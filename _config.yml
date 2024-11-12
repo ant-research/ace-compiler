@@ -18,20 +18,20 @@
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 
-title: ACE Compiler
-email: laijx03@gmail.com
+title: ANT-ACE Compiler
+email: laijianxin.ljx@antgroup.com
 description: >- # this means to ignore newlines until "baseurl:"
   Fully Homomorphic Encryption Compiler
-baseurl: "" # the subpath of your site, e.g. /blog
+baseurl: "/ace-compiler" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
 twitter_username: jekyllrb
 github_username:  jekyll
-repository: ace-compiler/ace-compiler
+repository: ant-research/ace-compiler
 
 github:
   repository_name: ace-compiler
   is_project_page: true
-  repository_url: "https://github.com/ace-compiler/ace-compiler"
+  repository_url: "https://github.com/ant-research/ace-compiler"
 
 # Build settings
 theme: jekyll-theme-cayman
