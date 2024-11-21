@@ -1,0 +1,15 @@
+- title: Getting Started
+  docs:
+  - home
+
+- title: Infrastructure
+  docs:
+  - infra
+
+- title: Neural Network Addon
+  docs:
+  - nn-addon
+
+- title: FHE Compiler
+  docs:
+  - fhe-cmplr

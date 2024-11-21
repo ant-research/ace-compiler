@@ -1,56 +1,80 @@
-# Welcome to Jekyll!
-#
-# This config file is meant for settings that affect your whole blog, values
-# which you are expected to set up once and rarely edit after that. If you find
-# yourself editing this file very often, consider using Jekyll's data files
-# feature for the data you need to update frequently.
-#
-# For technical reasons, this file is *NOT* reloaded automatically when you use
-# 'bundle exec jekyll serve'. If you change this file, please restart the server process.
-#
-# If you need help with YAML syntax, here are some quick references for you:
-# https://learn-the-web.algonquindesign.ca/topics/markdown-yaml-cheat-sheet/#yaml
-# https://learnxinyminutes.com/docs/yaml/
-#
 # Site settings
-# These are used to personalize your new site. If you look in the HTML files,
-# you will see them accessed via {{ site.title }}, {{ site.email }}, and so on.
-# You can create any custom variable you would like, and they will be accessible
-# in the templates via {{ site.myvariable }}.
-
-title: ANT-ACE Compiler
+title: ANT-ACE
 email: laijianxin.ljx@antgroup.com
-description: >- # this means to ignore newlines until "baseurl:"
-  Fully Homomorphic Encryption Compiler
-baseurl: "/ace-compiler" # the subpath of your site, e.g. /blog
-url: "" # the base hostname & protocol for your site, e.g. http://example.com
-twitter_username: jekyllrb
-github_username:  jekyll
-repository: ant-research/ace-compiler
+description: >
+  ANT-ACE: Advanced Compiler Ecosystem for Fully Homomorphic Encryption 
+lang: en-US
 
-github:
-  repository_name: ace-compiler
-  is_project_page: true
-  repository_url: "https://github.com/ant-research/ace-compiler"
+baseurl: "/ace-compiler" # the subpath of your site, e.g. /blog/
+url: https://ant-research.github.io/ace-compiler # the base hostname & protocol for your site
+git_address: https://github.com/ant-research/ace-compiler
+git_edit_address: https://github.com/ant-research/ace-compiler/docs
+
+# theme options from https://bootswatch.com/3/
+# comment out this to use default Bootstrap
+bootwatch: paper # cerulean cosmo custom cyborg darkly flatly journal lumen readable sandstone simplex slate solar spacelab superhero united yeti
 
 # Build settings
-theme: jekyll-theme-cayman
+markdown: kramdown
+highlighter: rouge
+
+# Plugins (previously gems:)
 plugins:
   - jekyll-feed
+  - jekyll-redirect-from
+  - jekyll-seo-tag
+  - jekyll-sitemap
 
-# Exclude from processing.
-#
-# Excluded items can be processed by explicitly listing the directories or
-# their entries' file path in the `include:` list.
-#
-# exclude:
-#   - .sass-cache/
-#   - .jekyll-cache/
-#   - gemfiles/
-#   - Gemfile
-#   - Gemfile.lock
-#   - node_modules/
-#   - vendor/bundle/
-#   - vendor/cache/
-#   - vendor/gems/
-#   - vendor/ruby/
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - .idea/
+  - .gitignore
+  - README.md
+  - vendor
+
+timezone: Asia/Shanghai
+defaults:
+- scope:
+    path: _docs
+    type: docs
+  values:
+    layout: docs
+    sectionid: docs
+    seo:
+      type: "WebPage"
+
+- scope:
+    path: _events
+    type: posts
+  values:
+    layout: post
+    sectionid: events
+
+- scope:
+    path: _pubs
+    type: posts
+  values:
+    layout: post
+    sectionid: pubs
+
+- scope:
+    path: _posts
+    type: posts
+  values:
+    layout: post
+    sectionid: posts
+
+collections:
+  docs:
+    permalink: /:collection/:path/
+    output: true
+  events:
+    permalink: /:collection/:path/
+    output: true
+  pubs:
+    permalink: /pubs/:year/:month/:day/:title/
+    output: true
+  posts:
+    permalink: /posts/:year/:month/:day/:title/
+    output: true

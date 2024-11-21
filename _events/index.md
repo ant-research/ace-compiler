@@ -1,11 +1,12 @@
 ---
-layout: default
+layout: event
+permalink: /events/home/
+redirect_from: /events/index.html
 title: ANT-ACE Tutorial at CGO 2025
 description: 1st March 2025, Las Vegas, Nevada, USA
 ---
 
-## **ANT-ACE:** Advanced Compiler Ecosystem for Domain Specific Computing and Its Application in Fully Homomorphic Encryption
-[CGO 2025](https://2025.cgo.org/) Tutorial, 1st March 2025, Las Vegas, Nevada, USA
+## [CGO 2025](https://2025.cgo.org/) Tutorial
 
 ### **Introduction**
 **ANT-ACE** is currently being developed at the Ant Research Institute to establish a cutting-edge compiler ecosystem, specifically tailored to meet the dynamic compilation needs of domain-specific languages and advanced computer architectures. ANT-ACE is dedicated to providing a stable and robust compiler infrastructure that features a flexible and extensible type system, complemented by robust support for domain-specific operations.

@@ -1,8 +1,20 @@
 ---
 layout: default
+title: ANT-ACE
 ---
 
-**ANT-ACE** is a Fully Homomorphic Encryption (FHE) Compiler Framework designed for automating Neural Network (NN) Inference. ANT-ACE accepts a pre-trained ONNX model as input and directly generates C/C++ programs to perform NN inference on encrypted data.
+<div class="header-container jumbotron">
+    <div class="container">
+        <h1>ANT-ACE</h1>
+        <p>Advanced Compiler Ecosystem for Fully Homomorphic Encryption and Domain Specific Computing</p>
+        <p><a class="btn btn-primary btn-lg" href="https://github.com/ant-research/ace-compiler" role="button">View on Github</a></p>
+    </div>
+</div>
+
+<div align="center">
+<div style="width: 768px" align="left">
+
+<b>ANT-ACE</b> is a Fully Homomorphic Encryption (FHE) Compiler Framework designed for automating Neural Network (NN) Inference. ANT-ACE accepts a pre-trained ONNX model as input and directly generates C/C++ programs to perform NN inference on encrypted data.
 
 FHE represents a revolutionary cryptographic technology that enables direct computations on encrypted data without the need for decryption. This powerful technique allows for the manipulation of sensitive data while ensuring that the computing party remains unaware of the actual information, yet still produces valuable encrypted output.
 
@@ -23,4 +35,5 @@ Currently, ANT-ACE is designed with a compiler infrastructure that supports five
 
 
 The ANT-ACE compiler framework marks an initial step in our FHE compiler technology research. We have developed fundamental capabilities for an FHE compiler focused on privacy-preserving machine learning inference, showcased through multiple abstraction levels that automate ONNX model inference using CKKS-encrypted data on CPUs. Future extensions of ANT-ACE will support various input formats and FHE schemes across different computing architectures, including GPUs, enhanced by contributions from open-source communities.
-
+</div>
+</div>
