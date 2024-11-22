@@ -1,0 +1,76 @@
+# project name
+PROJECT_NAME        = "AVHC"
+
+# version
+PROJECT_NUMBER      = "@NN_ADDON_VERSION@ @BUILD_TIMESTAMP@"
+PROJECT_BRIEF       = "NN-ADDON"
+
+# Program document output directory
+OUTPUT_DIRECTORY    =  doc
+ 
+# Program document input directory
+INPUT                = @CMAKE_CURRENT_SOURCE_DIR@/include       \
+                       @CMAKE_CURRENT_SOURCE_DIR@/core          \
+                       @CMAKE_CURRENT_SOURCE_DIR@/driver        \
+                       @CMAKE_CURRENT_SOURCE_DIR@/onnx          \
+                       @CMAKE_CURRENT_SOURCE_DIR@/onnx2air      \
+                       @CMAKE_CURRENT_SOURCE_DIR@/util          \
+                       @CMAKE_CURRENT_SOURCE_DIR@/vector        \
+                       @CMAKE_CURRENT_SOURCE_DIR@/opt           \
+                       @CMAKE_CURRENT_SOURCE_DIR@/test          \
+                       @CMAKE_CURRENT_SOURCE_DIR@/benchmark
+# Program documentation language environment
+OUTPUT_LANGUAGE      = English
+DOXYFILE_ENCODING  = UTF-8
+
+# Generate program documentation only for documented information in a header file
+FILE_PATTERNS        = *.h *.cxx
+ 
+# Recursively traverses the subdirectories of the current directory,
+# looking for the documented program source file
+RECURSIVE            = YES 
+# C/C++
+OPTIMIZE_OUTPUT_FOR_C  = NO
+ 
+# Extract information, including private data members and static members of the class
+EXTRACT_ALL            = yes
+EXTRACT_PRIVATE        = yes
+EXTRACT_STATIC        = yes
+
+# For structs, enumerations, unions, and other data types defined using typedef,
+# only the type name defined by typedef is documented
+TYPEDEF_HIDES_STRUCT  = YES
+
+# In the C++ program documentation, this value can be set to NO, 
+# and in the C program documentation, because the C language does not 
+# have such a concept as domain/namespace, it is set to YES
+HIDE_SCOPE_NAMES      = YES
+
+# Let doxygen quietly generate documentation for you,
+# and only output a prompt in the terminal if a warning or error occurs
+QUIET  = YES
+
+# Recursively iterate through the subdirectories of the sample program directory,
+# looking for the documented program source file
+EXAMPLE_RECURSIVE      = YES
+
+# Allows this documented function intercall relationship to be displayed in the program documentation
+REFERENCED_BY_RELATION = YES
+REFERENCES_RELATION    = YES
+REFERENCES_LINK_SOURCE = YES
+
+# No program documentation is generated in latex format
+GENERATE_LATEX        = NO
+
+# Allows function call relationships to be displayed as legends in the program documentation,
+# provided you have the graphviz package installed
+HAVE_DOT              = YES
+CALL_GRAPH            = YES
+CALLER_GRAPH          = YES
+
+# In the final generated document, include all the source code
+SOURCE_BROWSER        = YES
+# This adds a sidebar to the HTML document and displays the relationships of packages,
+# classes, interfaces, and so on in a tree structure
+GENERATE_HTML         = YES
+#GENERATE_TREEVIEW      ＝ YES

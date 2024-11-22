@@ -1,0 +1,17 @@
+Checks: '-*,readability-identifier-naming'
+CheckOptions:
+  - { key: readability-identifier-naming.StructCase,            value: UPPER_CASE }
+  - { key: readability-identifier-naming.ClassCase,             value: UPPER_CASE }
+  - { key: readability-identifier-naming.UnionCase,             value: UPPER_CASE }
+  - { key: readability-identifier-naming.EnumCase,              value: UPPER_CASE }
+  - { key: readability-identifier-naming.EnumConstantCase,      value: UPPER_CASE }
+  - { key: readability-identifier-naming.TypedefCase,           value: UPPER_CASE }
+  - { key: readability-identifier-naming.MacroDefinitionCase,   value: UPPER_CASE }
+  - { key: readability-identifier-naming.ConstexprVariableCase, value: UPPER_CASE }
+  - { key: readability-identifier-naming.NamespaceCase,         value: lower_case }
+  - { key: readability-identifier-naming.LocalVariableCase,     value: lower_case }
+  - { key: readability-identifier-naming.MemberCase,            value: lower_case }
+  - { key: readability-identifier-naming.MemberPrefix,          value: _ }
+  - { key: readability-identifier-naming.GlobalVariableCase,    value: Camel_Snake_Case }
+  - { key: readability-identifier-naming.FunctionCase,          value: Camel_Snake_Case }
+  - { key: readability-identifier-naming.MethodCase,            value: Camel_Snake_Case }

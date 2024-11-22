@@ -1,0 +1,20 @@
+set (AIR_BMAPP "")
+file (GLOB AIR_BMARK_SRC_FILES CONFIGURE_DEPENDS src/*.cxx)
+foreach (app ${AIR_BMARK_SRC_FILES})
+    get_filename_component (exe ${app} NAME_WE)
+    add_executable (${exe} ${app})
+    set_property (TARGET ${exe} PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bench)
+    target_include_directories (${exe} PUBLIC ../third-party/benchmark/include)
+    set_target_properties (${exe} PROPERTIES COMPILE_FLAGS
+        "${REGEX_FLAG} -DHAVE_STEADY_CLOCK -DNDEBUG ${WARNING_FLAG}")
+    target_link_libraries (${exe} ${AIR_BMLIBS})
+    set (AIR_BMAPP ${AIR_BMAPP} ${exe})
+    add_test( NAME ${exe} COMMAND ${CMAKE_BINARY_DIR}/bench/${exe})
+endforeach ()
+
+add_custom_target (air_benchmark)
+add_dependencies (air_benchmark ${AIR_BMAPP})
+
+if (AIR_INSTALL_APP)
+    install (TARGETS ${AIR_BMAPP} RUNTIME DESTINATION bench)
+endif ()

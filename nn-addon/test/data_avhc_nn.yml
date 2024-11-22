@@ -1,0 +1,32 @@
+nn_unittest:
+  # casename, parameter
+  - ["ut_nncore", NULL]
+  # - ["ut_nndriver", NULL]
+  # - ["ut_nnonnx", NULL]
+  # - ["ut_nnonnx2air", NULL]
+  # - ["ut_nnopt", NULL]
+  # - ["ut_nnutil", NULL]
+  - ["ut_nnvector", NULL]
+
+nn_example:
+  # casename, ifile, parameter
+  - ["eg_nncore_ir2c", NULL, NULL]
+  - ["eg_nnvector_01", "add.onnx", NULL]
+  - ["eg_nnvector_01", "gemm_small_const_input.onnx", NULL]
+  - ["eg_nnvector_01", "conv2d.onnx", NULL]
+  # - ["eg_nnvector_01", "max_pool.onnx", NULL]
+  # - ["eg_nnonnx_01", NULL, NULL]
+  # - ["eg_onnx2air_01", NULL, NULL]
+  # - ["eg_nnopt_01", NULL, NULL]
+  # - ["eg_nnutil_01", NULL, NULL]
+
+nn_test:
+  # casename, parameter
+  # - ["test_nncore_01", NULL]
+  # - ["test_nndriver_01", NULL]
+  # - ["test_nnonnx_01", NULL]
+  # - ["test_onnx2air_01", NULL]
+  # - ["test_nnopt_01", NULL]
+  # - ["test_nnutil_01", NULL]
+  - ["test_nnvector_01", NULL]
+  - ["test_nn_01", NULL]
