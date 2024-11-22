@@ -31,9 +31,6 @@ This tutorial is based on the CGO’25 Tool Paper titled "An FHE Compiler Framew
    - **Debug Facilities:** Features for debugging including selective encryption, runtime tracing, and validation.
    - **More Research Areas:** FHE specific optimizations, new cryptographic algorithms and software-hardware codesign for accelerators
 
-#### **4.  ANT-ACE FHE Compiler Extensions**
-
-
 #### **3.  ANT-ACE Case Study and Demo: SecureChat via Llama Inference in FHE**
    - **PyTorch Integration:** How ANT-ACE interfaces with PyTorch to facilitate neural network modeling.
    - **Llama Operator Support:** How to extend ANT-ACE framework for specific support for new operators.
