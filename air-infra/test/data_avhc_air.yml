@@ -1,0 +1,39 @@
+air_unittest:
+  # casename, parameter
+  - ["ut_airbase", NULL]
+  - ["ut_aircg", NULL]
+  # - ["ut_aircore", NULL]
+  - ["ut_airdriver", NULL]
+  - ["ut_airopt", NULL]
+  - ["ut_airutil", NULL]
+
+air_example:
+  # casename, parameter
+  - ["eg_meta_info", NULL]
+  # - ["eg_aircg_01", NULL]
+  - ["eg_aircore_ir2c", NULL]
+  - ["eg_airdriver_01", NULL]
+  - ["eg_airdriver_02", NULL]
+  - ["eg_airopt_01", NULL]
+  - ["eg_airutil_debug", NULL]
+  # - ["eg_airutil_msg", NULL]
+  - ["eg_airutil_timing", NULL]
+  - ["eg_nndriver_standalone", "-s -t"]
+  - ["eg_nndriver_nonstandalone", "-s -t"]
+
+air_test:
+  # casename, parameter
+  # - ["test_airbase_01", NULL]
+  - ["test_aircg_01", NULL]
+  # - ["test_aircore_01", NULL]
+  # - ["test_airdriver_01", NULL]
+  - ["test_airopt_01", NULL]
+  - ["air_assert", NULL]
+  - ["air_debug", NULL]
+  - ["air_trace", NULL]
+  - ["cmplr_assert", NULL]
+  - ["cmplr_err_msg", NULL]
+  - ["cmplr_warn_msg", NULL]
+  - ["cmplr_usr_msg", NULL]
+  - ["test_air", NULL]
+
