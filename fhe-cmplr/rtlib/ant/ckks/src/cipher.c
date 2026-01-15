@@ -56,7 +56,13 @@ void Init_ciph_same_scale(CIPHER res, CIPHER ciph1, CIPHER ciph2) {
 
 void Init_ciph_same_scale_plain(CIPHER res, CIPHER ciph, PLAIN plain) {
   RTLIB_TM_START(RTM_INIT_CIPH_SM_SC, rtm);
-  Init_cipher(res, ciph, Get_ciph_sfactor(ciph), Sc_degree(ciph));
+  if(Poly_level(&plain->_poly) < Get_ciph_level(ciph)){
+    CIPHER ciph_tmp = Alloc_ciphertext();
+    Copy_ciph(ciph_tmp, ciph);
+    Set_ciph_level(ciph_tmp, Poly_level(&plain->_poly));
+    Init_cipher(res, ciph_tmp, Get_ciph_sfactor(ciph_tmp), Sc_degree(ciph_tmp));
+  }
+  else Init_cipher(res, ciph, Get_ciph_sfactor(ciph), Sc_degree(ciph));
   RTLIB_TM_END(RTM_INIT_CIPH_SM_SC, rtm);
 }
 
