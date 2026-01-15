@@ -410,17 +410,6 @@ void REGION_BUILDER::Opt_mul_depth() {
       Unify_mul_depth(scc_list);
     }
   }
-
-  // 3, traversal all scc node to 
-  //   place input cipher(have no predecessor) at region 1
-  for (SCC_CONTAINER::NODE_ITER scc_iter = scc_cntr->Begin_node();
-      scc_iter != scc_cntr->End_node(); ++scc_iter) {
-    uint32_t mul_depth = Mul_depth(scc_iter->Id());
-    if (mul_depth == INVALID_MUL_DEPTH) continue;
-    if (scc_iter->Begin_pred() == scc_iter->End_pred()){
-      Set_mul_depth(scc_iter->Id(), 1);
-    }
-  }
 }
 
 //! @brief Create regions. REGION_ELEMs with the same mul_depth are grouped
