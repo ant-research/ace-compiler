@@ -32,9 +32,9 @@ public:
   RETV Handle(VISITOR* visitor, NODE_PTR node) {
     AIR_ASSERT(node->Domain() == ID);
     switch (CKKS_OPERATOR(node->Operator())) {
-#define CKKS_OPCODE(NAME, name, category, kid_num, fld_num, property) \
-  case CKKS_OPERATOR::NAME:                                           \
-    return Handle_##name<RETV, VISITOR>(visitor, node);               \
+#define CKKS_OPCODE(NAME, name, kid_num, fld_num, property) \
+  case CKKS_OPERATOR::NAME:                                 \
+    return Handle_##name<RETV, VISITOR>(visitor, node);     \
     break;
 #include "fhe/ckks/opcode_def.inc"
       default:
@@ -45,7 +45,7 @@ public:
   }
 
 private:
-#define CKKS_OPCODE(NAME, name, category, kid_num, fld_num, property)  \
+#define CKKS_OPCODE(NAME, name, kid_num, fld_num, property)            \
   template <typename RETV, typename VISITOR>                           \
   RETV Handle_##name(VISITOR* visitor, NODE_PTR node) {                \
     return _impl.template Handle_##name<RETV, VISITOR>(visitor, node); \

@@ -21,8 +21,8 @@ namespace sihe {
 class INVALID_HANDLER {
 public:
   // default handler implementation for each OPCODE
-#define SIHE_OPCODE(NAME, name, cat, kid_num, fld_num, prop) \
-  OPCODE_INVALID_HANDLER_GEN(NAME, name, cat, kid_num, fld_num, prop)
+#define SIHE_OPCODE(NAME, name, kid_num, fld_num, prop) \
+  OPCODE_INVALID_HANDLER_GEN(NAME, name, kid_num, fld_num, prop)
 #include "opcode_def.inc"
 #undef SIHE_OPCODE
 };

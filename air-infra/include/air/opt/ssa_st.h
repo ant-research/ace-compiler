@@ -36,7 +36,7 @@ class SSA_SYM_ATTR {
 public:
   uint32_t _kind : 2;      //!< SSA symbol kind
   uint32_t _iv : 1;        //!< Symbol is DO_LOOP IV
-  uint32_t _real_use : 1;  //!< Symbol is real used in IR
+  uint32_t _real_occ : 1;  //!< Symbol is real occurrence in IR
 };
 
 //! @brief SSA Symbol Data
@@ -49,18 +49,19 @@ public:
   bool Is_addr_datum() const { return Kind() == SSA_SYM_KIND::ADDR_DATUM; }
 
   bool Is_iv() const { return _attr._iv; }
-  bool Real_use() const { return _attr._real_use; }
+  bool Real_occ() const { return _attr._real_occ; }
 
-  SSA_SYM_KIND Kind() const { return (SSA_SYM_KIND)_attr._kind; }
-  SSA_SYM_ID   Parent_id() const { return _parent; }
-  SSA_SYM_ID   Sibling_id() const { return _sibling; }
-  SSA_SYM_ID   Child_id() const { return _child; }
-  uint32_t     Var_id() const { return _var_id; }
-  uint32_t     Index() const { return _sub_idx; }
-  SSA_VER_ID   Zero_ver() const { return _zero_ver; }
+  SSA_SYM_KIND  Kind() const { return (SSA_SYM_KIND)_attr._kind; }
+  SSA_SYM_ID    Parent_id() const { return _parent; }
+  SSA_SYM_ID    Sibling_id() const { return _sibling; }
+  SSA_SYM_ID    Child_id() const { return _child; }
+  uint32_t      Var_id() const { return _var_id; }
+  uint32_t      Index() const { return _sub_idx; }
+  SSA_VER_ID    Zero_ver() const { return _zero_ver; }
+  base::TYPE_ID Type_id() const { return _type; }
 
   void Set_iv() { _attr._iv = true; }
-  void Set_real_use() { _attr._real_use = true; }
+  void Set_real_occ() { _attr._real_occ = true; }
 
   void Set_parent(SSA_SYM_ID id) { _parent = id; }
   void Set_sibling(SSA_SYM_ID id) { _sibling = id; }
@@ -85,17 +86,25 @@ public:
   static constexpr uint32_t NO_INDEX = (uint32_t)-1;
 
   SSA_SYM_ID Id() const { return _data.Id(); }
+  bool       Is_null(void) const { return _data.Is_null(); }
+
+  bool     Is_preg() const { return _data->Is_preg(); }
+  bool     Is_addr_datum() const { return _data->Is_addr_datum(); }
+  uint32_t Var_id() const { return _data->Var_id(); }
+  uint32_t Index() const { return _data->Index(); }
 
   bool Is_iv() const { return _data->Is_iv(); }
-  bool Real_use() const { return _data->Real_use(); }
+  bool Real_occ() const { return _data->Real_occ(); }
 
-  SSA_SYM_ID Parent_id() const { return _data->Parent_id(); }
-  SSA_SYM_ID Sibling_id() const { return _data->Sibling_id(); }
-  SSA_SYM_ID Child_id() const { return _data->Child_id(); }
-  SSA_VER_ID Zero_ver_id() const { return _data->Zero_ver(); }
+  SSA_SYM_ID    Parent_id() const { return _data->Parent_id(); }
+  SSA_SYM_ID    Sibling_id() const { return _data->Sibling_id(); }
+  SSA_SYM_ID    Child_id() const { return _data->Child_id(); }
+  SSA_VER_ID    Zero_ver_id() const { return _data->Zero_ver(); }
+  base::TYPE_ID Type_id() const { return _data->Type_id(); }
+  SSA_SYM_KIND  Kind() const { return _data->Kind(); }
 
   void Set_iv() { _data->Set_iv(); }
-  void Set_real_use() { _data->Set_real_use(); }
+  void Set_real_occ() { _data->Set_real_occ(); }
 
   void Set_parent(SSA_SYM_ID id) { _data->Set_parent(id); }
   void Set_sibling(SSA_SYM_ID id) { _data->Set_sibling(id); }
@@ -187,6 +196,7 @@ public:
   static constexpr uint32_t NO_VER = (uint32_t)-1;
 
   SSA_VER_ID         Id() const { return _data.Id(); }
+  bool               Is_null(void) const { return _data.Is_null(); }
   VER_DEF_KIND       Kind() const { return _data->Kind(); }
   SSA_SYM_ID         Sym_id() const { return _data->Sym_id(); }
   uint32_t           Version() const { return _data->Version(); }
@@ -194,11 +204,17 @@ public:
   PHI_NODE_ID        Def_phi_id() const { return _data->Def_phi(); }
   CHI_NODE_ID        Def_chi_id() const { return _data->Def_chi(); }
 
+  SSA_SYM_PTR         Sym() const;
+  air::base::STMT_PTR Def_stmt() const;
+  PHI_NODE_PTR        Def_phi() const;
+  CHI_NODE_PTR        Def_chi() const;
+
   void Set_version(uint32_t v) { _data->Set_version(v); }
   void Set_def_stmt(air::base::STMT_ID stmt) { _data->Set_def_stmt(stmt); }
   void Set_def_phi(PHI_NODE_ID phi) { _data->Set_def_phi(phi); }
   void Set_def_chi(CHI_NODE_ID chi) { _data->Set_def_chi(chi); }
 
+  void        Print_ver(std::ostream& os) const;
   void        Print(std::ostream& os, uint32_t indent = 0) const;
   void        Print() const;
   std::string To_str() const;

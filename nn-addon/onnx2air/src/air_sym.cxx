@@ -13,7 +13,7 @@
 #include "nn/onnx2air/air_const.h"
 #include "nn/onnx2air/air_gen.h"
 #include "nn/onnx2air/air_utils.h"
-#include "onnx.pb.h"
+#include "nn/onnx2air/onnx_pb.h"
 
 namespace nn {
 namespace onnx2air {

@@ -12,6 +12,7 @@
 
 #include "air/base/meta_info.h"
 #include "nn/core/opcode.h"
+#include "nn/core/pragma.h"
 #include "nn/onnx2air/air_func.h"
 #include "nn/onnx2air/air_gen.h"
 #include "nn/onnx2air/air_utils.h"
@@ -221,10 +222,16 @@ bool AIRSTMTGEN::Try_resolve_node(onnx::NodeProto* node,
   _attributes_for_float.clear();
   Parse_attributes(node);
 
-  NODE_PTR node_op = Create_node(new_node, inputs, func_scope);
-  if (META_INFO::Has_prop<OPR_PROP::ATTR>(node_op->Opcode()) &&
-      node->has_name()) {
-    node_op->Set_attr("name", node->name().c_str());
+  // TODO: replace comparison of node name to check "COMMUTATIVE" attribute
+  if (new_node == "Add" || new_node == "Mul") {
+    AIR_ASSERT(inputs.size() == 2);
+    AIR_ASSERT(inputs[0]->Rtype()->Is_array());
+    AIR_ASSERT(inputs[1]->Rtype()->Is_array());
+    if (inputs[0]->Rtype()->Cast_to_arr()->Dim() <
+        inputs[1]->Rtype()->Cast_to_arr()->Dim()) {
+      // swap input[0] and input[1] to make sure tensor is the first operand
+      std::swap(inputs[0], inputs[1]);
+    }
   }
 
   std::vector<bool> output_used;
@@ -249,17 +256,41 @@ bool AIRSTMTGEN::Try_resolve_node(onnx::NodeProto* node,
   }
   NAME_MAP out_st_ptr = Get_airgen()->Sg().Get_tensor_sym_or_preg(
       onnx_name, base_ty, result_dim, func_scope);
+
   AIR_ASSERT_MSG(out_st_ptr.Is_preg() || out_st_ptr.Is_sym(),
                  ("Expect output to be preg or symbol.\n"));
+  TYPE_PTR rtype;
+  if (out_st_ptr.Is_preg()) {
+    rtype = out_st_ptr.Preg()->Type();
+  } else {
+    rtype = out_st_ptr.Sym()->Type();
+  }
+  NODE_PTR node_op = Create_node(new_node, inputs, rtype, func_scope);
+  if (META_INFO::Has_prop<OPR_PROP::ATTR>(node_op->Opcode()) &&
+      node->has_name()) {
+    node_op->Set_attr("name", node->name().c_str());
+  }
+
   if (node_op->Opcode() == air::core::OPC_LDC && onnx_name != "" &&
       out_st_ptr.Is_preg()) {
     Get_airgen()->Sg().Put_operator_cst(onnx_name, node_op->Const());
   } else {
-    STMT_PTR stmt;
+    // append a comment to indicate op start for readability
+    STMT_PTR stmt = cntr->New_comment(node->name().c_str(), spos);
+    cntr->Stmt_list().Append(stmt);
+    // append a pragma to indicate op start for statistics
+    uint32_t op_code = node_op->Opcode();
+    uint32_t op_name = stmt->Node()->Comment_id().Value();
+    stmt = cntr->New_pragma(core::PRAGMA_OP_START, op_code, op_name, spos);
+    cntr->Stmt_list().Append(stmt);
+    // append op
     if (out_st_ptr.Is_preg())
       stmt = cntr->New_stp(node_op, out_st_ptr.Preg(), spos);
     else
       stmt = cntr->New_st(node_op, out_st_ptr.Sym(), spos);
+    cntr->Stmt_list().Append(stmt);
+    // append a pragma to indicate op end for statistics
+    stmt = cntr->New_pragma(core::PRAGMA_OP_END, op_code, op_name, spos);
     cntr->Stmt_list().Append(stmt);
   }
 
@@ -304,14 +335,14 @@ std::vector<int> AIRSTMTGEN::Resolve_util(TYPE_PTR elem_ty, TYPE_PTR& base_ty) {
 }
 
 NODE_PTR AIRSTMTGEN::Create_node(std::string            OP_name,
-                                 std::vector<NODE_PTR>& input,
-                                 FUNC_SCOPE*            func_scope) {
+                                 std::vector<NODE_PTR>& input, TYPE_PTR rtype,
+                                 FUNC_SCOPE* func_scope) {
   CONTAINER* cntr = &func_scope->Container();
   SPOS       spos = Get_airgen()->Get_glob()->Unknown_simple_spos();
   NODE_PTR   op_node;
   auto       it = _onx_func_map.find(OP_name);
   if (it != _onx_func_map.end())
-    (this->*((it->second)._create_node))(cntr, input, spos, op_node);
+    (this->*((it->second)._create_node))(cntr, input, spos, rtype, op_node);
   else
     Unimplemented();
   return op_node;
@@ -319,9 +350,10 @@ NODE_PTR AIRSTMTGEN::Create_node(std::string            OP_name,
 
 void AIRSTMTGEN::Create_node_for_add(CONTAINER*             cntr,
                                      std::vector<NODE_PTR>& input,
-                                     const SPOS& spos, NODE_PTR& op_node) {
+                                     const SPOS& spos, TYPE_PTR rtype,
+                                     NODE_PTR& op_node) {
   op_node = cntr->New_bin_arith(
-      air::base::OPCODE(nn::core::NN, nn::core::OPCODE::ADD), input[0],
+      air::base::OPCODE(nn::core::NN, nn::core::OPCODE::ADD), rtype, input[0],
       input[1], spos);
 }
 
@@ -330,17 +362,64 @@ void AIRSTMTGEN::Parse_attributes_for_add(onnx::NodeProto* node) {}
 void AIRSTMTGEN::Resolve_for_add(onnx::NodeProto*       node,
                                  std::vector<NODE_PTR>& inputs,
                                  TYPE_PTR& base_ty, std::vector<int>& res) {
-  TYPE_PTR elem_ty = inputs[0]->Rtype();
-  res              = Resolve_util(elem_ty, base_ty);
+  ARRAY_TYPE_PTR aty = inputs[0]->Rtype()->Cast_to_arr();
+  ARRAY_TYPE_PTR bty = inputs[1]->Rtype()->Cast_to_arr();
+  base_ty            = aty->Elem_type();
+  // The result tensor shape is recomputed if one tensor shape is a subset
+  // of the other tensor shape.
+  res = Resovlve_broadcast_size(aty, bty);
+}
+
+// The function Get_dimension_for_array returns the dimension size for
+// the given array type.
+std::vector<int> AIRSTMTGEN::Get_tensor_shape(ARRAY_TYPE_PTR& aty) {
+  std::vector<int> res;
+  DIM_ITER         dim_iter = aty->Begin_dim();
+  DIM_ITER         end_iter = aty->End_dim();
+  for (; dim_iter != end_iter; ++dim_iter) {
+    res.push_back((((*dim_iter)->Ub_val() - (*dim_iter)->Lb_val()) /
+                   (*dim_iter)->Stride_val()));
+  }
+  return res;
+}
+
+// The function Resovlve_broadcast_size returns the result tensor shape after
+// the broadcast case is taken into account.
+std::vector<int> AIRSTMTGEN::Resovlve_broadcast_size(ARRAY_TYPE_PTR& aty,
+                                                     ARRAY_TYPE_PTR& bty) {
+  std::vector<int> result_dim;
+  std::vector<int> a_dim = Get_tensor_shape(aty);
+  std::vector<int> b_dim = Get_tensor_shape(bty);
+
+  while (a_dim.size() < b_dim.size()) a_dim.insert(a_dim.begin(), 1);
+
+  while (b_dim.size() < a_dim.size()) b_dim.insert(b_dim.begin(), 1);
+
+  AIR_ASSERT_MSG(a_dim.size() == b_dim.size(),
+                 ("Expect tensor shapes are identical.\n"));
+
+  for (uint32_t i = 0; i < a_dim.size(); i++) {
+    if (a_dim[i] == 1 || b_dim[i] == 1)
+      result_dim.push_back(std::max(a_dim[i], b_dim[i]));
+    else if (a_dim[i] == b_dim[i])
+      result_dim.push_back(a_dim[i]);
+    else
+      AIR_ASSERT_MSG(false, "Bad tensor shapes\n");
+  }
+
+  AIR_ASSERT_MSG(result_dim.size() != 0, ("Expect tensor type is resloved.\n"));
+
+  return result_dim;
 }
 
 void AIRSTMTGEN::Update_attributes_for_add(NODE_PTR node) {}
 
 void AIRSTMTGEN::Create_node_for_mul(CONTAINER*             cntr,
                                      std::vector<NODE_PTR>& input,
-                                     const SPOS& spos, NODE_PTR& op_node) {
+                                     const SPOS& spos, TYPE_PTR rtype,
+                                     NODE_PTR& op_node) {
   op_node = cntr->New_bin_arith(
-      air::base::OPCODE(nn::core::NN, nn::core::OPCODE::MUL), input[0],
+      air::base::OPCODE(nn::core::NN, nn::core::OPCODE::MUL), rtype, input[0],
       input[1], spos);
 }
 
@@ -349,15 +428,20 @@ void AIRSTMTGEN::Parse_attributes_for_mul(onnx::NodeProto* node) {}
 void AIRSTMTGEN::Resolve_for_mul(onnx::NodeProto*       node,
                                  std::vector<NODE_PTR>& inputs,
                                  TYPE_PTR& base_ty, std::vector<int>& res) {
-  TYPE_PTR elem_ty = inputs[0]->Rtype();
-  res              = Resolve_util(elem_ty, base_ty);
+  ARRAY_TYPE_PTR aty = inputs[0]->Rtype()->Cast_to_arr();
+  ARRAY_TYPE_PTR bty = inputs[1]->Rtype()->Cast_to_arr();
+  base_ty            = aty->Elem_type();
+  // The result tensor shape is recomputed if one tensor shape is a subset
+  // of the other tensor shape.
+  res = Resovlve_broadcast_size(aty, bty);
 }
 
 void AIRSTMTGEN::Update_attributes_for_mul(NODE_PTR node) {}
 
 void AIRSTMTGEN::Create_node_for_constant(CONTAINER*             cntr,
                                           std::vector<NODE_PTR>& input,
-                                          const SPOS& spos, NODE_PTR& op_node) {
+                                          const SPOS& spos, TYPE_PTR rtype,
+                                          NODE_PTR& op_node) {
   op_node = cntr->New_ldc(_attributes_for_tensor["value"], spos);
 }
 
@@ -382,9 +466,10 @@ void AIRSTMTGEN::Update_attributes_for_constant(NODE_PTR node) {}
 
 void AIRSTMTGEN::Create_node_for_gemm(CONTAINER*             cntr,
                                       std::vector<NODE_PTR>& input,
-                                      const SPOS& spos, NODE_PTR& op_node) {
+                                      const SPOS& spos, TYPE_PTR rtype,
+                                      NODE_PTR& op_node) {
   op_node = cntr->New_tern_arith(
-      air::base::OPCODE(nn::core::NN, nn::core::OPCODE::GEMM), input[0],
+      air::base::OPCODE(nn::core::NN, nn::core::OPCODE::GEMM), rtype, input[0],
       input[1], input[2], spos);
 }
 
@@ -439,10 +524,11 @@ void AIRSTMTGEN::Update_attributes_for_gemm(NODE_PTR node) {
 
 void AIRSTMTGEN::Create_node_for_flatten(CONTAINER*             cntr,
                                          std::vector<NODE_PTR>& input,
-                                         const SPOS& spos, NODE_PTR& op_node) {
+                                         const SPOS& spos, TYPE_PTR rtype,
+                                         NODE_PTR& op_node) {
   op_node = cntr->New_una_arith(
-      air::base::OPCODE(nn::core::NN, nn::core::OPCODE::FLATTEN), input[0],
-      spos);
+      air::base::OPCODE(nn::core::NN, nn::core::OPCODE::FLATTEN), rtype,
+      input[0], spos);
 }
 
 void AIRSTMTGEN::Parse_attributes_for_flatten(onnx::NodeProto* node) {
@@ -486,9 +572,10 @@ void AIRSTMTGEN::Update_attributes_for_flatten(NODE_PTR node) {
 
 void AIRSTMTGEN::Create_node_for_conv(CONTAINER*             cntr,
                                       std::vector<NODE_PTR>& input,
-                                      const SPOS& spos, NODE_PTR& op_node) {
+                                      const SPOS& spos, TYPE_PTR rtype,
+                                      NODE_PTR& op_node) {
   op_node = cntr->New_tern_arith(
-      air::base::OPCODE(nn::core::NN, nn::core::OPCODE::CONV), input[0],
+      air::base::OPCODE(nn::core::NN, nn::core::OPCODE::CONV), rtype, input[0],
       input[1], input[2], spos);
 }
 
@@ -623,8 +710,8 @@ std::vector<int> AIRSTMTGEN::Resolve_pooling_output_size(
     int32_t dilation = dilations.size() == 0 ? 1 : dilations[i - 2];
     int32_t stride   = strides[i - 2];
     // auto_pad is specified by the compiler option. At present we don't
-    // implement this. I assume auto_pad is "NOTSET" by default as work around.
-    // if ( auto_pad == "NOTSET" ) {
+    // implement this. I assume auto_pad is "NOTSET" by default as work
+    // around. if ( auto_pad == "NOTSET" ) {
     int32_t pad_sh = pad_shapes[i - 2];
     if (ceil_mode)
       d = ceil((float)(in_dim + pad_sh - ((kernel - 1) * dilation + 1)) /
@@ -677,9 +764,11 @@ void AIRSTMTGEN::Update_attributes_for_conv(NODE_PTR node) {
 
 void AIRSTMTGEN::Create_node_for_relu(CONTAINER*             cntr,
                                       std::vector<NODE_PTR>& input,
-                                      const SPOS& spos, NODE_PTR& op_node) {
+                                      const SPOS& spos, TYPE_PTR rtype,
+                                      NODE_PTR& op_node) {
   op_node = cntr->New_una_arith(
-      air::base::OPCODE(nn::core::NN, nn::core::OPCODE::RELU), input[0], spos);
+      air::base::OPCODE(nn::core::NN, nn::core::OPCODE::RELU), rtype, input[0],
+      spos);
 }
 void AIRSTMTGEN::Parse_attributes_for_relu(onnx::NodeProto* node) {}
 void AIRSTMTGEN::Resolve_for_relu(onnx::NodeProto*       node,
@@ -694,15 +783,18 @@ void AIRSTMTGEN::Update_attributes_for_relu(NODE_PTR node) {}
 
 void AIRSTMTGEN::Create_node_for_max_pool(CONTAINER*             cntr,
                                           std::vector<NODE_PTR>& input,
-                                          const SPOS& spos, NODE_PTR& op_node) {
+                                          const SPOS& spos, TYPE_PTR rtype,
+                                          NODE_PTR& op_node) {
   op_node = cntr->New_una_arith(
-      air::base::OPCODE(nn::core::NN, nn::core::OPCODE::MAX_POOL), input[0],
-      spos);
+      air::base::OPCODE(nn::core::NN, nn::core::OPCODE::MAX_POOL), rtype,
+      input[0], spos);
 }
 void AIRSTMTGEN::Parse_attributes_for_max_pool(onnx::NodeProto* node) {
   for (const auto& a : node->attribute()) {
     if (a.name() == "ceil_mode" || a.name() == "count_include_pad")
       _attributes_for_int[a.name()] = Parse_attribute_int(a);
+    else if (a.name() == "dilations")
+      _attributes_for_ints[a.name()] = Parse_attribute_ints(a);
     else if (a.name() == "kernel_shape")
       _attributes_for_ints[a.name()] = Parse_attribute_ints(a);
     else if (a.name() == "pads")
@@ -744,11 +836,11 @@ void AIRSTMTGEN::Update_attributes_for_max_pool(NODE_PTR node) {
 
 void AIRSTMTGEN::Create_node_for_average_pool(CONTAINER*             cntr,
                                               std::vector<NODE_PTR>& input,
-                                              const SPOS&            spos,
-                                              NODE_PTR&              op_node) {
+                                              const SPOS& spos, TYPE_PTR rtype,
+                                              NODE_PTR& op_node) {
   op_node = cntr->New_una_arith(
-      air::base::OPCODE(nn::core::NN, nn::core::OPCODE::AVERAGE_POOL), input[0],
-      spos);
+      air::base::OPCODE(nn::core::NN, nn::core::OPCODE::AVERAGE_POOL), rtype,
+      input[0], spos);
 }
 
 void AIRSTMTGEN::Parse_attributes_for_average_pool(onnx::NodeProto* node) {
@@ -768,10 +860,11 @@ void AIRSTMTGEN::Update_attributes_for_average_pool(NODE_PTR node) {
 
 void AIRSTMTGEN::Create_node_for_global_average_pool(
     CONTAINER* cntr, std::vector<NODE_PTR>& input, const SPOS& spos,
-    NODE_PTR& op_node) {
+    TYPE_PTR rtype, NODE_PTR& op_node) {
+  CMPLR_ASSERT(0, "Fix rtype for New_una_arith.");
   op_node = cntr->New_una_arith(
       air::base::OPCODE(nn::core::NN, nn::core::OPCODE::GLOBAL_AVERAGE_POOL),
-      input[0], spos);
+      rtype, input[0], spos);
 }
 void AIRSTMTGEN::Parse_attributes_for_global_average_pool(
     onnx::NodeProto* node) {}
@@ -795,10 +888,11 @@ void AIRSTMTGEN::Update_attributes_for_global_average_pool(NODE_PTR node) {}
 
 void AIRSTMTGEN::Create_node_for_reshape(CONTAINER*             cntr,
                                          std::vector<NODE_PTR>& input,
-                                         const SPOS& spos, NODE_PTR& op_node) {
+                                         const SPOS& spos, TYPE_PTR rtype,
+                                         NODE_PTR& op_node) {
   op_node = cntr->New_bin_arith(
-      air::base::OPCODE(nn::core::NN, nn::core::OPCODE::RESHAPE), input[0],
-      input[1], spos);
+      air::base::OPCODE(nn::core::NN, nn::core::OPCODE::RESHAPE), rtype,
+      input[0], input[1], spos);
 }
 void AIRSTMTGEN::Parse_attributes_for_reshape(onnx::NodeProto* node) {
   // TODO for attribute allowzero
@@ -845,6 +939,61 @@ void AIRSTMTGEN::Resolve_for_reshape(onnx::NodeProto*       node,
   base_ty = xty->Elem_type();
 }
 void AIRSTMTGEN::Update_attributes_for_reshape(NODE_PTR node) {}
+
+void AIRSTMTGEN::Create_node_for_concat(CONTAINER*             cntr,
+                                        std::vector<NODE_PTR>& input,
+                                        const SPOS& spos, TYPE_PTR rtype,
+                                        NODE_PTR& op_node) {
+  op_node = cntr->New_bin_arith(
+      air::base::OPCODE(nn::core::NN, nn::core::OPCODE::CONCAT), rtype,
+      input[0], input[1], spos);
+}
+
+void AIRSTMTGEN::Parse_attributes_for_concat(onnx::NodeProto* node) {
+  // same with flatten op
+  Parse_attributes_for_flatten(node);
+}
+
+void AIRSTMTGEN::Resolve_for_concat(onnx::NodeProto*       node,
+                                    std::vector<NODE_PTR>& inputs,
+                                    TYPE_PTR&              base_ty,
+                                    std::vector<int>&      result_dim) {
+  // Concatenate a list of tensors into a single tensor.
+  // All input tensors must have the same shape, except for the dimension size
+  // of the axis to concatenate on. axis -INT attribute: Which axis to concat
+  // on.
+  base_ty = inputs[0]->Rtype()->Cast_to_arr()->Elem_type();
+  std::vector<int> dims1;
+  Get_dimension_size(inputs[0]->Rtype(), dims1);
+  std::vector<int> dims2;
+  Get_dimension_size(inputs[1]->Rtype(), dims2);
+  AIR_ASSERT_MSG(dims1.size() == dims2.size() && dims1.size() == 4,
+                 "concat's two inputs should have 4 dimensions");
+
+  AIR_ASSERT_MSG(dims1[0] == dims2[0] && dims1[0] == 1,
+                 "the value of first dimension should be 1");
+
+  int axis = _attributes_for_int["axis"];
+  AIR_ASSERT_MSG(axis == 1, "only support axis = 1 now");
+
+  for (int i = 0; i < dims1.size(); i++) {
+    AIR_ASSERT_MSG(dims1[i] == dims2[i],
+                   "concat's two inputs should have same shape, 1-D empty "
+                   "tensor is not supported yet");
+    result_dim.push_back(dims1[i]);
+  }
+
+  // the value of channel in output shape should add two input's channel
+  // value, other dimensions keep same with either inputs' demension.
+  if (axis == 1) {
+    int channel_index         = 1;
+    result_dim[channel_index] = dims1[channel_index] + dims2[channel_index];
+  }
+}
+
+void AIRSTMTGEN::Update_attributes_for_concat(NODE_PTR node) {
+  Set_attribute_int("axis", node);
+}
 
 }  // namespace onnx2air
 }  // namespace nn

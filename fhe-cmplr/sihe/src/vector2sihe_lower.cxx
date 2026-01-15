@@ -17,6 +17,7 @@
 #include "fhe/core/scheme_info_config.h"
 #include "fhe/sihe/tensor2sihe_impl.h"
 #include "fhe/sihe/vector2sihe_ctx.h"
+#include "nn/core/attr.h"
 
 namespace fhe {
 namespace sihe {
@@ -72,13 +73,45 @@ FUNC_SCOPE& VECTOR2SIHE_LOWER::Lower_vec_func(FUNC_SCOPE* vec_func_scope) {
 
   uint32_t old_poly_deg = Lower_ctx()->Get_ctx_param().Get_poly_degree();
   if (poly_deg > old_poly_deg) {
-    Lower_ctx()->Get_ctx_param().Set_poly_degree(poly_deg);
-    trav_ctx.Trace(core::TRACE_ANA_RES,
+    // skip updating prime_info because mul_level, which prime_info depends on,
+    // is determined later in the CKKS domain.
+    Lower_ctx()->Get_ctx_param().Set_poly_degree(poly_deg, false);
+    trav_ctx.Trace(core::TD_ANA_RES,
                    "VECTOR2SIHE_LOWER update poly degree from ", old_poly_deg,
                    " to ", poly_deg, "\n");
   }
 
   return *sihe_func_scope;
+}
+
+//! @brief Return the equivalent parameter types in the SIHE domain: non-array
+//! parameter types are retained when transitioning from VECTOR to SIHE domain.
+//! For array parameter types, the innermost dimension is converted to CIPHER
+//! type, transforming the multi-dimension array into an array of CIPHER.
+static TYPE_PTR Get_sihe_param_type(GLOB_SCOPE* glob_scope,
+                                    TYPE_PTR vec_param_type, TYPE_PTR ciph) {
+  // 1. non-array type: return the type itself
+  if (!vec_param_type->Is_array()) return vec_param_type;
+
+  // 2. array type: return cipher or vector of cipher
+  TYPE_PTR       sihe_type  = vec_param_type;
+  ARRAY_TYPE_PTR array_type = vec_param_type->Cast_to_arr();
+  TYPE_PTR       elem_type  = array_type->Elem_type();
+  // 2.1 for vector of float, return cipher
+  if (elem_type->Is_float()) return ciph;
+
+  // 2.2 for vector of vector type, return vector of cipher
+  AIR_ASSERT(elem_type->Is_array());
+  ARRAY_TYPE_PTR elem_array_type = elem_type->Cast_to_arr();
+  AIR_ASSERT(elem_array_type->Elem_type()->Is_float());
+  // AIR_ASSERT_MSG(elem_array_type->Dim() == 1,
+  //                "not support multi-dim ciphertext array");
+  //  gen array type name
+  uint32_t    ciph_cnt = array_type->Elem_count();
+  std::string array_name("cipher_" + std::to_string(ciph_cnt));
+
+  return glob_scope->New_arr_type(array_name.c_str(), ciph, {ciph_cnt},
+                                  glob_scope->Unknown_simple_spos());
 }
 
 void VECTOR2SIHE_LOWER::Lower_func_tab(GLOB_SCOPE* vec_glob_scope) {
@@ -101,7 +134,7 @@ void VECTOR2SIHE_LOWER::Lower_func_tab(GLOB_SCOPE* vec_glob_scope) {
     for (; param_iter != param_end; ++param_iter) {
       PARAM_PTR param = *param_iter;
       TYPE_PTR  param_type =
-          (param->Type()->Is_array() ? ciph_type : param->Type());
+          Get_sihe_param_type(Glob_scope(), param->Type(), ciph_type);
       if (param->Is_ret()) {
         Glob_scope()->New_ret_param(param_type, sihe_func_sig);
       } else {
@@ -154,8 +187,9 @@ NODE_PTR VECTOR2SIHE_IMPL::Lower_bin_arith_node(VECTOR2SIHE_CTX& ctx,
                "child1 must be ciphertext, plaintext, or float");
 
   // 4. gen binary arithmatic node of SIHE
-  NODE_PTR bin_node = cont->New_bin_arith(sihe_op, op0, op1, node->Spos());
-  bin_node->Set_rtype(cipher_type_id);
+  NODE_PTR bin_node = cont->New_bin_arith(
+      sihe_op, ctx.Lower_ctx().Get_cipher_type(cont->Glob_scope()), op0, op1,
+      node->Spos());
   return bin_node;
 }
 
@@ -177,7 +211,7 @@ NODE_PTR VECTOR2SIHE_IMPL::Lower_rotate_node(VECTOR2SIHE_CTX& ctx,
   rotate_node->Set_child(0, op0);
   rotate_node->Set_child(1, op1);
 
-  const char* rot_idx_key   = "nums";
+  const char* rot_idx_key   = nn::core::ATTR::RNUM;
   uint32_t    rot_idx_count = 0;
   const int*  rot_idx       = node->Attr<int>(rot_idx_key, &rot_idx_count);
   AIR_ASSERT(rot_idx != nullptr && rot_idx_count > 0);

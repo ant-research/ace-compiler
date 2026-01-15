@@ -14,6 +14,11 @@
 #include "air/base/st_data.h"
 #include "air/base/st_decl.h"
 
+// forward declartion for friend class
+namespace air::opt {
+class HEXPR;
+}
+
 namespace air {
 namespace base {
 
@@ -42,7 +47,7 @@ public:
 protected:
   bool Is_null() const { return _attr.Is_null(); }
   void Set_key(STR_ID id) { _attr->Set_key(id); }
-  void Set_value(STR_ID id, PRIMITIVE_TYPE type, uint32_t count) {
+  void Set_value(LITERAL_ID id, PRIMITIVE_TYPE type, uint32_t count) {
     _attr->Set_value(id);
     _attr->Set_type((uint32_t)type);
     _attr->Set_count(count);
@@ -61,6 +66,7 @@ class ATTR_LIST {
   friend class TYPE;
   friend class SYM;
   friend class TARG_INFO;
+  friend class air::opt::HEXPR;
 
 public:
   template <typename T>
@@ -125,20 +131,20 @@ private:
 #define DECLATR_ATTR_ACCESS_API(attr_id, scope_ptr)                 \
   template <typename T>                                             \
   const T* Attr(const char* key, uint32_t* count = nullptr) const { \
-    ATTR_LIST list(attr_id, scope_ptr);                             \
+    air::base::ATTR_LIST list(attr_id, scope_ptr);                  \
     return list.Attr<T>(key, count);                                \
   }                                                                 \
   const char* Attr(const char* key) const {                         \
-    ATTR_LIST list(attr_id, scope_ptr);                             \
+    air::base::ATTR_LIST list(attr_id, scope_ptr);                  \
     return list.Attr(key);                                          \
   }                                                                 \
   template <typename T>                                             \
   void Set_attr(const char* key, const T* val, uint32_t count) {    \
-    ATTR_LIST list(attr_id, scope_ptr);                             \
+    air::base::ATTR_LIST list(attr_id, scope_ptr);                  \
     list.Set_attr(key, val, count);                                 \
   }                                                                 \
   void Set_attr(const char* key, const char* val) {                 \
-    ATTR_LIST list(attr_id, scope_ptr);                             \
+    air::base::ATTR_LIST list(attr_id, scope_ptr);                  \
     list.Set_attr(key, val);                                        \
   }
 

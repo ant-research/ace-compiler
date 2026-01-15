@@ -18,4 +18,7 @@
 #include "rt_stat.h"
 #include "tensor.h"
 
+//! TODO put it here for now
+static void Abort_location() { exit(1); }
+
 #endif  // RTLIB_COMMON_RTLIB_H

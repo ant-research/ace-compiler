@@ -17,6 +17,7 @@ void COMMON_CONFIG::Print(std::ostream& os) const {
   os << "  Runtime Timing: " << (_rt_timing ? "Yes" : "No") << std::endl;
   os << "  Runtime Validate: " << (_rt_validate ? "Yes" : "No") << std::endl;
   os << "  Trace stat: " << (_trace_stat ? "Yes" : "No") << std::endl;
+  os << "  Trace mempool: " << (_trace_mp ? "Yes" : "No") << std::endl;
   os << "  Trace IR before: " << (_trace_ir_before ? "Yes" : "No") << std::endl;
   os << "  Trace IR after: " << (_trace_ir_after ? "Yes" : "No") << std::endl;
   os << "  Trace Symtab before: " << (_trace_st_before ? "Yes" : "No")

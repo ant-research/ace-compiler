@@ -6,5 +6,4 @@
 //
 //=============================================================================
 
-// TODO: replace later
-int Core_test() { return 0; }
+#include "nn/core/opcode.cxx"

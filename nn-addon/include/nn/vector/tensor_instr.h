@@ -40,6 +40,15 @@ public:
                    : cntr->New_ldp(ptr->Preg(), ptr->Spos());
       };
 
+      if (_config.Rt_timing()) {
+        // instrument for runtime timing
+        uint32_t event = Rtt_event(val->Opcode());
+        AIR_ASSERT_MSG(event != air::base::RTM_NONE, "TODO: RTT event for %s", val->Name());
+        air::base::TIMING_GEN gen(cntr, event, 0, node->Spos());
+        Prepend(gen.New_tm_start());
+        Append(gen.New_tm_end());
+      }
+
       if (_config.Rt_dump()) {
         // dump result
         const char*         msg = air::base::META_INFO::Op_name(val->Opcode());
@@ -81,6 +90,32 @@ private:
       default:
         return -6;
     }
+  }
+
+  uint32_t Rtt_event(air::base::OPCODE opc) {
+    switch (opc) {
+      case nn::core::OPC_ADD:
+        return nn::core::RTM_NN_ADD;
+      case nn::core::OPC_AVERAGE_POOL:
+      case nn::core::OPC_MAX_POOL:
+        return nn::core::RTM_NN_AVGPOOL;
+      case nn::core::OPC_CONCAT:
+        return nn::core::RTM_NN_CONCAT;
+      case nn::core::OPC_CONV:
+        return nn::core::RTM_NN_CONV;
+      case nn::core::OPC_FLATTEN:
+      case nn::core::OPC_RESHAPE:
+        return nn::core::RTM_NN_FLATTEN;
+      case nn::core::OPC_GEMM:
+        return nn::core::RTM_NN_GEMM;
+      case nn::core::OPC_GLOBAL_AVERAGE_POOL:
+        return nn::core::RTM_NN_GLOBAL_AVGPOOL;
+      case nn::core::OPC_MUL:
+        return nn::core::RTM_NN_MUL;
+      case nn::core::OPC_RELU:
+        return nn::core::RTM_NN_RELU;
+    }
+    return air::base::RTM_NONE;
   }
 
   air::base::OPCODE Rtv_opcode(air::base::OPCODE opc) {

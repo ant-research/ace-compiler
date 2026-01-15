@@ -9,6 +9,8 @@
 #ifndef FHE_CKKS_VECTOR2CKKS_CTX_H
 #define FHE_CKKS_VECTOR2CKKS_CTX_H
 
+#include <map>
+
 #include "air/base/transform_ctx.h"
 #include "fhe/ckks/ckks_gen.h"
 #include "fhe/ckks/config.h"
@@ -27,16 +29,33 @@ public:
         _lower_ctx(ctx),
         _config(cfg) {}
 
-  DECLARE_CKKS_CONFIG_ACCESS_API(_config)
+  DECLARE_CKKS_OPTION_CONFIG_ACCESS_API(_config)
 
   fhe::core::LOWER_CTX& Lower_ctx() { return _lower_ctx; }
 
   CKKS_GEN& Ckks_gen() { return _ckks_gen; }
 
+  //! @brief Get cached bootstrap function ID for given level, or null if not
+  //! cached
+  air::base::FUNC_ID Get_bts_func(uint32_t level) const {
+    auto it = _bts_func_map.find(level);
+    if (it != _bts_func_map.end()) {
+      return it->second;
+    }
+    return air::base::FUNC_ID();
+  }
+
+  //! @brief Cache bootstrap function ID for given level
+  void Set_bts_func(uint32_t level, air::base::FUNC_ID func_id) {
+    _bts_func_map[level] = func_id;
+  }
+
 private:
   CKKS_GEN              _ckks_gen;
   fhe::core::LOWER_CTX& _lower_ctx;
   const CKKS_CONFIG&    _config;
+  // Cache bootstrap functions by level to avoid duplicate generation
+  std::map<uint32_t, air::base::FUNC_ID> _bts_func_map;
 };
 
 }  // namespace ckks

@@ -1,3 +1,10 @@
+#=============================================================================
+#
+# Copyright (c) Ant Group Co., Ltd
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+#
+#=============================================================================
+
 file (GLOB_RECURSE NNUTIL_SRC_FILES CONFIGURE_DEPENDS src/*.cxx)
 
 set (NNUTIL_INCLUDE_DIRS "")
@@ -7,7 +14,7 @@ include_directories (${NNUTIL_INCLUDE_DIRS})
 set (NNUTIL_INCLUDE_DIRS "${NNUTIL_INCLUDE_DIRS}" CACHE INTERNAL "")
 
 add_library (nnutil_obj OBJECT ${NNUTIL_SRC_FILES})
-
+add_dependencies(nnutil_obj nn_depend)
 set_property (TARGET nnutil_obj PROPERTY POSITION_INDEPENDENT_CODE 1)
 
 if (BUILD_STATIC)
@@ -24,59 +31,14 @@ if (BUILD_STATIC)
 	add_dependencies (nnutil_all NNutil)
 endif()
 
-set (NNUTIL_UTAPP "")
-if (BUILD_UNITTEST)
-	file (GLOB NNUTIL_UNITTEST_SRC_FILES CONFIGURE_DEPENDS unittest/*.cxx)
-	set (NNUTIL_UNITTEST_SRC_FILES ${NNUTIL_UNITTEST_SRC_FILES})
-	add_executable (ut_nnutil ${NNUTIL_UNITTEST_SRC_FILES} ${UNITTESTMAIN})
-	set_property (TARGET ut_nnutil PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/unittest)
-	target_link_libraries (ut_nnutil ${NN_UTLIBS})
-	set (NNUTIL_UTAPP ${NNUTIL_UTAPP} ut_nnutil)
-
-	add_dependencies (nnutil_all ut_nnutil)
-
-	add_custom_command (OUTPUT run_nnutil_utapp WORKING_DIRECTORY ${CMAKE_BINARY_DIR} COMMAND ${CMAKE_BINARY_DIR}/unittest/ut_nnutil)
-	add_custom_target (test_nnutil_ut DEPENDS ut_nnutil run_nnutil_utapp)
-	add_test( NAME ut_nnutil COMMAND ${CMAKE_BINARY_DIR}/unittest/ut_nnutil)
-endif()
-
-set (NNUTIL_TESTAPP "")
 if (NN_BUILD_TEST)
-	file (GLOB NNUTIL_TEST_SRC_FILES CONFIGURE_DEPENDS test/*.cxx)
-	foreach (app ${NNUTIL_TEST_SRC_FILES})
-		get_filename_component (exe ${app} NAME_WE)
-		add_executable (${exe} ${app})
-		set_property (TARGET ${exe} PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test)
-		set (NNUTIL_TESTAPP ${NNUTIL_TESTAPP} ${exe})
-		target_link_libraries (${exe} ${NN_LIBS})
-		add_test( NAME ${exe} COMMAND ${CMAKE_BINARY_DIR}/test/${exe})
-	endforeach ()
-
-	add_custom_target (nnutil_test)
-	add_dependencies (nnutil_test ${NNUTIL_TESTAPP})
-	add_dependencies (nnutil_all nnutil_test)
+	build_app_test (NN_INSTALL_APP "${NN_LIBS}")
 endif()
 
-set (NNUTIL_EGAPP "")
 if (NN_BUILD_EXAMPLE)
-	file (GLOB NNUTIL_EXAMPLE_SRC_FILES CONFIGURE_DEPENDS example/*.cxx)
-	foreach (app ${NNUTIL_EXAMPLE_SRC_FILES})
-		get_filename_component (exe ${app} NAME_WE)
-		add_executable (${exe} ${app})
-		set_property (TARGET ${exe} PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/example)
-		set (NNUTIL_EGAPP ${NNUTIL_EGAPP} ${exe})
-		target_link_libraries (${exe} ${NN_LIBS})
-		add_test( NAME ${exe} COMMAND ${CMAKE_BINARY_DIR}/example/${exe})
-	endforeach ()
-
-	add_custom_target (nnutil_example)
-	add_dependencies (nnutil_example ${NNUTIL_EGAPP})
-	add_dependencies (nnutil_all nnutil_example)
+	build_app_example (NN_INSTALL_APP "${NN_LIBS}")
 endif ()
 
-if (NN_INSTALL_APP)
-	install (TARGETS ${NNUTIL_UTAPP} RUNTIME DESTINATION unittest)
-	install (TARGETS ${NNUTIL_BMAPP} RUNTIME DESTINATION bench)
-	install (TARGETS ${NNUTIL_TESTAPP} RUNTIME DESTINATION test)
-	install (TARGETS ${NNUTIL_EGAPP} RUNTIME DESTINATION example)
-endif ()
+if (BUILD_UNITTEST)
+	build_app_unittest (NN_INSTALL_APP "${NN_UTLIBS}" "ut_nnutil")
+endif()

@@ -9,6 +9,7 @@
 #ifndef AIR_BASE_TYPE_H
 #define AIR_BASE_TYPE_H
 
+#include "air/base/id_wrapper.h"
 #include "air/base/st_data.h"
 #include "air/base/st_decl.h"
 #include "air/base/st_trait.h"
@@ -67,6 +68,7 @@ private:
 
   bool Is_null() const { return _fld.Is_null(); }
   void Set_next(FIELD_ID id) { _fld->Set_next(id); }
+  bool Is_same_fld(const FIELD_PTR o) const;
 
   FIELD_DATA_PTR Data() const { return _fld; }
   FIELD_ID       Next() const { return _fld->Next(); }
@@ -78,6 +80,7 @@ private:
 //! Wrapper class to access ARB_DATA
 class ARB {
   PTR_FRIENDS(ARB);
+  friend class ARRAY_TYPE;
 
 public:
   ARB() : _glob(0), _arb() {}
@@ -170,6 +173,11 @@ public:
   void Print() const;
 
 private:
+  bool Is_same_arb(CONST_ARB_PTR o) const {
+    if (_glob != &o->Glob_scope()) return false;
+    if (_arb.Id() != Null_id && _arb.Id() == o->Data().Id()) return true;
+    return _arb->Is_same_arb(o->Data());
+  }
   ARB_DATA_PTR Data() const { return _arb; }
 
   GLOB_SCOPE*  _glob;
@@ -197,7 +205,7 @@ public:
   uint64_t    Byte_size() const;
   uint32_t    Domain_tag() const { return _type->Domain_tag(); }
 
-  void Set_name(CONST_STR_PTR name) { Set_name(name->Id()); }
+  void Set_name(CONST_STR_PTR name);
   void Set_name(STR_ID name);
   void Set_domain_tag(uint32_t t) { _type->Set_domain_tag(t); }
 
@@ -224,7 +232,7 @@ public:
   bool Is_scalar() const;
   bool Is_aggregate() const;
   bool Is_local() const;
-  bool Is_same_type(CONST_TYPE_PTR o);
+  bool Is_compatible_type(CONST_TYPE_PTR o) const;
   bool Has_alignment() const;
   bool Has_size() const;
 
@@ -337,6 +345,12 @@ public:
   bool Is_float() const { return (Is_real_float() || Is_complex_float()); }
 
   bool Is_void() const { return (Encoding() == PRIMITIVE_TYPE::VOID); }
+  bool Is_compatible_type(CONST_PRIM_TYPE_PTR o) const {
+    if (Encoding() != o->Cast_to_prim()->Encoding()) return false;
+    // PRIM_TYPEs sharing the same PRIMITIVE_TYPE should have identical ID.
+    AIR_ASSERT(!Id().Is_null() && Id() == o->Id());
+    return true;
+  }
 
 private:
   void Set_encoding(PRIMITIVE_TYPE enc);
@@ -354,6 +368,10 @@ public:
   POINTER_KIND Ptr_kind() const;
 
   void Set_domain_type(TYPE_ID id);
+  bool Is_compatible_type(CONST_POINTER_TYPE_PTR o) const {
+    return Domain_type()->Is_compatible_type(o->Domain_type()) &&
+           Ptr_kind() == o->Ptr_kind();
+  }
 
 private:
   void Set_ptr_kind(POINTER_KIND kind);
@@ -384,6 +402,7 @@ public:
 
   void Set_first_dim(ARB_ID id);
   void Set_elem_type(TYPE_ID etype);
+  bool Is_compatible_type(CONST_ARRAY_TYPE_PTR o) const;
 
 private:
   bool Is_analyzed() const;
@@ -423,6 +442,7 @@ public:
 
   void Add_fld(FIELD_ID id);
   void Analyze();
+  bool Is_compatible_type(CONST_RECORD_TYPE_PTR o) const;
 
 private:
   bool Is_analyzed() const;
@@ -498,6 +518,9 @@ public:
 
   DATA_ALIGN Alignment() const;
   uint64_t   Bit_size() const;
+  bool       Is_compatible_type(CONST_VA_LIST_TYPE_PTR o) const {
+    return Alignment() == o->Alignment() && Bit_size() == o->Bit_size();
+  }
 };
 
 class PARAM {

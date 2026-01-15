@@ -37,6 +37,9 @@ public:
                                         int                    channel,
                                         const air::base::SPOS& spos);
 
+  //! @brief For 3x3 pooling operator, replace it by group conv
+  air::base::NODE_PTR New_group_conv(air::base::NODE_PTR node);
+
   //! @brief New MUL node
   air::base::NODE_PTR New_mul(air::base::NODE_PTR op0, air::base::NODE_PTR op1,
                               const air::base::SPOS& spos);
@@ -62,7 +65,10 @@ public:
   //! @brief New ROLL node
   air::base::NODE_PTR New_roll(air::base::NODE_PTR op0, air::base::NODE_PTR op1,
                                std::vector<int>       attr,
-                               const air::base::SPOS& spos);
+                               const air::base::SPOS& spos,
+                               TYPE_PTR rtype = air::base::Null_ptr);
+
+  air::base::NODE_PTR New_roll_sum(NODE_PTR op0, const SPOS& spos);
 
 protected:
   air::base::CONTAINER* _cntr;

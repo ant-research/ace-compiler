@@ -39,8 +39,8 @@ public:
     AIR_ASSERT(node->Domain() == ID);
     switch (node->Operator()) {
       // case definition from opcode_def.inc
-#define DEF_OPCODE(NAME, name, cat, kid_num, fld_num, prop) \
-  OPCODE_HANDLER_GEN(NAME, name, cat, kid_num, fld_num, prop)
+#define DEF_OPCODE(NAME, name, kid_num, fld_num, prop) \
+  OPCODE_HANDLER_GEN(NAME, name, kid_num, fld_num, prop)
 #include "opcode_def.inc"
 #undef DEF_OPCODE
 
@@ -56,8 +56,8 @@ public:
 
 private:
   // private dispatcher to deliver to IMPL to handle the node
-#define DEF_OPCODE(NAME, name, cat, kid_num, fld_num, prop) \
-  OPCODE_IMPL_GEN(NAME, name, cat, kid_num, fld_num, prop)
+#define DEF_OPCODE(NAME, name, kid_num, fld_num, prop) \
+  OPCODE_IMPL_GEN(NAME, name, kid_num, fld_num, prop)
 #include "opcode_def.inc"
 #undef DEF_OPCODE
 

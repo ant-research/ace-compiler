@@ -74,18 +74,55 @@ public:
   template <typename DRIVER>
   R_CODE Run(DRIVER* driver) {
     return Forward<0>([driver](auto&& pass) -> R_CODE {
-      if (driver->Keep() || pass.Trace_ir_before()) {
-        driver->Trace() << "#### IR trace before " << pass.Name() << std::endl;
+      if (pass.Enable() == false) {
+        CMPLR_WARN_MSG(driver->Tfile(), "%s PASS is disabled.", pass.Name());
+        return R_CODE::NORMAL;
+      }
+      if (driver->Trace() || pass.Trace_st_before()) {
+        driver->Tstream() << "#### SymTab trace before " << pass.Name()
+                          << std::endl;
+        driver->Trace_st();
+      }
+      if (driver->Trace() || pass.Trace_ir_before()) {
+        driver->Tstream() << "#### IR trace before " << pass.Name()
+                          << std::endl;
         driver->Trace_ir();
       }
-      if (pass.Trace_stat()) driver->Perf_start();
+
+      // Verify AIR before each phase
+      if (driver->Verify() || pass.Verify_ir()) {
+        driver->Verify_ir();
+      }
+      if (pass.Trace_stat()) {
+        driver->Perf_start();
+      }
       R_CODE ret_code = pass.Run();
-      if (driver->Keep() || pass.Trace_ir_after()) {
-        driver->Trace() << "#### IR trace after " << pass.Name() << std::endl;
+      if (driver->Trace() || pass.Trace_st_after()) {
+        driver->Tstream() << "#### SymTab trace after " << pass.Name()
+                          << std::endl;
+        driver->Trace_st();
+      }
+      if (driver->Trace() || pass.Trace_ir_after()) {
+        driver->Tstream() << "#### IR trace after " << pass.Name() << std::endl;
         driver->Trace_ir();
+      }
+      if (driver->Trace_mp() || pass.Trace_mp()) {
+        driver->Tstream() << "#### Mempool after " << pass.Name() << std::endl;
+        driver->Trace_mp_info();
       }
       if (pass.Trace_stat()) {
         driver->Perf_taken(driver->Exe_name(), pass.Name(), "--");
+      }
+
+      // Write AIR to ELF with Keep
+      if (driver->Keep()) {
+        std::string lower = pass.Name();
+        std::transform(lower.begin(), lower.end(), lower.begin(),
+                       [](unsigned char c) { return std::tolower(c); });
+        std::string kfile = driver->Ifile();
+        kfile.append(".");
+        kfile.append(lower);
+        driver->Write_ir(kfile);
       }
 
       // Write AIR to ELF after phase
@@ -96,6 +133,11 @@ public:
       // Read AIR from ELF before phase
       if (!pass.Read_ir().empty()) {
         driver->Read_ir(pass.Read_ir());
+      }
+
+      // Verify AIR after each phase
+      if (driver->Verify() || pass.Verify_ir()) {
+        driver->Verify_ir();
       }
 
       return ret_code;
@@ -133,6 +175,16 @@ public:
   template <int PASS_ID>
   bool Pass_enable() const {
     return std::get<PASS_ID>(_passes).Enable();
+  }
+
+  template <typename PASS, int PASS_ID>
+  PASS& Get_pass() {
+    return std::get<PASS_ID>(_passes);
+  }
+
+  template <typename PASS, int PASS_ID>
+  const PASS& Get_pass() const {
+    return std::get<PASS_ID>(_passes);
   }
 
 private:

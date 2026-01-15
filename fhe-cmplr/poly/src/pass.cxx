@@ -31,13 +31,9 @@ R_CODE POLY_PASS::Pre_run() {
 }
 
 R_CODE POLY_PASS::Run() {
-  if (_config.Enable() == false) {
-    CMPLR_WARN_MSG(_driver->Tfile(), "POLY GEN PASS is disabled.");
-    return R_CODE::NORMAL;
-  }
   fhe::poly::POLY_DRIVER poly_driver;
-  air::base::GLOB_SCOPE* glob =
-      poly_driver.Run(_config, _driver->Glob_scope(), _driver->Lower_ctx());
+  air::base::GLOB_SCOPE* glob = poly_driver.Run(
+      _config, _driver->Glob_scope(), _driver->Lower_ctx(), _driver->Context());
   _driver->Update_glob_scope(glob);
   return R_CODE::NORMAL;
 }
@@ -46,6 +42,11 @@ void POLY_PASS::Post_run() {}
 
 void POLY_PASS::Fini() {}
 
+void POLY_PASS::Set_lower_to_hpoly(bool v) { _config._lower_to_hpoly = v; }
+
+void POLY_PASS::Set_lower_to_hpoly2(bool v) { _config._lower_to_hpoly2 = v; }
+
+void POLY_PASS::Set_prop_attr(bool v) { _config._prop_attr = v; }
 }  // namespace poly
 
 }  // namespace fhe

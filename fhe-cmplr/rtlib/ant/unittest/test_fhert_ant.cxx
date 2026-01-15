@@ -10,9 +10,7 @@
 #include "helper.h"
 
 UT_GLOB_ENV::ENV_INFO UT_GLOB_ENV::Env_info[ENV_LAST];
-/**
-Main entry point for Google Test unit tests.
-*/
+//! @brief Main entry point for Google Test unit tests.
 int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);
   testing::AddGlobalTestEnvironment(new UT_GLOB_ENV);

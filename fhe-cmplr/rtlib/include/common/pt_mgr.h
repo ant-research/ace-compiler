@@ -11,6 +11,9 @@
 
 //! @brief pt_mgr.h
 //! define API to manage buffer for plaintext
+//! @note To avoid undefined reference issues, ensure that `pt_mgr.c` is
+//! included in the `libFHErt_xxx.a`. If other libraries require their own
+//! implementation, they should include `pt_mgr.c` within their own library.
 
 #include "common.h"
 
@@ -18,32 +21,44 @@
 extern "C" {
 #endif
 
-//! @brief initialize plaintext manager with external file name
+//! @brief Initialize plaintext manager with external file name
 bool Pt_mgr_init(const char* fname);
 
-//! @brief finalize plaintext manager
+//! @brief Finalize plaintext manager
 void Pt_mgr_fini();
 
-//! @brief prefetch plaintext from disk to memory
+//! @brief Prefetch plaintext from disk to memory
 void Pt_prefetch(uint32_t index);
 
-//! @brief get plaintext pointer
+//! @brief Get plaintext pointer
 void* Pt_get(uint32_t index, size_t len, uint32_t scale, uint32_t level);
 
-//! @brief get plaintext pointer and validate content
+//! @brief Get plaintext pointer and validate content
 void* Pt_get_validate(float* buf, uint32_t index, size_t len, uint32_t scale,
                       uint32_t level);
 
-//! @brief free plaintext by index
+//! @brief Free plaintext by index
 void Pt_free(uint32_t index);
 
-//! @brief get message by index
-void Pt_from_msg(void* pt, uint32_t index, size_t len, uint32_t scale,
-                 uint32_t level);
+//! @brief Free plaintext poly data
+void Free_data(void* poly);
 
-//! @brief get message by index and validate content
+//! @brief Get message by index
+void* Pt_from_msg(void* pt, uint32_t index, size_t len, uint32_t scale,
+                  uint32_t level);
+
+//! @brief Get message by index and offset
+void* Pt_from_msg_ofst(void* pt, uint32_t index, size_t ofst, size_t len,
+                       uint32_t scale, uint32_t level);
+
+//! @brief Get message by index and validate content
 void Pt_from_msg_validate(void* pt, float* buf, uint32_t index, size_t len,
                           uint32_t scale, uint32_t level);
+
+//! @brief Get message by index/offset and validate content
+void Pt_from_msg_ofst_validate(void* pt, float* buf, uint32_t index,
+                               size_t offset, size_t len, uint32_t scale,
+                               uint32_t level);
 
 #ifdef __cplusplus
 }

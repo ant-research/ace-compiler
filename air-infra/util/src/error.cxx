@@ -22,7 +22,8 @@ static int         Cmplr_line = 0;
 extern FILE*       Input_file;
 extern std::string Input_file_name;  // input file to the compiler
 
-#include "err_msg.inc.c"
+//! Note: It is generated automatically at compile time
+#include "air/util/err_msg.inc"
 
 typedef void (*sighandler_t)(int);
 

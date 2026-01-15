@@ -23,9 +23,9 @@ enum SECURITY_LEVEL : uint16_t {
   HE_STD_END         = 0xffff,
 };
 
-enum SCHEME_INFO_ANA_TRACE_DETAIL {
-  TRACE_ANA_OPTION = 0,
-  TRACE_ANA_RES    = 1,
+enum SCHEME_INFO_ANA_TRACE_DETAIL : uint64_t {
+  TD_ANA_OPTION = 0x1,
+  TD_ANA_RES    = 0x2,
 };
 
 //! Configuration of SCHEME_INFO_ANA_PASS

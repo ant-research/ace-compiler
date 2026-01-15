@@ -6,13 +6,13 @@
 //
 //=============================================================================
 
-#ifndef AIR_CORE_CLONE_HANDLER_RETV_H
-#define AIR_CORE_CLONE_HANDLER_RETV_H
+#ifndef AIR_BASE_HANDLER_RETV_H
+#define AIR_BASE_HANDLER_RETV_H
 
 #include "air/base/node.h"
 
 namespace air {
-namespace core {
+namespace base {
 
 /**
  * @brief A default handler return type
@@ -32,7 +32,7 @@ private:
   air::base::NODE_PTR _node;
 };
 
-}  // namespace core
+}  // namespace base
 }  // namespace air
 
 #endif  // AIR_CORE_CLONE_HANDLER_RETV_H

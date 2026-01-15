@@ -13,21 +13,23 @@
 #include "rt_ant/rt_ant.h"
 
 CKKS_PARAMS* Get_context_params() {
-  static CKKS_PARAMS param = {LIB_ANT, 16, 0, 25, 60, 51, 0, 0};
+  static CKKS_PARAMS param = {LIB_ANT, 16, 0, 25, 0, 60, 51, 0, 0};
   return &param;
 }
 
 DATA_SCHEME* Get_encode_scheme(int idx) {
+  static MAP_DESC desc_0[] = {{NORMAL, 0, 0, 0, 0}};
   static DATA_SCHEME scheme_0 = {
-    "input", {0, 0, 0, 0}, 1, {NORMAL, 0, 0, 0, 0}
+    "input", {0, 0, 0, 0}, 1, desc_0
   };
   static DATA_SCHEME* scheme[] = { &scheme_0 };
   return scheme[idx];
 }
 
 DATA_SCHEME* Get_decode_scheme(int idx) {
+  static MAP_DESC desc[] = {{NORMAL, 0, 0, 0, 0}};
   static DATA_SCHEME scheme = {
-    "output", {0, 0, 0, 0}, 1, {NORMAL, 0, 0, 0, 0}
+    "output", {0, 0, 0, 0}, 1, desc
   };
   return &scheme;
 }
@@ -52,9 +54,10 @@ bool Main_graph() {
   memset(&output, 0, sizeof(output));
 
   // encode plaintext at level 1
-  Encode_plain_from_float(&onnx_add_1, Add_const_val, Len, 1, 1);
+  Encode_float(&onnx_add_1, Add_const_val, Len, 1, 1);
   Encrypt(&onnx_add_ciph, &onnx_add_1);
   Bootstrap(&bs_ciph, &onnx_add_ciph, 5/*level_after_bts*/);
+  Bootstrap(&bs_ciph, &bs_ciph, 0/*level_after_bts*/);
   while (Sc_degree(&bs_ciph) > 1) {
     Rescale_ciph(&bs_ciph, &bs_ciph);
   }

@@ -16,31 +16,19 @@
 double Expected_data[] = {0.29442093, -0.06991183, -1.0922732, -0.44976643};
 int    Expected_len    = 4;
 
-/**
- * @brief generate input data for testing ONNX
- *
- *
- * @param n
- * @param c
- * @param h
- * @param w
- * @param data, data pointer
- * @return TENSOR input data
- */
+//! @brief Generate input data for testing ONNX
+//! @param data data pointer
+//! @return TENSOR input data
 TENSOR* Generate_input_data(size_t n, size_t c, size_t h, size_t w,
                             double* data) {
   return Alloc_tensor(n, c, h, w, data);
 }
 
-/**
- * @brief validate output vector with expect vector
- *
- *
- * @param result double *
- * @param expect double *
- * @param len int
- * @return return true if value match
- */
+//! @brief Validate output vector with expect vector
+//! @param result double *
+//! @param expect double *
+//! @param len int
+//! @return return true if value match
 bool Validate_output_data(double* result, double* expect, int len) {
   double error = 1e-3;
   for (int i = 0; i < len; i++) {

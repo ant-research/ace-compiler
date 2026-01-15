@@ -148,9 +148,9 @@ public:
       : _basis_type(basis_type), _mul_depth(depth) {}
 
   bool operator<(const POLY_INFO& other) const {
-     return ((static_cast<uint64_t>(_basis_type) << 32U) + _mul_depth) <
-            ((static_cast<uint64_t>(other._basis_type) << 32U) +
-             other._mul_depth);
+    return ((static_cast<uint64_t>(_basis_type) << 32U) + _mul_depth) <
+           ((static_cast<uint64_t>(other._basis_type) << 32U) +
+            other._mul_depth);
   }
 
 private:

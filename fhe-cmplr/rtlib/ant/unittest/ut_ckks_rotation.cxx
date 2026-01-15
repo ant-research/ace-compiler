@@ -6,43 +6,41 @@
 //
 //=============================================================================
 
+#include "ckks/ciphertext.h"
+#include "ckks/decryptor.h"
+#include "ckks/encoder.h"
+#include "ckks/encryptor.h"
+#include "ckks/evaluator.h"
+#include "ckks/key_gen.h"
+#include "ckks/param.h"
+#include "ckks/plaintext.h"
+#include "ckks/secret_key.h"
+#include "common/rt_api.h"
+#include "context/ckks_context.h"
 #include "gtest/gtest.h"
 #include "helper.h"
-#include "util/ciphertext.h"
-#include "util/ckks_decryptor.h"
-#include "util/ckks_encoder.h"
-#include "util/ckks_encryptor.h"
-#include "util/ckks_evaluator.h"
-#include "util/ckks_key_generator.h"
-#include "util/ckks_parameters.h"
-#include "util/matrix_operations.h"
-#include "util/plaintext.h"
-#include "util/polynomial.h"
+#include "rns_poly_impl.h"
+#include "util/matrix_operation.h"
 #include "util/random_sample.h"
-#include "util/secret_key.h"
 
 class TEST_ROTATION : public ::testing::Test {
 protected:
   void SetUp() override {
-    _degree = 32;
-    _param  = Alloc_ckks_parameter();
-    Init_ckks_parameters_with_multiply_depth(_param, _degree, HE_STD_NOT_SET, 3,
-                                             0);
+    _degree             = 32;
     int32_t rot_idxs[5] = {0, 1, 2, 3, 4};
-    _keygen             = Alloc_ckks_key_generator(_param, rot_idxs, 5);
-    _encoder            = Alloc_ckks_encoder(_param);
-    _encryptor = Alloc_ckks_encryptor(_param, Get_pk(_keygen), Get_sk(_keygen));
-    _decryptor = Alloc_ckks_decryptor(_param, Get_sk(_keygen));
-    _evaluator = Alloc_ckks_evaluator(_param, _encoder, _decryptor, _keygen);
+    Set_context_params(_degree, 3, 33, 30, 0 /*qpart*/, 0 /*input_level*/,
+                       0 /*hw*/, 5, rot_idxs);
+    Prepare_context();
+    // TODO: should be removed after refactor CKKS APIs
+    _param     = (CKKS_PARAMETER*)Param();
+    _keygen    = (CKKS_KEY_GENERATOR*)Keygen();
+    _evaluator = (CKKS_EVALUATOR*)Eval();
+    _encoder   = (CKKS_ENCODER*)Encoder();
+    _decryptor = (CKKS_DECRYPTOR*)Decryptor();
+    _encryptor = (CKKS_ENCRYPTOR*)Encryptor();
   }
-  void TearDown() override {
-    Free_ckks_parameters(_param);
-    Free_ckks_key_generator(_keygen);
-    Free_ckks_encoder(_encoder);
-    Free_ckks_encryptor(_encryptor);
-    Free_ckks_decryptor(_decryptor);
-    Free_ckks_evaluator(_evaluator);
-  }
+
+  void TearDown() override { Finalize_context(); }
 
   size_t Get_degree() { return _degree; }
 
@@ -54,11 +52,10 @@ protected:
           Get_dcmplx_value_at(vec, (idx + rot) % (_degree / 2));
     }
 
-    CRT_CONTEXT* crt      = Get_param_crt(_param);
-    PLAINTEXT*   plain    = Alloc_plaintext();
-    CIPHERTEXT*  ciph     = Alloc_ciphertext();
-    CIPHERTEXT*  ciph_rot = Alloc_ciphertext();
-    SECRET_KEY*  rot_key =
+    PLAINTEXT*  plain    = Alloc_plaintext();
+    CIPHERTEXT* ciph     = Alloc_ciphertext();
+    CIPHERTEXT* ciph_rot = Alloc_ciphertext();
+    SECRET_KEY* rot_key =
         Alloc_secret_key(_degree, _param->_num_primes, _param->_num_p_primes);
     CKKS_DECRYPTOR* rot_decryptor = Alloc_ckks_decryptor(_param, rot_key);
     PLAINTEXT*      decrypted_rot = Alloc_plaintext();
@@ -68,11 +65,11 @@ protected:
     Encrypt_msg(ciph, _encryptor, plain);
     Init_ciphertext_from_ciph(ciph_rot, ciph, Get_ciph_sfactor(ciph),
                               Get_ciph_sf_degree(ciph));
-    Rotate_poly_with_rotation_idx(Get_c0(ciph_rot), Get_c0(ciph), rot, crt);
-    Rotate_poly_with_rotation_idx(Get_c1(ciph_rot), Get_c1(ciph), rot, crt);
+    Rotate_poly_with_rotation_idx(Get_c0(ciph_rot), Get_c0(ciph), rot);
+    Rotate_poly_with_rotation_idx(Get_c1(ciph_rot), Get_c1(ciph), rot);
     Rotate_poly_with_rotation_idx(Get_sk_poly(rot_key),
-                                  Get_sk_poly(Get_sk(_keygen)), rot, crt);
-    Conv_poly2ntt(Get_ntt_sk(rot_key), Get_sk_poly(rot_key), crt);
+                                  Get_sk_poly(Get_sk(_keygen)), rot);
+    Conv_poly2ntt(Get_ntt_sk(rot_key), Get_sk_poly(rot_key));
     Decrypt(decrypted_rot, rot_decryptor, ciph_rot, NULL);
     Decode(decoded_rot, _encoder, decrypted_rot);
 
@@ -104,11 +101,7 @@ protected:
 
     ENCODE(plain, _encoder, vec);
     Encrypt_msg(ciph, _encryptor, plain);
-    uint32_t auto_idx = Get_precomp_auto_idx(_keygen, rot);
-    IS_TRUE(auto_idx, "cannot get precompute automorphism index");
-    SWITCH_KEY* rot_key = Get_auto_key(_keygen, auto_idx);
-    IS_TRUE(rot_key, "cannot get rotation key");
-    Eval_fast_rotate(ciph_rot, ciph, rot, rot_key, _evaluator);
+    Eval_fast_rotate(ciph_rot, ciph, rot, _evaluator);
     Decrypt(decrypted_rot, _decryptor, ciph_rot, NULL);
     Decode(decoded_rot, _encoder, decrypted_rot);
     Check_complex_vector_approx_eq(rot_msg, decoded_rot, 0.005);
@@ -147,11 +140,7 @@ protected:
     Mul_const(ciph, ciph, dup_cnt, _evaluator);
 
     // fast rotate with rot
-    uint32_t auto_idx = Get_precomp_auto_idx(_keygen, rot);
-    IS_TRUE(auto_idx, "cannot get precompute automorphism index");
-    SWITCH_KEY* rot_key = Get_auto_key(_keygen, auto_idx);
-    IS_TRUE(rot_key, "cannot get rotation key");
-    Eval_fast_rotate(ciph_rot, ciph, rot, rot_key, _evaluator);
+    Eval_fast_rotate(ciph_rot, ciph, rot, _evaluator);
 
     Decrypt(decrypted_rot, _decryptor, ciph_rot, NULL);
     VALUE_LIST* decoded_rot =
@@ -185,8 +174,9 @@ protected:
     ENCODE(plain, _encoder, vec);
     Encrypt_msg(ciph, _encryptor, plain);
     Generate_conj_key(conj_key, _keygen);
+    Insert_auto_key(_keygen, 2 * _degree - 1, conj_key);
 
-    Conjugate(ciph_conj, ciph, conj_key, _evaluator);
+    Conjugate(ciph_conj, ciph, _evaluator);
     Decrypt(decrypted_conj, _decryptor, ciph_conj, NULL);
     Decode(decoded_conj, _encoder, decrypted_conj);
 
@@ -195,7 +185,6 @@ protected:
     Free_value_list(decoded_conj);
     Free_plaintext(decrypted_conj);
     Free_ciphertext(ciph_conj);
-    Free_switch_key(conj_key);
     Free_ciphertext(ciph);
     Free_plaintext(plain);
     Free_value_list(conj_message);
@@ -207,11 +196,8 @@ private:
   CKKS_ENCRYPTOR*     _encryptor;
   CKKS_DECRYPTOR*     _decryptor;
   CKKS_EVALUATOR*     _evaluator;
-  CKKS_BTS_CTX*       _bts_ctx;
   CKKS_PARAMETER*     _param;
-  CRT_CONTEXT*        _crt;
   CKKS_KEY_GENERATOR* _keygen;
-  SWITCH_KEY*         _relin_key;
 };
 
 TEST_F(TEST_ROTATION, simple_rotate) {

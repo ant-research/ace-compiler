@@ -14,22 +14,24 @@
 
 CKKS_PARAMS* Get_context_params() {
   static CKKS_PARAMS param = {
-      LIB_ANT, 16, 0, 8, 33, 30, 0, 0, 5, {6, 14, 2, 5, 16}
+      LIB_ANT, 16, 0, 8, 0, 33, 30, 0, 0, 5, {6, 14, 2, 5, 16}
   };
   return &param;
 }
 
 DATA_SCHEME* Get_encode_scheme(int idx) {
+  static MAP_DESC desc_0[] = {{NORMAL, 0, 0, 0, 0}};
   static DATA_SCHEME scheme_0 = {
-    "input", {0, 0, 0, 0}, 1, {NORMAL, 0, 0, 0, 0}
+    "input", {0, 0, 0, 0}, 1, desc_0
   };
   static DATA_SCHEME* scheme[] = { &scheme_0 };
   return scheme[idx];
 }
 
 DATA_SCHEME* Get_decode_scheme(int idx) {
+  static MAP_DESC desc[] = {{NORMAL, 0, 0, 0, 0}};
   static DATA_SCHEME scheme = {
-    "output", {0, 0, 0, 0}, 1, {NORMAL, 0, 0, 0, 0}
+    "output", {0, 0, 0, 0}, 1, desc
   };
   return &scheme;
 }

@@ -16,8 +16,7 @@ namespace llama {
 
 static LLAMA_CONFIG Llama_config;
 
-static OPTION_DESC Llama_option[] = {
-    DECLARE_COMMON_CONFIG(llama, Llama_config)};
+static OPTION_DESC Llama_option[] = {DECLARE_COMMON_CONFIG(Llama_config)};
 
 static OPTION_DESC_HANDLE Llama_option_handle = {
     sizeof(Llama_option) / sizeof(Llama_option[0]), Llama_option};

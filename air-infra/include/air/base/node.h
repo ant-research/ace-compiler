@@ -100,6 +100,9 @@ public:
   BLOCK_ID       Block_id() const;
   ENTRY_PTR      Entry() const;
   ENTRY_ID       Entry_id() const;
+  const char*    Intrn_name() const;
+  const char*    Comment() const;
+  STR_ID         Comment_id() const;
   FIELD_PTR      Field() const;
   FIELD_ID       Field_id() const;
   STMT_PTR       Parent_stmt() const;
@@ -112,6 +115,13 @@ public:
   PREG_ID Preg_id() const;
   //! Get offset value
   int64_t Ofst() const;
+
+  //! Get pragma id
+  uint32_t Pragma_id() const;
+  //! Get pragma argument 0
+  uint32_t Pragma_arg0() const;
+  //! Get pragma argument 1
+  uint32_t Pragma_arg1() const;
 
   uint32_t Num_arg() const;
 
@@ -126,6 +136,8 @@ public:
   bool Is_dir_call() const;
   bool Is_icall() const;
   bool Is_intrn_call() const;
+  bool Is_intrn_op() const;
+  bool Is_comment() const;
   bool Is_block() const;
   bool Is_entry() const;
   bool Is_ret() const;
@@ -146,6 +158,7 @@ public:
   bool Is_preg_op() const;
   bool Is_relational_op() const;
   bool Is_lib_call() const;
+  bool Is_pragma() const;
 
   bool Has_added_chld() const;
   bool Has_entry() const;
@@ -177,6 +190,8 @@ public:
   void Set_end_stmt(STMT_ID stmt);
   void Set_entry(CONST_ENTRY_PTR ent);
   void Set_entry(ENTRY_ID);
+  void Set_intrn_name(STR_ID id);
+  void Set_comment(STR_ID id);
   //! Set return value of a function to retv
   void Set_ret_preg(CONST_PREG_PTR retv);
   void Set_ret_preg(PREG_ID retv);
@@ -184,6 +199,7 @@ public:
   void Set_field(FIELD_ID fld);
   void Set_parent_stmt(CONST_STMT_PTR stmt);
   void Set_parent_stmt(STMT_ID stmt);
+  void Set_pragma(uint32_t id, uint32_t arg0, uint32_t arg1);
   void Set_num_arg(uint32_t n);
   void Set_const(CONST_CONSTANT_PTR cst);
   void Set_const(CONSTANT_ID id);

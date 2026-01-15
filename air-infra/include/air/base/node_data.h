@@ -102,6 +102,11 @@ private:
         uint32_t _dummy_atype;
         uint32_t _fld;
       } _fld_acc;
+      struct {
+        uint32_t _id;
+        uint32_t _arg0;
+        uint32_t _arg1;
+      } _pragma;
     } _u3;
 
     union {

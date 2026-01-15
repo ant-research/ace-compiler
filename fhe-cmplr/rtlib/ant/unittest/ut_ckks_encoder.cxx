@@ -6,33 +6,36 @@
 //
 //=============================================================================
 
+#include "ckks/encoder.h"
+#include "ckks/param.h"
+#include "ckks/plaintext.h"
+#include "common/rt_api.h"
+#include "context/ckks_context.h"
 #include "gtest/gtest.h"
 #include "helper.h"
-#include "util/ckks_encoder.h"
-#include "util/ckks_parameters.h"
-#include "util/plaintext.h"
-#include "util/polynomial.h"
 #include "util/random_sample.h"
 
 namespace {
 class TEST_CKKS_ENCODER : public ::testing::Test {
 protected:
   void SetUp() override {
-    _scaling_factor = 1UL << 59;
-    _degree         = 32;
-    _params         = Alloc_ckks_parameter();
-    Init_ckks_parameters_with_multiply_depth(_params, _degree, HE_STD_NOT_SET,
-                                             3, 0);
+    _degree = 32;
+    _params = Alloc_ckks_parameter();
+    Set_global_params((PTR_TY)_params);
+    Init_ckks_parameters_with_prime_size(_params, _degree, HE_STD_NOT_SET, 4, 4,
+                                         60, 54, 0);
     _encoder = Alloc_ckks_encoder(_params);
+    Set_global_encoder((PTR_TY)_encoder);
   }
 
-  void TearDown() override {
-    Free_ckks_parameters(_params);
-    Free_ckks_encoder(_encoder);
-  }
+  void TearDown() override { Finalize_context(); }
 
-  size_t Get_degree() { return _degree; }
-  size_t Get_p_cnt() { return _params->_num_p_primes; }
+  size_t   Get_degree() { return _degree; }
+  size_t   Get_p_cnt() { return _params->_num_p_primes; }
+  double   Get_sc() { return _params->_scaling_factor; }
+  uint32_t Get_bit_diff() {
+    return _params->_first_mod_size - (uint32_t)log2(Get_sc());
+  };
 
   /**
    * @brief Checks that encode and decode are inverses.
@@ -155,7 +158,6 @@ protected:
 private:
   CKKS_PARAMETER* _params;
   CKKS_ENCODER*   _encoder;
-  double          _scaling_factor;
   size_t          _degree;
 };
 
@@ -220,6 +222,14 @@ TEST_F(TEST_CKKS_ENCODER, test_encode_decode_07) {
   Run_test_encode_decode_single_val(val, level, sf_degree);
 }
 
+TEST_F(TEST_CKKS_ENCODER, test_encode_decode_07_1) {
+  uint32_t level     = 4;
+  uint32_t sf_degree = 2;
+  // encode with a large value exceed MAX_BITS_IN_WORD * 2
+  double val = pow(10, 22);
+  Run_test_encode_decode_single_val(val, level, sf_degree);
+}
+
 TEST_F(TEST_CKKS_ENCODER, test_encode_decode_08) {
   uint32_t level     = 2;
   uint32_t sf_degree = 1;
@@ -228,7 +238,7 @@ TEST_F(TEST_CKKS_ENCODER, test_encode_decode_08) {
   // the value exceed two level's range, should report encode failure
   EXPECT_DEATH(Run_test_encode_decode_single_val(val, level, sf_degree), "");
   EXPECT_DEATH(Run_test_encode_decode_single_val_with_scale(pow(10, 25), level,
-                                                            pow(2, 30)),
+                                                            pow(2, 32)),
                "");
 }
 
@@ -250,6 +260,94 @@ TEST_F(TEST_CKKS_ENCODER, test_encode_decode_10) {
   Run_test_encode_decode_at_level_with_sf_scale(vec, level, slots, scale, 0);
   Run_test_encode_decode_at_level_with_sf_scale(vec, level, slots, scale,
                                                 Get_p_cnt());
+
+  scale = pow(2.0, 55);
+  Run_test_encode_decode_at_level_with_sf_scale(vec, level, slots, scale, 0);
+  Run_test_encode_decode_at_level_with_sf_scale(vec, level, slots, scale,
+                                                Get_p_cnt());
   Free_value_list(vec);
 }
+
+TEST_F(TEST_CKKS_ENCODER, test_encode_decode_11) {
+  uint32_t slots     = 8;
+  uint32_t level     = 1;
+  uint32_t sf_degree = 1;
+  double   scale     = Get_sc();
+
+  VALUE_LIST* vec = Alloc_value_list(DCMPLX_TYPE, 2);
+  // encode with a value out of range specified by double(q0 - scaling_factor)
+  // & embedding_inv, which exceed value range, should report encode failure
+  uint32_t max_bit        = Get_bit_diff() + log2(slots) - 1;
+  double   val            = pow(2, max_bit);
+  DCMPLX_VALUE_AT(vec, 0) = val;
+  EXPECT_DEATH(
+      Run_test_encode_decode_at_level_with_sf(vec, level, slots, sf_degree),
+      "");
+  EXPECT_DEATH(Run_test_encode_decode_at_level_with_sf_scale(vec, level, slots,
+                                                             scale, 0),
+               "");
+
+  // encode with val = val - 1, which is within value range
+  val -= 1;
+  DCMPLX_VALUE_AT(vec, 0) = val;
+  Run_test_encode_decode_at_level_with_sf(vec, level, slots, sf_degree);
+  Run_test_encode_decode_at_level_with_sf_scale(vec, level, slots, scale, 0);
+
+  // encode with value in bounds
+  DCMPLX_VALUE_AT(vec, 0) = 1;
+  DCMPLX_VALUE_AT(vec, 1) = val - 1;
+  Run_test_encode_decode_at_level_with_sf(vec, level, slots, sf_degree);
+  Run_test_encode_decode_at_level_with_sf_scale(vec, level, slots, scale, 0);
+
+  if (Get_bit_diff() > 1) {
+    // change scale and encode with value in bounds
+    scale *= 2;
+    val /= 2;
+    DCMPLX_VALUE_AT(vec, 0) = val;
+    DCMPLX_VALUE_AT(vec, 1) = 0;
+    Run_test_encode_decode_at_level_with_sf_scale(vec, level, slots, scale, 0);
+
+    // encode with val = val + 1, which exceed value range, should report encode
+    // failure
+    val += 1;
+    DCMPLX_VALUE_AT(vec, 0) = val;
+    DCMPLX_VALUE_AT(vec, 1) = 0;
+    EXPECT_DEATH(Run_test_encode_decode_at_level_with_sf_scale(vec, level,
+                                                               slots, scale, 0),
+                 "");
+  }
+  Free_value_list(vec);
+}
+
+TEST_F(TEST_CKKS_ENCODER, test_encode_decode_12) {
+  uint32_t level     = 1;
+  uint32_t sf_degree = 1;
+  double   scale     = Get_sc();
+
+  // encode with a value out of range specified by double(q0 -
+  // scaling_factor), which exceed value range, should report encode failure
+  uint32_t max_bit = Get_bit_diff() - 1;
+  double   val     = pow(2, max_bit);
+  EXPECT_DEATH(Run_test_encode_decode_single_val(val, level, sf_degree), "");
+  EXPECT_DEATH(Run_test_encode_decode_single_val_with_scale(val, level, scale),
+               "");
+  // encode with val = val - 1, which is within value range
+  val -= 1;
+  Run_test_encode_decode_single_val(val, level, sf_degree);
+  Run_test_encode_decode_single_val_with_scale(val, level, scale);
+
+  if (Get_bit_diff() > 1) {
+    // change scale and encode with value in bounds
+    scale *= 2;
+    val /= 2;
+    Run_test_encode_decode_single_val_with_scale(val, level, scale);
+
+    // encode with val = val + 1, which exceed value range, should report encode
+    // failure
+    val += 1;
+    EXPECT_DEATH(
+        Run_test_encode_decode_single_val_with_scale(val, level, scale), "");
+  }
+}
+
 }  // namespace

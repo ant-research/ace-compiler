@@ -8,57 +8,62 @@
 
 #include <complex>
 
+#include "ckks/bootstrap.h"
+#include "ckks/decryptor.h"
+#include "ckks/encryptor.h"
+#include "ckks/param.h"
+#include "common/rt_api.h"
 #include "common/rt_config.h"
+#include "context/ckks_context.h"
 #include "gtest/gtest.h"
 #include "helper.h"
-#include "util/ckks_bootstrap_context.h"
-#include "util/ckks_decryptor.h"
-#include "util/ckks_encryptor.h"
-#include "util/ckks_parameters.h"
-#include "util/crt.h"
-#include "util/fhe_types.h"
-#include "util/fhe_utils.h"
+#include "poly/rns_poly.h"
+#include "util/modular.h"
 #include "util/random_sample.h"
+#include "util/type.h"
 
 class TEST_BOOTSTRAP_METHOD : public ::testing::Test {
 protected:
   void SetUp() override {
     _degree = 64;
-    _param  = Alloc_ckks_parameter();
-    Init_ckks_parameters_with_prime_size(_param, _degree, HE_STD_NOT_SET, 33,
-                                         60, 51, 0);
-    _keygen    = Alloc_ckks_key_generator(_param, NULL, 0);
-    _relin_key = _keygen->_relin_key;
-    _encoder   = Alloc_ckks_encoder(_param);
-    _encryptor = Alloc_ckks_encryptor(_param, Get_pk(_keygen), Get_sk(_keygen));
-    _decryptor = Alloc_ckks_decryptor(_param, Get_sk(_keygen));
-    _eval      = Alloc_ckks_evaluator(_param, _encoder, _decryptor, _keygen);
-    _bts_ctx   = Get_bts_ctx(_eval);
+    Set_context_params(_degree, 33, 60, 51);
+    Prepare_context();
     // keep the imag part in the bootstrap testing
     Set_rtlib_config(CONF_BTS_CLEAR_IMAG, 0);
+
+    // TODO: should be remove after refactor CKKS APIs
+    _param     = (CKKS_PARAMETER*)Param();
+    _keygen    = (CKKS_KEY_GENERATOR*)Keygen();
+    _eval      = (CKKS_EVALUATOR*)Eval();
+    _encoder   = (CKKS_ENCODER*)Encoder();
+    _decryptor = (CKKS_DECRYPTOR*)Decryptor();
+    _encryptor = (CKKS_ENCRYPTOR*)Encryptor();
+    _bts_ctx   = Get_bts_ctx(_eval);
   }
 
-  void TearDown() override {
-    Free_ckks_parameters(_param);
-    Free_ckks_key_generator(_keygen);
-    Free_ckks_encoder(_encoder);
-    Free_ckks_encryptor(_encryptor);
-    Free_ckks_decryptor(_decryptor);
-    Free_ckks_evaluator(_eval);
+  void TearDown() override { Finalize_context(); }
+
+  size_t Get_degree() { return _degree; }
+
+  uint32_t Get_max_level_after_bts(VL_UI32* level_budget) {
+    CKKS_PARAMETER* param = _param;
+    size_t          q_cnt = Get_q_cnt();
+    uint32_t        bts_depth =
+        Get_bootstrap_depth(level_budget, param->_hamming_weight);
+    return q_cnt - bts_depth;
   }
 
-  size_t          Get_degree() { return _degree; }
-  CKKS_PARAMETER* Get_param() { return _param; }
-  double          Get_q0_scale_factor_ratio();
-  void            Run_test_bootstrap_setup(VL_UI32* level_budget, VL_UI32* dim1,
-                                           uint32_t num_slots, VL_DCMPLX* exp_coeff2slots,
-                                           VL_DCMPLX* exp_slots2coeffs);
-  void Run_test_chebshev(VL_DCMPLX* input, VL_DCMPLX* output, VL_DBL* coeffs,
-                         double a, double b);
+  double Get_q0_scale_factor_ratio();
+  void   Run_test_bootstrap_setup(VL_UI32* level_budget, VL_UI32* dim1,
+                                  uint32_t num_slots, VL_DCMPLX* exp_coeff2slots,
+                                  VL_DCMPLX* exp_slots2coeffs);
+  void   Run_test_chebshev(VL_DCMPLX* input, VL_DCMPLX* output, VL_DBL* coeffs,
+                           double a, double b);
   void Run_test_bootstrap(VALUE_LIST* vec, VL_UI32* level_budget, VL_UI32* dim1,
-                          uint32_t raise_level);
+                          uint32_t init_level, uint32_t raise_level);
   void Run_test_bootstrap_clear_imag(VALUE_LIST* vec, VL_UI32* level_budget,
-                                     VL_UI32* dim1, uint32_t raise_level);
+                                     VL_UI32* dim1, uint32_t init_level,
+                                     uint32_t raise_level);
   void Run_test_coeff_to_slot(VALUE_LIST* vec, VALUE_LIST* expected);
   void Run_test_slot_to_coeff(VALUE_LIST* vec, VALUE_LIST* expected);
   void Run_key_switch_ext(VALUE_LIST* vec, bool add_first);
@@ -74,15 +79,12 @@ private:
   CKKS_BTS_CTX*       _bts_ctx;
   CKKS_PARAMETER*     _param;
   CKKS_KEY_GENERATOR* _keygen;
-  SWITCH_KEY*         _relin_key;
 };
 
 double TEST_BOOTSTRAP_METHOD::Get_q0_scale_factor_ratio() {
-  CRT_CONTEXT* crt_ctx    = _param->_crt_context;
-  MODULUS*     mod0       = Get_modulus_head(Get_q_primes(crt_ctx));
-  int64_t      q0         = Get_mod_val(mod0);
-  double       sf         = _param->_scaling_factor;
-  double       q0_sf_rato = pow(2., round(log2((double)q0 / sf)));
+  int64_t q0         = Get_mod_val(Q_modulus());
+  double  sf         = _param->_scaling_factor;
+  double  q0_sf_rato = pow(2., round(log2((double)q0 / sf)));
   return q0_sf_rato;
 }
 
@@ -193,9 +195,9 @@ void TEST_BOOTSTRAP_METHOD::Run_test_slot_to_coeff(VALUE_LIST* vec,
 
   // setp 3: slots_to_coeffs
   uint32_t level_consume =
-      Get_bootstrap_depth(level_budget, 1, _param->_hamming_weight) -
+      Get_bootstrap_depth(level_budget, _param->_hamming_weight) -
       UI32_VALUE_AT(level_budget, 1);
-  size_t level = Get_primes_cnt(Get_q(Get_param_crt(_param))) - level_consume;
+  size_t level = Get_q_cnt() - level_consume;
   Encode_at_level_internal(plain, _encoder, vec, level, slots);
   Encrypt_msg(ciph_input, _encryptor, plain);
 
@@ -218,7 +220,8 @@ void TEST_BOOTSTRAP_METHOD::Run_test_slot_to_coeff(VALUE_LIST* vec,
 void TEST_BOOTSTRAP_METHOD::Run_test_bootstrap(VALUE_LIST* vec,
                                                VL_UI32*    level_budget,
                                                VL_UI32*    dim1,
-                                               uint32_t    raise_level) {
+                                               uint32_t    init_level,
+                                               uint32_t    level_after_bts) {
   size_t len = LIST_LEN(vec);
 
   PLAINTEXT*  plain           = Alloc_plaintext();
@@ -227,18 +230,15 @@ void TEST_BOOTSTRAP_METHOD::Run_test_bootstrap(VALUE_LIST* vec,
   PLAINTEXT*  decrypted_plain = Alloc_plaintext();
   VALUE_LIST* decoded_val     = Alloc_value_list(DCMPLX_TYPE, len);
 
-  // encode plain at level = 2
-  size_t init_level = 2;
-  std::cout << "number of levels before bootstrapping: " << init_level - 1
+  // encode plain at init_level
+  std::cout << "number of levels before bootstrapping: " << init_level
             << std::endl;
   Encode_at_level_internal(plain, _encoder, vec, init_level, len);
 
   Encrypt_msg(ciph, _encryptor, plain);
 
   // step 1: set parmeters
-  uint32_t num_slots     = len;
-  uint32_t num_iteration = 1;
-  uint32_t precision     = 0;
+  uint32_t num_slots = len;
 
   // step 2: bootstrap setup
   Bootstrap_setup(_bts_ctx, level_budget, dim1, num_slots);
@@ -247,11 +247,10 @@ void TEST_BOOTSTRAP_METHOD::Run_test_bootstrap(VALUE_LIST* vec,
   Bootstrap_keygen(_bts_ctx, num_slots);
 
   // step 3: call bootstrap driver
-  Eval_bootstrap(res_ciph, ciph, num_iteration, precision, raise_level,
-                 _bts_ctx);
+  Eval_bootstrap(res_ciph, ciph, level_after_bts, _bts_ctx);
 
   std::cout << "number of levels remaining after bootstrapping: "
-            << Get_poly_level(Get_c0(res_ciph)) << std::endl;
+            << Poly_level(Get_c0(res_ciph)) << std::endl;
 
   Decrypt(decrypted_plain, _decryptor, res_ciph, NULL);
   Decode(decoded_val, _encoder, decrypted_plain);
@@ -266,8 +265,8 @@ void TEST_BOOTSTRAP_METHOD::Run_test_bootstrap(VALUE_LIST* vec,
 }
 
 void TEST_BOOTSTRAP_METHOD::Run_test_bootstrap_clear_imag(
-    VALUE_LIST* vec, VL_UI32* level_budget, VL_UI32* dim1,
-    uint32_t raise_level) {
+    VALUE_LIST* vec, VL_UI32* level_budget, VL_UI32* dim1, uint32_t init_level,
+    uint32_t level_after_bts) {
   Set_rtlib_config(CONF_BTS_CLEAR_IMAG, 1);
   size_t len = LIST_LEN(vec);
 
@@ -277,18 +276,16 @@ void TEST_BOOTSTRAP_METHOD::Run_test_bootstrap_clear_imag(
   PLAINTEXT*  decrypted_plain = Alloc_plaintext();
   VALUE_LIST* decoded_val     = Alloc_value_list(DCMPLX_TYPE, len);
 
-  // encode plain at level = 2
-  size_t init_level = 2;
-  std::cout << "number of levels before bootstrapping: " << init_level - 1
+  // encode plain at init level
+  std::cout << "number of levels before bootstrapping: " << init_level
             << std::endl;
   Encode_at_level_internal(plain, _encoder, vec, init_level, len);
 
   Encrypt_msg(ciph, _encryptor, plain);
 
   // step 1: set parmeters
-  uint32_t num_slots     = len;
-  uint32_t num_iteration = 1;
-  uint32_t precision     = 0;
+  uint32_t num_slots = len;
+  uint32_t precision = 0;
 
   // step 2: bootstrap setup
   Bootstrap_setup(_bts_ctx, level_budget, dim1, num_slots);
@@ -297,11 +294,10 @@ void TEST_BOOTSTRAP_METHOD::Run_test_bootstrap_clear_imag(
   Bootstrap_keygen(_bts_ctx, num_slots);
 
   // step 3: call bootstrap driver
-  Eval_bootstrap(res_ciph, ciph, num_iteration, precision, raise_level,
-                 _bts_ctx);
+  Eval_bootstrap(res_ciph, ciph, level_after_bts, _bts_ctx);
 
   std::cout << "number of levels remaining after bootstrapping: "
-            << Get_poly_level(Get_c0(res_ciph)) << std::endl;
+            << Poly_level(Get_c0(res_ciph)) << std::endl;
 
   Decrypt(decrypted_plain, _decryptor, res_ciph, NULL);
   Decode(decoded_val, _encoder, decrypted_plain);
@@ -315,6 +311,7 @@ void TEST_BOOTSTRAP_METHOD::Run_test_bootstrap_clear_imag(
 
   Check_complex_vector_approx_eq(expected, decoded_val, 0.001);
 
+  Free_value_list(expected);
   Free_plaintext(plain);
   Free_ciphertext(ciph);
   Free_ciphertext(res_ciph);
@@ -349,13 +346,12 @@ void TEST_BOOTSTRAP_METHOD::Run_test_chebshev(VL_DCMPLX* input,
 
 void TEST_BOOTSTRAP_METHOD::Run_key_switch_ext(VALUE_LIST* vec,
                                                bool        add_first) {
-  PLAINTEXT*   plain       = Alloc_plaintext();
-  PLAINTEXT*   out_plain   = Alloc_plaintext();
-  CIPHERTEXT*  ciph        = Alloc_ciphertext();
-  CIPHERTEXT*  switch_ciph = Alloc_ciphertext();
-  CIPHERTEXT*  out_ciph    = Alloc_ciphertext();
-  VL_DCMPLX*   decoded     = Alloc_value_list(DCMPLX_TYPE, LIST_LEN(vec));
-  CRT_CONTEXT* crt         = _param->_crt_context;
+  PLAINTEXT*  plain       = Alloc_plaintext();
+  PLAINTEXT*  out_plain   = Alloc_plaintext();
+  CIPHERTEXT* ciph        = Alloc_ciphertext();
+  CIPHERTEXT* switch_ciph = Alloc_ciphertext();
+  CIPHERTEXT* out_ciph    = Alloc_ciphertext();
+  VL_DCMPLX*  decoded     = Alloc_value_list(DCMPLX_TYPE, LIST_LEN(vec));
 
   ENCODE(plain, _encoder, vec);
   Encrypt_msg(ciph, _encryptor, plain);
@@ -365,13 +361,13 @@ void TEST_BOOTSTRAP_METHOD::Run_key_switch_ext(VALUE_LIST* vec,
   Init_ciphertext_from_ciph(out_ciph, ciph, Get_ciph_sfactor(ciph),
                             Get_ciph_sf_degree(ciph));
   // Step2: reduce back from switch_ciph(P*Q) to out_ciph(Q)
-  Reduce_rns_base(Get_c0(out_ciph), Get_c0(switch_ciph), crt);
-  Reduce_rns_base(Get_c1(out_ciph), Get_c1(switch_ciph), crt);
+  Mod_down(Get_c0(out_ciph), Get_c0(switch_ciph));
+  Mod_down(Get_c1(out_ciph), Get_c1(switch_ciph));
 
   // Step3: if switch_key_ext is executed without adding first element,
   // add ciph->c0 after reducing back to Q
   if (!add_first) {
-    Add_poly(Get_c0(out_ciph), Get_c0(out_ciph), Get_c0(ciph), crt, NULL);
+    Add_poly(Get_c0(out_ciph), Get_c0(out_ciph), Get_c0(ciph));
   }
 
   Decrypt(out_plain, _decryptor, out_ciph, NULL);
@@ -390,13 +386,11 @@ void TEST_BOOTSTRAP_METHOD::Run_key_switch_ext(VALUE_LIST* vec,
 void TEST_BOOTSTRAP_METHOD::Run_fast_rotate_ext(VALUE_LIST* vec,
                                                 int32_t     rotation_idx,
                                                 bool        add_first) {
-  PLAINTEXT*   plain     = Alloc_plaintext();
-  PLAINTEXT*   out_plain = Alloc_plaintext();
-  CIPHERTEXT*  ciph      = Alloc_ciphertext();
-  SWITCH_KEY*  rot_key   = Alloc_switch_key();
-  CIPHERTEXT*  rot_ciph  = Alloc_ciphertext();
-  CIPHERTEXT*  out_ciph  = Alloc_ciphertext();
-  CRT_CONTEXT* crt       = _param->_crt_context;
+  PLAINTEXT*  plain     = Alloc_plaintext();
+  PLAINTEXT*  out_plain = Alloc_plaintext();
+  CIPHERTEXT* ciph      = Alloc_ciphertext();
+  CIPHERTEXT* rot_ciph  = Alloc_ciphertext();
+  CIPHERTEXT* out_ciph  = Alloc_ciphertext();
 
   size_t      len     = LIST_LEN(vec);
   VL_DCMPLX*  decoded = Alloc_value_list(DCMPLX_TYPE, len);
@@ -413,33 +407,30 @@ void TEST_BOOTSTRAP_METHOD::Run_fast_rotate_ext(VALUE_LIST* vec,
   // Step1: generate rot key
   Insert_rot_map(_keygen, rotation_idx);
   uint32_t auto_idx = Get_precomp_auto_idx(_keygen, rotation_idx);
-  IS_TRUE(auto_idx, "cannot get precompute automorphism index");
-  rot_key = Get_auto_key(_keygen, auto_idx);
-  IS_TRUE(rot_key, "cannot find auto key");
 
   // Step2: decompose & mod up
-  VALUE_LIST* precomputed = Switch_key_precompute(Get_c1(ciph), crt);
+  VALUE_LIST* precomputed = Alloc_precomp(Get_c1(ciph));
 
   // Step3: fast rotate without mod reduce(only key switch & rotate)
   //        and return the results in the extended CRT basis P*Q
-  Fast_rotate_ext(rot_ciph, ciph, rotation_idx, rot_key, _eval, precomputed,
-                  add_first);
+  Fast_rotate_ext(rot_ciph, ciph, rotation_idx, _eval, precomputed, add_first);
 
   // Step4: reduce back from rot_ciph(P*Q) to out_ciph(Q)
   Init_ciphertext_from_ciph(out_ciph, ciph, Get_ciph_sfactor(ciph),
                             Get_ciph_sf_degree(ciph));
-  Reduce_rns_base(Get_c0(out_ciph), Get_c0(rot_ciph), crt);
-  Reduce_rns_base(Get_c1(out_ciph), Get_c1(rot_ciph), crt);
+  Mod_down(Get_c0(out_ciph), Get_c0(rot_ciph));
+  Mod_down(Get_c1(out_ciph), Get_c1(rot_ciph));
 
   // Step5: if Fast_rotate_ext is executed without adding first element,
   // add rot(Get_c0(ciph)) after reducing back to Q
   if (!add_first) {
     VALUE_LIST* precomp_auto = Get_precomp_auto_order(_keygen, auto_idx);
-    POLYNOMIAL  c0;
+    IS_TRUE(precomp_auto, "cannot find precomputed automorphism order");
+    POLYNOMIAL c0;
     Alloc_poly_data(&c0, Get_c0(ciph)->_ring_degree, Get_ciph_prime_cnt(ciph),
                     0);
-    Rotate_poly(&c0, Get_c0(ciph), auto_idx, precomp_auto, crt);
-    Add_poly(Get_c0(out_ciph), Get_c0(out_ciph), &c0, crt, NULL);
+    Automorphism_transform(&c0, Get_c0(ciph), precomp_auto);
+    Add_poly(Get_c0(out_ciph), Get_c0(out_ciph), &c0);
     Free_poly_data(&c0);
   }
 
@@ -453,7 +444,7 @@ void TEST_BOOTSTRAP_METHOD::Run_fast_rotate_ext(VALUE_LIST* vec,
   Free_ciphertext(ciph);
   Free_ciphertext(rot_ciph);
   Free_ciphertext(out_ciph);
-  Free_switch_key_precomputed(precomputed);
+  Free_precomp(precomputed);
   Free_value_list(decoded);
   Free_value_list(rot_msg);
 }
@@ -804,8 +795,8 @@ TEST_F(TEST_BOOTSTRAP_METHOD, test_coeff_to_slot) {
       {-6.461073e-08, -1.788437e-07},
       {1.311342e-08,  2.483199e-08 }
   };
-  Init_dcmplx_value_list(vec, len, in);
-  Init_dcmplx_value_list(expected, len, out);
+  Init_dcmplx_value_list(vec, 8, in);
+  Init_dcmplx_value_list(expected, 8, out);
   Run_test_coeff_to_slot(vec, expected);
   Free_value_list(vec);
   Free_value_list(expected);
@@ -835,8 +826,8 @@ TEST_F(TEST_BOOTSTRAP_METHOD, test_slot_to_coeff) {
       {1.562495e-03, 4.724082e-11 },
       {1.953120e-03, 1.745843e-11 }
   };
-  Init_dcmplx_value_list(vec, len, in);
-  Init_dcmplx_value_list(expected, len, out);
+  Init_dcmplx_value_list(vec, 8, in);
+  Init_dcmplx_value_list(expected, 8, out);
   Run_test_slot_to_coeff(vec, expected);
   Free_value_list(vec);
   Free_value_list(expected);
@@ -854,7 +845,8 @@ TEST_F(TEST_BOOTSTRAP_METHOD, test_bootstrap_01) {
   UI32_VALUE_AT(dim1, 0)         = 0;
   UI32_VALUE_AT(dim1, 1)         = 0;
 
-  Run_test_bootstrap(vec, level_budget, dim1, 0);
+  Run_test_bootstrap(vec, level_budget, dim1, 1 /*init_level*/,
+                     0 /*level_after_bts*/);
   Free_value_list(vec);
   Free_value_list(level_budget);
   Free_value_list(dim1);
@@ -873,11 +865,15 @@ TEST_F(TEST_BOOTSTRAP_METHOD, test_bootstrap_02) {
   UI32_VALUE_AT(dim1, 0)         = 0;
   UI32_VALUE_AT(dim1, 1)         = 0;
 
-  size_t q_cnt = Get_primes_cnt(Get_q(Get_param_crt(Get_param())));
+  uint32_t init_level          = 1;
+  uint32_t max_level_after_bts = Get_max_level_after_bts(level_budget);
 
-  Run_test_bootstrap(vec, level_budget, dim1, q_cnt - 2);
+  Run_test_bootstrap(vec, level_budget, dim1, init_level,
+                     max_level_after_bts - 2);
 
-  Run_test_bootstrap(vec, level_budget, dim1, 0);
+  Run_test_bootstrap(vec, level_budget, dim1, init_level,
+                     0 /*level_after_bts*/);
+
   Free_value_list(vec);
   Free_value_list(level_budget);
   Free_value_list(dim1);
@@ -896,7 +892,8 @@ TEST_F(TEST_BOOTSTRAP_METHOD, test_bootstrap_03) {
   UI32_VALUE_AT(dim1, 0)         = 0;
   UI32_VALUE_AT(dim1, 1)         = 0;
 
-  Run_test_bootstrap_clear_imag(vec, level_budget, dim1, 0);
+  Run_test_bootstrap_clear_imag(vec, level_budget, dim1, 1 /*init_level*/,
+                                0 /*level_after_bts*/);
   Free_value_list(vec);
   Free_value_list(level_budget);
   Free_value_list(dim1);
@@ -914,7 +911,8 @@ TEST_F(TEST_BOOTSTRAP_METHOD, test_bootstrap_sparse_01) {
   UI32_VALUE_AT(dim1, 0)         = 0;
   UI32_VALUE_AT(dim1, 1)         = 0;
 
-  Run_test_bootstrap(vec, level_budget, dim1, 0);
+  Run_test_bootstrap(vec, level_budget, dim1, 1 /*init_level*/,
+                     0 /*level_after_bts*/);
   Free_value_list(vec);
   Free_value_list(level_budget);
   Free_value_list(dim1);
@@ -932,11 +930,13 @@ TEST_F(TEST_BOOTSTRAP_METHOD, test_bootstrap_sparse_02) {
   UI32_VALUE_AT(dim1, 0)         = 0;
   UI32_VALUE_AT(dim1, 1)         = 0;
 
-  size_t q_cnt = Get_primes_cnt(Get_q(Get_param_crt(Get_param())));
+  uint32_t init_level          = 1;
+  uint32_t max_level_after_bts = Get_max_level_after_bts(level_budget);
 
-  Run_test_bootstrap(vec, level_budget, dim1, q_cnt - 2);
+  Run_test_bootstrap(vec, level_budget, dim1, init_level,
+                     max_level_after_bts - 2);
 
-  Run_test_bootstrap(vec, level_budget, dim1, q_cnt);
+  Run_test_bootstrap(vec, level_budget, dim1, init_level, max_level_after_bts);
 
   Free_value_list(vec);
   Free_value_list(level_budget);
@@ -1074,7 +1074,7 @@ TEST_F(TEST_BOOTSTRAP_METHOD, test_chebyshev_sine) {
   Free_value_list(coeffs);
 }
 
-// Test for Switch_key_ext + Reduce_rns_base
+// Test for Switch_key_ext + Mod_down
 TEST_F(TEST_BOOTSTRAP_METHOD, test_key_switch_ext_01) {
   size_t      len = Get_degree() / 2;
   VALUE_LIST* vec = Alloc_value_list(DCMPLX_TYPE, len);
@@ -1083,7 +1083,7 @@ TEST_F(TEST_BOOTSTRAP_METHOD, test_key_switch_ext_01) {
   Free_value_list(vec);
 }
 
-// Test for Switch_key_ext(without adding first element) + Reduce_rns_base
+// Test for Switch_key_ext(without adding first element) + Mod_down
 TEST_F(TEST_BOOTSTRAP_METHOD, test_key_switch_ext_02) {
   size_t      len = Get_degree() / 2;
   VALUE_LIST* vec = Alloc_value_list(DCMPLX_TYPE, len);
@@ -1092,7 +1092,7 @@ TEST_F(TEST_BOOTSTRAP_METHOD, test_key_switch_ext_02) {
   Free_value_list(vec);
 }
 
-// Test for Fast_rotate_ext + Reduce_rns_base
+// Test for Fast_rotate_ext + Mod_down
 TEST_F(TEST_BOOTSTRAP_METHOD, test_fast_rotate_ext_01) {
   size_t      len = Get_degree() / 2;
   VALUE_LIST* vec = Alloc_value_list(DCMPLX_TYPE, len);
@@ -1101,7 +1101,7 @@ TEST_F(TEST_BOOTSTRAP_METHOD, test_fast_rotate_ext_01) {
   Free_value_list(vec);
 }
 
-// Test for Fast_rotate_ext(without adding first element) + Reduce_rns_base
+// Test for Fast_rotate_ext(without adding first element) + Mod_down
 TEST_F(TEST_BOOTSTRAP_METHOD, test_fast_rotate_ext_02) {
   size_t      len = Get_degree() / 2;
   VALUE_LIST* vec = Alloc_value_list(DCMPLX_TYPE, len);

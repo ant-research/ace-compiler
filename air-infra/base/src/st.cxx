@@ -17,6 +17,8 @@
 #include <sstream>
 
 #include "air/base/container.h"
+#include "air/base/st_sym.h"
+#include "air/util/debug.h"
 
 namespace air {
 namespace base {
@@ -98,12 +100,30 @@ void BLOCK::Set_parent_block(BLOCK_ID id) { _blk->Set_parent(id); }
 
 SCOPE_BASE::SCOPE_BASE(SCOPE_KIND kind, uint32_t lvl, bool open)
     : _kind(kind), _ref_count(open ? 1 : 0) {
-  ARENA_ALLOCATOR* main_allocator = new ARENA_ALLOCATOR;
-  _main_tab = new MAIN_TAB(main_allocator, lvl == 0 ? AK_GLOB_SYM : AK_FUNC_SYM,
+  _mem_pool = new ARENA_ALLOCATOR;
+  _attr_tab = new ATTR_TAB(_mem_pool, AK_ATTR, "attr_tab", true);
+  _aux_tab  = new AUX_TAB(_mem_pool, lvl, true);
+  _main_tab = new MAIN_TAB(_mem_pool, lvl == 0 ? AK_GLOB_SYM : AK_FUNC_SYM,
                            lvl == 0 ? "global_sym_tab" : "local_sym_tab", true);
-  ARENA_ALLOCATOR* aux_allocator = new ARENA_ALLOCATOR;
-  _aux_tab                       = new AUX_TAB(aux_allocator, lvl, true);
-  _mem_pool                      = new ARENA_ALLOCATOR;
+}
+
+SCOPE_BASE::~SCOPE_BASE() {
+  if (_main_tab != nullptr) {
+    delete _main_tab;
+    _main_tab = nullptr;
+  }
+  if (_aux_tab != nullptr) {
+    delete _aux_tab;
+    _aux_tab = nullptr;
+  }
+  if (_attr_tab != nullptr) {
+    delete _attr_tab;
+    _attr_tab = nullptr;
+  }
+  if (_mem_pool != nullptr) {
+    delete _mem_pool;
+    _mem_pool = nullptr;
+  }
 }
 
 GLOB_SCOPE& SCOPE_BASE::Cast_to_glob() const {
@@ -147,11 +167,24 @@ FUNC_SCOPE::FUNC_SCOPE(const GLOB_SCOPE& glob, FUNC_ID id, bool open)
       _glob(const_cast<GLOB_SCOPE*>(&glob)),
       _func_id(id),
       _parent(0) {
-  ARENA_ALLOCATOR* allocator = new ARENA_ALLOCATOR;
-  _label_tab = new LABEL_TAB(allocator, AK_LABEL, "label_tab", true);
-  _attr_tab  = new ATTR_TAB(allocator, AK_ATTR, "attr_tab", true);
-  _preg_tab  = new PREG_TAB(allocator, AK_PREG, "preg_tab", true);
+  _preg_tab  = new PREG_TAB(_mem_pool, AK_PREG, "preg_tab", true);
+  _label_tab = new LABEL_TAB(_mem_pool, AK_LABEL, "label_tab", true);
   _cont      = CONTAINER::New(this, open);
+}
+
+FUNC_SCOPE::~FUNC_SCOPE() {
+  if (_cont != nullptr) {
+    _cont->Delete();
+    _cont = nullptr;
+  }
+  if (_preg_tab != nullptr) {
+    delete _preg_tab;
+    _preg_tab = nullptr;
+  }
+  if (_label_tab != nullptr) {
+    delete _label_tab;
+    _label_tab = nullptr;
+  }
 }
 
 FUNC_PTR
@@ -226,6 +259,16 @@ FUNC_SCOPE::New_formal(TYPE_ID type, STR_ID name, const SPOS& spos) {
   return formal;
 }
 
+ADDR_DATUM_PTR FUNC_SCOPE::New_formal(TYPE_ID type, const char* name,
+                                      const SPOS& spos) {
+  return New_formal(type, _glob->New_str(name)->Id(), spos);
+}
+
+ADDR_DATUM_PTR FUNC_SCOPE::New_formal(TYPE_PTR type, STR_PTR name,
+                                      const SPOS& spos) {
+  return New_formal(type->Id(), name->Id(), spos);
+}
+
 PREG_PTR
 FUNC_SCOPE::New_preg(TYPE_ID type, SYM_ID home) {
   PREG_DATA_PTR ptr = Preg_table().Allocate<PREG_DATA>();
@@ -249,6 +292,15 @@ FUNC_SCOPE::Formal(uint32_t idx) const {
   NODE_PTR func_entry_node = _cont->Entry_stmt()->Node();
   NODE_PTR formal          = func_entry_node->Child(idx);
   return formal->Addr_datum();
+}
+
+uint32_t FUNC_SCOPE::Formal_cnt(void) const {
+  AIR_ASSERT(Owning_func()->Is_defined());
+  NODE_PTR func_entry_node = _cont->Entry_stmt()->Node();
+  uint32_t child_cnt       = func_entry_node->Num_child();
+  // last child of entry node is function body
+  AIR_ASSERT(child_cnt >= 1);
+  return child_cnt - 1;
 }
 
 SYM_PTR
@@ -308,12 +360,55 @@ void FUNC_SCOPE::Clone_attr(FUNC_SCOPE& func) {
   Attr_table().Clone(func.Attr_table());
 }
 
+void FUNC_SCOPE::Replace_code(CONTAINER* cntr) {
+  AIR_ASSERT(cntr != nullptr);
+  _cont->Delete();
+  _cont = cntr;
+}
+
+size_t FUNC_SCOPE::Print_mp_info(std::ostream& os) {
+  size_t total_size = 0;
+  os << std::dec << "Func Scope \"" << Owning_func()->Name()->Char_str()
+     << "\":\n";
+  os << "  MAIN TABLE (" << _main_tab->Size() << " Items, "
+     << _main_tab->Mem_size() << " Bytes)\n";
+  total_size += _main_tab->Mem_size();
+
+  os << "  AUX TABLE (" << _aux_tab->Size() << " Items, "
+     << _aux_tab->Mem_size() << " Bytes)\n";
+  total_size += _aux_tab->Mem_size();
+
+  os << "  ATTR TABLE (" << _attr_tab->Size() << " Items, "
+     << _attr_tab->Mem_size() << " Bytes)\n";
+  total_size += _attr_tab->Mem_size();
+
+  os << "  PREG TABLE (" << _preg_tab->Size() << " Items, "
+     << _preg_tab->Mem_size() << " Bytes)\n";
+  total_size += _preg_tab->Mem_size();
+
+  os << "  LABEL TABLE (" << _label_tab->Size() << " Items, "
+     << _label_tab->Mem_size() << " Bytes)\n";
+  total_size += _label_tab->Mem_size();
+
+  os << "  CODE ARENA (" << _cont->Code_arena()->Size() << " Items, "
+     << _cont->Code_arena()->Mem_size() << " Bytes)\n";
+  total_size += _cont->Code_arena()->Mem_size();
+
+  os << "  Total: " << total_size << " Bytes\n\n";
+  return total_size;
+}
+
 void FUNC_SCOPE::Print(std::ostream& os, bool rot) const {
   CONST_FUNC_PTR func = Owning_func();
   os << std::hex << std::showbase;
   os << "FUN[" << func->Id().Value() << "] \"" << func->Name()->Char_str()
      << "\"\n";
 
+  FORMAL_ITER f_iter = Begin_formal();
+  FORMAL_ITER f_end  = End_formal();
+  for (; f_iter != f_end; ++f_iter) {
+    (*f_iter)->Print(os, 1);
+  }
   VAR_ITER v_iter = Begin_var();
   VAR_ITER v_end  = End_var();
   for (; v_iter != v_end; ++v_iter) {
@@ -357,21 +452,24 @@ const char* Primitive_type_names[static_cast<uint32_t>(PRIMITIVE_TYPE::END)] = {
     "float80_t",    "float128_t", "complex32_t", "complex64_t", "complex80_t",
     "complex128_t", "void",       "bool"};
 
+const char*
+    Primitive_type_short_names[static_cast<uint32_t>(PRIMITIVE_TYPE::END)] = {
+        "i8",  "i16", "i32",  "i64", "u8",  "u16", "u32",  "u64", "f32",
+        "f64", "f80", "f128", "c32", "c64", "c80", "c128", "v",   "b"};
+
 GLOB_SCOPE::GLOB_SCOPE(uint32_t id, bool open)
     : _id(id), SCOPE_BASE(SCOPE_KIND::GLOB, 0, true) {
-  ARENA_ALLOCATOR* allocator = new ARENA_ALLOCATOR;
-
-  _str_tab   = new STR_TAB(allocator, AK_STRING, "string_tab", true);
-  _type_tab  = new TYPE_TAB(allocator, AK_TYPE, "type_tab", true);
-  _blk_tab   = new BLOCK_TAB(allocator, AK_BLOCK, "block_tab", true);
-  _file_tab  = new FILE_TAB(allocator, AK_FILE, "file_tab", true);
-  _param_tab = new PARAM_TAB(allocator, AK_PARAM, "param_tab", true);
+  _str_tab   = new STR_TAB(_mem_pool, AK_STRING, "string_tab", true);
+  _fld_tab   = new FIELD_TAB(_mem_pool, AK_FIELD, "field_tab", true);
+  _arb_tab   = new ARB_TAB(_mem_pool, AK_ARB, "arb_tab", true);
+  _type_tab  = new TYPE_TAB(_mem_pool, AK_TYPE, "type_tab", true);
+  _blk_tab   = new BLOCK_TAB(_mem_pool, AK_BLOCK, "block_tab", true);
+  _file_tab  = new FILE_TAB(_mem_pool, AK_FILE, "file_tab", true);
+  _param_tab = new PARAM_TAB(_mem_pool, AK_PARAM, "param_tab", true);
   _func_def_tab =
-      new FUNC_DEF_TAB(allocator, AK_FUNC_DEF, "func_def_tab", true);
-  _fld_tab   = new FIELD_TAB(allocator, AK_FIELD, "field_tab", true);
-  _const_tab = new CONSTANT_TAB(allocator, AK_CONSTANT, "constant_tab", true);
-  _arb_tab   = new ARB_TAB(allocator, AK_ARB, "arb_tab", true);
-  _attr_tab  = new ATTR_TAB(allocator, AK_ATTR, "attr_tab", true);
+      new FUNC_DEF_TAB(_mem_pool, AK_FUNC_DEF, "func_def_tab", true);
+  _lit_tab   = new LITERAL_TAB(_mem_pool, AK_LITERAL, "literal_tab", true);
+  _const_tab = new CONSTANT_TAB(_mem_pool, AK_CONSTANT, "constant_tab", true);
 
   BLOCK_TAB&     bt     = Blk_table();
   BLOCK_DATA_PTR ce_ptr = bt.Allocate<BLOCK_DATA>();
@@ -380,12 +478,15 @@ GLOB_SCOPE::GLOB_SCOPE(uint32_t id, bool open)
 
   size_t prim_count = static_cast<size_t>(PRIMITIVE_TYPE::BOOL) + 1;
   size_t prim_tb_sz = prim_count * sizeof(TYPE_ID);
-  _prim_type_tab    = (TYPE_ID*)allocator->Allocate(prim_tb_sz);
+  _prim_type_tab    = (TYPE_ID*)_mem_pool->Allocate(prim_tb_sz);
   TYPE_ID* tptr     = _prim_type_tab;
 
   for (uint32_t i = 0; i < static_cast<uint32_t>(POINTER_KIND::END); i++) {
     _ptr_type_map[i] = new PTR_TYPE_MAP();
   }
+
+  LITERAL_PTR undef_lit = New_literal("_undef");
+  _undefined_lit_id     = undef_lit->Id();
 
   STR_PTR undef_name_str = New_str("_noname");
   _undefined_name_id     = undef_name_str->Id();
@@ -417,14 +518,58 @@ GLOB_SCOPE::~GLOB_SCOPE() {
     }
   }
 
-  delete _const_tab;
-  delete _fld_tab;
-  delete _func_def_tab;
-  delete _param_tab;
-  delete _file_tab;
-  delete _blk_tab;
-  delete _type_tab;
-  delete _str_tab;
+  for (FUNC_SCOPE_MAP::iterator iter = _func_scope_map.begin();
+       iter != _func_scope_map.end(); ++iter) {
+    FUNC_SCOPE* func = (*iter).second;
+    if (func != nullptr) {
+      func->~FUNC_SCOPE();
+    }
+  }
+
+  for (uint32_t i = 0; i < static_cast<uint32_t>(POINTER_KIND::END); i++) {
+    delete _ptr_type_map[i];
+  }
+
+  if (_func_def_tab != nullptr) {
+    delete _func_def_tab;
+    _func_def_tab = nullptr;
+  }
+  if (_param_tab != nullptr) {
+    delete _param_tab;
+    _param_tab = nullptr;
+  }
+  if (_file_tab != nullptr) {
+    delete _file_tab;
+    _file_tab = nullptr;
+  }
+  if (_blk_tab != nullptr) {
+    delete _blk_tab;
+    _blk_tab = nullptr;
+  }
+  if (_type_tab != nullptr) {
+    delete _type_tab;
+    _type_tab = nullptr;
+  }
+  if (_arb_tab != nullptr) {
+    delete _arb_tab;
+    _arb_tab = nullptr;
+  }
+  if (_fld_tab != nullptr) {
+    delete _fld_tab;
+    _fld_tab = nullptr;
+  }
+  if (_str_tab != nullptr) {
+    delete _str_tab;
+    _str_tab = nullptr;
+  }
+  if (_const_tab != nullptr) {
+    delete _const_tab;
+    _const_tab = nullptr;
+  }
+  if (_lit_tab != nullptr) {
+    delete _lit_tab;
+    _lit_tab = nullptr;
+  }
 }
 
 FUNC_PTR
@@ -462,20 +607,51 @@ GLOB_SCOPE::Constant(CONSTANT_ID id) const {
 ARB_PTR GLOB_SCOPE::Arb(ARB_ID id) const { return ARB_PTR(ARB(*this, id)); }
 
 STR_PTR
-GLOB_SCOPE::New_str(const char* str, size_t len) {
+GLOB_SCOPE::New_str(const char* str) {
+  AIR_ASSERT(str != nullptr);
+  size_t            len  = strlen(str);
+  STR_MAP::iterator iter = _str_map.find(str);
+  if (iter != _str_map.end()) {
+    STR_ID ret = iter->second;
+    return String(ret);
+  }
+
+  PTR_FROM_DATA<char> ptr          = _str_tab->Allocate_array<char>(len + 1);
+  STR_DATA*           str_data_ptr = (STR_DATA*)ptr.Addr();
+  char* new_str = const_cast<char*>(str_data_ptr->Str());
+  memcpy(new_str, str, len + 1);
+  new_str[len] = '\0';
+
+  STR_PTR str_ptr = STR_PTR(STR(*this, Reinterpret_cast<STR_DATA_PTR>(ptr)));
+  _str_map[new_str]   = str_ptr->Id();
+  return str_ptr;
+}
+
+LITERAL_PTR
+GLOB_SCOPE::New_literal(const char* str, size_t len) {
   AIR_ASSERT(str != nullptr);
   if (len == 0) {
     len = strlen(str);
   }
+  LIT_KEY           key(str, len);
+  LIT_MAP::iterator iter = _lit_map.find(key);
+  if (iter != _lit_map.end()) {
+    LITERAL_ID ret = iter->second;
+    return Literal(ret);
+  }
 
   PTR_FROM_DATA<char> ptr = Reinterpret_cast<PTR_FROM_DATA<char> >(
-      _str_tab->Allocate_array<short>((sizeof(int) + len + 2) / 2));
-  STR_DATA* str_data_ptr = (STR_DATA*)ptr.Addr();
+      _lit_tab->Allocate_array<short>((sizeof(int) + len + 2) / 2));
+  LITERAL_DATA* str_data_ptr = (LITERAL_DATA*)ptr.Addr();
   str_data_ptr->Set_len((uint32_t)len);
-  memcpy(const_cast<char*>(str_data_ptr->Str()), str, len);
-  const_cast<char*>(str_data_ptr->Str())[len] = '\0';
+  char* new_data = const_cast<char*>(str_data_ptr->Str());
+  memcpy(new_data, str, len);
+  new_data[len] = '\0';
 
-  STR_PTR new_str = STR_PTR(STR(*this, Reinterpret_cast<STR_DATA_PTR>(ptr)));
+  LIT_KEY     new_key(new_data, len);
+  LITERAL_PTR new_str =
+      LITERAL_PTR(LITERAL(*this, Reinterpret_cast<LITERAL_DATA_PTR>(ptr)));
+  _lit_map[new_key] = new_str->Id();
 
   return new_str;
 }
@@ -527,6 +703,58 @@ GLOB_SCOPE::New_arr_type(CONST_STR_PTR name, CONST_TYPE_PTR etype,
     prev = arb;
   }
   return New_arr_type(name, etype, head_arb, spos);
+}
+
+ARRAY_TYPE_PTR
+GLOB_SCOPE::New_arr_type(CONST_TYPE_PTR etype, CONST_ARB_PTR arb,
+                         const SPOS& spos) {
+  const char* etype_name;
+  if (etype->Is_prim()) {
+    etype_name = Primitive_type_short_names[static_cast<uint32_t>(
+        etype->Cast_to_prim()->Encoding())];
+  } else {
+    etype_name = etype->Name()->Char_str();
+  }
+  std::string buf(etype_name);
+  ARB_ID      arb_id = arb->Id();
+  do {
+    ARB_PTR iter = Arb(arb_id);
+    AIR_ASSERT(iter->Is_lb_const());
+    AIR_ASSERT(iter->Is_ub_const());
+    AIR_ASSERT(iter->Is_stride_const());
+    uint32_t dim_sz = (iter->Ub_val() - iter->Lb_val()) / iter->Stride_val();
+    if (arb_id == arb->Id()) {
+      buf += "_";
+    } else {
+      buf += "x";
+    }
+    buf += std::to_string(dim_sz);
+    arb_id = iter->Next();
+  } while (arb_id != Null_id);
+  return New_arr_type(New_str(buf.c_str()), etype, arb, spos);
+}
+
+ARRAY_TYPE_PTR
+GLOB_SCOPE::New_arr_type(CONST_TYPE_PTR etype, const std::vector<int64_t>& dim,
+                         const SPOS& spos) {
+  const char* etype_name;
+  if (etype->Is_prim()) {
+    etype_name = Primitive_type_short_names[static_cast<uint32_t>(
+        etype->Cast_to_prim()->Encoding())];
+  } else {
+    etype_name = etype->Name()->Char_str();
+  }
+  std::string buf(etype_name);
+  uint32_t    dim_sz = dim.size();
+  for (uint32_t i = 0; i < dim_sz; i++) {
+    if (i == 0) {
+      buf += "_";
+    } else {
+      buf += "x";
+    }
+    buf += std::to_string(dim[i]);
+  }
+  return New_arr_type(New_str(buf.c_str()), etype, dim, spos);
 }
 
 RECORD_TYPE_PTR
@@ -618,6 +846,8 @@ GLOB_SCOPE::New_ret_param(TYPE_ID type, TYPE_ID sig) {
 
 FILE_PTR
 GLOB_SCOPE::New_file(STR_ID name, LANG lang) {
+  uint64_t fname_key = (static_cast<uint64_t>(lang) << 32 | name.Value());
+  AIR_ASSERT(_name_file_map.find(fname_key) == _name_file_map.end());
   FILE_DATA_PTR ptr = _file_tab->Allocate<FILE_DATA>();
   ::new (ptr) FILE_DATA(name, lang);
   FILE_PTR new_file = FILE_PTR(SRC_FILE(*this, ptr));
@@ -643,6 +873,7 @@ GLOB_SCOPE::New_file(STR_ID name, LANG lang) {
     }
     _ecf_map[new_file->Id().Value()] = ecf_ptr;
   }
+  _name_file_map[fname_key] = new_file->Id();
   return new_file;
 }
 
@@ -674,6 +905,11 @@ GLOB_SCOPE::Ptr_type(TYPE_ID domain, POINTER_KIND kind) {
 ENTRY_PTR
 GLOB_SCOPE::Entry_point(ENTRY_ID id) const {
   return ENTRY_PTR(ENTRY(*this, id));
+}
+
+LITERAL_PTR
+GLOB_SCOPE::Literal(LITERAL_ID id) const {
+  return LITERAL_PTR(LITERAL(*this, id));
 }
 
 STR_PTR
@@ -890,7 +1126,7 @@ GLOB_SCOPE::New_const(CONSTANT_KIND ck, CONST_TYPE_PTR type, void* buf,
 }
 
 CONSTANT_PTR
-GLOB_SCOPE::New_const(CONSTANT_KIND ck, STR_ID str) {
+GLOB_SCOPE::New_const(CONSTANT_KIND ck, LITERAL_ID str) {
   CONSTANT_PTR new_const = New_const(ck);
   // assume type is always "char*"
   TYPE_PTR type = New_ptr_type(Prim_type(PRIMITIVE_TYPE::INT_S8)->Id(),
@@ -902,7 +1138,7 @@ GLOB_SCOPE::New_const(CONSTANT_KIND ck, STR_ID str) {
 
 CONSTANT_PTR
 GLOB_SCOPE::New_const(CONSTANT_KIND ck, const char* str, size_t len) {
-  STR_PTR str_ptr = New_str(str, len);
+  LITERAL_PTR str_ptr = New_literal(str, len);
   return New_const(ck, str_ptr->Id());
 }
 
@@ -918,6 +1154,23 @@ GLOB_SCOPE::New_const(CONSTANT_KIND ck, TYPE_ID type, long double val) {
   new_cst->Set_type(type);
   new_cst->Set_val(val);
   return new_cst;
+}
+
+CONSTANT_PTR
+GLOB_SCOPE::New_const(CONSTANT_KIND ck, CONST_TYPE_PTR type, const char* fname,
+                      void* buf, uint64_t sz) {
+  AIR_ASSERT(fname != nullptr);
+  STR_MAP::iterator siter = _str_map.find(fname);
+  AIR_ASSERT(siter != _str_map.end());
+  STR_ID fname_id = siter->second;
+  AIR_ASSERT(!Is_null_id(fname_id));
+  uint64_t fname_key =
+      (static_cast<uint64_t>(LANG::WO_CONST) << 32) | fname_id.Value();
+  NAME_FILE_MAP::iterator fiter = _name_file_map.find(fname_key);
+  AIR_ASSERT(fiter != _name_file_map.end());
+  FILE_PTR file = File(fiter->second);
+  AIR_ASSERT(file != Null_ptr);
+  return New_const(ck, type, file, buf, sz);
 }
 
 CONSTANT_PTR
@@ -941,6 +1194,23 @@ GLOB_SCOPE::New_const(CONSTANT_KIND ck, CONST_TYPE_PTR type,
   AIR_ASSERT_MSG((len == sz), "%s write errno: %d\n",
                  file->File_name()->Char_str(), errno);
   return new_cst;
+}
+
+CONSTANT_PTR
+GLOB_SCOPE::New_const(CONSTANT_KIND ck, CONST_TYPE_PTR type, const char* fname,
+                      uint64_t ofst, uint64_t sz) {
+  AIR_ASSERT(fname != nullptr);
+  STR_MAP::iterator siter = _str_map.find(fname);
+  AIR_ASSERT(siter != _str_map.end());
+  STR_ID fname_id = siter->second;
+  AIR_ASSERT(!Is_null_id(fname_id));
+  uint64_t fname_key =
+      (static_cast<uint64_t>(LANG::RO_CONST) << 32) | fname_id.Value();
+  NAME_FILE_MAP::iterator fiter = _name_file_map.find(fname_key);
+  AIR_ASSERT(fiter != _name_file_map.end());
+  FILE_PTR file = File(fiter->second);
+  AIR_ASSERT(file != Null_ptr);
+  return New_const(ck, type, file, ofst, sz);
 }
 
 CONSTANT_PTR
@@ -1001,9 +1271,18 @@ FUNC_SCOPE& GLOB_SCOPE::New_func_scope(FUNC_ID func, FUNC_DEF_ID def,
     AIR_ASSERT(0);
     // TODO
   }
+
   _func_scope_map[func] = new_func_scope;
-  func_ptr->Set_defined(def);
+  if (def == (FUNC_DEF_ID)Null_st_id) {
+    func_ptr->Set_defined(def);
+  }
+
   return *new_func_scope;
+}
+
+void GLOB_SCOPE::Delete_func_scope(FUNC_SCOPE* func) {
+  _func_scope_map.erase(func->Id());
+  func->~FUNC_SCOPE();
 }
 
 FUNC_SCOPE& GLOB_SCOPE::Open_func_scope(FUNC_ID id) {
@@ -1013,6 +1292,12 @@ FUNC_SCOPE& GLOB_SCOPE::Open_func_scope(FUNC_ID id) {
   AIR_ASSERT(scope);
   return *scope;
 }
+
+LITERAL_ITER
+GLOB_SCOPE::Begin_lit() const { return LITERAL_ITER(*this); }
+
+LITERAL_ITER
+GLOB_SCOPE::End_lit() const { return LITERAL_ITER(); }
 
 STR_ITER
 GLOB_SCOPE::Begin_str() const { return STR_ITER(*this); }
@@ -1053,7 +1338,7 @@ GLOB_SCOPE::FUNC_SCOPE_ITER GLOB_SCOPE::End_func_scope() const {
 }
 
 void GLOB_SCOPE::Clone(GLOB_SCOPE& glob, bool clone_func_scope) {
-  // String
+  // Null-terminated string
   Str_table().Clone(glob.Str_table());
   // Type
   Type_table().Clone(glob.Type_table());
@@ -1063,6 +1348,8 @@ void GLOB_SCOPE::Clone(GLOB_SCOPE& glob, bool clone_func_scope) {
   // Global symbol
   Main_table().Clone(glob.Main_table());
   Aux_table().Clone(glob.Aux_table());
+  // None null-terminated string
+  Lit_table().Clone(glob.Lit_table());
   // Constant
   Const_table().Clone(glob.Const_table());
   // Attribute
@@ -1092,6 +1379,103 @@ void GLOB_SCOPE::Init_targ_info(ENDIANNESS e, ARCHITECTURE a) {
   _targ_info = new TARG_INFO(this, e, a);
 }
 
+bool GLOB_SCOPE::Verify_ir() const {
+  bool            ret             = true;
+  FUNC_SCOPE_ITER func_scope_iter = Begin_func_scope();
+  FUNC_SCOPE_ITER end_iter        = End_func_scope();
+  for (; func_scope_iter != end_iter; ++func_scope_iter) {
+    CONTAINER& cntr = (*func_scope_iter).Container();
+    if (!cntr.Verify()) {
+      CMPLR_USR_MSG(U_CODE::IR_Verify_Error,
+                    (*func_scope_iter).Owning_func()->Name()->Char_str());
+      ret = false;
+    }
+  }
+  return ret;
+}
+
+void GLOB_SCOPE::Print_mp_info(std::ostream& os, bool func) const {
+  size_t total_size = 0;
+  os << std::dec << "Global Scope:\n";
+  os << "  STRING TABLE (" << _str_tab->Size() << " Items, "
+     << _str_tab->Mem_size() << " Bytes)\n";
+  total_size += _str_tab->Mem_size();
+
+  os << "  TYPE TABLE (" << _type_tab->Size() << " Items, "
+     << _type_tab->Mem_size() << " Bytes)\n";
+  total_size += _type_tab->Mem_size();
+
+  os << "  ARB TABLE (" << _arb_tab->Size() << " Items, "
+     << _arb_tab->Mem_size() << " Bytes)\n";
+  total_size += _arb_tab->Mem_size();
+
+  os << "  FIELD TABLE (" << _fld_tab->Size() << " Items, "
+     << _fld_tab->Mem_size() << " Bytes)\n";
+  total_size += _fld_tab->Mem_size();
+
+  os << "  PARAM TABLE (" << _param_tab->Size() << " Items, "
+     << _param_tab->Mem_size() << " Bytes)\n";
+  total_size += _param_tab->Mem_size();
+
+  os << "  MAIN TABLE (" << _main_tab->Size() << " Items, "
+     << _main_tab->Mem_size() << " Bytes)\n";
+  total_size += _main_tab->Mem_size();
+
+  os << "  AUX TABLE (" << _aux_tab->Size() << " Items, "
+     << _aux_tab->Mem_size() << " Bytes)\n";
+  total_size += _aux_tab->Mem_size();
+
+  os << "  LITERAL TABLE (" << _lit_tab->Size() << " Items, "
+     << _lit_tab->Mem_size() << " Bytes)\n";
+  total_size += _lit_tab->Mem_size();
+
+  os << "  CONSTANT TABLE (" << _const_tab->Size() << " Items, "
+     << _const_tab->Mem_size() << " Bytes)\n";
+  total_size += _const_tab->Mem_size();
+
+  os << "  ATTR TABLE (" << _attr_tab->Size() << " Items, "
+     << _attr_tab->Mem_size() << " Bytes)\n";
+  total_size += _attr_tab->Mem_size();
+
+  os << "  FILE TABLE (" << _file_tab->Size() << " Items, "
+     << _file_tab->Mem_size() << " Bytes)\n";
+  total_size += _file_tab->Mem_size();
+
+  os << "  FUNC DEF TABLE (" << _func_def_tab->Size() << " Items, "
+     << _func_def_tab->Mem_size() << " Bytes)\n";
+  total_size += _func_def_tab->Mem_size();
+
+  os << "  BLOCK TABLE (" << _blk_tab->Size() << " Items, "
+     << _blk_tab->Mem_size() << " Bytes)\n";
+  total_size += _blk_tab->Mem_size();
+
+  os << "  Total: " << total_size << " Bytes\n\n";
+
+  if (func) {
+    FUNC_SCOPE_ITER func_scope_iter = Begin_func_scope();
+    FUNC_SCOPE_ITER end_iter        = End_func_scope();
+    for (; func_scope_iter != end_iter; ++func_scope_iter) {
+      total_size += (*func_scope_iter).Print_mp_info(os);
+    }
+  }
+  os << "Total Mempool in Used: " << total_size << " Bytes\n\n";
+}
+
+void GLOB_SCOPE::Print_st(std::ostream& os) const {
+  os << "\nTYPE TABLE\n";
+  TYPE_ITER t_iter = Begin_type();
+  TYPE_ITER t_end  = End_type();
+  for (; t_iter != t_end; ++t_iter) {
+    (*t_iter)->Print(os, 1);
+  }
+  os << "\nFUNCTION TABLE\n";
+  FUNC_ITER f_iter = Begin_func();
+  FUNC_ITER f_end  = End_func();
+  for (; f_iter != f_end; ++f_iter) {
+    (*f_iter)->Print(os, 1);
+  }
+}
+
 void GLOB_SCOPE::Print_ir(std::ostream& os, bool rot) const {
   FUNC_SCOPE_ITER func_scope_iter = Begin_func_scope();
   FUNC_SCOPE_ITER end_iter        = End_func_scope();
@@ -1102,28 +1486,33 @@ void GLOB_SCOPE::Print_ir(std::ostream& os, bool rot) const {
 }
 
 void GLOB_SCOPE::Print(std::ostream& os, bool rot) const {
-  os << std::hex << std::showbase;
-
-  os << "TYPE TABLE\n";
+  os << "STRING TABLE (" << std::dec << _str_tab->Mem_size() << " Bytes)\n";
+  STR_ITER s_iter = Begin_str();
+  STR_ITER s_end  = End_str();
+  for (; s_iter != s_end; ++s_iter) {
+    (*s_iter)->Print(os, 1);
+  }
+  os << "\nTYPE TABLE (" << std::dec << _type_tab->Mem_size() << " Bytes)\n";
   TYPE_ITER t_iter = Begin_type();
   TYPE_ITER t_end  = End_type();
   for (; t_iter != t_end; ++t_iter) {
     (*t_iter)->Print(os, 1);
   }
-  os << "\nARB TABLE\n";
+  os << "\nARB TABLE (" << std::dec << _arb_tab->Mem_size() << " Bytes)\n";
   ARB_ITER a_iter = Begin_arb();
   ARB_ITER a_end  = End_arb();
   for (; a_iter != a_end; ++a_iter) {
     (*a_iter)->Print(os, 1);
     os << std::endl;
   }
-  os << "\nSTRING TABLE\n";
-  STR_ITER s_iter = Begin_str();
-  STR_ITER s_end  = End_str();
-  for (; s_iter != s_end; ++s_iter) {
-    (*s_iter)->Print(os, 1);
+  os << "\nLITERAL TABLE (" << std::dec << _lit_tab->Mem_size() << " Bytes)\n";
+  LITERAL_ITER l_iter = Begin_lit();
+  LITERAL_ITER l_end  = End_lit();
+  for (; l_iter != l_end; ++l_iter) {
+    (*l_iter)->Print(os, 1);
   }
-  os << "\nCONSTANT TABLE\n";
+  os << "\nCONSTANT TABLE (" << std::dec << _const_tab->Mem_size()
+     << " Bytes)\n";
   CONSTANT_ITER c_iter = Begin_const();
   CONSTANT_ITER c_end  = End_const();
   for (; c_iter != c_end; ++c_iter) {

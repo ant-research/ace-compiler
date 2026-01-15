@@ -9,8 +9,10 @@
 #include <limits.h>
 
 #include "fhe/core/ctx_param_ana.h"
-#include "gen_ckks_ir.h"
+#include "fhe/poly/poly2c_driver.h"
+#include "fhe/test/gen_ckks_ir.h"
 #include "gen_expect_data.h"
+#include "nn/core/attr.h"
 
 using namespace air::base;
 using namespace air::util;
@@ -28,19 +30,25 @@ int main(int argc, char** argv) {
   CKKS_IR_GEN          ir_gen(fhe_ctx);
   Create_ckks_ir(ir_gen);
 
-  CONTAINER*             cntr = ir_gen.Container();
-  fhe::poly::POLY_DRIVER poly_driver;
-  fhe::poly::POLY_CONFIG poly_config;
+  CONTAINER* cntr = ir_gen.Main_container();
+
+  air::driver::DRIVER_CTX driver_ctx;
+  fhe::poly::POLY_DRIVER  poly_driver;
+  fhe::poly::POLY_CONFIG  poly_config;
+
+  poly_config.Pre_process_options();
 
   // do not inline rotate IR, generate into a new function
-  poly_config.Set_inline_rotate(false);
+  poly_config._inline_rotate = false;
 
-  GLOB_SCOPE* glob = poly_driver.Run(poly_config, cntr->Glob_scope(), fhe_ctx);
+  GLOB_SCOPE* glob =
+      poly_driver.Run(poly_config, cntr->Glob_scope(), fhe_ctx, &driver_ctx);
 
   std::ofstream            of("test_rotate_02.inc");
   fhe::poly::POLY2C_CONFIG p2c_config;
   fhe::poly::POLY2C_DRIVER poly2c(of, fhe_ctx, p2c_config);
-  poly2c.Run(glob);
+  POLY2C_VISITOR           visitor(poly2c.Ctx());
+  poly2c.Run(glob, visitor);
   Gen_expected(of);
   std::cout << "Output: test_rotate_02.inc" << std::endl;
   return 0;
@@ -48,7 +56,7 @@ int main(int argc, char** argv) {
 
 // output = roate(input, 2) + rotate(input, 3)
 void Create_ckks_ir(CKKS_IR_GEN& ir_gen) {
-  CONTAINER* cntr = ir_gen.Container();
+  CONTAINER* cntr = ir_gen.Main_container();
   STMT_LIST  sl   = cntr->Stmt_list();
   SPOS       spos = ir_gen.Spos();
 
@@ -63,7 +71,7 @@ void Create_ckks_ir(CKKS_IR_GEN& ir_gen) {
                           ir_gen.Ciph_ty(), spos);
   rotate_node1->Set_child(0, n_input);
   rotate_node1->Set_child(1, int2);
-  rotate_node1->Set_attr("nums", &rot_idx, 1);
+  rotate_node1->Set_attr(nn::core::ATTR::RNUM, &rot_idx, 1);
 
   // rotate(input, 3)
   n_input       = cntr->New_ld(ir_gen.Input_var(), spos);
@@ -76,7 +84,7 @@ void Create_ckks_ir(CKKS_IR_GEN& ir_gen) {
                           ir_gen.Ciph_ty(), spos);
   rotate_node2->Set_child(0, n_input);
   rotate_node2->Set_child(1, int3);
-  rotate_node2->Set_attr("nums", &rot_idx, 1);
+  rotate_node2->Set_attr(nn::core::ATTR::RNUM, &rot_idx, 1);
 
   NODE_PTR n_add =
       cntr->New_cust_node(air::base::OPCODE(fhe::ckks::CKKS_DOMAIN::ID,

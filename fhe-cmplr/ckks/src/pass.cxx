@@ -8,6 +8,8 @@
 
 #include "fhe/ckks/pass.h"
 
+#include <iostream>
+
 #include "fhe/ckks/ckks_gen.h"
 #include "fhe/driver/fhe_cmplr.h"
 

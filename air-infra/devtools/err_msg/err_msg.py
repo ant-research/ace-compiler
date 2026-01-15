@@ -8,23 +8,31 @@
 Generate the user message code according to the yaml configuration file
 '''
 
+import os
+import sys
 import re
 import argparse
 import yaml
+
 
 def read_yaml(file):  # -> Union[dict, list, None]:
     '''
     Read the yaml configuration file
     '''
-    with open(file, 'r', encoding='utf-8') as f:
-        return yaml.load(f, yaml.Loader)
+    with open(file, 'r', encoding='utf-8') as handler:
+        return yaml.load(handler, yaml.Loader)
+
 
 def write_file(file, text):
     '''
     Generate the code file errMsg.inc
     '''
-    with open(file, 'w', encoding='utf-8') as f:
-        f.write(text)
+    directory = os.path.dirname(file)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    with open(file, 'w', encoding='utf-8') as handler:
+        handler.write(text)
+
 
 def translate(text, trans):
     '''
@@ -32,6 +40,7 @@ def translate(text, trans):
     '''
     regex = re.compile('|'.join(map(re.escape, trans)))
     return regex.sub(lambda match: trans[match.group(0)], text)
+
 
 def format_list(text):
     '''
@@ -42,11 +51,13 @@ def format_list(text):
 
     return string
 
+
 def format_line(text):
     '''
     Add line feed
     '''
     return text + '\n'
+
 
 def user_msg(def_dict):
     '''
@@ -57,17 +68,17 @@ def user_msg(def_dict):
 
     msg_text = ''
     first = True
-    for s in msg_list:
+    for msg in msg_list:
         table = ''.maketrans("{}[]\'", "     ")
-        msg_str = str(s['inStrVarDef']).translate(table).replace(' ', '').replace(':', '::')
+        msg_str = str(msg['inStrVarDef']).translate(table).replace(' ', '').replace(':', '::')
 
         trans = {
-           "{{type}}": s['type'],
-            "{{key}}": s['key'], 
-            "{{errLevel}}": s['errLevel'], 
-           "{{msg}}": "\"" + s['msg'] + "\"",
+            "{{type}}": msg['type'],
+            "{{key}}": msg['key'],
+            "{{errLevel}}": msg['errLevel'],
+            "{{msg}}": "\"" + msg['msg'] + "\"",
             "{{inStrVarDef}}": msg_str
-            }
+        }
 
         item = translate(def_dict['codeConstructor'], trans)
         if first:
@@ -78,7 +89,8 @@ def user_msg(def_dict):
 
     return def_dict['wrapper'].replace('{{code}}', msg_text)
 
-def code_gen(msg_dict, data_dict):
+
+def code_gen(data_dict):
     '''
     Generate the source code according to the yaml configuration file
     '''
@@ -92,7 +104,8 @@ def code_gen(msg_dict, data_dict):
 
     return text
 
-def head_gen(msg_dict, data_dict):
+
+def head_gen(msg_dict):
     '''
     Generate the header file according to the yaml configuration file
     '''
@@ -107,20 +120,20 @@ def head_gen(msg_dict, data_dict):
 
     text += format_line(msg_dict['postText'])
 
-    # print(text)
-
     return text
+
 
 def get_parser():
     '''
     parameter analysis
     '''
-    parser = argparse.ArgumentParser(description='Custom defined User_msg generates err_msg.inc')
+    parser = argparse.ArgumentParser(description='Custom defined user_msg generates err_msg.inc')
     parser.add_argument('-i', '--include', metavar='path', default='./',
-                        help='path for output, if not set, output to current path as err_msg.inc.h')
+                        help='path for output, if not set, output to current path as err_msg.h')
     parser.add_argument('-s', '--src', metavar='path', default='./',
-                        help='path for output, if not set, output to current path as err_msg.inc.c')
+                        help='path for output, if not set, output to current path as err_msg.inc')
     return parser
+
 
 def main():
     '''
@@ -132,21 +145,23 @@ def main():
     include = args.include
     if include[-1] != "/":
         include += "/"
-    inc_file = include + 'err_msg.inc.h'
+    inc_file = include + 'err_msg.h'
 
     src = args.src
     if src[-1] != "/":
         src += "/"
-    src_file = src + 'err_msg.inc.c'
+    src_file = src + 'err_msg.inc'
 
-    msg = read_yaml("err_msg.yml")
-    data = read_yaml("user_define.yml")
+    path = sys.path[0]
+    msg = read_yaml(f"{path}/err_msg.yml")
+    data = read_yaml(f"{path}/user_define.yml")
 
-    head_text = head_gen(msg, data)
-    code_text = code_gen(msg, data)
+    head_text = head_gen(msg)
+    code_text = code_gen(data)
 
     write_file(inc_file, head_text)
     write_file(src_file, code_text)
+
 
 if __name__ == '__main__':
     main()

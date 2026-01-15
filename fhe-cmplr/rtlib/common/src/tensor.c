@@ -76,4 +76,5 @@ void Print_tensor(FILE* fp, TENSOR* tensor) {
     }
   }
   fprintf(fp, "\n]\n");
+  fflush(stdout);
 }

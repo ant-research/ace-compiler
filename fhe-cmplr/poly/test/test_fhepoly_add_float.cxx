@@ -9,7 +9,8 @@
 #include <limits.h>
 
 #include "fhe/core/ctx_param_ana.h"
-#include "gen_ckks_ir.h"
+#include "fhe/poly/poly2c_driver.h"
+#include "fhe/test/gen_ckks_ir.h"
 #include "gen_expect_data.h"
 
 using namespace air::base;
@@ -28,27 +29,32 @@ int main(int argc, char** argv) {
   CKKS_IR_GEN          ir_gen(fhe_ctx);
   Create_ckks_ir(ir_gen);
 
-  CONTAINER* cntr = ir_gen.Container();
+  CONTAINER* cntr = ir_gen.Main_container();
 
-  fhe::poly::POLY_DRIVER poly_driver;
-  fhe::poly::POLY_CONFIG poly_config;
+  air::driver::DRIVER_CTX driver_ctx;
+  fhe::poly::POLY_DRIVER  poly_driver;
+  fhe::poly::POLY_CONFIG  poly_config;
   // inline rotate IR
-  poly_config.Set_inline_rotate(true);
+  poly_config._inline_rotate = true;
+  poly_config.Pre_process_options();
 
-  GLOB_SCOPE* glob = poly_driver.Run(poly_config, cntr->Glob_scope(), fhe_ctx);
+  GLOB_SCOPE* glob =
+      poly_driver.Run(poly_config, cntr->Glob_scope(), fhe_ctx, &driver_ctx);
 
   std::ofstream            of("test_add_float.inc");
   fhe::poly::POLY2C_CONFIG p2c_config;
   fhe::poly::POLY2C_DRIVER poly2c(of, fhe_ctx, p2c_config);
-  poly2c.Run(glob);
+  POLY2C_VISITOR           visitor(poly2c.Ctx());
+  poly2c.Run(glob, visitor);
   Gen_expected(of);
   std::cout << "Output: test_add_float.inc" << std::endl;
+  delete glob;
   return 0;
 }
 
 // output = add(input, Float_data)
 void Create_ckks_ir(CKKS_IR_GEN& ir_gen) {
-  CONTAINER* cntr = ir_gen.Container();
+  CONTAINER* cntr = ir_gen.Main_container();
   STMT_LIST  sl   = cntr->Stmt_list();
   SPOS       spos = ir_gen.Spos();
 
@@ -61,7 +67,7 @@ void Create_ckks_ir(CKKS_IR_GEN& ir_gen) {
   NODE_PTR add_node =
       cntr->New_bin_arith(air::base::OPCODE(fhe::ckks::CKKS_DOMAIN::ID,
                                             fhe::ckks::CKKS_OPERATOR::ADD),
-                          n_input, f_node, spos);
+                          n_input->Rtype(), n_input, f_node, spos);
   STMT_PTR add_stmt = cntr->New_st(add_node, ir_gen.Output_var(), spos);
   sl.Append(add_stmt);
 

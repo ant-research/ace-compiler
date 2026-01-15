@@ -31,13 +31,13 @@ TEST(RT_DATA_WRITER, WRITE_READ_DUMP) {
                          16.1, 17.1, 18.1, 19.1, 20.1, 21.1, 22.1, 23.1};
   {
     fhe::core::RT_DATA_WRITER w_ofs(name, DE_MSG_F32, model, uuid);
-    w_ofs.Append("cst_0", &cst_0[0], 3);
-    w_ofs.Append("cst_1", &cst_0[1], 4);
-    w_ofs.Append("cst_2", &cst_0[2], 5);
-    w_ofs.Append("cst_3", &cst_0[3], 6);
-    w_ofs.Append("cst_4", &cst_0[4], 7);
-    w_ofs.Append("cst_5", &cst_0[5], 8);
-    w_ofs.Append("cst_6", &cst_0[6], 9);
+    w_ofs.Append("cst_0", &cst_0[0], 3, 1, 1);
+    w_ofs.Append("cst_1", &cst_0[1], 4, 2, 2);
+    w_ofs.Append("cst_2", &cst_0[2], 5, 1, 3);
+    w_ofs.Append("cst_3", &cst_0[3], 6, 2, 4);
+    w_ofs.Append("cst_4", &cst_0[4], 7, 1, 5);
+    w_ofs.Append("cst_5", &cst_0[5], 8, 2, 6);
+    w_ofs.Append("cst_6", &cst_0[6], 9, 1, 7);
   }
   {
     std::ifstream             ifs(name, std::ios::binary);
@@ -57,6 +57,8 @@ TEST(RT_DATA_WRITER, WRITE_READ_DUMP) {
       EXPECT_EQ(memcmp(lut[i]._name, "cst_", 4), 0);
       EXPECT_EQ(lut[i]._index, i);
       EXPECT_EQ(lut[i]._size, (i + 3) * sizeof(float));
+      EXPECT_EQ(lut[i]._scale, (i % 2) + 1);
+      EXPECT_EQ(lut[i]._level, i + 1);
       EXPECT_EQ(lut[i]._ent_ofst % (1 << hdr._ent_align), 0);
       float res[32];
       EXPECT_TRUE(reader.Read_entry(lut[i], (char*)res));

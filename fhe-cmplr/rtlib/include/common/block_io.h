@@ -15,13 +15,13 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <sys/uio.h>
+#include <sys/uio.h>  // TODO : uio is supported by HPU embedded systems needs to be determined
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-//! @brief block state in memory
+//! @brief Block state in memory
 typedef enum {
   BLK_INVALID,      //!< invalid state
   BLK_PREFETCHING,  //!< prefetching state
@@ -35,22 +35,22 @@ typedef struct {
   struct iovec _iovec;     //!< address and size
 } BLOCK_INFO;
 
-//! @brief initialize block I/O context
+//! @brief Initialize block I/O context
 bool Block_io_init(bool async);
 
-//! @brief finalize block I/O context
+//! @brief Finalize block I/O context
 void Block_io_fini(bool sync_read);
 
-//! @brief open a file for I/O
+//! @brief Open a file for I/O
 int Block_io_open(const char* fname, bool sync_read);
 
-//! @brief close a file
+//! @brief Close a file
 void Block_io_close(int fd);
 
-//! @brief prefetch block into buffer
+//! @brief Prefetch block into buffer
 bool Block_io_prefetch(int fd, uint64_t ofst, BLOCK_INFO* blk);
 
-//! @brief make sure reading is done
+//! @brief Make sure reading is done
 bool Block_io_read(int fd, uint64_t ofst, BLOCK_INFO* blk);
 
 #ifdef __cplusplus

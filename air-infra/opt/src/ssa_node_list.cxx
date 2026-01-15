@@ -20,6 +20,7 @@ void SSA_NODE_LIST<MU_NODE_ID, MU_NODE_PTR>::Print(std::ostream& os,
   auto print = [](MU_NODE_PTR ptr, std::ostream& os, uint32_t indent) {
     os << std::string(indent * air::base::INDENT_SPACE, ' ');
     ptr->Print(os);
+    os << std::endl;
   };
   For_each(print, os, indent);
 }
@@ -30,6 +31,7 @@ void SSA_NODE_LIST<CHI_NODE_ID, CHI_NODE_PTR>::Print(std::ostream& os,
   auto print = [](CHI_NODE_PTR ptr, std::ostream& os, uint32_t indent) {
     os << std::string(indent * air::base::INDENT_SPACE, ' ');
     ptr->Print(os);
+    os << std::endl;
   };
   For_each(print, os, indent);
 }

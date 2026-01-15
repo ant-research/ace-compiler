@@ -13,10 +13,10 @@
 extern "C" {
 #endif
 
-//! @brief get input data from input file
+//! @brief Get input data from input file
 CIPHERTEXT Get_input_data(const char* name, size_t idx);
 
-//! @brief set output data into output file
+//! @brief Set output data into output file
 void Set_output_data(const char* name, size_t idx, CIPHER data);
 
 #ifdef __cplusplus

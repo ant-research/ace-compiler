@@ -6,15 +6,15 @@
 //
 //=============================================================================
 
-#ifndef RTLIB_INCLUDE_CRT_H
-#define RTLIB_INCLUDE_CRT_H
+#ifndef RTLIB_ANT_INCLUDE_UTIL_CRT_H
+#define RTLIB_ANT_INCLUDE_UTIL_CRT_H
 
 #include <stdint.h>
 #include <stdlib.h>
 
-#include "util/fhe_std_parms.h"
-#include "util/fhe_utils.h"
+#include "util/modular.h"
 #include "util/ntt.h"
+#include "util/std_param.h"
 
 // A module to split a large number into its prime factors using
 // the Chinese Remainder Theorem (CRT).
@@ -23,1040 +23,243 @@
 extern "C" {
 #endif
 
-typedef VALUE_LIST VL_I64;        // VALUE_LIST<int64_t>
-typedef VALUE_LIST VL_VL_I64;     // VALUE_LIST<VALUE_LIST<int64_t>>>
-typedef VALUE_LIST VL_VL_VL_I64;  // VALUE_LIST<VALUE_LIST<VALUE_LIST<int64_t>>>
-typedef VALUE_LIST VL_CRTPRIME;   // VALUE_LIST<CRT_PRIME *>
-typedef VALUE_LIST VL_VL_CRTPRIME;  // VALUE_LIST<VALUE_LIST<CRT_PRIME *>>
-typedef VALUE_LIST
-    VL_VL_VL_CRTPRIME;  // VALUE_LIST<VALUE_LIST<VALUE_LIST<CRT_PRIME *>>>
-typedef VALUE_LIST VL_BIGINT;  // VALUE_LIST<BIG_INT>
+typedef VALUE_LIST VL_I64;             // 1D value list of <int64_t>
+typedef VALUE_LIST VL_VL_I64;          // 2D value list of <int64_t>
+typedef VALUE_LIST VL_VL_VL_I64;       // 3D value list of <int64_t>
+typedef VALUE_LIST VL_VL_VL_VL_I64;    // 4D value list of <int64_t>
+typedef VALUE_LIST VL_CRTPRIME;        // 1D value list of <CRT_PRIME *>
+typedef VALUE_LIST VL_VL_CRTPRIME;     // 2D value list of <CRT_PRIME *>
+typedef VALUE_LIST VL_VL_VL_CRTPRIME;  // 3D value list of <CRT_PRIME *>
+typedef VALUE_LIST VL_BIGINT;          // 1D value list of <BIGINT>
 
-/**
- * @brief type of primes
- *
- */
-typedef enum { Q_TYPE, P_TYPE, QPART_TYPE, QPART_COMP_TYPE } PRIME_TYPE;
+typedef struct CRT_PRIME   CRT_PRIME;
+typedef struct CRT_PRIMES  CRT_PRIMES;
+typedef struct CRT_CONTEXT CRT_CONTEXT;
 
-/**
- * @brief crt primes
- *
- */
-typedef struct {
-  MODULUS     _moduli;
-  NTT_CONTEXT _ntt;
-} CRT_PRIME;
+//! @brief Get the modulus from CRT_PRIME
+MODULUS* Get_modulus(CRT_PRIME* prime);
 
-/**
- * @brief alloc crt primes
- *
- * @param n length of primes
- * @return CRT_PRIME *
- */
-static inline CRT_PRIME* Alloc_crt_primes(size_t n) {
-  CRT_PRIME* primes = (CRT_PRIME*)malloc(sizeof(CRT_PRIME) * n);
-  return primes;
-}
+//! @brief Get modulus value from crt primes
+int64_t Get_modulus_val(CRT_PRIME* prime);
 
-/**
- * @brief print CRT_PRIME
- *
- * @param fp
- * @param prime
- */
-void Print_crtprime(FILE* fp, CRT_PRIME* prime);
+//! @brief Get the NTT from CRT_PRIME
+NTT_CONTEXT* Get_ntt(CRT_PRIME* prime);
 
-/**
- * @brief cleanup crt primes
- *
- * @param prime
- */
-void Free_crtprime(CRT_PRIME* prime);
+//! @brief CRT_PRIME memory are continus
+//! adjust the pointers to get next modulus
+MODULUS* Get_next_modulus(MODULUS* modulus);
 
-/**
- * @brief Get the modulus from CRT_PRIME
- *
- * @param prime
- * @return MODULUS*
- */
-static inline MODULUS* Get_modulus(CRT_PRIME* prime) {
-  return &(prime->_moduli);
-}
+//! @brief If crt_primes is Q primes
+bool Is_q(CRT_PRIMES* crt_primes);
 
-/**
- * @brief get modulus value from crt primes
- *
- * @param prime
- * @return int64_t
- */
-static inline int64_t Get_modulus_val(CRT_PRIME* prime) {
-  return prime->_moduli._val;
-}
+//! @brief Get value list of CRT_PRIME from CRT_PRIMES
+VALUE_LIST* Get_primes(CRT_PRIMES* crt_primes);
 
-/**
- * @brief Get the NTT from CRT_PRIME
- *
- * @param prime
- * @return NTT_CONTEXT*
- */
-static inline NTT_CONTEXT* Get_ntt(CRT_PRIME* prime) { return &(prime->_ntt); }
+//! @brief Get CRT_PRIME from CRT_PRIMES
+//! @param idx index of CRT_PRIME in CRT_PRIMES
+//! @return CRT_PRIME*
+CRT_PRIME* Get_prime_at(CRT_PRIMES* crt_primes, size_t idx);
 
-/**
- * @brief CRT_PRIME memory are continus
- * adjust the pointers to get next modulus
- *
- * @param modulus
- * @return MODULUS*
- */
-static inline MODULUS* Get_next_modulus(MODULUS* modulus) {
-  return (MODULUS*)((CRT_PRIME*)modulus + 1);
-}
+//! @brief Get head address of CRT_PRIME from CRT_PRIMES
+//! @return CRT_PRIME*
+CRT_PRIME* Get_prime_head(CRT_PRIMES* crt_primes);
 
-/**
- * @brief initialize crt primes
- *
- * @param prime crt primes to be initialized
- * @param val init val
- * @param ring_degree ring degree
- */
-static inline void Init_crtprime(CRT_PRIME* prime, int64_t val,
-                                 uint32_t ring_degree) {
-  MODULUS* modulus = Get_modulus(prime);
-  Init_modulus(modulus, val);
-  Init_nttcontext(Get_ntt(prime), ring_degree, modulus);
-}
+//! @brief Get address of CRT_PRIME at given idx from CRT_PRIMES
+//! RT_PRIME are put into continus memory
+//! @param idx index of CRT_PRIME
+//! @return CRT_PRIME*
+CRT_PRIME* Get_nth_prime(CRT_PRIME* prime_head, size_t idx);
 
-/**
- * @brief precomputed value for CRT
- *
- */
-typedef struct {
-  BIG_INT    _modulus;           // BIG_INT
-  VL_VL_I64* _m_mod_nb;          // For Q -> {Q % p_j}
-                                 // For P -> {P % q_j}
-  VL_VL_I64* _m_inv_mod_nb;      // For Q -> {Q^-1 % p_j}
-                                 // For P -> {P^-1 % q_j}
-  VL_BIGINT*  _hat;              // BIG_INT, Q/q_i
-  VALUE_LIST* _hat_mod_nb;       // For Q -> VL_VL_VL_I64 {(Q/q_j) % p_j}
-                                 // For P -> VL_VL_I64 {(P/p_j) % q_j}
-  VL_BIGINT* _hat_inv;           // BIG_INT, mod inverse of hat, (Q/q_i)^-1
-  VL_VL_I64* _hat_inv_mod_self;  // For Q -> VL_VL_I64 {((Q/q_i)^-1) % q_i}
-                                 // For P -> VL_I64 {((P/p_i)^-1) % p_i}
-  VL_VL_VL_I64* _hat_inv_mod_self_prec;  // Precomputed for barret mod
-                                         // For Q, barret mod qi
-                                         // For P, barret mod pi
-  VL_VL_I64* _ql_div2_mod_qi;            // {(q_l/2) % q_i}
-  VL_VL_I64* _ql_inv_mod_qi;             // {q_l^-1 % q_i}
-  VL_VL_I64* _ql_inv_mod_qi_prec;        // precomputed const for {q_l^-1 % q_i}
-  VL_VL_I64* _ql_ql_inv_mod_ql_div_ql_mod_qi;       //{((Q/q_l)*((Q/q_l)^-1 %
-                                                    // q_l))/ql) % q_i}
-  VL_VL_I64* _ql_ql_inv_mod_ql_div_ql_mod_qi_prec;  // precomputed const for
-                                                    // {((Q/q_l)*((Q/q_l)^-1 %
-                                                    // q_l))/ql) % q_i}
-} PRE_COMP;
+//! @brief Get next address of CRT_PRIME
+//! CRT_PRIME are put into continus memory
+//! @return CRT_PRIME*
+CRT_PRIME* Get_next_prime(CRT_PRIME* prime_head);
 
-/**
- * @brief alloc precompute values
- *
- * @return PRE_COMP*
- */
-static inline PRE_COMP* Alloc_precompute() {
-  PRE_COMP* p = (PRE_COMP*)malloc(sizeof(PRE_COMP));
-  memset(p, 0, sizeof(PRE_COMP));
-  BI_INIT(p->_modulus);
-  return p;
-}
+//! @brief Get CRT_PRIME from VL_CRTPRIME at given idx
+//! @return CRT_PRIME*
+CRT_PRIME* Get_vlprime_at(VL_CRTPRIME* vl_primes, size_t idx);
 
-/**
- * @brief cleanup precompute values
- *
- * @param precomp
- */
-void Free_precompute(PRE_COMP* precomp);
+//! @brief Get head address of modulus from VL_CRTPRIME
+//! @return MODULUS*
+MODULUS* Get_modulus_head(VL_CRTPRIME* primes);
 
-/**
- * @brief precomputed value of q part
- *
- */
-typedef struct {
-  size_t     _per_part_size;
-  size_t     _num_p;
-  VL_BIGINT* _modulus;
-  VL_VL_I64* _l_hat_inv_modq;  // int64_t [num_parts][part_size][part_size - l]
-  VL_VL_VL_I64
-  *_l_hat_modp;  // int64_t [num_Q][l/part_size][part_size][complement_size]
-} QPART_PRE_COMP;
+//! @brief Get VL_CRTPRIME from CRT_PRIMES at given part_idx
+//! @return VL_CRTPRIME*
+VL_CRTPRIME* Get_qpart_prime_at_l1(CRT_PRIMES* crt_primes, size_t part_idx);
 
-/**
- * @brief alloc precomputed value of q part
- *
- * @return
- */
-static inline QPART_PRE_COMP* Alloc_qpart_precomp() {
-  QPART_PRE_COMP* precomp = (QPART_PRE_COMP*)malloc(sizeof(QPART_PRE_COMP));
-  memset(precomp, 0, sizeof(QPART_PRE_COMP));
-  return precomp;
-}
+//! @brief Get qpart_compl VL_CRTPRIME* from CRT_PRIMES
+//! @return VL_CRTPRIME*
+VL_CRTPRIME* Get_qpart_compl_at(CRT_PRIMES* crt_primes, size_t idx1,
+                                size_t idx2);
 
-/**
- * @brief print precomputed value of q part
- *
- * @param fp
- * @param precomp
- */
-void Print_qpart_precompute(FILE* fp, QPART_PRE_COMP* precomp);
+//! @brief Get length of primes
+//! @return size_t
+size_t Get_primes_cnt(CRT_PRIMES* crt_primes);
 
-/**
- * @brief free precomputed value of q part
- *
- * @param precomp
- */
-void Free_qpart_precompute(QPART_PRE_COMP* precomp);
-
-/**
- * @brief crt primes, include primes & computed value
- *
- */
-typedef struct {
-  PRIME_TYPE   _type;
-  VALUE_LIST*  _mod_val_list;  // list of MODULUS
-  VL_CRTPRIME* _primes;        // lists of CRT_PRIME
-                               // Q primes:         VALUE_LIST<CRT_PRIME>
-                               // P primes:         VALUE_LIST<CRT_PRIME>
-  // QPart primes:     VALUE_LIST<VALUE_LIST<CRT_PRIME>>
-  // QPartComp primes:
-  // VALUE_LIST<VALUE_LIST<VALUE_LIST<CRT_PRIME>>>
-  union {
-    PRE_COMP*       _precomp;
-    QPART_PRE_COMP* _qpart_precomp;
-  } _u;
-} CRT_PRIMES;
-
-/**
- * @brief precompute crt primes
- *
- * @param crt_primes
- */
-void Precompute_primes(CRT_PRIMES* crt_primes, bool without_rescale);
-
-/**
- * @brief copy value list of crtprimes from input to res
- *
- * @param res return VL_CRTPRIME
- * @param input input VL_CRTPRIME
- * @param cnt length of VL_CRTPRIME
- */
-void Copy_vl_crtprime(VL_CRTPRIME* res, VL_CRTPRIME* input, size_t cnt);
-
-/**
- * @brief print value list of crt primes
- *
- * @param fp
- * @param crt_primes
- */
-void Print_vl_crtprime(FILE* fp, VL_CRTPRIME* crt_primes);
-
-/**
- * @brief print crt primes
- *
- * @param fp
- * @param crt_primes
- */
-void Print_crtprimes(FILE* fp, CRT_PRIMES* crt_primes);
-
-/**
- * @brief cleanup crt primes
- *
- * @param crt_primes
- */
-void Free_crtprimes(CRT_PRIMES* crt_primes);
-
-// Access APIs for CRT_PRIMES
-#define GET_BIG_M(crt_primes) (crt_primes)->_u._precomp->_modulus
-
-/**
- * @brief if crt_primes is Q primes
- *
- * @param crt_primes
- * @return true if crt_primes is Q primes
- * @return false if crt_primes is not Q primes
- */
-static inline bool Is_q(CRT_PRIMES* crt_primes) {
-  return crt_primes->_type == Q_TYPE;
-}
-
-/**
- * @brief if crt_primes is P primes
- *
- * @param crt_primes
- * @return true if crt-primes is P primes
- * @return false if crt-primes is not P primes
- */
-static inline bool Is_p(CRT_PRIMES* crt_primes) {
-  return crt_primes->_type == P_TYPE;
-}
-
-/**
- * @brief if crt_primes is Q part primes
- *
- * @param crt_primes
- * @return true if crt_primes is Q part primes
- * @return false if crt_primes is not Q part primes
- */
-static inline bool Is_qpart(CRT_PRIMES* crt_primes) {
-  return crt_primes->_type == QPART_TYPE;
-}
-
-/**
- * @brief if crt_primes is Q part complement
- *
- * @param crt_primes
- * @return true
- * @return false
- */
-static inline bool Is_qpart_compl(CRT_PRIMES* crt_primes) {
-  return crt_primes->_type == QPART_COMP_TYPE;
-}
-
-/**
- * @brief Set the prime with given PRIME_TYPE
- *
- * @param crt_primes CRT_PRIMES
- * @param type prime type
- */
-static inline void Set_prime_type(CRT_PRIMES* crt_primes, PRIME_TYPE type) {
-  crt_primes->_type = type;
-}
-
-/**
- * @brief get value list of mod val from CRT_PRIMES
- *
- * @param crt_primes
- * @return VALUE_LIST*
- */
-static inline VALUE_LIST* Get_mod_val_list(CRT_PRIMES* crt_primes) {
-  return crt_primes->_mod_val_list;
-}
-
-/**
- * @brief get value list of CRT_PRIME from CRT_PRIMES
- *
- * @param crt_primes
- * @return VALUE_LIST*
- */
-static inline VALUE_LIST* Get_primes(CRT_PRIMES* crt_primes) {
-  return crt_primes->_primes;
-}
-
-/**
- * @brief get CRT_PRIME from CRT_PRIMES
- *
- * @param crt_primes
- * @param idx index of CRT_PRIME in CRT_PRIMES
- * @return CRT_PRIME*
- */
-static inline CRT_PRIME* Get_prime_at(CRT_PRIMES* crt_primes, size_t idx) {
-  IS_TRUE(Is_q(crt_primes) || Is_p(crt_primes), "invalid crt prime type");
-  VALUE_LIST* primes = Get_primes(crt_primes);
-  IS_TRUE(idx < LIST_LEN(primes), "index outof bound");
-  return (CRT_PRIME*)PTR_VALUE_AT(primes, idx);
-}
-
-/**
- * @brief get head address of CRT_PRIME from CRT_PRIMES
- *
- * @param crt_primes
- * @return CRT_PRIME*
- */
-static inline CRT_PRIME* Get_prime_head(CRT_PRIMES* crt_primes) {
-  return Get_prime_at(crt_primes, 0);
-}
-
-/**
- * @brief get address of CRT_PRIME at given idx from CRT_PRIMES
- * RT_PRIME are put into continus memory
- *
- * @param prime_head
- * @param idx index of CRT_PRIME
- * @return CRT_PRIME*
- */
-static inline CRT_PRIME* Get_nth_prime(CRT_PRIME* prime_head, size_t idx) {
-  return prime_head + idx;
-}
-
-/**
- * @brief get next address of CRT_PRIME
- * CRT_PRIME are put into continus memory
- *
- * @param prime_head
- * @return CRT_PRIME*
- */
-static inline CRT_PRIME* Get_next_prime(CRT_PRIME* prime_head) {
-  return prime_head + 1;
-}
-
-/**
- * @brief get CRT_PRIME from VL_CRTPRIME at given idx
- *
- * @param vl_primes
- * @param idx
- * @return CRT_PRIME*
- */
-static inline CRT_PRIME* Get_vlprime_at(VL_CRTPRIME* vl_primes, size_t idx) {
-  IS_TRUE(idx < LIST_LEN(vl_primes), "index outof bound");
-  return (CRT_PRIME*)Get_ptr_value_at(vl_primes, idx);
-}
-
-/**
- * @brief get head address of modulus from VL_CRTPRIME
- *
- * @param primes
- * @return MODULUS*
- */
-static inline MODULUS* Get_modulus_head(VL_CRTPRIME* primes) {
-  CRT_PRIME* prime_head = Get_vlprime_at(primes, 0);
-  return Get_modulus(prime_head);
-}
-
-/**
- * @brief get VL_CRTPRIME from CRT_PRIMES at given part_idx
- *
- * @param crt_primes
- * @param part_idx
- * @return VL_CRTPRIME*
- */
-static inline VL_CRTPRIME* Get_qpart_prime_at_l1(CRT_PRIMES* crt_primes,
-                                                 size_t      part_idx) {
-  IS_TRUE(Is_qpart(crt_primes), "invalid crt prime type");
-  return VL_VALUE_AT(Get_primes(crt_primes), part_idx);
-}
-
-/**
- * @brief get qpart CRT_PRIME from CRT_PRIMES at given part_idx & prime_idx
- *
- * @param crt_primes
- * @param part_idx
- * @param prime_idx
- * @return CRT_PRIME*
- */
-static inline CRT_PRIME* Get_qpart_prime_at_l2(CRT_PRIMES* crt_primes,
-                                               size_t      part_idx,
-                                               size_t      prime_idx) {
-  IS_TRUE(Is_qpart(crt_primes), "invalid crt prime type");
-  return (CRT_PRIME*)VL_L2_VALUE_AT(Get_primes(crt_primes), part_idx,
-                                    prime_idx);
-}
-
-/**
- * @brief get qpart_compl VL_CRTPRIME* from CRT_PRIMES
- *
- * @param crt_primes
- * @param idx1
- * @param idx2
- * @return VL_CRTPRIME*
- */
-static inline VL_CRTPRIME* Get_qpart_compl_at(CRT_PRIMES* crt_primes,
-                                              size_t idx1, size_t idx2) {
-  IS_TRUE(Is_qpart_compl(crt_primes), "invalid crt prime type");
-  return VL_L2_VALUE_AT(Get_primes(crt_primes), idx1, idx2);
-}
-
-/**
- * @brief initialize CRT_PRIMES
- *
- * @param crt_primes CRT_PRIMES to be initialized
- * @param primes input primes
- * @param ring_degree ring degree
- */
-static inline void Set_primes(CRT_PRIMES* crt_primes, VALUE_LIST* primes,
-                              uint32_t ring_degree) {
-  size_t prime_cnt          = LIST_LEN(primes);
-  crt_primes->_mod_val_list = Alloc_value_list(PTR_TYPE, prime_cnt);
-  MODULUS* modulus          = Alloc_modulus(prime_cnt);
-  crt_primes->_primes       = Alloc_value_list(PTR_TYPE, prime_cnt);
-  int64_t*   mods           = Get_i64_values(primes);
-  CRT_PRIME* entries        = Alloc_crt_primes(prime_cnt);
-  CRT_PRIME* entry          = entries;
-  for (size_t idx = 0; idx < prime_cnt; idx++) {
-    Init_modulus(modulus, *mods);
-    Init_crtprime(entry, *mods, ring_degree);
-    PTR_VALUE_AT(Get_primes(crt_primes), idx)       = (PTR)entry;
-    PTR_VALUE_AT(Get_mod_val_list(crt_primes), idx) = (PTR)modulus;
-    entry++;
-    mods++;
-    modulus++;
-  }
-}
-
-/**
- * @brief get length of primes
- *
- * @param crt_primes
- * @return size_t
- */
-static inline size_t Get_primes_cnt(CRT_PRIMES* crt_primes) {
-  return LIST_LEN(Get_primes(crt_primes));
-}
-
-/**
- * @brief get number of parts from crt primes
- *
- * @param crt_primes
- * @return size_t
- */
-static inline size_t Get_num_parts(CRT_PRIMES* crt_primes) {
-  IS_TRUE(Is_qpart(crt_primes), "invalid crtprime type");
-  return LIST_LEN(Get_primes(crt_primes));
-}
-
-/**
- * @brief get precomp from crt primes
- *
- * @param crt_primes
- * @return PRE_COMP*
- */
-static inline PRE_COMP* Get_precomp(CRT_PRIMES* crt_primes) {
-  IS_TRUE(Is_q(crt_primes) || Is_p(crt_primes), "invliad type");
-  return crt_primes->_u._precomp;
-}
-
-/**
- * @brief get recucible level from crt primes
- *
- * @param crt_primes
- * @return size_t
- */
-static inline size_t Get_reducible_levels(CRT_PRIMES* crt_primes) {
-  if (Is_q(crt_primes)) {
-    return Get_primes_cnt(crt_primes);
-  } else if (Is_p(crt_primes)) {
-    // for p primes, there is no level decrease for p
-    // first dimension size is 1, the array is [0][k]
-    return 1;
-  } else {
-    IS_TRUE(FALSE, "unexpected primes");
-    return 0;
-  }
-}
-
-// Access APIs for Q & P precomputed
-/**
- * @brief get Q/q_i from crt primes
- *
- * @param crt_primes
- * @return VL_BIGINT*
- */
-static inline VL_BIGINT* Get_hat(CRT_PRIMES* crt_primes) {
-  IS_TRUE(Is_q(crt_primes) || Is_p(crt_primes), "invalid type");
-  return crt_primes->_u._precomp->_hat;
-}
-
-/**
- * @brief get mod inverse of hat, (Q/q_i)^-1
- *
- * @param crt_primes
- * @return VL_BIGINT*
- */
-static inline VL_BIGINT* Get_hat_inv(CRT_PRIMES* crt_primes) {
-  IS_TRUE(Is_q(crt_primes) || Is_p(crt_primes), "invalid type");
-  return crt_primes->_u._precomp->_hat_inv;
-}
+//! @brief Get number of parts from crt primes
+//! @return size_t
+size_t Get_num_parts(CRT_PRIMES* crt_primes);
 
 // Access APIs for Q precomputed
-/**
- * @brief get {Q % p_j} from q crt primes
- *
- * @param crt_primes
- * @return VL_VL_I64*
- */
-static inline VL_VL_I64* Get_qmodp(CRT_PRIMES* crt_primes) {
-  IS_TRUE(Is_q(crt_primes), "invliad type");
-  return crt_primes->_u._precomp->_m_mod_nb;
-}
+//! @brief Get {((Q/q_i)^-1)%q_i} at given idx from crt primes
+//! @return VL_I64*
+VL_I64* Get_qhatinvmodq_at(CRT_PRIMES* crt_primes, size_t idx);
 
-/**
- * @brief get {Q % p_j} at given idx from q crt primes
- *
- * @param crt_primes
- * @param idx
- * @return VL_I64*
- */
-static inline VL_I64* Get_qmodp_at(CRT_PRIMES* crt_primes, size_t idx) {
-  IS_TRUE(Is_q(crt_primes), "invliad type");
-  return Get_vl_value_at(crt_primes->_u._precomp->_m_mod_nb, idx);
-}
-
-/**
- * @brief get {Q^-1 % p_j} from q crt primes
- *
- * @param crt_primes
- * @return VL_VL_I64*
- */
-static inline VL_VL_I64* Get_qinvmodp(CRT_PRIMES* crt_primes) {
-  IS_TRUE(Is_q(crt_primes), "invliad type");
-  return crt_primes->_u._precomp->_m_inv_mod_nb;
-}
-
-/**
- * @brief get {Q^-1 % p_j} at given idx from q crt primes
- *
- * @param crt_primes
- * @param idx
- * @return VL_I64*
- */
-static inline VL_I64* Get_qinvmodp_at(CRT_PRIMES* crt_primes, size_t idx) {
-  IS_TRUE(Is_q(crt_primes), "invliad type");
-  return Get_vl_value_at(crt_primes->_u._precomp->_m_inv_mod_nb, idx);
-}
-
-/**
- * @brief get Q/q_i from q crt primes
- *
- * @param crt_primes
- * @return VL_BIGINT*
- */
-static inline VL_BIGINT* Get_qhat(CRT_PRIMES* crt_primes) {
-  IS_TRUE(Is_q(crt_primes), "invliad type");
-  return crt_primes->_u._precomp->_hat;
-}
-
-/**
- * @brief get {{Q/q_j} % p_j} from q crt primes
- *
- * @param crt_primes
- * @return VL_VL_VL_I64*
- */
-static inline VL_VL_VL_I64* Get_qhatmodp(CRT_PRIMES* crt_primes) {
-  IS_TRUE(Is_q(crt_primes), "invliad type");
-  return crt_primes->_u._precomp->_hat_mod_nb;
-}
-
-/**
- * @brief get {{Q/q_j} % p_j} at given idx from q crt primes
- *
- * @param crt_primes
- * @param idx1
- * @param idx2
- * @return VL_I64*
- */
-static inline VL_I64* Get_qhatmodp_at(CRT_PRIMES* crt_primes, size_t idx1,
-                                      size_t idx2) {
-  IS_TRUE(Is_q(crt_primes), "invliad type");
-  VL_VL_VL_I64* p = crt_primes->_u._precomp->_hat_mod_nb;
-  return Get_vl_value_at(Get_vl_value_at(p, idx1), idx2);
-}
-
-/**
- * @brief get mod inverse of hat, (Q/q_i)^-1 for q prime
- *
- * @param crt_primes
- * @return VL_BIGINT*
- */
-static inline VL_BIGINT* Get_qhatinv(CRT_PRIMES* crt_primes) {
-  IS_TRUE(Is_q(crt_primes), "invliad type");
-  return crt_primes->_u._precomp->_hat_inv;
-}
-
-/**
- * @brief get {((Q/q_i)^-1)%q_i} from crt primes
- *
- * @param crt_primes
- * @return VL_VL_I64*
- */
-static inline VL_VL_I64* Get_qhatinvmodq(CRT_PRIMES* crt_primes) {
-  IS_TRUE(Is_q(crt_primes), "invliad type");
-  return crt_primes->_u._precomp->_hat_inv_mod_self;
-}
-
-/**
- * @brief get {((Q/q_i)^-1)%q_i} at given idx from crt primes
- *
- * @param crt_primes
- * @param idx
- * @return VL_I64*
- */
-static inline VL_I64* Get_qhatinvmodq_at(CRT_PRIMES* crt_primes, size_t idx) {
-  IS_TRUE(Is_q(crt_primes), "invliad type");
-  return Get_vl_value_at(crt_primes->_u._precomp->_hat_inv_mod_self, idx);
-}
-
-//! @brief get precomputed values for {((Q/q_i)^-1)%q_i} at given level index
-static inline VL_I64* Get_qhatinvmodq_prec_at(CRT_PRIMES* crt_primes,
-                                              size_t      idx) {
-  IS_TRUE(Is_q(crt_primes), "invliad type");
-  return Get_vl_value_at(crt_primes->_u._precomp->_hat_inv_mod_self_prec, idx);
-}
+//! @brief Get precomputed values for {((Q/q_i)^-1)%q_i} at given level index
+VL_I64* Get_qhatinvmodq_prec_at(CRT_PRIMES* crt_primes, size_t idx);
 
 // Get API for P precomputed
-/**
- * @brief get {P % q_j} from p crt primes
- *
- * @param crt_primes
- * @return VL_I64*
- */
-static inline VL_I64* Get_pmodq(CRT_PRIMES* crt_primes) {
-  IS_TRUE(Is_p(crt_primes), "invliad type");
-  return Get_vl_value_at(crt_primes->_u._precomp->_m_mod_nb, 0);
-}
+//! @brief Get {P % q_j} from p crt primes
+//! @return VL_I64*
+VL_I64* Get_pmodq(CRT_PRIMES* crt_primes);
 
-/**
- * @brief get {P^-1 % q_j} from p crt primes
- *
- * @param crt_primes
- * @return
- */
-static inline VL_I64* Get_pinvmodq(CRT_PRIMES* crt_primes) {
-  IS_TRUE(Is_p(crt_primes), "invliad type");
-  return Get_vl_value_at(crt_primes->_u._precomp->_m_inv_mod_nb, 0);
-}
+//! @brief Get {P^-1 % q_j} from p crt primes
+VL_I64* Get_pinvmodq(CRT_PRIMES* crt_primes);
 
-/**
- * @brief get P/p_i from p crt primes
- *
- * @param crt_primes
- * @return
- */
-static inline VL_BIGINT* Get_phat(CRT_PRIMES* crt_primes) {
-  IS_TRUE(Is_p(crt_primes), "invliad type");
-  return crt_primes->_u._precomp->_hat;
-}
+//! @brief Get precomputed values for {P^-1 % q_j}
+VL_I64* Get_pinvmodq_prec(CRT_PRIMES* crt_primes);
 
-/**
- * @brief get {{P/p_j} % q_j} from p crt primes
- *
- * @param crt_primes
- * @return VL_VL_I64*
- */
-static inline VL_VL_I64* Get_phatmodq(CRT_PRIMES* crt_primes) {
-  IS_TRUE(Is_p(crt_primes), "invliad type");
-  return crt_primes->_u._precomp->_hat_mod_nb;
-}
+//! @brief Get {{P/p_j} % q_j} from p crt primes
+//! @return VL_VL_I64*
+VL_VL_I64* Get_phatmodq(CRT_PRIMES* crt_primes);
 
-/**
- * @brief get {{P/p_j} % q_j} at given idx from p crt primes
- *
- * @param crt_primes
- * @param idx
- * @return VL_I64*
- */
-static inline VL_I64* Get_phatmodq_at(CRT_PRIMES* crt_primes, size_t idx) {
-  IS_TRUE(Is_p(crt_primes), "invliad type");
-  return Get_vl_value_at(
-      Get_vl_value_at(crt_primes->_u._precomp->_hat_mod_nb, 0), idx);
-}
+//! @brief Get {{P/p_j} % q_j} at given idx from p crt primes
+//! @return VL_I64*
+VL_I64* Get_phatmodq_at(CRT_PRIMES* crt_primes, size_t idx);
 
-/**
- * @brief get mod inverse of hat, (P/p_i)^-1 for p crt prime
- *
- * @param crt_primes
- * @return VL_BIGINT*
- */
-static inline VL_BIGINT* Get_phatinv(CRT_PRIMES* crt_primes) {
-  IS_TRUE(Is_p(crt_primes), "invliad type");
-  return crt_primes->_u._precomp->_hat_inv;
-}
+//! @brief Get {((P/p_i)^-1) % p_i} from p crt primes
+//! @return VL_I64*
+VL_I64* Get_phatinvmodp(CRT_PRIMES* crt_primes);
 
-/**
- * @brief get {((P/p_i)^-1) % p_i} from p crt primes
- *
- * @param crt_primes
- * @return VL_I64*
- */
-static inline VL_I64* Get_phatinvmodp(CRT_PRIMES* crt_primes) {
-  IS_TRUE(Is_p(crt_primes), "invliad type");
-  return Get_vl_value_at(crt_primes->_u._precomp->_hat_inv_mod_self, 0);
-}
+//! @brief Get precomputed values for {((P/p_i)^-1)%p_i} from p crt primes
+VL_I64* Get_phatinvmodp_prec(CRT_PRIMES* crt_primes);
 
-//! @brief get precomputed values for {((P/p_i)^-1)%p_i} from p crt primes
-static inline VL_I64* Get_phatinvmodp_prec(CRT_PRIMES* crt_primes) {
-  IS_TRUE(Is_p(crt_primes), "invliad type");
-  return Get_vl_value_at(crt_primes->_u._precomp->_hat_inv_mod_self_prec, 0);
-}
+//! @brief Get size of QPart precomputed
+size_t Get_per_part_size(CRT_PRIMES* crt_primes);
 
-// Get API for QPart precomputed
-/**
- * @brief get QPart precomputed
- *
- * @param crt_primes
- * @return QPART_PRE_COMP*
- */
-static inline QPART_PRE_COMP* Get_qpart_precomp(CRT_PRIMES* crt_primes) {
-  IS_TRUE(Is_qpart(crt_primes), "invliad type");
-  return crt_primes->_u._qpart_precomp;
-}
+//! @brief Get l_hat_inv_modq from QPart precomputed
+//! @return VL_VL_VL_I64*
+VL_VL_VL_I64* Get_qlhatinvmodq(CRT_PRIMES* crt_primes);
 
-/**
- * @brief get size of QPart precomputed
- *
- * @param crt_primes
- * @return
- */
-static inline size_t Get_per_part_size(CRT_PRIMES* crt_primes) {
-  IS_TRUE(Is_qpart(crt_primes), "invliad type");
-  return crt_primes->_u._qpart_precomp->_per_part_size;
-}
+//! @brief Get l_hat_modp from QPart precomputed
+//! @return VL_VL_VL_VL_I64*
+VL_VL_VL_VL_I64* Get_qlhatmodp(CRT_PRIMES* crt_primes);
 
-/**
- * @brief get modulus of QPart precomputed
- *
- * @param crt_primes
- * @return VL_BIGINT*
- */
-static inline VL_BIGINT* Get_qpart_modulus(CRT_PRIMES* crt_primes) {
-  IS_TRUE(Is_qpart(crt_primes), "invliad type");
-  return crt_primes->_u._qpart_precomp->_modulus;
-}
+//! @brief Get _ql_div2_mod_qi at given idx from crt primes
+VL_I64* Get_ql_div2_mod_qi_at(CRT_PRIMES* crt_primes, size_t idx);
 
-/**
- * @brief get l_hat_inv_modq from QPart precomputed
- *
- * @param crt_primes
- * @return VL_VL_I64*
- */
-static inline VL_VL_I64* Get_qlhatinvmodq(CRT_PRIMES* crt_primes) {
-  IS_TRUE(Is_qpart(crt_primes), "invliad type");
-  return crt_primes->_u._qpart_precomp->_l_hat_inv_modq;
-}
+//! @brief Get _ql_inv_mod_qi at given idx from crt primes
+VL_I64* Get_ql_inv_mod_qi_at(CRT_PRIMES* crt_primes, size_t idx);
 
-/**
- * @brief get l_hat_modp from QPart precomputed
- *
- * @param crt_primes
- * @return VL_VL_VL_I64*
- */
-static inline VL_VL_VL_I64* Get_qlhatmodp(CRT_PRIMES* crt_primes) {
-  IS_TRUE(Is_qpart(crt_primes), "invliad type");
-  return crt_primes->_u._qpart_precomp->_l_hat_modp;
-}
+//! @brief Get _ql_inv_mod_qi_prec at given idx from crt primes
+VL_I64* Get_ql_inv_mod_qi_prec_at(CRT_PRIMES* crt_primes, size_t idx);
 
-//! @brief get _ql_div2_mod_qi at given idx from crt primes
-static inline VL_I64* Get_ql_div2_mod_qi_at(CRT_PRIMES* crt_primes,
-                                            size_t      idx) {
-  IS_TRUE(Is_q(crt_primes), "invliad type");
-  return Get_vl_value_at(crt_primes->_u._precomp->_ql_div2_mod_qi, idx);
-}
+//! @brief Get _ql_ql_inv_mod_ql_div_ql_mod_qi at given idx from crt primes
+VL_I64* Get_ql_ql_inv_mod_ql_div_ql_mod_qi_at(CRT_PRIMES* crt_primes,
+                                              size_t      idx);
 
-//! @brief get _ql_inv_mod_qi at given idx from crt primes
-static inline VL_I64* Get_ql_inv_mod_qi_at(CRT_PRIMES* crt_primes, size_t idx) {
-  IS_TRUE(Is_q(crt_primes), "invliad type");
-  return Get_vl_value_at(crt_primes->_u._precomp->_ql_inv_mod_qi, idx);
-}
+//! @brief Get _ql_ql_inv_mod_ql_div_ql_mod_qi_prec at given idx from crt primes
+VL_I64* Get_ql_ql_inv_mod_ql_div_ql_mod_qi_prec_at(CRT_PRIMES* crt_primes,
+                                                   size_t      idx);
 
-//! @brief get _ql_inv_mod_qi_prec at given idx from crt primes
-static inline VL_I64* Get_ql_inv_mod_qi_prec_at(CRT_PRIMES* crt_primes,
-                                                size_t      idx) {
-  IS_TRUE(Is_q(crt_primes), "invliad type");
-  return Get_vl_value_at(crt_primes->_u._precomp->_ql_inv_mod_qi_prec, idx);
-}
-
-//! @brief get _ql_ql_inv_mod_ql_div_ql_mod_qi at given idx from crt primes
-static inline VL_I64* Get_ql_ql_inv_mod_ql_div_ql_mod_qi_at(
-    CRT_PRIMES* crt_primes, size_t idx) {
-  IS_TRUE(Is_q(crt_primes), "invliad type");
-  return Get_vl_value_at(
-      crt_primes->_u._precomp->_ql_ql_inv_mod_ql_div_ql_mod_qi, idx);
-}
-
-//! @brief get _ql_ql_inv_mod_ql_div_ql_mod_qi_prec at given idx from crt primes
-static inline VL_I64* Get_ql_ql_inv_mod_ql_div_ql_mod_qi_prec_at(
-    CRT_PRIMES* crt_primes, size_t idx) {
-  IS_TRUE(Is_q(crt_primes), "invliad type");
-  return Get_vl_value_at(
-      crt_primes->_u._precomp->_ql_ql_inv_mod_ql_div_ql_mod_qi_prec, idx);
-}
-
-/**
- * @brief An instance of Chinese Remainder Theorem parameters
- * We split a large number into its prime factors
- *
- */
-typedef struct {
-  CRT_PRIMES _q;
-  CRT_PRIMES _p;
-  CRT_PRIMES _qpart;
-  CRT_PRIMES _qpart_compl;
-} CRT_CONTEXT;
-
-/**
- * @brief malloc memory for CRT_CONTEXT
- *
- * @return CRT_CONTEXT*
- */
+//! @brief Malloc memory for CRT_CONTEXT
+//! @return CRT_CONTEXT*
 CRT_CONTEXT* Alloc_crtcontext();
 
-/**
- * @brief initialize CRT_CONTEXT with max depth of multiply
- *
- * @param crt CRT_CONTEXT will be initialized
- * @param level security level
- * @param poly_degree polynomial degree of ring
- * @param mult_depth max depth of multiply
- * @param num_parts number of q parts
- */
+//! @brief Initialize CRT_CONTEXT with max depth of multiply
+//! @param crt CRT_CONTEXT will be initialized
+//! @param level security level
+//! @param poly_degree polynomial degree of ring
+//! @param mult_depth max depth of multiply
+//! @param num_parts number of q parts
 void Init_crtcontext(CRT_CONTEXT* crt, SECURITY_LEVEL level,
                      uint32_t poly_degree, size_t mult_depth, size_t num_parts);
 
-/**
- * @brief initialize CRT_CONTEXT with mod size
- *
- * @param crt CRT_CONTEXT will be initialized
- * @param level security level
- * @param poly_degree polynomial degree of ring
- * @param num_primes number of q primes
- * @param first_mod_size bit size of first mod
- * @param scaling_mod_size bit size of scaling factor
- * @param num_parts number of q parts
- */
+//! @brief Initialize CRT_CONTEXT with mod size
+//! @param crt CRT_CONTEXT will be initialized
+//! @param level security level
+//! @param poly_degree polynomial degree of ring
+//! @param num_primes number of q primes
+//! @param first_mod_size bit size of first mod
+//! @param scaling_mod_size bit size of scaling factor
+//! @param num_parts number of q parts
 void Init_crtcontext_with_prime_size(CRT_CONTEXT* crt, SECURITY_LEVEL level,
                                      uint32_t poly_degree, size_t num_primes,
                                      size_t first_mod_size,
                                      size_t scaling_mod_size, size_t num_parts);
 
-/**
- * @brief cleanup crtContext memory
- *
- * @param crt
- */
+//! @brief Cleanup crtContext memory
 void Free_crtcontext(CRT_CONTEXT* crt);
 
-/**
- * @brief precompute with new base
- *
- * @param base
- * @param new_base
- */
-void Precompute_new_base(CRT_PRIMES* base, CRT_PRIMES* new_base);
-
-/**
- * @brief transform value to CRT representation (Q)
- *
- * @param crt_ret CRT representation from value
- * @param crt CRT representation
- * @param value value to be transformed to CRT representation
- */
-void Transform_to_crt(VALUE_LIST* crt_ret, CRT_PRIMES* crt, BIG_INT value);
-
-/**
- * @brief transform value to CRT representation (P * Q)
- *
- * @param crt_ret CRT representation from value
- * @param crt CRT representation
- * @param value value to be transformed to CRT representation
- */
-void Transform_to_qpcrt(VALUE_LIST* crt_ret, CRT_CONTEXT* crt, BIG_INT value);
-
-/**
- * @brief print crt context
- *
- * @param fp
- * @param crt
- */
-void Print_crt(FILE* fp, CRT_CONTEXT* crt);
-
 // Access APIs for CRT_CONTEXT
-/**
- * @brief get crt primes for q
- *
- * @param crt
- * @return CRT_PRIMES*
- */
-static inline CRT_PRIMES* Get_q(CRT_CONTEXT* crt) { return &(crt->_q); }
+//! @brief Get crt primes for q
+//! @return CRT_PRIMES*
+CRT_PRIMES* Get_q(CRT_CONTEXT* crt);
 
-/**
- * @brief get crt primes for p
- *
- * @param crt
- * @return CRT_PRIMES*
- */
-static inline CRT_PRIMES* Get_p(CRT_CONTEXT* crt) { return &(crt->_p); }
+//! @brief Get crt primes for p
+//! @return CRT_PRIMES*
+CRT_PRIMES* Get_p(CRT_CONTEXT* crt);
 
-/**
- * @brief get crt primes for q part
- *
- * @param crt
- * @return CRT_PRIMES*
- */
-static inline CRT_PRIMES* Get_qpart(CRT_CONTEXT* crt) { return &(crt->_qpart); }
+//! @brief Get crt primes for q part
+//! @return CRT_PRIMES*
+CRT_PRIMES* Get_qpart(CRT_CONTEXT* crt);
 
-/**
- * @brief get crt primes for q part complement
- *
- * @param crt
- * @return CRT_PRIMES*
- */
-static inline CRT_PRIMES* Get_qpart_compl(CRT_CONTEXT* crt) {
-  return &(crt->_qpart_compl);
-}
+//! @brief Get crt primes for q part complement
+//! @return CRT_PRIMES*
+CRT_PRIMES* Get_qpart_compl(CRT_CONTEXT* crt);
 
-/**
- * @brief Get q modulus head from crt context
- *
- * @param crt
- * @return Modulus*
- */
-static inline MODULUS* Get_q_modulus_head(CRT_CONTEXT* crt) {
-  return (MODULUS*)Get_ptr_value_at(crt->_q._mod_val_list, 0);
-}
+//! @brief Get q modulus head from crt context
+//! @return Modulus*
+MODULUS* Get_q_modulus_head(CRT_CONTEXT* crt);
 
-/**
- * @brief Get p modulus head from crt context
- *
- * @param crt
- * @return Modulus*
- */
-static inline MODULUS* Get_p_modulus_head(CRT_CONTEXT* crt) {
-  return (MODULUS*)Get_ptr_value_at(crt->_p._mod_val_list, 0);
-}
+//! @brief Get p modulus head from crt context
+//! @return Modulus*
+MODULUS* Get_p_modulus_head(CRT_CONTEXT* crt);
 
-/**
- * @brief get value list of crt primes for q
- *
- * @param crt
- * @return CRT_PRIMES*
- */
-static inline VL_CRTPRIME* Get_q_primes(CRT_CONTEXT* crt) {
-  return crt->_q._primes;
-}
+//! @brief Get value list of crt primes for q
+//! @return CRT_PRIMES*
+VL_CRTPRIME* Get_q_primes(CRT_CONTEXT* crt);
 
-/**
- * @brief get value list of crt primes for p
- *
- * @param crt
- * @return CRT_PRIMES*
- */
-static inline VL_CRTPRIME* Get_p_primes(CRT_CONTEXT* crt) {
-  return crt->_p._primes;
-}
+//! @brief Get value list of crt primes for p
+//! @return CRT_PRIMES*
+VL_CRTPRIME* Get_p_primes(CRT_CONTEXT* crt);
 
-/**
- * @brief get number of p prime
- *
- * @param crt
- * @return size_t
- */
-static inline size_t Get_crt_num_p(CRT_CONTEXT* crt) {
-  return Get_qpart(crt)->_u._qpart_precomp->_num_p;
-}
+//! @brief Get number of q prime
+//! @return size_t
+size_t Get_crt_num_q(CRT_CONTEXT* crt);
 
-/**
- * @brief get value list of crt primes for q part
- *
- * @param crt
- * @return
- */
-static inline VL_VL_CRTPRIME* Get_qpart_primes(CRT_CONTEXT* crt) {
-  return crt->_qpart._primes;
-}
+//! @brief Get number of p prime
+//! @return size_t
+size_t Get_crt_num_p(CRT_CONTEXT* crt);
 
-/**
- * @brief get value list of crt primes for q part complement
- *
- * @param crt
- * @return VL_VL_VL_CRTPRIME*
- */
-static inline VL_VL_VL_CRTPRIME* Get_qpart_compl_primes(CRT_CONTEXT* crt) {
-  return crt->_qpart_compl._primes;
-}
+//! @brief Get number of decompose part size with given number of q primes
+//! @param crt CRT_CONTEXT
+//! @param num_q the number of q primes
+size_t Get_num_decomp(CRT_CONTEXT* crt, size_t num_q);
+
+//! @brief Transform regular value to double-CRT representation values from
+//! given primes
+//! @param res values of double-CRT representation values
+//! @param res_len length of double-CRT representation values
+//! @param vals input original value list
+//! @param q_cnt length of Q primes
+//! @param extend_p extend P primes or not
+//! @param without_mod within modulus or not
+//! @param crt CRT_CONTEXT
+void Transform_to_dcrt(int64_t* res, size_t res_len, VALUE_LIST* vals,
+                       size_t q_cnt, bool extend_p, bool without_mod,
+                       CRT_CONTEXT* crt);
+
+//! @brief Reconstructs double-CRT representation values to the regular values
+//! @param res regular value list
+//! @param vals input double-CRT representation values
+//! @param val_len length of double-CRT representation values
+//! @param q_cnt length of Q primes
+//! @param extend_p extend P primes or not
+//! @param crt CRT_CONTEXT
+//! @return A value list whose values are reconstructed.
+void Reconstruct_from_dcrt(VALUE_LIST* res, int64_t* vals, size_t val_len,
+                           size_t q_cnt, bool extend_p, CRT_CONTEXT* crt);
 
 #ifdef __cplusplus
 }

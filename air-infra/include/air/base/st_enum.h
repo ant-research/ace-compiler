@@ -173,7 +173,8 @@ enum ARENA_KIND {
   AK_CODE     = 0xf,
   AK_ARB      = 0x10,
   AK_ATTR     = 0x11,
-  AK_PREG     = 0x12
+  AK_PREG     = 0x12,
+  AK_LITERAL  = 0x13
 };
 
 enum class PARAM_KIND { MANDATORY = 0x0, RETURN = 0x1, ELLIPSIS = 0x2 };
@@ -188,11 +189,8 @@ enum class FIELD_KIND {
   STATIC           = 0x6
 };
 
-/**
- * @brief ARB entry flag indicating if bounds are constant
- * and if the entry is the first or last dimension entry
- *
- */
+//! @brief ARB entry flag indicating if bounds are constant
+//! and if the entry is the first or last dimension entry
 enum class ARB_FLAG {
   LB_CONST     = 0x01,
   UB_CONST     = 0x02,
@@ -232,11 +230,8 @@ enum class RECORD_KIND { CLASS = 0x0, STRUCT = 0x1, UNION = 0x2 };
 
 enum class STRIDE_KIND { BIT = 0x0, BYTE = 0x1 };
 
-/**
- * @brief FLAT32 refers to pointer of size 32 and alignment 32,
- *        FLAT64 refers to pointer of size 64 and alignment 64
- *
- */
+//! @brief FLAT32 refers to pointer of size 32 and alignment 32,
+//!        FLAT64 refers to pointer of size 64 and alignment 64
 enum class POINTER_KIND { FLAT32 = 0x0, FLAT64 = 0x1, END = 0x2 };
 
 }  // namespace base

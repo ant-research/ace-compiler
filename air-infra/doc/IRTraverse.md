@@ -6,8 +6,8 @@
 
 |Version|Author     |Date      |Description|
 |-------|-----------|----------|-----------|
-|0.2    ||2023.12.07|Update visitor, handler and context.|
-|0.1    ||2023.08.24|Initial version.|
+|0.2    |jianxin.lai|2023.12.07|Update visitor, handler and context.|
+|0.1    |jianxin.lai|2023.08.24|Initial version.|
 
 ## Introduction
 This document introduced how operator from different domains are organized and traversed.

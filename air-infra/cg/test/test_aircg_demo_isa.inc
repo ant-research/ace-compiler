@@ -1,0 +1,395 @@
+//-*-c++-*-
+//=============================================================================
+//
+// Copyright (c) Ant Group Co., Ltd
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//=============================================================================
+
+#include "air/cg/targ_info.h"
+#include "air/util/debug.h"
+#include "test_aircg_demo_isa.h"
+
+namespace air {
+
+namespace cg {
+
+namespace demo {
+
+static constexpr uint16_t RC_NUM = 5;
+
+static constexpr uint32_t GPR_NUM  = 32;
+static constexpr uint32_t GPR_SIZE = 0x8 | 0x4 | 0x2 | 0x1;
+static constexpr uint32_t FPR_NUM  = 32;
+static constexpr uint32_t FPR_SIZE = 0x8 | 0x4;
+static constexpr uint32_t VER_NUM  = 32;
+static constexpr uint32_t VER_SIZE =
+    0x64 | 0x32 | 0x16 | 0x8 | 0x4 | 0x2 | 0x1;
+
+static constexpr uint32_t ADDR_SIZE = 0x8;
+
+static constexpr struct REG_META REG_INFO_GPR[GPR_NUM] = {
+    {"x0",  0,  GPR_SIZE, REG_READONLY | REG_ZERO},
+    {"x1",  1,  GPR_SIZE, REG_RET_ADDR},
+    {"x2",  2,  GPR_SIZE, REG_STACK_PTR},
+    {"x3",  3,  GPR_SIZE, REG_GLOBAL_PTR},
+    {"x4",  4,  GPR_SIZE, REG_THREAD_PTR},
+    {"x5",  5,  GPR_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"x6",  6,  GPR_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"x7",  7,  GPR_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"x8",  8,  GPR_SIZE, REG_ALLOCATABLE | REG_PRESERVED},
+    {"x9",  9,  GPR_SIZE, REG_ALLOCATABLE | REG_PRESERVED},
+    {"x10", 10, GPR_SIZE, REG_ALLOCATABLE | REG_SCRATCH | REG_PARAMETER | REG_RET_VALUE},
+    {"x11", 11, GPR_SIZE, REG_ALLOCATABLE | REG_SCRATCH | REG_PARAMETER | REG_RET_VALUE},
+    {"x12", 12, GPR_SIZE, REG_ALLOCATABLE | REG_SCRATCH | REG_PARAMETER | REG_RET_VALUE},
+    {"x13", 13, GPR_SIZE, REG_ALLOCATABLE | REG_SCRATCH | REG_PARAMETER | REG_RET_VALUE},
+    {"x14", 14, GPR_SIZE, REG_ALLOCATABLE | REG_SCRATCH | REG_PARAMETER | REG_RET_VALUE},
+    {"x15", 15, GPR_SIZE, REG_ALLOCATABLE | REG_SCRATCH | REG_PARAMETER | REG_RET_VALUE},
+    {"x16", 16, GPR_SIZE, REG_ALLOCATABLE | REG_SCRATCH | REG_PARAMETER | REG_RET_VALUE},
+    {"x17", 17, GPR_SIZE, REG_ALLOCATABLE | REG_SCRATCH | REG_PARAMETER | REG_RET_VALUE},
+    {"x18", 18, GPR_SIZE, REG_ALLOCATABLE | REG_PRESERVED},
+    {"x19", 19, GPR_SIZE, REG_ALLOCATABLE | REG_PRESERVED},
+    {"x20", 20, GPR_SIZE, REG_ALLOCATABLE | REG_PRESERVED},
+    {"x21", 21, GPR_SIZE, REG_ALLOCATABLE | REG_PRESERVED},
+    {"x22", 22, GPR_SIZE, REG_ALLOCATABLE | REG_PRESERVED},
+    {"x23", 23, GPR_SIZE, REG_ALLOCATABLE | REG_PRESERVED},
+    {"x24", 24, GPR_SIZE, REG_ALLOCATABLE | REG_PRESERVED},
+    {"x25", 25, GPR_SIZE, REG_ALLOCATABLE | REG_PRESERVED},
+    {"x26", 26, GPR_SIZE, REG_ALLOCATABLE | REG_PRESERVED},
+    {"x27", 27, GPR_SIZE, REG_ALLOCATABLE | REG_PRESERVED},
+    {"x28", 28, GPR_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"x29", 29, GPR_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"x30", 30, GPR_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"x31", 31, GPR_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+};
+
+static constexpr struct REG_INFO_META REG_CLASS_GPR = {
+    "GPR", REG_CLASS::GPR, 32, GPR_SIZE, 0, REG_INFO_GPR
+};
+
+static constexpr struct REG_META REG_INFO_FPR[FPR_NUM] = {
+    {"f0",  0,  FPR_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"f1",  1,  FPR_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"f2",  2,  FPR_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"f3",  3,  FPR_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"f4",  4,  FPR_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"f5",  5,  FPR_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"f6",  6,  FPR_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"f7",  7,  FPR_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"f8",  8,  FPR_SIZE, REG_ALLOCATABLE | REG_PRESERVED},
+    {"f9",  9,  FPR_SIZE, REG_ALLOCATABLE | REG_PRESERVED},
+    {"f10", 10, FPR_SIZE, REG_ALLOCATABLE | REG_SCRATCH | REG_PARAMETER | REG_RET_VALUE},
+    {"f11", 11, FPR_SIZE, REG_ALLOCATABLE | REG_SCRATCH | REG_PARAMETER | REG_RET_VALUE},
+    {"f12", 12, FPR_SIZE, REG_ALLOCATABLE | REG_SCRATCH | REG_PARAMETER | REG_RET_VALUE},
+    {"f13", 13, FPR_SIZE, REG_ALLOCATABLE | REG_SCRATCH | REG_PARAMETER | REG_RET_VALUE},
+    {"f14", 14, FPR_SIZE, REG_ALLOCATABLE | REG_SCRATCH | REG_PARAMETER | REG_RET_VALUE},
+    {"f15", 15, FPR_SIZE, REG_ALLOCATABLE | REG_SCRATCH | REG_PARAMETER | REG_RET_VALUE},
+    {"f16", 16, FPR_SIZE, REG_ALLOCATABLE | REG_SCRATCH | REG_PARAMETER | REG_RET_VALUE},
+    {"f17", 17, FPR_SIZE, REG_ALLOCATABLE | REG_SCRATCH | REG_PARAMETER | REG_RET_VALUE},
+    {"f18", 18, FPR_SIZE, REG_ALLOCATABLE | REG_PRESERVED},
+    {"f19", 19, FPR_SIZE, REG_ALLOCATABLE | REG_PRESERVED},
+    {"f20", 20, FPR_SIZE, REG_ALLOCATABLE | REG_PRESERVED},
+    {"f21", 21, FPR_SIZE, REG_ALLOCATABLE | REG_PRESERVED},
+    {"f22", 22, FPR_SIZE, REG_ALLOCATABLE | REG_PRESERVED},
+    {"f23", 23, FPR_SIZE, REG_ALLOCATABLE | REG_PRESERVED},
+    {"f24", 24, FPR_SIZE, REG_ALLOCATABLE | REG_PRESERVED},
+    {"f25", 25, FPR_SIZE, REG_ALLOCATABLE | REG_PRESERVED},
+    {"f26", 26, FPR_SIZE, REG_ALLOCATABLE | REG_PRESERVED},
+    {"f27", 27, FPR_SIZE, REG_ALLOCATABLE | REG_PRESERVED},
+    {"f28", 28, FPR_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"f29", 29, FPR_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"f30", 30, FPR_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"f31", 31, FPR_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+};
+
+static constexpr struct REG_INFO_META REG_CLASS_FPR = {
+    "FPR", REG_CLASS::FPR, 32, FPR_SIZE, 0, REG_INFO_FPR
+};
+
+static constexpr struct REG_META REG_INFO_VER[VER_NUM] = {
+    {"v0",  0,  VER_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"v1",  1,  VER_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"v2",  2,  VER_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"v3",  3,  VER_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"v4",  4,  VER_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"v5",  5,  VER_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"v6",  6,  VER_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"v7",  7,  VER_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"v8",  8,  VER_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"v9",  9,  VER_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"v10", 10, VER_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"v11", 11, VER_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"v12", 12, VER_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"v13", 13, VER_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"v14", 14, VER_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"v15", 15, VER_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"v16", 16, VER_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"v17", 17, VER_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"v18", 18, VER_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"v19", 19, VER_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"v20", 20, VER_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"v21", 21, VER_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"v22", 22, VER_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"v23", 23, VER_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"v24", 24, VER_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"v25", 25, VER_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"v26", 26, VER_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"v27", 27, VER_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"v28", 28, VER_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"v29", 29, VER_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"v30", 30, VER_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+    {"v31", 31, VER_SIZE, REG_ALLOCATABLE | REG_SCRATCH},
+};
+
+static constexpr struct REG_INFO_META REG_CLASS_VER = {
+    "VER", REG_CLASS::VER, 32, VER_SIZE, 0, REG_INFO_VER
+};
+
+static constexpr struct INST_META INST_META_UNDEF = {
+    "undef",
+    0,
+    0,
+    0,
+    0,
+    {}
+};
+
+static constexpr struct INST_META INST_META_ADD = {
+    "add",
+    0,
+    1,
+    2,
+    INST_COMMUTABLE,
+    {{OPND_KIND::REGISTER, REG_CLASS::GPR, REG_UNKNOWN, GPR_SIZE},
+      {OPND_KIND::REGISTER, REG_CLASS::GPR, REG_UNKNOWN, GPR_SIZE},
+      {OPND_KIND::REGISTER, REG_CLASS::GPR, REG_UNKNOWN, GPR_SIZE}}
+};
+
+static constexpr struct INST_META INST_META_ADDI = {
+    "addi",
+    0,
+    1,
+    2,
+    0,
+    {{OPND_KIND::REGISTER, REG_CLASS::GPR, REG_UNKNOWN, GPR_SIZE},
+      {OPND_KIND::REGISTER, REG_CLASS::GPR, REG_UNKNOWN, GPR_SIZE},
+      {OPND_KIND::IMMEDIATE, REG_CLASS::UNKNOWN, REG_UNKNOWN,
+      GPR_SIZE}}
+};
+
+static constexpr struct INST_META INST_META_BNEZ = {
+    "bnez",
+    0,
+    0,
+    2,
+    INST_BRANCH,
+    {
+      {OPND_KIND::REGISTER, REG_CLASS::GPR, REG_UNKNOWN, GPR_SIZE},
+      {OPND_KIND::BB, REG_CLASS::UNKNOWN, REG_UNKNOWN, ADDR_SIZE},
+      }
+};
+
+static constexpr struct INST_META INST_META_BGE = {
+    "bge",
+    0,
+    0,
+    3,
+    INST_BRANCH,
+    {
+      {OPND_KIND::REGISTER, REG_CLASS::GPR, REG_UNKNOWN, GPR_SIZE},
+      {OPND_KIND::REGISTER, REG_CLASS::GPR, REG_UNKNOWN, GPR_SIZE},
+      {OPND_KIND::BB, REG_CLASS::UNKNOWN, REG_UNKNOWN, ADDR_SIZE},
+      }
+};
+
+static constexpr struct INST_META INST_META_CALL = {
+    "call",
+    0,
+    0,
+    1,
+    INST_CALL,
+    {
+      {OPND_KIND::SYMBOL, REG_CLASS::UNKNOWN, REG_UNKNOWN, ADDR_SIZE},
+      }
+};
+
+static constexpr struct INST_META INST_META_LW = {
+    "lw",
+    0,
+    1,
+    1,
+    0,
+    {
+      {OPND_KIND::REGISTER, REG_CLASS::GPR, REG_UNKNOWN, 0x4},
+      {OPND_KIND::SYMBOL, REG_CLASS::UNKNOWN, REG_UNKNOWN, ADDR_SIZE},
+      }
+};
+
+static constexpr struct INST_META INST_META_LD = {
+    "ld",
+    0,
+    1,
+    1,
+    0,
+    {
+      {OPND_KIND::REGISTER, REG_CLASS::GPR, REG_UNKNOWN, 0x8},
+      {OPND_KIND::SYMBOL, REG_CLASS::UNKNOWN, REG_UNKNOWN, ADDR_SIZE},
+      }
+};
+
+static constexpr struct INST_META INST_META_J = {
+    "j",
+    0,
+    0,
+    1,
+    INST_BRANCH,
+    {
+      {OPND_KIND::BB, REG_CLASS::UNKNOWN, REG_UNKNOWN, ADDR_SIZE},
+      }
+};
+
+static constexpr struct INST_META INST_META_MV = {
+    "mv",
+    0,
+    1,
+    1,
+    0,
+    {
+      {OPND_KIND::REGISTER, REG_CLASS::GPR, REG_UNKNOWN, GPR_SIZE},
+      {OPND_KIND::REGISTER, REG_CLASS::GPR, REG_UNKNOWN, GPR_SIZE},
+      }
+};
+
+static constexpr struct INST_META INST_META_RET = {"ret", 0, 0, 0, INST_RETURN};
+
+static constexpr struct INST_META INST_META_SW = {
+    "sw",
+    0,
+    0,
+    2,
+    0,
+    {
+      {OPND_KIND::REGISTER, REG_CLASS::GPR, REG_UNKNOWN, 0x4},
+      {OPND_KIND::SYMBOL, REG_CLASS::UNKNOWN, REG_UNKNOWN, ADDR_SIZE},
+      }
+};
+
+static constexpr struct INST_META INST_META_SD = {
+    "sd",
+    0,
+    0,
+    2,
+    0,
+    {
+      {OPND_KIND::REGISTER, REG_CLASS::GPR, REG_UNKNOWN, 0x8},
+      {OPND_KIND::SYMBOL, REG_CLASS::UNKNOWN, REG_UNKNOWN, ADDR_SIZE},
+      }
+};
+
+static constexpr struct INST_META INST_META_LI = {
+    "li",
+    0,
+    1,
+    1,
+    0,
+    {{OPND_KIND::REGISTER, REG_CLASS::GPR, REG_UNKNOWN, GPR_SIZE},
+      {OPND_KIND::IMMEDIATE, REG_CLASS::UNKNOWN, REG_UNKNOWN,
+      GPR_SIZE}}
+};
+
+static constexpr struct INST_META INST_META_BLT = {
+    "blt",
+    0,
+    0,
+    3,
+    INST_BRANCH,
+    {
+      {OPND_KIND::REGISTER, REG_CLASS::GPR, REG_UNKNOWN, GPR_SIZE},
+      {OPND_KIND::REGISTER, REG_CLASS::GPR, REG_UNKNOWN, GPR_SIZE},
+      {OPND_KIND::BB, REG_CLASS::UNKNOWN, REG_UNKNOWN, ADDR_SIZE},
+      }
+};
+
+static constexpr struct INST_META INST_META_MUL = {
+    "mul",
+    0,
+    1,
+    2,
+    INST_COMMUTABLE,
+    {{OPND_KIND::REGISTER, REG_CLASS::GPR, REG_UNKNOWN, GPR_SIZE},
+      {OPND_KIND::REGISTER, REG_CLASS::GPR, REG_UNKNOWN, GPR_SIZE},
+      {OPND_KIND::REGISTER, REG_CLASS::GPR, REG_UNKNOWN, GPR_SIZE}}
+};
+
+static constexpr struct INST_META INST_META_SUBI = {
+    "subi",
+    0,
+    1,
+    2,
+    0,
+    {{OPND_KIND::REGISTER, REG_CLASS::GPR, REG_UNKNOWN, GPR_SIZE},
+      {OPND_KIND::REGISTER, REG_CLASS::GPR, REG_UNKNOWN, GPR_SIZE},
+      {OPND_KIND::IMMEDIATE, REG_CLASS::UNKNOWN, REG_UNKNOWN,
+      GPR_SIZE}}
+};
+
+static constexpr struct INST_META const* INST_META_ALL[] = {
+    &INST_META_UNDEF, &INST_META_ADD,   &INST_META_ADDI,
+    &INST_META_BNEZ,  &INST_META_BGE,   &INST_META_CALL,
+    &INST_META_LW,    &INST_META_LD,    &INST_META_J,
+    &INST_META_MV,    &INST_META_RET,   &INST_META_SW,
+    &INST_META_SD,    &INST_META_LI,    &INST_META_BLT,
+    &INST_META_MUL,   &INST_META_SUBI
+};
+
+static const struct OPND_FLAG_META OPND_FLAG[] = {
+  {LO, "lo"},
+  {HI, "hi"}
+};
+
+static constexpr struct ISA_INFO_META ISA_INFO = {
+  "DEMO", ISA_ID,
+  sizeof(INST_META_ALL) / sizeof(INST_META_ALL[0]),
+  sizeof(OPND_FLAG) / sizeof(OPND_FLAG[0]),
+  INST_META_ALL,
+  OPND_FLAG
+};
+
+static constexpr struct REG_CONV_META REG_CONV_GPR = {
+  REG_CLASS::GPR, demo::X0, 8, 2,
+  {
+    demo::X10, demo::X11, demo::X12, demo::X13, demo::X14, demo::X15, demo::X16, demo::X17,
+    demo::X10, demo::X11
+  }
+};
+
+static constexpr struct REG_CONV_META REG_CONV_FPR = {
+  REG_CLASS::FPR, REG_UNKNOWN, 8, 2,
+  {
+    demo::F10, demo::F11, demo::F12, demo::F13, demo::F14, demo::F15, demo::F16, demo::F17,
+    demo::F10, demo::F11,
+  }
+};
+
+static constexpr struct REG_CONV_META const* REG_CONV_ALL[] = {
+  &REG_CONV_GPR, &REG_CONV_FPR
+};
+
+static constexpr struct ABI_INFO_META ABI_INFO = {
+  "DEMO-ABI", ABI_ID, REG_CLASS::GPR,
+  REG_UNKNOWN, demo::X2, demo::X3, demo::X4, demo::X1,
+  sizeof(REG_CONV_ALL) / sizeof(REG_CONV_ALL[0]),
+  REG_CONV_ALL
+};
+
+static REG_INFO_REGISTER Reg_gpr(&REG_CLASS_GPR);
+static REG_INFO_REGISTER Reg_fpr(&REG_CLASS_FPR);
+static REG_INFO_REGISTER Reg_ver(&REG_CLASS_VER);
+static ISA_INFO_REGISTER Reg_isa(&ISA_INFO);
+static ABI_INFO_REGISTER Reg_abi(&ABI_INFO);
+
+}  // namespace demo
+
+}  // namespace cg
+
+}  // namespace air

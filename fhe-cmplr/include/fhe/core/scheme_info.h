@@ -9,9 +9,12 @@
 #ifndef FHE_CORE_SCHEME_INFO_H
 #define FHE_CORE_SCHEME_INFO_H
 
+#include <cmath>
 #include <cstdint>
 #include <iostream>
 #include <set>
+
+#include "air/util/debug.h"
 
 namespace fhe {
 namespace core {
@@ -42,10 +45,9 @@ public:
   // to achieve better precision, update _q_part_num and bit number of q0/sf
   // with mul_level and poly_deg.
   void Update_prime_info();
-  void Set_poly_degree(uint32_t deg) {
-    if (_poly_degree >= deg) return;
+  void Set_poly_degree(uint32_t deg, bool update_prime_info) {
     _poly_degree = deg;
-    Update_prime_info();
+    if (update_prime_info) Update_prime_info();
   }
 
   uint32_t Get_poly_degree() const { return _poly_degree; }
@@ -95,11 +97,34 @@ public:
   void     Add_rotate_index(const std::set<int32_t>& index) {
     _rotate_index.insert(index.begin(), index.end());
   }
+  void     Set_input_level(uint32_t lev) { _input_level = lev; }
+  uint32_t Get_input_level(void) const { return _input_level; }
+  uint32_t Get_tot_prime_num() const {
+    return Get_p_prime_num() + Get_mul_level();
+  }
 
+  void                     Clear_rotate_index() { _rotate_index.clear(); }
   const std::set<int32_t>& Get_rotate_index() const { return _rotate_index; }
   void                     Print(std::ostream& out = std::cout);
   uint32_t                 Mul_depth_of_bootstrap();
   uint32_t                 Get_modulus_bit_num() const;
+
+  uint32_t Get_per_part_size() const {
+    return std::ceil((double)(Get_mul_level()) / Get_q_part_num());
+  }
+
+  uint32_t Get_num_decomp(uint32_t num_q) const {
+    uint32_t num_decomp = std::ceil((double)num_q / Get_per_part_size());
+    return num_decomp > Get_q_part_num() ? Get_q_part_num() : num_decomp;
+  }
+
+  uint32_t Get_part2_size(uint32_t num_q, uint32_t idx) const {
+    if (idx == Get_num_decomp(num_q) - 1) {
+      CMPLR_ASSERT(num_q > Get_per_part_size() * idx, "invalid part2 size");
+      return num_q - Get_per_part_size() * idx;
+    }
+    return Get_per_part_size();
+  }
 
 private:
   // REQUIRED UNDEFINED UNWANTED methods
@@ -109,8 +134,9 @@ private:
   uint32_t          _poly_degree            = 4;
   uint32_t          _security_level         = 0;
   uint32_t          _mul_level              = 0;
-  uint32_t          _first_prime_bit_num    = 33;
-  uint32_t          _scaling_factor_bit_num = 30;
+  uint32_t          _input_level            = 0;
+  uint32_t          _first_prime_bit_num    = 60;
+  uint32_t          _scaling_factor_bit_num = 56;
   uint32_t          _q_part_num             = 0;
   uint32_t          _hamming_weight         = 0;
   std::set<int32_t> _rotate_index;

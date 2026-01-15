@@ -40,11 +40,19 @@ public:
 
   bool Is_empty() const;
 
+  //! Insert stmt before the position pointed by pos
   STMT_PTR Prepend(STMT_PTR pos, STMT_PTR stmt);
+  //! Insert stmt to be the first statement
   STMT_PTR Prepend(STMT_PTR stmt);
+  //! Insert stmt_list of the begining, return the header of the new list
+  STMT_PTR Prepend(STMT_LIST stmt_list);
   STMT_PTR Remove(STMT_PTR pos);
+  //! Insert stmt after the position pointed by pos
   STMT_PTR Append(STMT_PTR pos, STMT_PTR stmt);
+  //! Insert stmt to be the last statement
   STMT_PTR Append(STMT_PTR stmt);
+  //! Insert stmt_list to the end, return the header of the new list
+  STMT_PTR Append(STMT_LIST stmt_list);
   STMT_PTR Erase(STMT_PTR pos);
 
   //! Given a statement 'stmt', return the list encloses it
@@ -68,6 +76,15 @@ class CONTAINER {
   friend class FUNC_SCOPE;
 
 public:
+  //! @brief Constructor for c++ new
+  CONTAINER(FUNC_SCOPE* func, bool open);
+  //! @brief Destructor for c++ delete
+  ~CONTAINER();
+  //! @brief Use delete to clean up the container created via New API
+  static CONTAINER* New(FUNC_SCOPE* func, bool open = true);
+  //! @brief Clean up code arena and mempool
+  void Delete();
+
   FUNC_SCOPE* Parent_func_scope() const { return _func; }
   GLOB_SCOPE* Glob_scope() const { return _glob; }
   STMT_LIST   Stmt_list() const;
@@ -77,6 +94,8 @@ public:
   STMT_PTR    Stmt(STMT_ID stmt) const;
 
   NODE_PTR New_void(const SPOS& spos);
+  //! Function entry node. The example can be found in ut_container.cxx.
+  STMT_PTR New_func_entry(const SPOS& spos, uint32_t arg_cnt);
   //! Function entry node
   STMT_PTR New_func_entry(const SPOS& spos);
   //! Formal parameter of function entry
@@ -89,11 +108,23 @@ public:
                        const SPOS& spos);
   STMT_PTR New_while_loop(OPCODE op, CONST_NODE_PTR comp, NODE_PTR body,
                           const SPOS& spos);
-  NODE_PTR New_una_arith(OPCODE op, NODE_PTR val, const SPOS& spos);
-  NODE_PTR New_bin_arith(OPCODE op, NODE_PTR left, NODE_PTR right,
+  NODE_PTR New_una_arith(OPCODE op, CONST_TYPE_PTR rtype, NODE_PTR val,
                          const SPOS& spos);
-  NODE_PTR New_tern_arith(OPCODE op, NODE_PTR node1, NODE_PTR node2,
-                          NODE_PTR node3, const SPOS& spos);
+  NODE_PTR New_bin_arith(OPCODE op, CONST_TYPE_PTR rtype, NODE_PTR left,
+                         NODE_PTR right, const SPOS& spos);
+  NODE_PTR New_tern_arith(OPCODE op, CONST_TYPE_PTR rtype, NODE_PTR node1,
+                          NODE_PTR node2, NODE_PTR node3, const SPOS& spos);
+  NODE_PTR New_quad_arith(OPCODE op, CONST_TYPE_PTR rtype, NODE_PTR node1,
+                          NODE_PTR node2, NODE_PTR node3, NODE_PTR node4,
+                          const SPOS& spos);
+  NODE_PTR New_quint_arith(OPCODE op, CONST_TYPE_PTR rtype, NODE_PTR node1,
+                           NODE_PTR node2, NODE_PTR node3, NODE_PTR node4,
+                           NODE_PTR node5, const SPOS& spos);
+  NODE_PTR New_sext_arith(OPCODE op, CONST_TYPE_PTR rtype, NODE_PTR node1,
+                          NODE_PTR node2, NODE_PTR node3, NODE_PTR node4,
+                          NODE_PTR node5, NODE_PTR node6, const SPOS& spos);
+  //! Invalid node
+  NODE_PTR New_invalid(OPCODE op, const SPOS& spos);
   //! Load value of a symbol
   NODE_PTR New_ld(CONST_ADDR_DATUM_PTR datum, const SPOS& spos);
   //! Load value of a symbol to rtype
@@ -153,14 +184,23 @@ public:
   STMT_PTR New_entry(CONST_ENTRY_PTR entry, const SPOS& spos);
   STMT_PTR New_ret(const SPOS& spos);
   STMT_PTR New_retv(CONST_NODE_PTR retv, const SPOS& spos);
-  //! New statement of a direct call
+  //! @brief New statement of a direct call,
+  //! if its signature has a return parameter,
+  //! retv must not be null and retv's type must match the type of the
+  //! signature's return parameter, otherwise, retv must be null
   STMT_PTR New_call(CONST_ENTRY_PTR entry, CONST_PREG_PTR retv,
                     uint32_t num_args, const SPOS& spos);
+  NODE_PTR New_intrn_op(const char* fname, TYPE_ID rtype, uint32_t num_args,
+                        const SPOS& spos);
+  STMT_PTR New_intrn_call(const char* fname, CONST_PREG_PTR retv,
+                          uint32_t num_args, const SPOS& spos);
+  void     New_arg(NODE_PTR call, uint32_t num, CONST_NODE_PTR arg);
   void     New_arg(STMT_PTR call, uint32_t num, CONST_NODE_PTR arg);
   STMT_PTR New_begin_region(OPCODE op, CONST_REGION_INFO_PTR region,
                             const SPOS& spos);
   STMT_PTR New_end_region(OPCODE op, const SPOS& spos);
-  STMT_PTR New_pragma(const SPOS& spos);
+  STMT_PTR New_pragma(uint32_t id, uint32_t arg0, uint32_t arg1,
+                      const SPOS& spos);
 
   //! @brief Clone node with validate_op to support VALIDATE
   NODE_PTR New_validate_node(CONST_NODE_PTR node, OPCODE validate_op);
@@ -171,10 +211,6 @@ public:
   //! @brief Support dump opcodes
   STMT_PTR New_dump_var(const char* msg, CONST_NODE_PTR val, uint64_t len,
                         const SPOS& spos);
-
-  //! @brief Support timing opcodes
-  STMT_PTR New_tm_start(CONST_CONSTANT_PTR msg, const SPOS& spos);
-  STMT_PTR New_tm_taken(CONST_CONSTANT_PTR msg, const SPOS& spos);
 
   //! @brief New array element node indexed by num_dim dimensions
   //! @param base base address of the array
@@ -187,6 +223,9 @@ public:
   //! New array node with constant indexes
   NODE_PTR New_array(CONST_NODE_PTR base, std::vector<uint32_t>& idx,
                      const SPOS& spos);
+
+  //! New comment statement
+  STMT_PTR New_comment(const char* comment, const SPOS& spos);
 
   //! @brief New expression node according to its number of fields and
   //! number of children from meta info, and number of extra child
@@ -272,10 +311,6 @@ public:
   std::string To_str(bool rot = true) const;
 
 private:
-  static CONTAINER* New(FUNC_SCOPE* func, bool open = true);
-
-  CONTAINER(FUNC_SCOPE* func, bool open);
-
   NODE_DATA_PTR New_node(OPCODE op, uint32_t num = 0);
   STMT_DATA_PTR New_stmt(OPCODE op, uint32_t num = 0);
 
@@ -288,6 +323,11 @@ private:
                     NODE_ID nid2, NODE_ID nid3);
   NODE_PTR New_node(OPCODE op, const SPOS& spos, TYPE_ID type, NODE_ID nid1,
                     NODE_ID nid2, NODE_ID nid3, NODE_ID nid4);
+  NODE_PTR New_node(OPCODE op, const SPOS& spos, TYPE_ID type, NODE_ID nid1,
+                    NODE_ID nid2, NODE_ID nid3, NODE_ID nid4, NODE_ID nid5);
+  NODE_PTR New_node(OPCODE op, const SPOS& spos, TYPE_ID type, NODE_ID nid1,
+                    NODE_ID nid2, NODE_ID nid3, NODE_ID nid4, NODE_ID nid5,
+                    NODE_ID nid6);
   NODE_PTR New_node(OPCODE op, const SPOS& spos, TYPE_ID type, NODE_ID nid,
                     uint32_t err, uint32_t dim);
 
@@ -303,9 +343,10 @@ private:
   STMT_PTR New_stmt(OPCODE op, const SPOS& spos, NODE_ID nid1, NODE_ID nid2,
                     NODE_ID nid3, NODE_ID nid4, NODE_ID nid5, NODE_ID nid6);
 
-  CODE_ARENA* _code_arena;
-  FUNC_SCOPE* _func;
-  GLOB_SCOPE* _glob;
+  ARENA_ALLOCATOR* _mem_pool;
+  CODE_ARENA*      _code_arena;
+  FUNC_SCOPE*      _func;
+  GLOB_SCOPE*      _glob;
 };
 
 }  // namespace base

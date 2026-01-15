@@ -29,7 +29,7 @@ R_CODE LLAMA_PASS::Pre_run() {
 
 R_CODE LLAMA_PASS::Run() {
   if (llama::Llama_driver(_driver->Context()->Glob_scope(), _driver->Context(),
-                          _config) == nullptr) {
+                          _config, _driver->Context()->Ifile()) == nullptr) {
     return R_CODE::USER;
   }
   return R_CODE::NORMAL;

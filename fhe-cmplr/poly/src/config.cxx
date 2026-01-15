@@ -8,31 +8,26 @@
 
 #include "fhe/poly/config.h"
 
-using namespace air::base;
-using namespace air::util;
-
+#include "fhe/poly/option_config.inc"
 namespace fhe {
 namespace poly {
 
-static POLY_CONFIG Poly_config;
-
-static OPTION_DESC Poly_option[] = {DECLARE_COMMON_CONFIG(poly, Poly_config),
-                                    DECLARE_POLY_CONFIG(poly, Poly_config)};
-
-static OPTION_DESC_HANDLE Poly_option_handle = {
-    sizeof(Poly_option) / sizeof(Poly_option[0]), Poly_option};
-
-static OPTION_GRP Poly_option_grp = {
-    "POLY", "Polynomial Intermediate Representation", ':', air::util::V_EQUAL,
-    &Poly_option_handle};
-
-void POLY_CONFIG::Register_options(air::driver::DRIVER_CTX* ctx) {
-  ctx->Register_option_group(&Poly_option_grp);
+void POLY_CONFIG::Update_options() {
+  POLY_OPTION_CONFIG::Update_options();
+  Pre_process_options();
 }
 
-void POLY_CONFIG::Update_options() { *this = Poly_config; }
-
-void POLY_CONFIG::Print(std::ostream& os) const { COMMON_CONFIG::Print(os); }
+void POLY_CONFIG::Pre_process_options() {
+  if (Hoist_mdup() || Hoist_mdown()) {
+    _lower_to_hpoly = true;
+    _lower_to_lpoly = true;
+  }
+  if (Lower_to_hpoly()) {
+    // TODO: support relin/rotate function call
+    _inline_rotate = true;
+    _inline_relin  = true;
+  }
+}
 
 }  // namespace poly
 }  // namespace fhe

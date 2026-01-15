@@ -24,8 +24,8 @@ enum VECTOR_DOMAIN : uint32_t {
 };
 
 enum VECTOR_OPCODE : uint32_t {
-#define DEF_OPCODE(NAME, name, cat, kid_num, fld_num, prop) \
-  OPCODE_ENUM_GEN(NAME, name, cat, kid_num, fld_num, prop)
+#define DEF_OPCODE(NAME, name, kid_num, fld_num, prop) \
+  OPCODE_ENUM_GEN(NAME, name, kid_num, fld_num, prop)
 #include "nn/vector/opcode_def.inc"
 #undef DEF_OPCODE
 
@@ -34,7 +34,7 @@ enum VECTOR_OPCODE : uint32_t {
 };
 
 //! @brief VECTOR' opcodes
-#define DEF_OPCODE(NAME, name, cat, kid_num, fld_num, prop)        \
+#define DEF_OPCODE(NAME, name, kid_num, fld_num, prop)             \
   static constexpr air::base::OPCODE OPC_##NAME(VECTOR_DOMAIN::ID, \
                                                 VECTOR_OPCODE::NAME);
 #include "nn/vector/opcode_def.inc"

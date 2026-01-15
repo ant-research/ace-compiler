@@ -36,7 +36,7 @@ const uint32_t Null_prim_id = UINT32_MAX;
 template <typename T>
 class ID {
 public:
-  explicit ID(uint32_t id = Null_prim_id) : _id(id) {}
+  explicit constexpr ID(uint32_t id = Null_prim_id) : _id(id) {}
   uint32_t Value() const { return _id; }
 
   bool operator==(ID<T> o) const { return _id == o._id; }

@@ -13,9 +13,10 @@ namespace nn {
 namespace vector {
 
 //! @brief trace flags for VECTOR phase
-enum TRACE_FLAG : int {
-  TF_MISC,   //!< Trace misc contents
-  TF_LOWER,  //!< Trace lower pass
+enum TRACE_FLAG : uint64_t {
+  TF_MISC     = 0x1,  //!< Trace misc contents
+  TF_LOWER    = 0x2,  //!< Trace lower pass
+  TF_SHARDING = 0x4,  //!< Trace sharding
 };
 
 }  // namespace vector

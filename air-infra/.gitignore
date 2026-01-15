@@ -2,11 +2,13 @@
 .vscode
 .cloudide
 .DS_Store
+.mypy_cache
 build
 debug
 *.jpg
 *.onnx
 *.pth
+*.diff
 */param-*.data
 */d*-*.outputs
 */d*-*.data
@@ -54,3 +56,6 @@ debug
 __pycache__/
 *.py[cod]
 *$py.class
+
+# meta info
+*.egg-info

@@ -11,6 +11,7 @@
 #include "fhe/ckks/ckks_opcode.h"
 #include "fhe/poly/opcode.h"
 #include "fhe/sihe/sihe_opcode.h"
+#include "nn/core/attr.h"
 #include "nn/core/opcode.h"
 #include "nn/vector/vector_opcode.h"
 
@@ -34,7 +35,7 @@ void fhe::test::E2E_DRIVER::Build_vector_ir(air::base::GLOB_SCOPE* glob) {
                         arr_ty);
   roll_node->Set_child(0, irb.New_ld(input));
   roll_node->Set_child(1, irb.New_const_s32(roll_idx));
-  roll_node->Set_attr("nums", &roll_idx, 1);
+  roll_node->Set_attr(nn::core::ATTR::RNUM, &roll_idx, 1);
 
   STMT_PTR roll_stmt = irb.New_st(roll_node, output);
   irb.Append(roll_stmt);

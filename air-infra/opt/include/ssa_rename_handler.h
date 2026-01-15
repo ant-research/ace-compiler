@@ -19,6 +19,16 @@ namespace opt {
 class RENAME_HANDLER : public air::core::DEFAULT_HANDLER {
 public:
   template <typename RETV, typename VISITOR>
+  RETV Handle_func_entry(VISITOR* visitor, air::base::NODE_PTR node) {
+    // 1. handle defined virtual variables
+    visitor->Context().Rename_chi_list(node);
+    // 2. handle formals and body
+    for (int i = 0; i < node->Num_child(); ++i) {
+      visitor->template Visit<RETV>(node->Child(i));
+    }
+  }
+
+  template <typename RETV, typename VISITOR>
   RETV Handle_ld(VISITOR* visitor, air::base::NODE_PTR node) {
     visitor->Context().Handle_use(node->Id());
   }
@@ -27,6 +37,11 @@ public:
   RETV Handle_ild(VISITOR* visitor, air::base::NODE_PTR node) {
     // 1. handle address node
     base::NODE_PTR addr_child = node->Child(0);
+    if (addr_child->Opcode() == air::core::OPC_ADD ||
+        addr_child->Opcode() == air::core::OPC_SUB) {
+      // ist(add(array(lda, idx), ofst), rhs_node)
+      addr_child = addr_child->Child(0);
+    }
     AIR_ASSERT(addr_child->Opcode() == air::core::OPC_ARRAY);
     air::base::NODE_PTR base = addr_child->Child(0);
     if (base->Opcode() == air::core::OPC_LDCA) {
@@ -35,13 +50,17 @@ public:
     AIR_ASSERT(base->Opcode() == air::core::OPC_LDA);
     visitor->template Visit<RETV>(addr_child);
 
-    // 2. handle may used virtual variable
+    // 2. handle direct access virtual variable
+    visitor->Context().Handle_use(node->Id());
+
+    // 3. handle alias use on ild
     visitor->Context().Handle_mu(node->Id());
   }
 
   template <typename RETV, typename VISITOR>
   RETV Handle_ldf(VISITOR* visitor, air::base::NODE_PTR node) {
-    AIR_ASSERT(false);
+    // handle may used virtual variable
+    visitor->Context().Handle_use(node->Id());
   }
 
   template <typename RETV, typename VISITOR>
@@ -56,7 +75,7 @@ public:
 
   template <typename RETV, typename VISITOR>
   RETV Handle_ldpf(VISITOR* visitor, air::base::NODE_PTR node) {
-    AIR_ASSERT(false);
+    visitor->Context().Handle_use(node->Id());
   }
 
   template <typename RETV, typename VISITOR>
@@ -65,9 +84,16 @@ public:
   }
 
   template <typename RETV, typename VISITOR>
+  RETV Handle_retv(VISITOR* visitor, air::base::NODE_PTR node) {
+    visitor->template Visit<RETV>(node->Child(0));
+    visitor->Context().Rename_mu_list(node);
+  }
+
+  template <typename RETV, typename VISITOR>
   RETV Handle_st(VISITOR* visitor, air::base::NODE_PTR node) {
     visitor->template Visit<RETV>(node->Child(0));
     visitor->Context().Handle_def(node->Id());
+    visitor->Context().Rename_chi_list(node);
   }
 
   template <typename RETV, typename VISITOR>
@@ -78,18 +104,32 @@ public:
 
     // 2. handle address node
     base::NODE_PTR addr_child = node->Child(0);
+    if (addr_child->Opcode() == air::core::OPC_ADD ||
+        addr_child->Opcode() == air::core::OPC_SUB) {
+      // ist(add(array(lda, idx), ofst), rhs_node)
+      addr_child = addr_child->Child(0);
+    }
     AIR_ASSERT(addr_child->Opcode() == air::core::OPC_ARRAY);
     air::base::NODE_PTR base = addr_child->Child(0);
     AIR_ASSERT(base->Opcode() == air::core::OPC_LDA);
     visitor->template Visit<RETV>(addr_child);
 
-    // 3. handle defined virtual variables
+    // 3. handle direct def
+    visitor->Context().Handle_def(node->Id());
+
+    // 4. handle alias def
     visitor->Context().Rename_chi_list(node);
   }
 
   template <typename RETV, typename VISITOR>
   RETV Handle_stf(VISITOR* visitor, air::base::NODE_PTR node) {
-    AIR_ASSERT(false);
+    // 1. handle rhs node
+    base::NODE_PTR rhs_child = node->Child(0);
+    visitor->template Visit<RETV>(rhs_child);
+
+    // 2. handle defined virtual variables
+    visitor->Context().Handle_def(node->Id());
+    visitor->Context().Rename_chi_list(node);
   }
 
   template <typename RETV, typename VISITOR>
@@ -101,11 +141,17 @@ public:
   RETV Handle_stp(VISITOR* visitor, air::base::NODE_PTR node) {
     visitor->template Visit<RETV>(node->Child(0));
     visitor->Context().Handle_def(node->Id());
+    visitor->Context().Rename_chi_list(node);
   }
 
   template <typename RETV, typename VISITOR>
   RETV Handle_stpf(VISITOR* visitor, air::base::NODE_PTR node) {
-    AIR_ASSERT(false);
+    // 1. handle rhs node
+    visitor->template Visit<RETV>(node->Child(0));
+
+    // 2. handle defined virtual variables
+    visitor->Context().Handle_def(node->Id());
+    visitor->Context().Rename_chi_list(node);
   }
 
   template <typename RETV, typename VISITOR>
@@ -116,6 +162,7 @@ public:
     air::base::PREG_ID preg = node->Ret_preg_id();
     if (!air::base::Is_null_id(preg)) {
       visitor->Context().Handle_def(node->Id());
+      visitor->Context().Rename_chi_list(node);
     }
   }
 

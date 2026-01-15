@@ -90,7 +90,7 @@ public:
     if (iter != _vec2sihe_addr_datum_map.end()) {
       ADDR_DATUM_PTR addr_datum =
           func_scope.Addr_datum(ADDR_DATUM_ID(iter->second));
-      AIR_ASSERT(addr_datum->Type_id() == type->Id());
+      AIR_ASSERT(addr_datum->Type()->Is_compatible_type(type));
       return addr_datum;
     }
 

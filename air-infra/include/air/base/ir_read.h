@@ -38,25 +38,9 @@ public:
     Recovery(glob->File_table(), air::util::SHDR::FILE_TAB);
     Recovery(glob->Func_def_table(), air::util::SHDR::FUNC_DEF_TAB);
     Recovery(glob->Blk_table(), air::util::SHDR::BLK_TAB);
-
-    Set_func(glob);
-  }
-
-  //! @brief Set function undefined status
-  void Set_func(GLOB_SCOPE* glob) {
-    // Set all functions of this global scope undefined
-    FUNC_ITER iter = glob->Begin_func();
-    FUNC_ITER end  = glob->End_func();
-    for (; iter != end; ++iter) {
-      FUNC_PTR func = *iter;
-      if (func->Is_defined()) {
-        func->Set_undefined();
-      }
-    }
   }
 
   void Handler_func_scope(GLOB_SCOPE* glob) {
-    // FUNC_SCOPE* func = &glob->New_func_scope((FUNC_ID)0);
     FUNC_SCOPE* func = &glob->New_func_scope((FUNC_ID)0, (FUNC_DEF_ID)0);
 
     for (GLOB_SCOPE::FUNC_SCOPE_ITER it = glob->Begin_func_scope();

@@ -39,13 +39,32 @@ R_CODE POLY2C_PASS::Pre_run() {
 }
 
 R_CODE POLY2C_PASS::Run() {
-  std::ofstream            of(_driver->Context()->Ofile());
-  fhe::poly::POLY2C_DRIVER poly2c(of, _driver->Lower_ctx(), _config);
+  // setup output file
+  std::string cfile_name(_driver->Context()->Ofile());
+  if (cfile_name.empty()) {
+    cfile_name = _driver->Context()->Def_cfile();
+  }
+  std::ofstream of(cfile_name);
+  if (!of.is_open()) {
+    CMPLR_USR_MSG(U_CODE::Output_File_Open_Err, cfile_name);
+  }
+
   air::base::GLOB_SCOPE*   glob = _driver->Glob_scope();
+  fhe::poly::POLY2C_DRIVER poly2c(of, _driver->Lower_ctx(), _config);
   if (_driver->Poly_pass_disabled()) {
     glob = poly2c.Flatten(glob);
+    _driver->Update_glob_scope(glob);
   }
-  poly2c.Run(glob);
+
+  if (_config.Provider() == core::PROVIDER::ANT) {
+    POLY2C_VISITOR visitor(poly2c.Ctx());
+    poly2c.template Run<POLY2C_VISITOR>(glob, visitor);
+  } else {
+    CKKS2C_VISITOR visitor(poly2c.Ctx());
+    poly2c.template Run<CKKS2C_VISITOR>(glob, visitor);
+  }
+  // close the file
+  of.close();
   return R_CODE::NORMAL;
 }
 

@@ -46,8 +46,15 @@ public:
     return _cont->Parent_func_scope();
   }
   air::base::GLOB_SCOPE* Glob_scope() const { return _cont->Glob_scope(); }
+  air::base::NODE_PTR    Node(air::base::NODE_ID id) const {
+    return _cont->Node(id);
+  }
+  air::base::STMT_PTR Stmt(air::base::STMT_ID id) const {
+    return _cont->Stmt(id);
+  }
 
-  SSA_SYM_PTR New_sym(SSA_SYM_KIND kind, uint32_t var, uint32_t id);
+  SSA_SYM_PTR New_sym(SSA_SYM_KIND kind, uint32_t var, uint32_t id,
+                      base::TYPE_ID type_id);
   SSA_VER_PTR New_ver(VER_DEF_KIND kind, SSA_SYM_ID sym);
 
   MU_NODE_PTR  New_mu(SSA_SYM_ID sym);
@@ -133,11 +140,13 @@ public:
     AIR_ASSERT(mu.Value() < _mu_tab->Size());
     (*_mu_map)[node.Value()] = mu.Value();
   }
+
   void Set_node_chi(air::base::NODE_ID node, CHI_NODE_ID chi) {
     AIR_ASSERT(Has_chi(_cont->Node(node)));
     AIR_ASSERT(chi.Value() < _chi_tab->Size());
     (*_chi_map)[node.Value()] = chi.Value();
   }
+
   void Set_node_phi(air::base::NODE_ID node, PHI_NODE_ID phi) {
     AIR_ASSERT(Has_phi(_cont->Node(node)));
     AIR_ASSERT(phi.Value() < _phi_tab->Size());
@@ -149,6 +158,7 @@ public:
   enum STATE {
     NO_SSA,       //!< No SSA. Before SSA Build
     SYM_CREATE,   //!< During SSA Symbol Creation Phase
+    MU_CHI_GEN,   //!< During MU/CHI Generation Phase
     PHI_INSERT,   //!< During SSA PHI Insertion Phase
     RENAME,       //!< During SSA Renaming Phase
     SSA,          //!< Valid SSA. After SSA Build
@@ -171,8 +181,10 @@ public:
 
   //! @brief Check if node can have SSA Symbol
   static bool Has_sym(air::base::NODE_PTR node) {
-    return air::base::META_INFO::Op_category(node->Opcode()) ==
-               air::base::OPR_CAT::LDST ||
+    return air::base::META_INFO::Has_prop<air::base::OPR_PROP::LOAD>(
+               node->Opcode()) ||
+           air::base::META_INFO::Has_prop<air::base::OPR_PROP::STORE>(
+               node->Opcode()) ||
            node->Is_do_loop() || node->Is_call() ||
            node->Opcode() == core::OPC_IDNAME;
   }
@@ -182,21 +194,25 @@ public:
 
   //! @brief Check if node can have MU_NODE
   static bool Has_mu(air::base::NODE_PTR node) {
-    return node->Is_ld() || node->Is_call();
+    return node->Is_ld() || node->Is_call() || node->Is_ret();
   }
   //! @brief Check if node can have CHI_NODE
   static bool Has_chi(air::base::NODE_PTR node) {
-    return node->Is_st() || node->Is_call();
+    return node->Is_st() || node->Is_call() || node->Is_entry();
   }
   //! @brief Check if node can have PHI_NODE
   static bool Has_phi(air::base::NODE_PTR node) {
     return node->Is_if() || node->Is_do_loop();
   }
 
+  //! @brief Get vsym index for given NODE
+  static uint32_t Vsym_index(air::base::NODE_PTR node);
+
 public:
   void Print(SSA_SYM_ID sym, std::ostream& os, uint32_t indent = 0) const;
   void Print(SSA_VER_ID ver, std::ostream& os, uint32_t indent = 0) const;
   void Print_ver(SSA_VER_ID ver, std::ostream& os, uint32_t indent = 0) const;
+  void Print_version(SSA_VER_ID ver, std::ostream& os) const;
 
   void Print(SSA_SYM_ID sym) const;
   void Print(SSA_VER_ID ver) const;
@@ -219,6 +235,7 @@ public:
   void Print(std::ostream& os) const {
     Print_tree(_cont->Entry_node()->Id(), os, 0);
   }
+  void Print() const;
 
 private:
   static constexpr uint32_t SYM_TAB_KIND = 0x10001;

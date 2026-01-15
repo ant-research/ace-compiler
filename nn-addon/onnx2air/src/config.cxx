@@ -16,8 +16,7 @@ namespace onnx2air {
 
 static ONNX2AIR_CONFIG Onnx2air_config;
 
-static OPTION_DESC Onnx2air_option[] = {
-    DECLARE_COMMON_CONFIG(onnx2air, Onnx2air_config)};
+static OPTION_DESC Onnx2air_option[] = {DECLARE_COMMON_CONFIG(Onnx2air_config)};
 
 static OPTION_DESC_HANDLE Onnx2air_option_handle = {
     sizeof(Onnx2air_option) / sizeof(Onnx2air_option[0]), Onnx2air_option};

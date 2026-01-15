@@ -1,0 +1,15 @@
+#!/bin/sh
+
+# Get the type of commit (message, template, merge, etc.)
+COMMIT_SOURCE=$2
+
+YELLOW='\033[0;33m'
+RESET='\033[0m'
+
+# Check if the commit was initiated with an inline message
+if [ "$COMMIT_SOURCE" = "message" ]; then
+    echo "${YELLOW}hint: Checking that you're using: 'git commit -m'? If not, please ignore.${RESET}"
+    echo "${YELLOW}hint: Commit.template enabled by default, which is used to standardize the commit message format.${RESET}"
+    echo "${YELLOW}hint: Please use 'git commit' without '-m' to ensure the commit template is applied.${RESET}"
+    # exit 1
+fi

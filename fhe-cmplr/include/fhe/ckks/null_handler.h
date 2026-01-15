@@ -6,8 +6,8 @@
 //
 //=============================================================================
 
-#ifndef FHE_CKKS_INVALID_HANDLER_H
-#define FHE_CKKS_INVALID_HANDLER_H
+#ifndef FHE_CKKS_NULL_HANDLER_H
+#define FHE_CKKS_NULL_HANDLER_H
 
 #include "air/base/container.h"
 #include "air/base/container_decl.h"
@@ -18,10 +18,10 @@ namespace fhe {
 namespace ckks {
 class NULL_HANDLER {
 public:
-#define CKKS_OPCODE(NAME, name, category, kid_num, fld_num, property) \
-  template <typename RETV, typename VISITOR>                          \
-  RETV Handle_##name(VISITOR* visitor, air::base::NODE_PTR node) {    \
-    return RETV();                                                    \
+#define CKKS_OPCODE(NAME, name, kid_num, fld_num, property)        \
+  template <typename RETV, typename VISITOR>                       \
+  RETV Handle_##name(VISITOR* visitor, air::base::NODE_PTR node) { \
+    return RETV();                                                 \
   }
 #include "fhe/ckks/opcode_def.inc"
 };

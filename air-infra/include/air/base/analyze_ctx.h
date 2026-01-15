@@ -43,6 +43,32 @@ public:
     return Null_ptr;
   }
 
+  //! @brief get parent loop
+  NODE_PTR Parent_loop(uint32_t idx) {
+    for (auto it = _stack.rbegin(); it != _stack.rend(); ++it) {
+      if ((*it)->Is_do_loop()) {
+        if (idx == 0) {
+          return *it;
+        }
+        --idx;
+      }
+    }
+    return Null_ptr;
+  }
+
+  //! @brief get nested level of parent loop.
+  //! Return 0 if the parent loop is null.
+  //! Return 1 if parent loop is the outer most.
+  uint32_t Loop_level(void) const {
+    uint32_t loop_level = 0;
+    for (auto it = _stack.rbegin(); it != _stack.rend(); ++it) {
+      if ((*it)->Is_do_loop()) {
+        ++loop_level;
+      }
+    }
+    return loop_level;
+  }
+
   //! @brief get parent stmt
   STMT_PTR Parent_stmt() const {
     for (auto it = _stack.rbegin(); it != _stack.rend(); ++it) {
@@ -64,8 +90,24 @@ public:
     _stack.pop_back();
   }
 
+  //! @brief get top node from visiting stack
+  const NODE_PTR Top() const {
+    AIR_ASSERT(!_stack.empty());
+    return _stack.back();
+  }
+
   //! @brief check if node stack is empty
   bool Empty() const { return _stack.empty(); }
+
+  //! @brief get indent of current node
+  uint32_t Indent() const {
+    for (auto it = _stack.rbegin(); it != _stack.rend(); ++it) {
+      if ((*it)->Is_root()) {
+        return it - _stack.rbegin();
+      }
+    }
+    return _stack.size();
+  }
 
   //! @brief default BLOCK handler
   template <typename RETV, typename VISITOR>

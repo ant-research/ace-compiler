@@ -18,22 +18,19 @@
 namespace air {
 namespace base {
 
-/**
- * @brief Attribute data for TYPE/SYM/NODE/etc
- *
- */
+//! Attribute data for TYPE/SYM/NODE/etc
 class ATTR_DATA {
 public:
   ATTR_DATA() : _key(Null_st_id), _value(Null_st_id), _next(Null_st_id) {}
 
-  STR_ID   Key() const { return _key; }
-  STR_ID   Value() const { return _value; }
-  uint32_t Type() const { return _elem_type; }
-  uint32_t Count() const { return _elem_count; }
-  ATTR_ID  Next() const { return _next; }
+  STR_ID     Key() const { return _key; }
+  LITERAL_ID Value() const { return _value; }
+  uint32_t   Type() const { return _elem_type; }
+  uint32_t   Count() const { return _elem_count; }
+  ATTR_ID    Next() const { return _next; }
 
   void Set_key(STR_ID k) { _key = k; }
-  void Set_value(STR_ID v) { _value = v; }
+  void Set_value(LITERAL_ID v) { _value = v; }
   void Set_type(uint32_t t) {
     AIR_ASSERT(t < (1 << 8));
     _elem_type = t;
@@ -45,18 +42,14 @@ public:
   void Set_next(ATTR_ID n) { _next = n; }
 
 private:
-  STR_ID   _key;
-  STR_ID   _value;
-  ATTR_ID  _next;
-  uint32_t _elem_type : 8;
-  uint32_t _elem_count : 24;
+  STR_ID     _key;
+  LITERAL_ID _value;
+  ATTR_ID    _next;
+  uint32_t   _elem_type : 8;
+  uint32_t   _elem_count : 24;
 };
 
-/**
- * @brief Two word long attributes assumed to be the first field
- * of SYM_DATA
- *
- */
+//! Two word long attributes assumed to be the first field of SYM_DATA
 struct SYM_ATTR {
   enum class ACCESSED_BY_NESTED { YES = 0, NO = 1 };
 
@@ -378,7 +371,7 @@ public:
   int64_t       Ptr_ofst_ofst() const;
   uint64_t      Ptr_from_unsigned_val() const;
   CONSTANT_ID   Ptr_val() const;
-  STR_ID        Str_array_val() const;
+  LITERAL_ID    Str_array_val() const;
   CONSTANT_ID   First_elem() const;
   CONSTANT_ID   Last_elem() const;
   CONSTANT_ID   Next_elem() const;
@@ -415,7 +408,7 @@ public:
   void Set_ptr_ofst_val(CONSTANT_ID base, int64_t ofst);
   void Set_ptr_from_unsigned_val(uint64_t val);
   void Set_ptr_val(CONSTANT_ID ptr);
-  void Set_str_array_val(STR_ID str);
+  void Set_str_array_val(LITERAL_ID str);
   void Set_first_elem(CONSTANT_ID id);
   void Set_last_elem(CONSTANT_ID id);
   void Set_next_elem(CONSTANT_ID id);
@@ -569,7 +562,7 @@ public:
   static const STR_CONSTANT_DATA& Cast_to_me(const CONSTANT_DATA& data);
 
 private:
-  STR_ID _str;
+  LITERAL_ID _str;
 };
 
 class ARRAY_CONSTANT_DATA : public CONSTANT_DATA {
@@ -730,10 +723,7 @@ private:
   uint64_t _size;
 };
 
-/**
- * @brief Auxilary symbol entry base class
- *
- */
+//! @brief Auxilary symbol entry base class
 class AUX_DATA {
 public:
   AUX_DATA(AUX_KIND k)
@@ -823,11 +813,25 @@ private:
   } _u;
 };
 
-/**
- * @brief String table data
- *
- */
+//! @brief Null-terminated string table data, for symbol or identifier names
 class STR_DATA {
+public:
+  uint32_t Len() const {
+    if (_str == nullptr)
+      return 0;
+    else
+      return strlen(_str);
+  }
+
+  const char* Str() const { return _str; }
+
+private:
+  char _str[1];
+};
+
+//! @brief None null-terminated string table data, for string constants
+//! that may contain '\0' in the middle
+class LITERAL_DATA {
 public:
   uint32_t    Len() const { return _len; }
   const char* Str() const { return _str; }
@@ -1312,6 +1316,11 @@ public:
   void Set_dim(uint32_t d) { _dim = d; }
   void Set_next(uint32_t n) { _next = n; }
 
+  bool Is_same_arb(ARB_DATA_PTR o) {
+    return _flag == o->_flag && Dim() == o->Dim() && Lb_val() == o->Lb_val() &&
+           Ub_val() == o->Ub_val() && Stride_val() == o->Stride_val();
+  }
+
 private:
   uint32_t _flag : 16;
   uint32_t _dim : 16;
@@ -1468,7 +1477,8 @@ public:
 typedef ARENA<sizeof(SYM_DATA), 4, false>      MAIN_TAB;
 typedef ARENA<sizeof(PREG_DATA), 4, false>     PREG_TAB;
 typedef ARENA<sizeof(BLOCK_DATA), 4, false>    BLOCK_TAB;
-typedef ARENA<2, 4, true>                      STR_TAB;
+typedef ARENA<2, 4, true>                      LITERAL_TAB;
+typedef ARENA<2, 1, true>                      STR_TAB;
 typedef ARENA<4, 8, true>                      TYPE_TAB;
 typedef ARENA<4, 8, true>                      CONSTANT_TAB;
 typedef ARENA<sizeof(PARAM_DATA), 4, false>    PARAM_TAB;

@@ -17,6 +17,9 @@
 #include "common/tensor.h"
 #include "rt_def.h"
 
+typedef uint64_t SCALE_T;
+typedef uint64_t LEVEL_T;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -25,8 +28,8 @@ extern "C" {
 void       Openfhe_prepare_input(TENSOR* input, const char* name);
 void       Openfhe_set_output_data(const char* name, size_t idx, CIPHER data);
 CIPHERTEXT Openfhe_get_input_data(const char* name, size_t idx);
-void       Openfhe_encode_from_float(PLAIN plain, float* input, size_t len,
-                                     uint32_t sc_degree, uint32_t level);
+void       Openfhe_encode_float(PLAIN plain, float* input, size_t len,
+                                uint32_t sc_degree, uint32_t level);
 double*    Openfhe_handle_output(const char* name);
 
 //! @brief OpenFHE API for evaluation
@@ -35,6 +38,9 @@ void Openfhe_add_plain(CIPHER res, CIPHER op1, PLAIN op2);
 void Openfhe_mul_ciph(CIPHER res, CIPHER op1, CIPHER op2);
 void Openfhe_mul_plain(CIPHER res, CIPHER op1, PLAIN op2);
 void Openfhe_rotate(CIPHER res, CIPHER op, int step);
+void Openfhe_rescale(CIPHER res, CIPHER op);
+void Openfhe_mod_switch(CIPHER res, CIPHER op);
+void Openfhe_relin(CIPHER res, CIPHER3 op);
 void Openfhe_copy(CIPHER res, CIPHER op);
 void Openfhe_zero(CIPHER res);
 

@@ -36,7 +36,7 @@ bool Main_graph() {
       Rotate_ciph(&_ckks_gen_tmp_39, &input_dup_n1, _cst_6[index_khw_n1]);
       _preg_268435457 = Sc_degree(&_ckks_gen_tmp_39);
       _preg_268435458 = Level(&_ckks_gen_tmp_39);
-      Encode_plain_from_float(&_preg_268435459, Slice(_cst_4, (index_khw_n1 + (index_cin_n1 * 9)), 25), 25, _preg_268435457, _preg_268435458);
+      Encode_float(&_preg_268435459, Slice(_cst_4, (index_khw_n1 + (index_cin_n1 * 9)), 25), 25, _preg_268435457, _preg_268435458);
       Copy_ciph(&_preg_268435460, Mul_plain(&_preg_268435460, &_ckks_gen_tmp_39, &_preg_268435459));
       Add_ciph(&tmp_result_n1, &tmp_result_n1, &_preg_268435460);
     }
@@ -44,7 +44,7 @@ bool Main_graph() {
   }
   _preg_268435461 = Sc_degree(&tmp_result_n1);
   _preg_268435462 = Level(&tmp_result_n1);
-  Encode_plain_from_float(&_preg_268435463, _cst_5, 25, _preg_268435461, _preg_268435462);
+  Encode_float(&_preg_268435463, _cst_5, 25, _preg_268435461, _preg_268435462);
   Add_plain(&tmp_result_n1, &tmp_result_n1, &_preg_268435463);
   Copy_ciph(&output, &tmp_result_n1);
   Set_output_data("output", 0, &output);
@@ -56,8 +56,9 @@ int Get_input_count() {
 }
 
 DATA_SCHEME* Get_encode_scheme(int idx) {
+  static MAP_DESC desc_0[] = {{NORMAL, 0, 0, 0, 0}};
   static DATA_SCHEME scheme_0 = {
-    "input", {0, 0, 0, 0}, 1, {NORMAL, 0, 0, 0, 0}
+    "input", {0, 0, 0, 0}, 1, desc_0
   };
   static DATA_SCHEME* scheme[] = { &scheme_0 };
   return scheme[idx];
@@ -68,15 +69,16 @@ int Get_output_count() {
 }
 
 DATA_SCHEME* Get_decode_scheme(int idx) {
+  static MAP_DESC desc[] = {{NORMAL, 0, 0, 0, 0}};
   static DATA_SCHEME scheme = {
-    "output", {0, 0, 0, 0}, 1, {NORMAL, 0, 0, 0, 0}
+    "output", {0, 0, 0, 0}, 1, desc
   };
   return &scheme;
 }
 
 CKKS_PARAMS* Get_context_params() {
   static CKKS_PARAMS parm = {
-    LIB_OPENFHE, 1024, 0, 1, 33, 30, 2, 0, 11, 
+    LIB_OPENFHE, 1024, 0, 1, 2, 33, 30, 2, 0, 11,
     { -75, -6, -5, -4, -1, 0, 1, 4,
       5, 6, 25 }
   };

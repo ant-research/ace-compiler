@@ -14,7 +14,7 @@ Library for creating and running tests for nn-addon.
 
 ## Setup
 
-See the [Getting Started page](.aci/doc/SETUP.md) for instructions for installing required Host dependencies and how to checkout, build and run the tests in nn-addon(this project).
+See the [Getting Started page](doc/SETUP.md) for instructions for installing required Host dependencies and how to checkout, build and run the tests in nn-addon(this project).
 
 ## Build
 

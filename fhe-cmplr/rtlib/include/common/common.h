@@ -20,7 +20,7 @@
 extern "C" {
 #endif
 
-//! @brief method of data scheme for enc/dec
+//! @brief Method of data scheme for enc/dec
 typedef enum {
   NORMAL,
   CONV,
@@ -28,30 +28,32 @@ typedef enum {
   DIAGONAL,
 } MAP_KIND;
 
-//! @brief describe provider of the underlying library
+//! @brief Describe provider of the underlying library
 typedef enum {
-  LIB_ANT,      //!< Using ANT in-house library
-  LIB_SEAL,     //!< Using SEAL library
-  LIB_OPENFHE,  //!< Using OpenFHE library
+  LIB_ANT,       //!< Using ANT in-house library
+  LIB_SEAL,      //!< Using SEAL library
+  LIB_OPENFHE,   //!< Using OpenFHE library
+  LIB_PHANTOM,   //!< Using Phantom library
+  LIB_HYPERFHE,  //!< Using HyperFHE library
 } LIB_PROV;
 
-//! @brief describe data type in seperated weight data file
+//! @brief Describe data type in seperated weight data file
 typedef enum {
   DE_MSG_F32,   //!< Data entry is message with float type
   DE_MSG_F64,   //!< Data entry is message with double type
   DE_PLAINTEXT  //!< Data entry is plaintext after encoding
 } DATA_ENTRY_TYPE;
 
-//! @brief describe the detail of enc/dec
+//! @brief Describe the detail of enc/dec
 typedef struct {
   MAP_KIND _kind;    //!< How elements are mapped
   int      _count;   //!< Number of elements
   int      _start;   //!< Start index, inclusive
-  int      _end;     //!< End index, inclusive
+  int      _pad;     //!< Pad before and after data
   int      _stride;  //!< Stride
 } MAP_DESC;
 
-//! @brief shape of tensor (NCHW)
+//! @brief Shape of tensor (NCHW)
 typedef struct {
   size_t _n;
   size_t _c;
@@ -59,20 +61,21 @@ typedef struct {
   size_t _w;
 } SHAPE;
 
-//! @brief describe scheme for enc/dec
+//! @brief Describe scheme for enc/dec
 typedef struct {
-  const char* _name;    //!< name of the parameter/return value
-  SHAPE       _shape;   //!< shape of original data
-  int         _count;   //!< number of ciphertext to enc/dec
-  MAP_DESC    _desc[];  //!< how each ciphertext is enc'ed/dec'ed
+  const char* _name;   //!< name of the parameter/return value
+  SHAPE       _shape;  //!< shape of original data
+  int         _count;  //!< number of ciphertext to enc/dec
+  MAP_DESC*   _desc;   //!< how each ciphertext is enc'ed/dec'ed
 } DATA_SCHEME;
 
-//! @brief parameters to create CKKS Context
+//! @brief Parameters to create CKKS Context
 typedef struct {
   LIB_PROV _provider;          //!< underlying library provider
   uint32_t _poly_degree;       //!< polynomial degree
   size_t   _sec_level;         //!< security level of HE
   size_t   _mul_depth;         //!< multiply depth
+  size_t   _input_level;       //!< level of input ciphertext
   size_t   _first_mod_size;    //!< first prime size
   size_t   _scaling_mod_size;  //!< bits of scaling factor
   size_t   _num_q_parts;       //!< number of parts of q primes
@@ -81,7 +84,7 @@ typedef struct {
   int32_t  _rot_idxs[];        //!< array of rotation idxs
 } CKKS_PARAMS;
 
-//! @brief seperated weight data file info
+//! @brief Seperated weight data file info
 typedef struct {
   const char*     _file_name;   //!< Data file name for reference
   const char*     _file_uuid;   //!< Data file uuid for verification

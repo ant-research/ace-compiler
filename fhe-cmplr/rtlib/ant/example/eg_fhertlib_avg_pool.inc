@@ -316,7 +316,7 @@ bool Main_graph() {
       _pgen_modulus = _pgen_modulus + 1;
     }
   }
-  Encode_plain_from_float(&_pgen_tmp_2, _cst_3, 16,
+  Encode_float(&_pgen_tmp_2, _cst_3, 16,
                           Sc_degree(&_ckks_gen_tmp_13),
                           Level(&_ckks_gen_tmp_13));
 
@@ -445,7 +445,7 @@ bool Main_graph() {
       Free_poly(_pgen_tmp_poly);
       Free_poly(_pgen_decomp);
     }
-    Encode_plain_from_float(
+    Encode_float(
         &_pgen_tmp_3, Slice(_cst_4, combine_row_index_n0, 16), 16,
         Sc_degree(&_ckks_gen_tmp_38), Level(&_ckks_gen_tmp_38));
     Init_ciph_up_scale_plain(&_pgen_tmp_4, &_ckks_gen_tmp_38, &_pgen_tmp_3);
@@ -586,7 +586,7 @@ bool Main_graph() {
       Free_poly(_pgen_tmp_poly);
       Free_poly(_pgen_decomp);
     }
-    Encode_plain_from_float(
+    Encode_float(
         &_pgen_tmp_5, Slice(_cst_5, combine_rc_index_n0, 16), 16,
         Sc_degree(&_ckks_gen_tmp_69), Level(&_ckks_gen_tmp_69));
     Init_ciph_up_scale_plain(&_pgen_tmp_6, &_ckks_gen_tmp_69, &_pgen_tmp_5);
@@ -727,7 +727,7 @@ bool Main_graph() {
       Free_poly(_pgen_tmp_poly);
       Free_poly(_pgen_decomp);
     }
-    Encode_plain_from_float(
+    Encode_float(
         &_pgen_tmp_7, Slice(_cst_6, combine_cc_index_n0, 16), 16,
         Sc_degree(&_ckks_gen_tmp_100), Level(&_ckks_gen_tmp_100));
     Init_ciph_up_scale_plain(&_pgen_tmp_8, &_ckks_gen_tmp_100, &_pgen_tmp_7);
@@ -765,22 +765,24 @@ bool Main_graph() {
 }
 CKKS_PARAMS* Get_context_params() {
   static CKKS_PARAMS parm = {
-      LIB_ANT, 128, 0, 4, 33, 30, 0, 0, 4, {0, 1, 4, 6}
+      LIB_ANT, 128, 0, 4, 0, 33, 30, 0, 0, 4, {0, 1, 4, 6}
   };
   return &parm;
 }
 
 DATA_SCHEME* Get_encode_scheme(int idx) {
+  static MAP_DESC desc_0[] = {{NORMAL, 0, 0, 0, 0}};
   static DATA_SCHEME scheme_0 = {
-    "input", {0, 0, 0, 0}, 1, {NORMAL, 0, 0, 0, 0}
+    "input", {0, 0, 0, 0}, 1, desc_0
   };
   static DATA_SCHEME* scheme[] = { &scheme_0 };
   return scheme[idx];
 }
 
 DATA_SCHEME* Get_decode_scheme(int idx) {
+  static MAP_DESC desc[] = {{NORMAL, 0, 0, 0, 0}};
   static DATA_SCHEME scheme = {
-    "output", {0, 0, 0, 0}, 1, {NORMAL, 0, 0, 0, 0}
+    "output", {0, 0, 0, 0}, 1, desc
   };
   return &scheme;
 }

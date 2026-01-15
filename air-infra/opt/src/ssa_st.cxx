@@ -46,14 +46,28 @@ std::string SSA_SYM::To_str() const {
   return buf.str();
 }
 
-void SSA_VER::Print(std::ostream& os, uint32_t indent) const {
-  _cont->Print(Sym_id(), os, indent);
+SSA_SYM_PTR SSA_VER::Sym() const { return _cont->Sym(Sym_id()); }
+
+air::base::STMT_PTR SSA_VER::Def_stmt() const {
+  return _cont->Stmt(Def_stmt_id());
+}
+
+PHI_NODE_PTR SSA_VER::Def_phi() const { return _cont->Phi_node(Def_phi_id()); }
+
+CHI_NODE_PTR SSA_VER::Def_chi() const { return _cont->Chi_node(Def_chi_id()); }
+
+void SSA_VER::Print_ver(std::ostream& os) const {
   uint32_t ver = _data->Version();
   if (ver != NO_VER) {
-    os << ".v" << std::dec << ver;
+    os << "v" << std::dec << ver;
   } else {
-    os << ".zero";
+    os << "zero";
   }
+}
+void SSA_VER::Print(std::ostream& os, uint32_t indent) const {
+  _cont->Print(Sym_id(), os, indent);
+  os << ".";
+  Print_ver(os);
 }
 
 void SSA_VER::Print() const {

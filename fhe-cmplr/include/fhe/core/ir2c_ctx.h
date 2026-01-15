@@ -35,6 +35,9 @@ public:
   bool Is_poly_type(air::base::TYPE_ID type) {
     return _lower_ctx.Is_poly_type(type);
   }
+  bool Is_rns_poly_type(air::base::TYPE_ID type) {
+    return _lower_ctx.Is_rns_poly_type(type);
+  }
   bool Is_plain_type(air::base::TYPE_ID type) {
     return _lower_ctx.Is_plain_type(type);
   }

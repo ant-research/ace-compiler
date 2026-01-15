@@ -7,7 +7,8 @@
 //=============================================================================
 
 #include "gtest/gtest.h"
-#include "util/fhe_utils.h"
+#include "prng_impl.h"
+#include "util/modular.h"
 #include "util/prng.h"
 #include "util/random_sample.h"
 
@@ -57,6 +58,7 @@ TEST(prng, test_unifrom_int) {
   int32_t arr[size];
   Test_uniform_prng(arr, size, 0, 100);
   Test_uniform_prng(arr, size, -1, 1);
+  Free_prng();
 }
 
 TEST(sample, test_tenary) {
@@ -83,4 +85,5 @@ TEST(sample, test_tenary) {
   EXPECT_LE(abs((int32_t)((int32_t)one_cnt - neg_one_cnt)), 2);
 
   Free_value_list(value);
+  Free_prng();
 }

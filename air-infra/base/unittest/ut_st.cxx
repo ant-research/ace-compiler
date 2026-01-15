@@ -22,8 +22,14 @@ class TEST_GLOB_SCOPE : public ::testing::Test {
 protected:
   void SetUp() override { _glob = new GLOB_SCOPE(0, true); }
   void TearDown() override { delete _glob; }
+  void Run_test_ctor_dtor();
+  void Run_test_new_func_scope();
+  void Run_test_new_delete_func_scope();
   void Run_test_new_pointer_type();
-  void Run_test_new_array_type();
+  void Run_test_new_array_type1();
+  void Run_test_new_array_type2();
+  void Run_test_new_array_type3();
+  void Run_test_new_array_type4();
   void Run_test_new_record_type();
   void Run_test_record_size1();
   void Run_test_record_size2();
@@ -43,9 +49,31 @@ protected:
   void Run_test_new_entry_sym();
   void Run_test_clone();
   void Run_test_init_targ_info();
+  void Run_test_unique_str_tab();
+  void Run_test_unique_lit_tab();
 
   GLOB_SCOPE* _glob;
 };
+
+void TEST_GLOB_SCOPE::Run_test_ctor_dtor() {
+  GLOB_SCOPE* gs = new GLOB_SCOPE(1, true);
+  delete gs;
+}
+
+void TEST_GLOB_SCOPE::Run_test_new_func_scope() {
+  GLOB_SCOPE* gs   = new GLOB_SCOPE(2, true);
+  FUNC_PTR    func = gs->New_func("abc", SPOS());
+  FUNC_SCOPE& fs   = gs->New_func_scope(func, true);
+  delete gs;
+}
+
+void TEST_GLOB_SCOPE::Run_test_new_delete_func_scope() {
+  GLOB_SCOPE* gs   = new GLOB_SCOPE(2, true);
+  FUNC_PTR    func = gs->New_func("abc", SPOS());
+  FUNC_SCOPE& fs   = gs->New_func_scope(func, true);
+  gs->Delete_func_scope(&fs);
+  delete gs;
+}
 
 void TEST_GLOB_SCOPE::Run_test_new_pointer_type() {
   PRIM_TYPE_PTR    ptr_to = _glob->Prim_type(PRIMITIVE_TYPE::INT_S8);
@@ -57,7 +85,7 @@ void TEST_GLOB_SCOPE::Run_test_new_pointer_type() {
   EXPECT_EQ(result, expected);
 }
 
-void TEST_GLOB_SCOPE::Run_test_new_array_type() {
+void TEST_GLOB_SCOPE::Run_test_new_array_type1() {
   TYPE_PTR etype    = _glob->Prim_type(PRIMITIVE_TYPE::FLOAT_32);
   ARB_PTR  arb      = _glob->New_arb(0, 0, 5, 1);
   SPOS     spos     = _glob->Unknown_simple_spos();
@@ -68,6 +96,62 @@ void TEST_GLOB_SCOPE::Run_test_new_array_type() {
       "  ARB[0] lower(const:0), upper(const:0x5), stride(const:0x1)\n"
       "    dimension(0), first(yes), last(yes), next(ARB[0xffffffff])\n");
   std::string result(var_type->To_str());
+  EXPECT_EQ(result, expected);
+}
+
+void TEST_GLOB_SCOPE::Run_test_new_array_type2() {
+  TYPE_PTR etype    = _glob->Prim_type(PRIMITIVE_TYPE::FLOAT_32);
+  ARB_PTR  arb      = _glob->New_arb(0, 0, 5, 1);
+  SPOS     spos     = _glob->Unknown_simple_spos();
+  TYPE_PTR var_type = _glob->New_arr_type(etype, arb, spos);
+
+  std::string expected(
+      "TYP[0x12] array(\"f32_5\"), element(TYP[0x8])\n"
+      "  ARB[0] lower(const:0), upper(const:0x5), stride(const:0x1)\n"
+      "    dimension(0), first(yes), last(yes), next(ARB[0xffffffff])\n");
+  std::string result(var_type->To_str());
+  EXPECT_EQ(result, expected);
+}
+
+void TEST_GLOB_SCOPE::Run_test_new_array_type3() {
+  TYPE_PTR etype = _glob->Prim_type(PRIMITIVE_TYPE::FLOAT_32);
+  SPOS     spos  = _glob->Unknown_simple_spos();
+  ARB_PTR  arb_c = _glob->New_arb(0, 0, 10, 1);
+  ARB_PTR  arb_h = _glob->New_arb(1, 0, 28, 1);
+  ARB_PTR  arb_w = _glob->New_arb(2, 0, 28, 1);
+  arb_c->Set_next(arb_h->Id());
+  arb_h->Set_next(arb_w->Id());
+  TYPE_PTR w_type = _glob->New_arr_type(etype, arb_c, spos);
+
+  std::string expected(
+      "TYP[0x12] array(\"f32_10x28x28\"), element(TYP[0x8])\n"
+      "  ARB[0] lower(const:0), upper(const:0xa), stride(const:0x1)\n"
+      "    dimension(0), first(yes), last(no), next(ARB[0x1])\n"
+      "  ARB[0x1] lower(const:0), upper(const:0x1c), stride(const:0x1)\n"
+      "    dimension(0x1), first(no), last(no), next(ARB[0x2])\n"
+      "  ARB[0x2] lower(const:0), upper(const:0x1c), stride(const:0x1)\n"
+      "    dimension(0x2), first(no), last(yes), next(ARB[0xffffffff])\n");
+  std::string result(w_type->To_str());
+  EXPECT_EQ(result, expected);
+  EXPECT_EQ(w_type->Byte_size(), 4 * 10 * 28 * 28);
+}
+
+void TEST_GLOB_SCOPE::Run_test_new_array_type4() {
+  TYPE_PTR             etype    = _glob->Prim_type(PRIMITIVE_TYPE::FLOAT_32);
+  SPOS                 spos     = _glob->Unknown_simple_spos();
+  int64_t              uppers[] = {10, 28, 28};
+  std::vector<int64_t> dims(uppers, uppers + 3);
+  TYPE_PTR             w_type = _glob->New_arr_type(etype, dims, spos);
+
+  std::string expected(
+      "TYP[0x12] array(\"f32_10x28x28\"), element(TYP[0x8])\n"
+      "  ARB[0] lower(const:0), upper(const:0xa), stride(const:0x1)\n"
+      "    dimension(0), first(yes), last(no), next(ARB[0x1])\n"
+      "  ARB[0x1] lower(const:0), upper(const:0x1c), stride(const:0x1)\n"
+      "    dimension(0x1), first(no), last(no), next(ARB[0x2])\n"
+      "  ARB[0x2] lower(const:0), upper(const:0x1c), stride(const:0x1)\n"
+      "    dimension(0x2), first(no), last(yes), next(ARB[0xffffffff])\n");
+  std::string result(w_type->To_str());
   EXPECT_EQ(result, expected);
 }
 
@@ -550,7 +634,7 @@ void TEST_GLOB_SCOPE::Run_test_clone() {
   NODE_PTR       node_x     = func_cntr->New_ld(formal_x, spos);
   NODE_PTR       node_y     = func_cntr->New_ld(formal_y, spos);
   NODE_PTR       node_add =
-      func_cntr->New_bin_arith(air::core::OPC_ADD, node_x, node_y, spos);
+      func_cntr->New_bin_arith(air::core::OPC_ADD, etype, node_x, node_y, spos);
   STMT_PTR stmt_st = func_cntr->New_st(node_add, var_z, spos);
   func_cntr->Stmt_list().Append(stmt_st);
   NODE_PTR node_z   = func_cntr->New_ld(var_z, spos);
@@ -628,8 +712,60 @@ void TEST_GLOB_SCOPE::Run_test_init_targ_info() {
   EXPECT_EQ(rtta, "bad");
 }
 
+void TEST_GLOB_SCOPE::Run_test_unique_str_tab() {
+  const char* str1 = "abc";
+  const char* str2 = "abcd";
+  size_t      len  = strlen(str1);
+  char*       str3 = (char*)malloc(len + 1);
+  memcpy(str3, str1, len);
+  str3[len]        = '\0';
+  STR_PTR str_ptr1 = _glob->New_str(str1);
+  STR_PTR str_ptr2 = _glob->New_str(str2);
+  STR_PTR str_ptr3 = _glob->New_str(str3);
+
+  EXPECT_TRUE(strcmp(str1, str3) == 0);
+  EXPECT_NE(str_ptr1->Id().Value(), str_ptr2->Id().Value());
+  EXPECT_EQ(str_ptr1->Id().Value(), str_ptr3->Id().Value());
+}
+
+void TEST_GLOB_SCOPE::Run_test_unique_lit_tab() {
+  const char* str0 = "abc";
+  const char* str1 = "abcd";
+  const char* str2 = "abc\0d";
+  const char* str3 = "abc\0e";
+  size_t      len  = 5;
+  char*       str4 = (char*)malloc(len + 1);
+  memcpy(str4, str2, len);
+  str4[len]            = '\0';
+  LITERAL_PTR lit_ptr0 = _glob->New_literal(str0);
+  LITERAL_PTR lit_ptr1 = _glob->New_literal(str1);
+  LITERAL_PTR lit_ptr2 = _glob->New_literal(str2, len);
+  LITERAL_PTR lit_ptr3 = _glob->New_literal(str3, len);
+  LITERAL_PTR lit_ptr4 = _glob->New_literal(str4, len);
+
+  EXPECT_TRUE(memcmp(str2, str4, len) == 0);
+  EXPECT_NE(lit_ptr0->Id().Value(), lit_ptr1->Id().Value());
+  EXPECT_NE(lit_ptr1->Id().Value(), lit_ptr2->Id().Value());
+  EXPECT_NE(lit_ptr2->Id().Value(), lit_ptr3->Id().Value());
+  EXPECT_NE(lit_ptr3->Id().Value(), lit_ptr4->Id().Value());
+  EXPECT_NE(lit_ptr1->Id().Value(), lit_ptr2->Id().Value());
+  EXPECT_NE(lit_ptr1->Id().Value(), lit_ptr3->Id().Value());
+  EXPECT_NE(lit_ptr1->Id().Value(), lit_ptr4->Id().Value());
+  EXPECT_NE(lit_ptr2->Id().Value(), lit_ptr3->Id().Value());
+  EXPECT_EQ(lit_ptr2->Id().Value(), lit_ptr4->Id().Value());
+  EXPECT_NE(lit_ptr3->Id().Value(), lit_ptr4->Id().Value());
+}
+
+TEST_F(TEST_GLOB_SCOPE, ctor_dtor) { Run_test_ctor_dtor(); }
+TEST_F(TEST_GLOB_SCOPE, new_func_scope) { Run_test_new_func_scope(); }
+TEST_F(TEST_GLOB_SCOPE, new_delete_func_scope) {
+  Run_test_new_delete_func_scope();
+}
 TEST_F(TEST_GLOB_SCOPE, new_pointer_type) { Run_test_new_pointer_type(); }
-TEST_F(TEST_GLOB_SCOPE, new_array_type) { Run_test_new_array_type(); }
+TEST_F(TEST_GLOB_SCOPE, new_array_type1) { Run_test_new_array_type1(); }
+TEST_F(TEST_GLOB_SCOPE, new_array_type2) { Run_test_new_array_type2(); }
+TEST_F(TEST_GLOB_SCOPE, new_array_type3) { Run_test_new_array_type3(); }
+TEST_F(TEST_GLOB_SCOPE, new_array_type4) { Run_test_new_array_type4(); }
 TEST_F(TEST_GLOB_SCOPE, new_record_type) { Run_test_new_record_type(); }
 TEST_F(TEST_GLOB_SCOPE, record_size1) { Run_test_record_size1(); }
 TEST_F(TEST_GLOB_SCOPE, record_size2) { Run_test_record_size2(); }
@@ -653,6 +789,8 @@ TEST_F(TEST_GLOB_SCOPE, new_func_sym) { Run_test_new_func_sym(); }
 TEST_F(TEST_GLOB_SCOPE, new_entry_sym) { Run_test_new_entry_sym(); }
 TEST_F(TEST_GLOB_SCOPE, clone) { Run_test_clone(); }
 TEST_F(TEST_GLOB_SCOPE, init_targ_info) { Run_test_init_targ_info(); }
+TEST_F(TEST_GLOB_SCOPE, unique_str_tab) { Run_test_unique_str_tab(); }
+TEST_F(TEST_GLOB_SCOPE, unique_lit_tab) { Run_test_unique_lit_tab(); }
 
 class TEST_FUNC_SCOPE : public ::testing::Test {
 protected:
@@ -675,6 +813,7 @@ protected:
     STMT_PTR   estmt = cntr->New_func_entry(SPOS());
   }
   void TearDown() override { delete _glob; }
+  void Run_test_ctor_dtor();
   void Run_test_new_formal_sym();
   void Run_test_new_var_sym();
   void Run_test_new_preg_sym();
@@ -683,6 +822,11 @@ protected:
   GLOB_SCOPE* _glob;
   FUNC_SCOPE* _func;
 };
+
+void TEST_FUNC_SCOPE::Run_test_ctor_dtor() {
+  FUNC_SCOPE* fs = new FUNC_SCOPE(*_glob, _func->Id(), true);
+  delete fs;
+}
 
 void TEST_FUNC_SCOPE::Run_test_new_formal_sym() {
   ADDR_DATUM_PTR formal_x = _func->Formal(0);
@@ -775,6 +919,7 @@ void TEST_FUNC_SCOPE::Run_test_clone() {
   delete cloned_glob;
 }
 
+TEST_F(TEST_FUNC_SCOPE, ctor_dtor) { Run_test_ctor_dtor(); }
 TEST_F(TEST_FUNC_SCOPE, new_formal_sym) { Run_test_new_formal_sym(); }
 TEST_F(TEST_FUNC_SCOPE, new_var_sym) { Run_test_new_var_sym(); }
 TEST_F(TEST_FUNC_SCOPE, new_preg_sym) { Run_test_new_preg_sym(); }

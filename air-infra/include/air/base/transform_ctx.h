@@ -43,6 +43,19 @@ public:
     list.Append(stmt);
   }
 
+  //! @brief Prepend stmt_list in new container before current stmt
+  void Prepend(STMT_LIST stmt_list) {
+    AIR_ASSERT(!_n_blk.empty());
+    STMT_LIST list(_n_blk.back());
+    list.Append(stmt_list);
+  }
+
+  //! @brief Return current block in new container
+  NODE_PTR Cur_blk() {
+    AIR_ASSERT(!_n_blk.empty());
+    return _n_blk.back();
+  }
+
   //! @brief Append stmt in new container after current stmt
   void Append(STMT_PTR stmt) { _post_stmt.push_back(stmt); }
 
@@ -120,8 +133,8 @@ public:
       n_node->Set_child(i, n_child);
 
       // add parent node for nested blocks
-      if (n_node->Is_root() && n_child->Is_root()) {
-        n_child->Stmt()->Set_parent_node(n_node);
+      if (n_node->Is_root() && n_child->Is_block()) {
+        n_child->Set_parent_stmt(n_node->Stmt());
       }
     }
     // pop current node from ANALYZE_CTX's stack

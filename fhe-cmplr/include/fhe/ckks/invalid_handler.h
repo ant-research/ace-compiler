@@ -18,11 +18,11 @@ namespace fhe {
 namespace ckks {
 class INVALID_HANDLER {
 public:
-#define CKKS_OPCODE(NAME, name, category, kid_num, fld_num, property) \
-  template <typename RETV, typename VISITOR>                          \
-  RETV Handle_##name(VISITOR* visitor, air::base::NODE_PTR node) {    \
-    CMPLR_ASSERT(false, "Unexpected operator: " #name "");            \
-    return RETV();                                                    \
+#define CKKS_OPCODE(NAME, name, kid_num, fld_num, property)        \
+  template <typename RETV, typename VISITOR>                       \
+  RETV Handle_##name(VISITOR* visitor, air::base::NODE_PTR node) { \
+    CMPLR_ASSERT(false, "Unexpected operator: " #name "");         \
+    return RETV();                                                 \
   }
 #include "fhe/ckks/opcode_def.inc"
 };

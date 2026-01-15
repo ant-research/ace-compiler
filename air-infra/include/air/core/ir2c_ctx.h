@@ -37,13 +37,13 @@ public:
       Emit_var(node);
     } else if (node->Opcode() == OPC_STF) {
       Emit_var(node);
-      _os << ".";
+      _ir2c_util << ".";
       Emit_field(node);
     } else if (node->Opcode() == OPC_STP) {
       Emit_preg_id(node->Preg_id());
     } else if (node->Opcode() == OPC_STPF) {
       Emit_preg_id(node->Preg_id());
-      _os << ".";
+      _ir2c_util << ".";
       Emit_field(node);
     } else if (node->Opcode() == OPC_STO) {
       AIR_ASSERT(false);

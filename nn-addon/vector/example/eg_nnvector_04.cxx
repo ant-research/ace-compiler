@@ -79,8 +79,8 @@ int main() {
   // z = nn::core:MAX_POOL(x)
   NODE_PTR nnx_node   = cntr->New_ld(var_x, spos);
   NODE_PTR nnadd_node = cntr->New_una_arith(
-      air::base::OPCODE(nn::core::NN, nn::core::OPCODE::MAX_POOL), nnx_node,
-      spos);
+      air::base::OPCODE(nn::core::NN, nn::core::OPCODE::MAX_POOL),
+      nnx_node->Rtype(), nnx_node, spos);
 
   int64_t kernel_shape = 2;
   nnadd_node->Set_attr("kernel_shape", &kernel_shape, 1);

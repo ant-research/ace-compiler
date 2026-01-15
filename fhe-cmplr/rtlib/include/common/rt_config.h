@@ -14,9 +14,12 @@
 extern "C" {
 #endif
 
+typedef __int64_t int64_t;
+
 #define RTLIB_CONFIG_ALL()                  \
   DECL_CONF(CONF_OP_FUSION_DECOMP_MODUP, 1) \
-  DECL_CONF(CONF_BTS_CLEAR_IMAG, 0)
+  DECL_CONF(CONF_BTS_CLEAR_IMAG, 0)         \
+  DECL_CONF(CONF_FAST_DOT_PROD, 0)
 
 typedef enum {
 #define DECL_CONF(ID, VALUE) ID,

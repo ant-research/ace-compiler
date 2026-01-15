@@ -16,7 +16,8 @@ CKKS_PARAMS *Get_context_params() {
   static CKKS_PARAMS param = {._provider         = LIB_ANT,
                               ._poly_degree      = 1024,
                               ._sec_level        = 0,
-                              ._mul_depth        = 3,
+                              ._mul_depth        = 0,
+                              ._input_level      = 0,
                               ._first_mod_size   = 33,
                               ._scaling_mod_size = 30,
                               ._num_q_parts      = 0};
@@ -24,19 +25,22 @@ CKKS_PARAMS *Get_context_params() {
 }
 
 DATA_SCHEME* Get_encode_scheme(int idx) {
+  static MAP_DESC desc_0[] = {{NORMAL, 0, 0, 0, 0}};
   static DATA_SCHEME scheme_0 = {
-    "input", {0, 0, 0, 0}, 1, {NORMAL, 0, 0, 0, 0}
+    "input", {0, 0, 0, 0}, 1, desc_0
   };
+  static MAP_DESC desc_1[] = {{NORMAL, 0, 0, 0, 0}};
   static DATA_SCHEME scheme_1 = {
-    "onnx::Add_1", {0, 0, 0, 0}, 1, {NORMAL, 0, 0, 0, 0}
+    "onnx::Add_1", {0, 0, 0, 0}, 1, desc_1
   };
   static DATA_SCHEME* scheme[] = { &scheme_0, &scheme_1 };
   return scheme[idx];
 }
 
 DATA_SCHEME* Get_decode_scheme(int idx) {
+  static MAP_DESC desc[] = {{NORMAL, 0, 0, 0, 0}};
   static DATA_SCHEME scheme = {
-    "output", {0, 0, 0, 0}, 1, {NORMAL, 0, 0, 0, 0}
+    "output", {0, 0, 0, 0}, 1, desc
   };
   return &scheme;
 }

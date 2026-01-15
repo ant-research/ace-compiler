@@ -28,17 +28,48 @@ public:
     ADDR_DATUM_PTR data =
         cntr->Parent_func_scope()->Addr_datum(node->Addr_datum_id());
     NODE_PTR new_load = cntr->New_ld(data, node->Spos());
+    new_load->Copy_attr(node);
     return RETV(new_load);
   }
 
   template <typename RETV, typename VISITOR>
   RETV Handle_st(VISITOR* visitor, air::base::NODE_PTR node) {
-    CONTAINER*     cntr  = visitor->Context().Container();
+    CONTAINER* cntr = visitor->Context().Container();
+
     NODE_PTR       child = Node(visitor->template Visit<RETV>(node->Child(0)));
     ADDR_DATUM_PTR data =
         cntr->Parent_func_scope()->Addr_datum(node->Addr_datum_id());
     data->Set_type(child->Rtype());
     STMT_PTR new_store = cntr->New_st(child, data, node->Spos());
+    new_store->Node()->Copy_attr(node);
+    if ((child->Opcode() == air::core::LD) ||
+        (child->Opcode() == air::core::LDP)) {
+      new_store->Node()->Copy_attr(child);
+    }
+    return RETV(new_store->Node());
+  }
+
+  template <typename RETV, typename VISITOR>
+  RETV Handle_ldp(VISITOR* visitor, air::base::NODE_PTR node) {
+    CONTAINER* cntr     = visitor->Context().Container();
+    PREG_PTR   preg     = cntr->Parent_func_scope()->Preg(node->Preg_id());
+    NODE_PTR   new_load = cntr->New_ldp(preg, node->Spos());
+    new_load->Copy_attr(node);
+    return RETV(new_load);
+  }
+
+  template <typename RETV, typename VISITOR>
+  RETV Handle_stp(VISITOR* visitor, air::base::NODE_PTR node) {
+    CONTAINER* cntr = visitor->Context().Container();
+
+    NODE_PTR child     = Node(visitor->template Visit<RETV>(node->Child(0)));
+    PREG_PTR preg      = cntr->Parent_func_scope()->Preg(node->Preg_id());
+    STMT_PTR new_store = cntr->New_stp(child, preg, node->Spos());
+    new_store->Node()->Copy_attr(node);
+    if ((child->Opcode() == air::core::LD) ||
+        (child->Opcode() == air::core::LDP)) {
+      new_store->Node()->Copy_attr(child);
+    }
     return RETV(new_store->Node());
   }
 

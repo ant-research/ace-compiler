@@ -16,10 +16,10 @@
 extern "C" {
 #endif
 
-//! @brief start a time/memory statistics
+//! @brief Start a time/memory statistics
 void Tm_start(const char* msg);
 
-//! @brief end current time/memory statistics
+//! @brief End current time/memory statistics
 void Tm_taken(const char* msg);
 
 #ifdef __cplusplus

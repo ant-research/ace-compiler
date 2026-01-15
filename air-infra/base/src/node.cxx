@@ -62,7 +62,7 @@ uint64_t NODE::Intconst() const {
 }
 
 bool NODE::Is_root() const {
-  return !META_INFO::Has_prop<OPR_PROP::EXPR>(Opcode());
+  return META_INFO::Has_prop<OPR_PROP::STMT>(Opcode());
 }
 
 bool NODE::Is_leaf() const {
@@ -81,6 +81,12 @@ bool NODE::Is_call() const {
   return META_INFO::Has_prop<OPR_PROP::CALL>(Opcode());
 }
 
+bool NODE::Is_intrn_call() const { return Opcode() == core::OPC_INTRN_CALL; }
+
+bool NODE::Is_intrn_op() const { return Opcode() == core::OPC_INTRN_OP; }
+
+bool NODE::Is_comment() const { return Opcode() == core::OPC_COMMENT; }
+
 bool NODE::Is_empty_blk() const { return Begin_stmt_id() == End_stmt_id(); }
 
 bool NODE::Is_entry() const { return Opcode() == core::OPC_FUNC_ENTRY; }
@@ -90,6 +96,12 @@ bool NODE::Is_block() const { return Opcode() == core::OPC_BLOCK; }
 bool NODE::Is_if() const { return Opcode() == core::OPC_IF; }
 
 bool NODE::Is_do_loop() const { return Opcode() == core::OPC_DO_LOOP; }
+
+bool NODE::Is_pragma() const { return Opcode() == core::OPC_PRAGMA; }
+
+bool NODE::Is_ret() const {
+  return Opcode() == core::OPC_RET || Opcode() == core::OPC_RETV;
+}
 
 bool NODE::Is_preg_op() const {
   return (Opcode() == core::OPC_LDP || Opcode() == core::OPC_STP ||
@@ -148,6 +160,7 @@ TYPE_ID
 NODE::Rtype_id() const {
   AIR_ASSERT(Has_rtype());
   AIR_ASSERT_MSG(_data->_comm._rtype != Null_st_id, "invalid rtype");
+  if (Is_block()) return Glob_scope().Prim_type(PRIMITIVE_TYPE::VOID)->Id();
   return TYPE_ID(_data->_comm._rtype);
 }
 
@@ -403,6 +416,38 @@ NODE::Entry_id() const {
 ENTRY_PTR
 NODE::Entry() const { return _cont->Glob_scope()->Entry_point(Entry_id()); }
 
+const char* NODE::Intrn_name() const {
+  AIR_ASSERT(Is_intrn_call() || Is_intrn_op());
+  STR_ID name(_data->_uu._entry);
+  return _cont->Glob_scope()->String(name)->Char_str();
+}
+
+const char* NODE::Comment() const {
+  AIR_ASSERT(Is_comment());
+  STR_ID name(_data->_uu._str);
+  return _cont->Glob_scope()->String(name)->Char_str();
+}
+
+STR_ID NODE::Comment_id() const {
+  AIR_ASSERT(Is_comment());
+  return STR_ID(_data->_uu._str);
+}
+
+uint32_t NODE::Pragma_id() const {
+  AIR_ASSERT(Is_pragma());
+  return _data->_uu._u3._pragma._id;
+}
+
+uint32_t NODE::Pragma_arg0() const {
+  AIR_ASSERT(Is_pragma());
+  return _data->_uu._u3._pragma._arg0;
+}
+
+uint32_t NODE::Pragma_arg1() const {
+  AIR_ASSERT(Is_pragma());
+  return _data->_uu._u3._pragma._arg1;
+}
+
 CONSTANT_ID
 NODE::Const_id() const {
   AIR_ASSERT(Has_const_id());
@@ -476,14 +521,19 @@ void NODE::Set_child(uint32_t num, CONST_NODE_PTR node) {
 }
 
 void NODE::Set_rtype(TYPE_ID type) {
+  CMPLR_ASSERT(0, "Do not call this API to change rtype.");
   AIR_ASSERT(Has_rtype());
+  AIR_ASSERT(!Is_block());
   _data->_comm._rtype = type.Value();
   AIR_ASSERT((!Has_access_type()) ||
              ((Rtype()->Is_int() && Access_type()->Is_int()) ||
               (Rtype() == Access_type())));
 }
 
-void NODE::Set_rtype(CONST_TYPE_PTR type) { Set_rtype(type->Id()); }
+void NODE::Set_rtype(CONST_TYPE_PTR type) {
+  CMPLR_ASSERT(0, "Do not call this API to change rtype.");
+  Set_rtype(type->Id());
+}
 
 void NODE::Set_addr_datum(ADDR_DATUM_ID id) {
   AIR_ASSERT(Has_sym());
@@ -500,6 +550,16 @@ void NODE::Set_entry(ENTRY_ID id) {
 }
 
 void NODE::Set_entry(CONST_ENTRY_PTR entry) { Set_entry(entry->Id()); }
+
+void NODE::Set_intrn_name(STR_ID id) { _data->_uu._entry = id.Value(); }
+
+void NODE::Set_comment(STR_ID id) { _data->_uu._str = id.Value(); }
+
+void NODE::Set_pragma(uint32_t id, uint32_t arg0, uint32_t arg1) {
+  _data->_uu._u3._pragma._id   = id;
+  _data->_uu._u3._pragma._arg0 = arg0;
+  _data->_uu._u3._pragma._arg1 = arg1;
+}
 
 void NODE::Set_ret_preg(PREG_ID id) {
   AIR_ASSERT(Has_ret_var());
@@ -576,8 +636,8 @@ void NODE::Print_tree(std::ostream& os, bool rot, uint32_t indent) const {
       stmt->Print(os, rot, indent + 1);
     }
     // print end block
-    os << std::string(indent * INDENT_SPACE, ' ') << "end_block ID("
-       << Id().Value() << ")" << std::endl;
+    os << std::string(indent * INDENT_SPACE, ' ') << "end_block ID(" << std::hex
+       << std::showbase << Id().Value() << ")" << std::endl;
   } else if (Is_entry() || rot) {
     // print self
     Print(os, indent);
@@ -641,6 +701,9 @@ void NODE::Print(std::ostream& os, uint32_t indent) const {
       os << " CST[" << cst->Id().Value() << "]";
     }
   }
+  if (op == core::OPC_INTRN_CALL || op == core::OPC_INTRN_OP) {
+    os << " \"" << Intrn_name() << "\"";
+  }
   if (op == core::OPC_INTCONST) {
     if (Rtype()->Is_signed_int()) {
       os << " #" << static_cast<int64_t>(Intconst());
@@ -655,7 +718,7 @@ void NODE::Print(std::ostream& os, uint32_t indent) const {
     list.Print(os, 0);
     os << "]";
   }
-  if (Has_rtype()) {
+  if (Has_rtype() && !Is_block()) {
     os << " RTYPE[" << Rtype_id().Value() << "](" << Rtype()->Name()->Char_str()
        << ")";
   }
@@ -663,7 +726,14 @@ void NODE::Print(std::ostream& os, uint32_t indent) const {
     os << " FLD[" << Field_id().Value() << "](" << Field()->Name()->Char_str()
        << ")";
   }
-  if (Is_root()) {
+  if (Is_pragma()) {
+    os << " ID[" << Pragma_id() << "](" << Pragma_arg0() << ", "
+       << Pragma_arg1() << ")";
+  }
+  if (Is_comment()) {
+    os << " \"" << Comment() << "\"";
+  }
+  if (Is_root() || Is_block()) {
     os << " ID(" << Id().Value() << ") LINE(";
     os << std::dec << Spos().Line() << ":" << Spos().Col() << ":"
        << Spos().Count() << ")";

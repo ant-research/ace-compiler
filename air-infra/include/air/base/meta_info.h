@@ -18,30 +18,6 @@ namespace air {
 namespace base {
 
 /**
- * @brief Operator's category
- * Each operator should only belong to 1 category
- *
- */
-enum class OPR_CAT {
-  /**! Operator is entry for function or region */
-  ENTRY,
-  /**! Operator is pragma */
-  PRAGMA,
-  /**! Operator is control flow */
-  CFLOW,
-  /**! Operator is load or store */
-  LDST,
-  /**! Operator is a generic statement */
-  STMT,
-  /**! Operator is a generic expression */
-  EXPR,
-  /**! Operator is a call */
-  CALL,
-  /**! Last category, should never be used */
-  LAST_CAT
-};  // OPR_CAT
-
-/**
  * @brief Operator's property
  * Each operator has 1 or more properties
  *
@@ -134,8 +110,6 @@ enum OPR_KIDS : uint16_t { FLEXIBLE = (uint16_t)-1 };
 struct OPR_INFO {
   /**! Operator name */
   char _name[31];
-  /**! Operator category */
-  OPR_CAT _cate : 8;
   /**! Number of operator kids. FLEXIBLE(-1) means no fixed kid number */
   uint16_t _nkids;
   /**! Number of operator fields */
@@ -171,14 +145,6 @@ struct DOMAIN_INFO {
  */
 class META_INFO {
 public:
-  /**
-   * @brief Get operator category name
-   *
-   * @param cat Operator category
-   * @return const char* Name of the category
-   */
-  static const char* Op_cate_name(OPR_CAT cat);
-
   /**
    * @brief Get operator property name
    *
@@ -274,49 +240,6 @@ public:
    */
   static uint32_t Op_num_field(OPCODE opc) {
     return Op_num_field(opc.Domain(), opc.Operator());
-  }
-
-  /**
-   * @brief Operator category
-   *
-   * @param id Domain id
-   * @param opr Operator id
-   * @return OPR_CAT Operator category
-   */
-  static OPR_CAT Op_category(uint32_t id, uint32_t opr) {
-    AIR_ASSERT(Valid_operator(id, opr));
-    return Domains[id]->_opr_info[opr]._cate;
-  }
-
-  /**
-   * @brief Operator category
-   *
-   * @param opc OPCODE
-   * @return OPR_CAT Operator category
-   */
-  static OPR_CAT Op_category(OPCODE opc) {
-    return Op_category(opc.Domain(), opc.Operator());
-  }
-
-  /**
-   * @brief Operator category name
-   *
-   * @param id Domain id
-   * @param opr Operator id
-   * @return const char* Operator category name
-   */
-  static const char* Op_category_name(uint32_t id, uint32_t opr) {
-    return Op_cate_name(Op_category(id, opr));
-  }
-
-  /**
-   * @brief Operator category name
-   *
-   * @param opc OPCODE
-   * @return const char* Operator category name
-   */
-  static const char* Op_category_name(OPCODE opc) {
-    return Op_category_name(opc.Domain(), opc.Operator());
   }
 
   /**

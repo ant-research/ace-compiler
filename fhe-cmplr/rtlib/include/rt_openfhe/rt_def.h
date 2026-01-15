@@ -11,15 +11,20 @@
 
 // NOLINTBEGIN (readability-identifier-naming)
 
-//! @brief forward declaration of OpenFHE types
+//! @brief Forward declaration of OpenFHE types
 namespace lbcrypto {}  // namespace lbcrypto
 
 //! @brief Define CIPHERTEXT/CIPHER/PLAINTEXT/PLAIN for rt APIs
 typedef lbcrypto::Ciphertext<lbcrypto::DCRTPoly>  CIPHERTEXT;
+typedef lbcrypto::Ciphertext<lbcrypto::DCRTPoly>  CIPHERTEXT3;
 typedef lbcrypto::Ciphertext<lbcrypto::DCRTPoly>* CIPHER;
+typedef lbcrypto::Ciphertext<lbcrypto::DCRTPoly>* CIPHER3;
 typedef lbcrypto::Plaintext                       PLAINTEXT;
 typedef lbcrypto::Plaintext*                      PLAIN;
 
 // NOLINTEND (readability-identifier-naming)
+
+#define CIPHER_DEFINED 1
+#define PLAIN_DEFINED  1
 
 #endif  // RTLIB_RT_OPENFHE_RT_DEF_H

@@ -18,8 +18,8 @@ namespace poly {
 class INVALID_HANDLER {
 public:
   // invalid handler implementation for each OPCODE
-#define DEF_OPCODE(NAME, name, cat, kid_num, fld_num, prop) \
-  OPCODE_INVALID_HANDLER_GEN(NAME, name, cat, kid_num, fld_num, prop)
+#define DEF_OPCODE(NAME, name, kid_num, fld_num, prop) \
+  OPCODE_INVALID_HANDLER_GEN(NAME, name, kid_num, fld_num, prop)
 #include "opcode_def.inc"
 #undef DEF_OPCODE
 };

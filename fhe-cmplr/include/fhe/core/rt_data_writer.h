@@ -13,7 +13,6 @@
 #include <vector>
 
 #include "air/core/ir2c_ctx.h"
-#include "fhe/core/lower_ctx.h"
 #include "fhe/core/rt_data_def.h"
 #include "fhe/core/rt_version.h"
 #include "fhe/poly/poly2c_config.h"
@@ -59,24 +58,27 @@ public:
   }
 
   template <typename T>
-  uint64_t Append(const char* name, const T* data, uint32_t count) {
+  uint64_t Append(const char* name, const T* data, uint32_t len, int sc,
+                  int lv) {
     AIR_ASSERT((sizeof(T) == 4 && _hdr._ent_type == DE_MSG_F32) ||
                (sizeof(T) == 8 && _hdr._ent_type == DE_MSG_F64));
-    AIR_ASSERT(count > 0);
-    uint32_t size = count * sizeof(T);
-    return Write_data(name, (const char*)data, size);
+    AIR_ASSERT(len > 0);
+    uint32_t size = len * sizeof(T);
+    return Write_data(name, (const char*)data, size, sc, lv);
   }
 
-  uint64_t Append_pt(const char* name, const char* data, uint32_t size) {
+  uint64_t Append_pt(const char* name, const char* data, uint32_t size, int sc,
+                     int lv) {
     AIR_ASSERT(_hdr._ent_type == DE_PLAINTEXT);
     AIR_ASSERT(size > 0);
-    return Write_data(name, (const char*)data, size);
+    return Write_data(name, (const char*)data, size, sc, lv);
   }
 
   uint64_t Cur_idx() const { return _lut.size(); }
 
 private:
-  uint64_t Write_data(const char* name, const char* data, uint32_t size) {
+  uint64_t Write_data(const char* name, const char* data, uint32_t size, int sc,
+                      int lv) {
     uint64_t idx  = _lut.size();
     uint64_t ofst = _os.tellp();
     AIR_ASSERT((ofst % (1 << _hdr._ent_align)) == 0);
@@ -86,18 +88,20 @@ private:
       uint32_t padding = (1 << _hdr._ent_align) - rem;
       _os.seekp(padding, std::ios_base::cur);
     }
-    _lut.emplace_back(name, idx, size, ofst);
+    _lut.emplace_back(name, idx, size, sc, lv, ofst);
     return (!_os) ? (uint64_t)(-1) : idx;
   }
 
   struct CXX_DATA_LUT_ENTRY : public DATA_LUT_ENTRY {
   public:
-    CXX_DATA_LUT_ENTRY(const char* name, uint32_t index, uint32_t size,
-                       uint64_t ofst) {
+    CXX_DATA_LUT_ENTRY(const char* name, uint32_t index, uint32_t size, int sc,
+                       int lv, uint64_t ofst) {
       AIR_ASSERT(strlen(name) < sizeof(_name));
       strncpy(_name, name, sizeof(_name));
       _index    = index;
       _size     = size;
+      _scale    = sc;
+      _level    = lv;
       _ent_ofst = ofst;
     }
   };

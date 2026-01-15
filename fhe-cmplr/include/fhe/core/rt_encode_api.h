@@ -28,7 +28,9 @@ struct PLAINTEXT_BUFFER {
 
 //! @brief create context for encoding only
 void Prepare_encode_context(uint32_t degree, uint32_t sec_level, uint32_t depth,
-                            uint32_t first_mod_size, uint32_t scaling_mod_size);
+                            uint32_t input_lev, uint32_t first_mod_size,
+                            uint32_t scaling_mod_size, uint32_t num_q_parts,
+                            uint32_t hamming_weight);
 
 //! @brief destroy context for encoding only
 void Finalize_encode_context();

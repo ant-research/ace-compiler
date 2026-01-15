@@ -37,6 +37,14 @@ public:
 
   const char* Name() const { return "POLY"; }
 
+  void Set_lower_to_hpoly(bool v);
+
+  void Set_lower_to_hpoly2(bool v);
+
+  void Set_prop_attr(bool v);
+
+  POLY_CONFIG& Config() { return air::driver::PASS<POLY_CONFIG>::Config(); }
+
 private:
   driver::FHE_COMPILER* _driver;
 };  // POLY_PASS

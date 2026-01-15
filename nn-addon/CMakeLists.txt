@@ -1,145 +1,213 @@
-cmake_minimum_required (VERSION 3.13)
+#=============================================================================
+#
+# Copyright (c) Ant Group Co., Ltd
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+#
+#=============================================================================
 
-project (nn-addon C CXX)
+cmake_minimum_required(VERSION 3.13)
 
-set (NN_ADDON_VERSION_MAJOR 0)
-set (NN_ADDON_VERSION_MINOR 0)
-set (NN_ADDON_VERSION_PATCH 1)
-set (NN_ADDON_VERSION ${NN_ADDON_VERSION_MAJOR}.${NN_ADDON_VERSION_MINOR}.${NN_ADDON_VERSION_PATCH})
+project(nn-addon C CXX)
 
-set (CMAKE_CXX_STANDARD 17)
-set (CXX_STANDARD_REQUIRED ON)
+set(NN_ADDON_VERSION_MAJOR 0)
+set(NN_ADDON_VERSION_MINOR 0)
+set(NN_ADDON_VERSION_PATCH 1)
+set(NN_ADDON_VERSION ${NN_ADDON_VERSION_MAJOR}.${NN_ADDON_VERSION_MINOR}.${NN_ADDON_VERSION_PATCH})
+
+set(CMAKE_CXX_STANDARD 17)
+set(CXX_STANDARD_REQUIRED ON)
+
+include(cmake/function_option.cmake)
+include(cmake/function_library.cmake)
+include(cmake/function_extralib.cmake)
+
+# Add path for custom CMake modules.
+list(APPEND CMAKE_MODULE_PATH
+	"${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
 
 #--------------------------------------------------------------------
 # Build options
 #--------------------------------------------------------------------
-# -DCMAKE_BUILD_TYPE=Debug/Release
-if (CMAKE_BUILD_TYPE)
-  set (RELEASE_TYPES Debug Release)
-  list (FIND RELEASE_TYPES ${CMAKE_BUILD_TYPE} INDEX_FOUND)
-  if (${INDEX_FOUND} EQUAL -1)
-    message (FATAL_ERROR "CMAKE_BUILD_TYPE must be one of Debug, Release")
-  endif ()
-else ()
-    # if no build type is chosen, default to Debug mode
-	set (CMAKE_BUILD_TYPE Debug CACHE STRING
-		"Choose the type of build, options are: None, Debug, Release." FORCE)
-endif ()
+option(BUILD_STATIC        "Control whether to build the static libraries"  ON)
+option(BUILD_SHARED        "Control whether to build the shared libraries" OFF)
+option(BUILD_UNITTEST      "Control whether to build the unittest"          ON)
+option(BUILD_BENCH         "Control whether to build the benmark"           ON)
+option(BUILD_DOC           "Control whether to build API documentation"    OFF)
+option(NN_CODE_CHECK       "Control whether to check coding style"          ON)
+option(NN_BUILD_TEST       "Control whether to build the tests"             ON)
+option(NN_BUILD_EXAMPLE    "Control whether to build the examples"          ON)
+option(NN_INSTALL_APP      "Control whether to install the APPs"            ON)
+option(EXTERNAL_URL_SSH    "Control choose external URL for repository"    OFF)
 
-string (TIMESTAMP BUILD_TIMESTAMP "%Y-%m-%d %H:%M:%S")
+set(NN_WITH_SRC "" CACHE STRING "The default compilation depends")
 
-option (BUILD_STATIC      "Set to ON to build static versions of the library"             ON)
-option (BUILD_SHARED      "Set to OFF to disable build shared versions of the library"   OFF)
-option (BUILD_UNITTEST    "Set to ON to build third-party unittests default"              ON)
-option (BUILD_BENCH       "Set to ON to build third-party benmark default"                ON)
-option (BUILD_DOC         "Set to OFF to disable Build documentation default"            OFF)
-option (NN_CODE_CHECK     "Set to ON to check C/C++ code style default"                   ON)
-option (NN_WITH_SRC       "Set to ON to build with air-infra default"                     ON)
-option (NN_BUILD_ONNX     "Set to ON to build test example defualt"                       ON)
-option (NN_BUILD_TEST     "Set to ON to build test example defualt"                       ON)
-option (NN_BUILD_EXAMPLE  "Set to ON to build test example defualt"                       ON)
-option (NN_INSTALL_APP    "Set to ON to build install package defualt"                    ON)
+# Add target nn_depend
+add_custom_target(nn_depend)
+
+# Check option : -DNN_WITH_SRC
+if(NOT "${NN_WITH_SRC}" STREQUAL "")
+  build_nn_with_src("${NN_WITH_SRC}")
+  read_package_config("$ENV{PACKAGE_BASE_DIR}")
+  add_dependencies (nn_depend ${AIR_LIBS})
+else()
+  # find depend libraries
+  find_package(ant-ace REQUIRED)
+  find_air_lib()
+  set_package_env(${PACKAGE_BASE_DIR} ${PACKAGE_CONF_DIR} ${PACKAGE_DEVTOOLS_DIR})
+endif()
+
+# Check Package information
+check_package_info(${PACKAGE_NAME})
+
+# Check common program & libraries
+check_program("python3" PYTHON_EXECUTABLE)
+
+# Check commit : BUILD_GIT_COMMIT
+string(TIMESTAMP BUILD_TIMESTAMP "%Y-%m-%d %H:%M:%S")
+check_code_revision(${PROJECT_NAME} BUILD_GIT_COMMIT)
+
+# Check option : -DCMAKE_BUILD_TYPE
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Set the default type of build" FORCE)
+else()
+  check_build_type(${CMAKE_BUILD_TYPE})
+endif()
 
 ### Print options
-message (STATUS "CMAKE_CURRENT_SOURCE_DIR     : ${CMAKE_CURRENT_SOURCE_DIR}")
-message (STATUS "CMAKE_BUILD_TYPE             : ${CMAKE_BUILD_TYPE}")
-message (STATUS "BUILD_STATIC                 : ${BUILD_STATIC}")
-message (STATUS "BUILD_SHARED                 : ${BUILD_SHARED}")
-message (STATUS "BUILD_UNITTEST               : ${BUILD_UNITTEST}")
-message (STATUS "BUILD_BENCH                  : ${BUILD_BENCH}")
-message (STATUS "BUILD_DOC                    : ${BUILD_DOC}")
-message (STATUS "NN_CODE_CHECK                : ${NN_CODE_CHECK}")
-message (STATUS "NN_WITH_SRC                  : ${NN_WITH_SRC}")
-message (STATUS "NN_BUILD_ONNX                : ${NN_BUILD_ONNX}")
-message (STATUS "NN_BUILD_TEST                : ${NN_BUILD_TEST}")
-message (STATUS "NN_BUILD_EXAMPLE             : ${NN_BUILD_EXAMPLE}")
-message (STATUS "NN_INSTALL_APP               : ${NN_INSTALL_APP}")
-message (STATUS "BUILD_TIMESTAMP              : ${BUILD_TIMESTAMP}")
+message(STATUS "CMAKE_CURRENT_SOURCE_DIR      : ${CMAKE_CURRENT_SOURCE_DIR}")
+message(STATUS "CMAKE_BUILD_TYPE              : ${CMAKE_BUILD_TYPE}")
+message(STATUS "BUILD_STATIC                  : ${BUILD_STATIC}")
+message(STATUS "BUILD_SHARED                  : ${BUILD_SHARED}")
+message(STATUS "BUILD_UNITTEST                : ${BUILD_UNITTEST}")
+message(STATUS "BUILD_BENCH                   : ${BUILD_BENCH}")
+message(STATUS "BUILD_DOC                     : ${BUILD_DOC}")
+message(STATUS "NN_CODE_CHECK                 : ${NN_CODE_CHECK}")
+message(STATUS "NN_WITH_SRC                   : ${NN_WITH_SRC}")
+message(STATUS "NN_BUILD_TEST                 : ${NN_BUILD_TEST}")
+message(STATUS "NN_BUILD_EXAMPLE              : ${NN_BUILD_EXAMPLE}")
+message(STATUS "NN_INSTALL_APP                : ${NN_INSTALL_APP}")
+message(STATUS "BUILD_TIMESTAMP               : ${BUILD_TIMESTAMP}")
+message(STATUS "BUILD_GIT_COMMIT              : ${BUILD_GIT_COMMIT}")
 
 #--------------------------------------------------------------------
 # Logic: Configure
 #--------------------------------------------------------------------
-# for build with src/libs
-# -DNN_WITH_SRC="air-infra"
-if (NN_WITH_SRC)
-  string (FIND "${NN_WITH_SRC}" "air-infra" CONF_AIR_INFRA)
-  if (${CONF_AIR_INFRA} GREATER "-1")
-    set (AIR_INFRA_PROJECTS ${CMAKE_SOURCE_DIR}/../air-infra)
-    if (IS_DIRECTORY ${AIR_INFRA_PROJECTS})
-      add_subdirectory (${AIR_INFRA_PROJECTS} air-infra)
-      include_directories (${AIR_INFRA_PROJECTS}/include)
-      include_directories (${CMAKE_BINARY_DIR}/include)
-    else ()
-      message (FATAL_ERROR "MUST MANUALLY CLONE REPO 'AIR_INFRA_PROJECTS'=${AIR_INFRA_PROJECTS}")
-    endif ()
-  endif ()
-else ()
-  find_library (libvar  AIRutil)
-  if (${libvar} STREQUAL "libvar-NOTFOUND")
-    message (FATAL_ERROR "required AIRutil library but not found!")
-  else ()
-    message (STATUS "AIRutil library found in ${libvar}")
-  endif ()
-endif ()
+# for check commit message
+install_hooks($ENV{PACKAGE_DEVTOOLS_DIR}/hooks)
 
-# for check coding style
-if (NN_CODE_CHECK)
-  include (cmake/external_regex.cmake)
-endif ()
+# check coding style
+if(NN_CODE_CHECK)
+  # codes from other parties are excluded from coding style checks
+  set(CODEING_STYLE_EXCLUDES "third-party")
+  # exclude unittest source from coding style check if not build
+  if(NOT BUILD_UNITTEST)
+    set(CODEING_STYLE_EXCLUDES ${CODEING_STYLE_EXCLUDES} "unittest")
+  endif()
+  # exclude benchmark source from coding style check if not build
+  if(NOT BUILD_BENCH)
+    set(CODEING_STYLE_EXCLUDES ${CODEING_STYLE_EXCLUDES} "benchmark")
+  endif()
+  # exclude tests source from coding style check if not build
+  if(NOT NN_BUILD_TEST)
+    set(CODEING_STYLE_EXCLUDES ${CODEING_STYLE_EXCLUDES} "test")
+  endif()
 
-# for generate onnx.proto
-include (cmake/external_protogen.cmake)
+  set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+  set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES})
+  check_coding_style("$ENV{PACKAGE_DEVTOOLS_DIR}" "${CODEING_STYLE_EXCLUDES}")
+endif()
+
+# find extra libs : protobuf, python, pybind11
+find_nn_extralib(EXTRA_LIBS)
+
+# generate domain opcodes for NN
+# the target `nn_od` will be created
+gen_domain_od(
+  "$ENV{PACKAGE_BASE_DIR}/irgen/od/odgen.py"
+  "${PROJECT_SOURCE_DIR}/core/od/opcode_def.yml"
+  "${CMAKE_BINARY_DIR}/include/nn/core"
+  nn
+)
+add_dependencies(nn_depend nn_od)
+
 #--------------------------------------------------------------------
 # Logic: Target
 #--------------------------------------------------------------------
-# build nn
-add_custom_target (allnn)
+# add glob include list
+add_inc_list("${PROJECT_SOURCE_DIR}/include;${CMAKE_BINARY_DIR}/include")
+include_directories("${PACKAGE_INC_DIR}")
 
-if (BUILD_STATIC)
-  set (AIR_LIBS ${AIR_LIBS} PUBLIC AIRdriver PUBLIC AIRopt PUBLIC AIRcg PUBLIC AIRcore PUBLIC AIRbase PUBLIC AIRutil)
-  set (NN_LIBS ${NN_LIBS} PUBLIC NNdriver PUBLIC NNvector PUBLIC NNonnx2air PUBLIC NNopt PUBLIC NNonnx PUBLIC NNcore PUBLIC NNutil ${AIR_LIBS})
-  add_dependencies (allnn NNdriver NNopt NNvector NNonnx2air NNonnx NNcore NNutil)
-endif ()
+# set target libraries
+set_nn_lib()
 
-# build depend libs for test
-include (cmake/external_testdep.cmake)
+# add glob depends for allnn
+add_custom_target(allnn DEPENDS nn_depend)
 
-if (NN_BUILD_TEST)
+if(NN_BUILD_TEST)
   enable_testing()
-endif ()
+endif()
 
 # build component libs
-add_subdirectory (util)
-add_subdirectory (core)
-add_subdirectory (onnx)
-add_subdirectory (onnx2air)
-add_subdirectory (llama)
-add_subdirectory (vector)
-add_subdirectory (opt)
+add_subdirectory(util)
+add_subdirectory(core)
+add_subdirectory(onnx)
+add_subdirectory(onnx2air)
+add_subdirectory(llama)
+add_subdirectory(vector)
+add_subdirectory(opt)
 
 # build component executable
-add_subdirectory (driver)
+add_subdirectory(driver)
 
 # build benchmark
-if (BUILD_BENCH)
-  add_subdirectory (benchmark)
-endif ()
+if(BUILD_BENCH)
+  add_subdirectory(benchmark)
+endif()
 
 # build e2e test
-if (NN_BUILD_TEST)
-  add_subdirectory (test)
-endif ()
+if(NN_BUILD_TEST)
+  add_subdirectory(test)
+endif()
 
 # build docs
-if (BUILD_DOC)
-  include (cmake/external_doxygen.cmake)
-endif ()
+if(BUILD_DOC)
+  build_app_doc(NN_INSTALL_APP ${PROJECT_NAME})
+endif()
 
 #--------------------------------------------------------------------
 # Logic: Package
 #--------------------------------------------------------------------
 # install header file
-install (DIRECTORY include/ DESTINATION include)
+install(DIRECTORY include/ DESTINATION include)
 
-# install testcase dict for cti
-install (FILES ${PROJECT_SOURCE_DIR}/test/data_avhc_nn.yml DESTINATION test)
+install(FILES
+    ${PROJECT_SOURCE_DIR}/cmake/function_library.cmake
+    ${PROJECT_SOURCE_DIR}/cmake/function_extralib.cmake
+    DESTINATION share/${PACKAGE_NAME}/cmake/${PROJECT_NAME}
+)
+
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_Version.cmake"
+    VERSION ${NN_ADDON_VERSION}
+    COMPATIBILITY AnyNewerVersion
+)
+
+set(COMPONENT_CONFIG_FILE "${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}Config.cmake")
+set(PACKAGE_CONFIG_FILE "$ENV{PACKAGE_CONF_DIR}/${PACKAGE_NAME}Config.cmake")
+
+configure_file(
+    "${CMAKE_CURRENT_LIST_DIR}/package.cmake.in"
+    "${COMPONENT_CONFIG_FILE}"
+    @ONLY
+)
+
+install(CODE "
+  file(READ ${COMPONENT_CONFIG_FILE} CMAKE_CONTENTS)
+  file(APPEND ${PACKAGE_CONFIG_FILE} \"\${CMAKE_CONTENTS}\")
+")
+
+install(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_Version.cmake"
+    DESTINATION share/${PACKAGE_NAME}
+)

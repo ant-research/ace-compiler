@@ -6,6 +6,20 @@
 //
 //=============================================================================
 
+#include <ctype.h>
+#include <fcntl.h>
+#include <math.h>
+#include <pybind11/embed.h>
+#include <pybind11/pybind11.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/mman.h>
+#include <time.h>
+#include <unistd.h>
+
+#include <numeric>
+
 #include "air/base/container.h"
 #include "air/base/st.h"
 #include "air/base/visitor.h"
@@ -23,8 +37,9 @@ using namespace nn::vector;
 namespace nn {
 namespace llama {
 
-#define ZERO       0
-#define ARRAY_SIZE 4096
+namespace py = pybind11;
+
+#define ZERO 0
 
 void LLAMA::Create_entry_func() {
   // name of entry function
@@ -37,7 +52,7 @@ void LLAMA::Create_entry_func() {
 
   // parameter x of entry function
   TYPE_PTR base_type_idx = _glob->Prim_type(PRIMITIVE_TYPE::FLOAT_32);
-  std::vector<int64_t> shape{1, 1, ARRAY_SIZE};
+  std::vector<int64_t> shape{_transformer._config._dim};
   TYPE_PTR             array_type =
       New_array_type(_glob, "float", base_type_idx, shape, _spos);
 
@@ -58,7 +73,7 @@ void LLAMA::Create_entry_func() {
   CONTAINER* cntr = &_func_scope->Container();
   cntr->New_func_entry(_spos);
 }
-
+#if 0
 ADDR_DATUM_PTR LLAMA::Create_rmsnorm(std::string result) {
   CONTAINER* cntr     = &_func_scope->Container();
   STMT_PTR   ent_stmt = cntr->New_func_entry(_spos);
@@ -87,9 +102,10 @@ ADDR_DATUM_PTR LLAMA::Create_rmsnorm(std::string result) {
                                       floats, sizeof(floats));
 
   NODE_PTR nny_node = cntr->New_ldc(cst, _spos);
-  NODE_PTR nn_node  = cntr->New_bin_arith(
-      air::base::OPCODE(nn::core::NN, nn::core::OPCODE::RMSNORM), nnx_node,
-      nny_node, _spos);
+  CMPLR_ASSERT(0, "Fix rtype for New_bin_arith.");
+  NODE_PTR nn_node = cntr->New_bin_arith(
+      air::base::OPCODE(nn::core::NN, nn::core::OPCODE::RMSNORM),
+      nnx_node->Rtype(), nnx_node, nny_node, _spos);
   STMT_PTR  nnstmt = cntr->New_st(nn_node, var_z, _spos);
   STMT_LIST sl     = cntr->Stmt_list();
   sl.Append(nnstmt);
@@ -99,10 +115,11 @@ ADDR_DATUM_PTR LLAMA::Create_rmsnorm(std::string result) {
 
 ADDR_DATUM_PTR LLAMA::Create_matmul(NODE_PTR nnx_node, NODE_PTR nny_node,
                                     TYPE_PTR array_type, std::string result) {
-  CONTAINER* cntr    = &_func_scope->Container();
-  NODE_PTR   nn_node = cntr->New_bin_arith(
-      air::base::OPCODE(nn::core::NN, nn::core::OPCODE::MATMUL), nnx_node,
-      nny_node, _spos);
+  CONTAINER* cntr = &_func_scope->Container();
+  CMPLR_ASSERT(0, "Fix rtype for New_bin_arith.");
+  NODE_PTR nn_node = cntr->New_bin_arith(
+      air::base::OPCODE(nn::core::NN, nn::core::OPCODE::MATMUL),
+      nnx_node->Rtype(), nnx_node, nny_node, _spos);
   STR_PTR        z_str  = _glob->New_str(result.c_str());
   ADDR_DATUM_PTR var_z  = _func_scope->New_var(array_type, z_str, _spos);
   STMT_PTR       nnstmt = cntr->New_st(nn_node, var_z, _spos);
@@ -147,7 +164,8 @@ ADDR_DATUM_PTR LLAMA::Create_sqrt(std::string weight_input,
   ADDR_DATUM_PTR var_z      = _func_scope->New_var(array_type, z_str, _spos);
   NODE_PTR       nnx_node   = cntr->New_ldc(cst, _spos);
   NODE_PTR       nn_node    = cntr->New_una_arith(
-      air::base::OPCODE(nn::core::NN, nn::core::OPCODE::SQRT), nnx_node, _spos);
+      air::base::OPCODE(nn::core::NN, nn::core::OPCODE::SQRT),
+      nnx_node->Rtype(), nnx_node, _spos);
   STMT_PTR  nnstmt = cntr->New_st(nn_node, var_z, _spos);
   STMT_LIST sl     = cntr->Stmt_list();
   sl.Append(nnstmt);
@@ -182,9 +200,10 @@ std::pair<ADDR_DATUM_PTR, ADDR_DATUM_PTR> LLAMA::Create_kv_cache(
   TYPE_PTR   type     = nnx_node->Rtype();
   AIR_ASSERT_MSG(type->Is_array(), "Expect tensor type");
   TYPE_PTR array_type = type->Cast_to_arr();
-  NODE_PTR nn_node    = cntr->New_tern_arith(
-      air::base::OPCODE(nn::core::NN, nn::core::OPCODE::RESHAPE_KV), nnx_node,
-      nny_node, nnz_node, _spos);
+  CMPLR_ASSERT(0, "Fix rtype for New_tern_arith.");
+  NODE_PTR nn_node = cntr->New_tern_arith(
+      air::base::OPCODE(nn::core::NN, nn::core::OPCODE::RESHAPE_KV),
+      nnx_node->Rtype(), nnx_node, nny_node, nnz_node, _spos);
   return Create_record_return(nn_node, array_type, output_name);
 }
 
@@ -201,9 +220,10 @@ std::pair<ADDR_DATUM_PTR, ADDR_DATUM_PTR> LLAMA::Create_rope_rotary(
   NODE_PTR nnx_node = cntr->New_ld(input_1, _spos);
   NODE_PTR nny_node = cntr->New_ld(input_2, _spos);
   NODE_PTR nnw_node = cntr->New_ldc(cst, _spos);
-  NODE_PTR nn_node  = cntr->New_tern_arith(
-      air::base::OPCODE(nn::core::NN, nn::core::OPCODE::ROPE_ROTARY), nnx_node,
-      nny_node, nnw_node, _spos);
+  CMPLR_ASSERT(0, "Fix rtype for New_tern_arith.");
+  NODE_PTR nn_node = cntr->New_tern_arith(
+      air::base::OPCODE(nn::core::NN, nn::core::OPCODE::ROPE_ROTARY),
+      nnx_node->Rtype(), nnx_node, nny_node, nnw_node, _spos);
 
   return Create_record_return(nn_node, array_type, output_name);
 }
@@ -251,9 +271,10 @@ ADDR_DATUM_PTR LLAMA::Create_repeat_kv(ADDR_DATUM_PTR input, int32_t val,
   NODE_PTR   nnx_node = cntr->New_ld(input, _spos);
   TYPE_PTR   int_type = _glob->Prim_type(PRIMITIVE_TYPE::INT_S32);
   NODE_PTR   cst_node = cntr->New_intconst(int_type, val, _spos);
-  NODE_PTR   nn_node  = cntr->New_bin_arith(
-      air::base::OPCODE(nn::core::NN, nn::core::OPCODE::REPEAT_KV), nnx_node,
-      cst_node, _spos);
+  CMPLR_ASSERT(0, "Fix rtype for New_bin_arith.");
+  NODE_PTR nn_node = cntr->New_bin_arith(
+      air::base::OPCODE(nn::core::NN, nn::core::OPCODE::REPEAT_KV),
+      nnx_node->Rtype(), nnx_node, cst_node, _spos);
 
   STR_PTR        z_str  = _glob->New_str(result.c_str());
   ADDR_DATUM_PTR var_z  = _func_scope->New_var(input->Type(), z_str, _spos);
@@ -270,9 +291,10 @@ ADDR_DATUM_PTR LLAMA::Create_transpose(ADDR_DATUM_PTR input, int32_t val_1,
   TYPE_PTR   int_type   = _glob->Prim_type(PRIMITIVE_TYPE::INT_S32);
   NODE_PTR   cst_node_1 = cntr->New_intconst(int_type, val_1, _spos);
   NODE_PTR   cst_node_2 = cntr->New_intconst(int_type, val_2, _spos);
-  NODE_PTR   nn_node    = cntr->New_tern_arith(
-      air::base::OPCODE(nn::core::NN, nn::core::OPCODE::TRANSPOSE), nnx_node,
-      cst_node_1, cst_node_2, _spos);
+  CMPLR_ASSERT(0, "Fix rtype for New_tern_arith.");
+  NODE_PTR nn_node = cntr->New_tern_arith(
+      air::base::OPCODE(nn::core::NN, nn::core::OPCODE::TRANSPOSE),
+      nnx_node->Rtype(), nnx_node, cst_node_1, cst_node_2, _spos);
 
   STR_PTR        z_str  = _glob->New_str(result.c_str());
   ADDR_DATUM_PTR var_z  = _func_scope->New_var(input->Type(), z_str, _spos);
@@ -291,9 +313,10 @@ ADDR_DATUM_PTR LLAMA::Create_divide(ADDR_DATUM_PTR input_1,
   NODE_PTR       nny_node = cntr->New_ld(input_2, _spos);
   STR_PTR        z_str    = _glob->New_str(result.c_str());
   ADDR_DATUM_PTR var_z    = _func_scope->New_var(input_1->Type(), z_str, _spos);
-  NODE_PTR       nn_node  = cntr->New_bin_arith(
-      air::base::OPCODE(nn::core::NN, nn::core::OPCODE::DIVIDE), nnx_node,
-      nny_node, _spos);
+  CMPLR_ASSERT(0, "Fix rtype for New_bin_arith.");
+  NODE_PTR nn_node = cntr->New_bin_arith(
+      air::base::OPCODE(nn::core::NN, nn::core::OPCODE::DIVIDE),
+      nnx_node->Rtype(), nnx_node, nny_node, _spos);
   STMT_PTR  nnstmt = cntr->New_st(nn_node, var_z, _spos);
   STMT_LIST sl     = cntr->Stmt_list();
   sl.Append(nnstmt);
@@ -307,20 +330,13 @@ ADDR_DATUM_PTR LLAMA::Create_softmax(ADDR_DATUM_PTR input, std::string result) {
   STR_PTR        z_str    = _glob->New_str(result.c_str());
   ADDR_DATUM_PTR var_z    = _func_scope->New_var(input->Type(), z_str, _spos);
   NODE_PTR       nn_node  = cntr->New_una_arith(
-      air::base::OPCODE(nn::core::NN, nn::core::OPCODE::SQRT), nnx_node, _spos);
+      air::base::OPCODE(nn::core::NN, nn::core::OPCODE::SQRT),
+      nnx_node->Rtype(), nnx_node, _spos);
   STMT_PTR  nnstmt = cntr->New_st(nn_node, var_z, _spos);
   STMT_LIST sl     = cntr->Stmt_list();
   sl.Append(nnstmt);
 
   return var_z;
-}
-
-void LLAMA::Create_return(ADDR_DATUM_PTR input) {
-  CONTAINER* cntr     = &_func_scope->Container();
-  NODE_PTR   out_node = cntr->New_ld(input, _spos);
-  STMT_PTR   ret_stmt = cntr->New_retv(out_node, _spos);
-  STMT_LIST  sl       = cntr->Stmt_list();
-  sl.Append(ret_stmt);
 }
 
 FIELD_PTR LLAMA::Get_fld(ADDR_DATUM_PTR var, uint32_t fld_id) {
@@ -337,6 +353,203 @@ FIELD_PTR LLAMA::Get_fld(ADDR_DATUM_PTR var, uint32_t fld_id) {
   }
   TYPE_PTR fld_ty = (*fld_iter)->Type();
   return *fld_iter;
+}
+#endif
+void LLAMA::Create_return(ADDR_DATUM_PTR input) {
+  CONTAINER* cntr     = &_func_scope->Container();
+  NODE_PTR   out_node = cntr->New_ld(input, _spos);
+  STMT_PTR   ret_stmt = cntr->New_retv(out_node, _spos);
+  STMT_LIST  sl       = cntr->Stmt_list();
+  sl.Append(ret_stmt);
+}
+
+void LLAMA::Memory_map_weights(TRANSFORMER_WEIGHTS* w, CONFIG* p, float* ptr,
+                               int shared_weights) {
+  int head_size = p->_dim / p->_n_heads;
+  // make sure the multiplications below are done in 64bit to fit the parameter
+  // counts of 13B+ models
+  unsigned long long n_layers = p->_n_layers;
+  w->_token_embedding_table   = ptr;
+  ptr += p->_vocab_size * p->_dim;
+  w->_rms_att_weight = ptr;
+  ptr += n_layers * p->_dim;
+  w->_wq = ptr;
+  ptr += n_layers * p->_dim * (p->_n_heads * head_size);
+  w->_wk = ptr;
+  ptr += n_layers * p->_dim * (p->_n_kv_heads * head_size);
+  w->_wv = ptr;
+  ptr += n_layers * p->_dim * (p->_n_kv_heads * head_size);
+  w->_wo = ptr;
+  ptr += n_layers * (p->_n_heads * head_size) * p->_dim;
+  w->_rms_ffn_weight = ptr;
+  ptr += n_layers * p->_dim;
+  w->_w1 = ptr;
+  ptr += n_layers * p->_dim * p->_hidden_dim;
+  w->_w2 = ptr;
+  ptr += n_layers * p->_hidden_dim * p->_dim;
+  w->_w3 = ptr;
+  ptr += n_layers * p->_dim * p->_hidden_dim;
+  w->_rms_final_weight = ptr;
+  ptr += p->_dim;
+  w->_freq_cis_real = ptr;
+  ptr += p->_seq_len * head_size /
+         2;  // skip what used to be freq_cis_real (for RoPE)
+  w->_freq_cis_imag = ptr;
+  ptr += p->_seq_len * head_size /
+         2;  // skip what used to be freq_cis_imag (for RoPE)
+  w->_wcls = shared_weights ? w->_token_embedding_table : ptr;
+}
+
+void LLAMA::Read_checkpoint(const char* checkpoint) {
+  CONFIG*              config    = &_transformer._config;
+  TRANSFORMER_WEIGHTS* weights   = &_transformer._weights;
+  int*                 fd        = &_transformer._fd;
+  float**              data      = &_transformer._data;
+  ssize_t*             file_size = &_transformer._file_size;
+
+  FILE* file = fopen(checkpoint, "rb");
+  if (!file) {
+    fprintf(stderr, "Couldn't open file %s\n", checkpoint);
+    exit(EXIT_FAILURE);
+  }
+  _fbin = _glob->New_file(checkpoint, LANG::RO_CONST);
+  // read in the config header
+  if (fread(config, sizeof(CONFIG), 1, file) != 1) {
+    exit(EXIT_FAILURE);
+  }
+  // negative vocab size is hacky way of signaling unshared weights. bit yikes.
+  int shared_weights  = config->_vocab_size > 0 ? 1 : 0;
+  config->_vocab_size = abs(config->_vocab_size);
+  // figure out the file size
+  fseek(file, 0, SEEK_END);  // move file pointer to end of file
+  *file_size = ftell(file);  // get the file size, in bytes
+  fclose(file);
+  // memory map the Transformer weights into the data pointer
+  *fd = open(checkpoint, O_RDONLY);  // open in read only mode
+  if (*fd == -1) {
+    fprintf(stderr, "open failed!\n");
+    exit(EXIT_FAILURE);
+  }
+  *data = static_cast<float*>(
+      mmap(NULL, *file_size, PROT_READ, MAP_PRIVATE, *fd, 0));
+  if (*data == MAP_FAILED) {
+    fprintf(stderr, "mmap failed!\n");
+    exit(EXIT_FAILURE);
+  }
+  _orig_data         = *data;
+  float* weights_ptr = *data + sizeof(CONFIG) / sizeof(float);
+  Memory_map_weights(weights, config, weights_ptr, shared_weights);
+}
+
+void LLAMA::Create_weights_const() {
+  CONTAINER* cntr = &_func_scope->Container();
+
+  _transformer._weights_cst._token_embedding_table = Create_weight_cst(
+      {_transformer._config._vocab_size, _transformer._config._dim},
+      _transformer._weights._token_embedding_table);
+  _transformer._weights_cst._rms_att_weight = Create_weight_cst(
+      {_transformer._config._dim}, _transformer._weights._rms_att_weight);
+  _transformer._weights_cst._rms_ffn_weight = Create_weight_cst(
+      {_transformer._config._dim}, _transformer._weights._rms_ffn_weight);
+  _transformer._weights_cst._wq =
+      Create_weight_cst({_transformer._config._dim, _transformer._config._dim},
+                        _transformer._weights._wq);
+  _transformer._weights_cst._wk =
+      Create_weight_cst({_transformer._config._dim, _transformer._config._dim},
+                        _transformer._weights._wk);
+  _transformer._weights_cst._wv =
+      Create_weight_cst({_transformer._config._dim, _transformer._config._dim},
+                        _transformer._weights._wv);
+  _transformer._weights_cst._wo =
+      Create_weight_cst({_transformer._config._dim, _transformer._config._dim},
+                        _transformer._weights._wo);
+  _transformer._weights_cst._w1 = Create_weight_cst(
+      {_transformer._config._hidden_dim, _transformer._config._dim},
+      _transformer._weights._w1);
+  _transformer._weights_cst._w2 = Create_weight_cst(
+      {_transformer._config._dim, _transformer._config._hidden_dim},
+      _transformer._weights._w2);
+  _transformer._weights_cst._w3 = Create_weight_cst(
+      {_transformer._config._hidden_dim, _transformer._config._dim},
+      _transformer._weights._w3);
+  _transformer._weights_cst._rms_final_weight = Create_weight_cst(
+      {_transformer._config._dim}, _transformer._weights._rms_final_weight);
+  // TODO. It is HACK!
+  _transformer._weights_cst._real_vec0 = Create_weight_cst(
+      {_transformer._config._dim}, _transformer._weights._freq_cis_real);
+  _transformer._weights_cst._real_vec1 = Create_weight_cst(
+      {_transformer._config._dim}, _transformer._weights._freq_cis_real);
+  _transformer._weights_cst._imag_vec0 = Create_weight_cst(
+      {_transformer._config._dim}, _transformer._weights._freq_cis_imag);
+  _transformer._weights_cst._imag_vec1 = Create_weight_cst(
+      {_transformer._config._dim}, _transformer._weights._freq_cis_imag);
+}
+
+NODE_PTR LLAMA::Create_weight_cst(std::vector<int64_t> shape, float* data) {
+  TYPE_PTR base_type_idx = _glob->Prim_type(PRIMITIVE_TYPE::FLOAT_32);
+
+  int product =
+      std::accumulate(shape.begin(), shape.end(), 1, std::multiplies<int>());
+  TYPE_PTR array_type =
+      New_array_type(_glob, "float", base_type_idx, shape, _spos);
+  CONSTANT_PTR cst = _glob->New_const(
+      CONSTANT_KIND::EXT_FILE, array_type, _fbin,
+      (uint64_t)((data - _orig_data) * sizeof(float)), sizeof(float) * product);
+  return _func_scope->Container().New_ldc(cst, _spos);
+}
+
+void LLAMA::Create_pydsl_kernel() {
+  ADDR_DATUM_PTR var_x = _func_scope->Formal(ZERO);
+  NODE_PTR       ld_x  = _func_scope->Container().New_ld(var_x, _spos);
+
+  ADDR_DATUM_PTR new_var =
+      _func_scope->New_var(ld_x->Rtype(), "dsl_out", _spos);
+
+  py::scoped_interpreter guard{};
+  py::module             m_instantiator = py::module::import("instantiator");
+  py::module             m_dsl          = py::module::import("air_dsl");
+  py::object             py_fs          = py::cast(_func_scope);
+  py::object             py_node        = py::cast(ld_x);
+  py::object             py_x           = py::cast(ld_x);
+  py::object             py_wq = py::cast(_transformer._weights_cst._wq);
+  py::object             py_wk = py::cast(_transformer._weights_cst._wk);
+  py::object             py_wv = py::cast(_transformer._weights_cst._wv);
+  py::object             py_wo = py::cast(_transformer._weights_cst._wo);
+  py::object             py_w1 = py::cast(_transformer._weights_cst._w1);
+  py::object             py_w2 = py::cast(_transformer._weights_cst._w2);
+  py::object             py_w3 = py::cast(_transformer._weights_cst._w3);
+  py::object             py_rms_att_weight =
+      py::cast(_transformer._weights_cst._rms_att_weight);
+  py::object py_rms_ffn_weight =
+      py::cast(_transformer._weights_cst._rms_ffn_weight);
+  py::object py_real_vec0 = py::cast(_transformer._weights_cst._real_vec0);
+  py::object py_real_vec1 = py::cast(_transformer._weights_cst._real_vec1);
+  py::object py_imag_vec0 = py::cast(_transformer._weights_cst._imag_vec0);
+  py::object py_imag_vec1 = py::cast(_transformer._weights_cst._imag_vec1);
+  py::object py_dim       = py::cast(_transformer._config._dim);
+  int32_t    pos          = 1;
+  py::object py_pos       = py::cast(pos);
+  int32_t    len_pad      = 16;
+  py::object py_len_pad   = py::cast(len_pad);
+  py::object py_n_heads   = py::cast(_transformer._config._n_heads);
+  pybind11::detail::str_attr_accessor attention =
+      m_instantiator.attr("attention");
+  py::object py_new_var = py::cast(new_var);
+  NODE_PTR   body       = _func_scope->Container().New_stmt_block(_spos);
+  py::object py_body    = py::cast(&body);
+  attention(py_fs, py_body, py_node, py_x, py_wq, py_wk, py_wv, py_wo, py_w1,
+            py_w2, py_w3, py_rms_att_weight, py_rms_ffn_weight, py_real_vec0,
+            py_real_vec1, py_imag_vec0, py_imag_vec1, py_dim, py_pos,
+            py_len_pad, py_n_heads, py_new_var);
+
+  STMT_LIST sl = _func_scope->Container().Stmt_list();
+  for (STMT_PTR stmt = body->Begin_stmt(); stmt != body->End_stmt();) {
+    STMT_PTR next_stmt = stmt->Next();
+    sl.Append(stmt);
+    stmt = next_stmt;
+  }
+
+  Create_return(new_var);
 }
 
 }  // namespace llama

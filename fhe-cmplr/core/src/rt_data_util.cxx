@@ -30,8 +30,9 @@ void RT_DATA_DUMPER::Dump_hdr(const DATA_FILE_HDR& hdr) {
 void RT_DATA_DUMPER::Dump_lut(const std::vector<DATA_LUT_ENTRY>& lut) {
   _os << "Lookup Table:" << std::endl;
   for (auto it = lut.cbegin(); it != lut.cend(); ++it) {
-    _os << "  " << it->_name << " | " << it->_index << ": ";
-    _os << "size=" << it->_size << " ofst=" << it->_ent_ofst << std::endl;
+    _os << "  " << it->_name << " | " << it->_index << ":";
+    _os << " size=" << it->_size << " scale=" << it->_scale;
+    _os << " level=" << it->_level << " ofst=" << it->_ent_ofst << std::endl;
   }
 }
 

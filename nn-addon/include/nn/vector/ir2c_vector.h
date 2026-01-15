@@ -22,14 +22,17 @@ public:
   //! @brief Emit constant id for operator SLICE
   template <typename RETV, typename VISITOR>
   void Handle_slice(VISITOR* visitor, air::base::NODE_PTR node) {
+    AIR_ASSERT(node->Child(0)->Opcode() == air::core::OPC_LDC);
+    air::base::CONSTANT_PTR cst = node->Child(0)->Const();
+    AIR_ASSERT(cst->Kind() == air::base::CONSTANT_KIND::ARRAY);
+    AIR_ASSERT(cst->Type()->Is_array());
+    AIR_ASSERT(cst->Type()->Cast_to_arr()->Elem_type()->Is_prim());
+    AIR_ASSERT(node->Child(2)->Opcode() == air::core::OPC_INTCONST);
     air::core::IR2C_CTX& ctx = visitor->Context();
-    ctx << "Slice(";
     visitor->template Visit<RETV>(node->Child(0));
-    ctx << ", ";
+    ctx << "[";
     visitor->template Visit<RETV>(node->Child(1));
-    ctx << ", ";
-    visitor->template Visit<RETV>(node->Child(2));
-    ctx << ")";
+    ctx << "]";
   }
 
   //! @brief the follow functions are used to emit code for runtime validation.

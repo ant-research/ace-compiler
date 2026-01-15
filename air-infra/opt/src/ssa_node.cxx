@@ -10,16 +10,28 @@
 
 #include <sstream>
 
+#include "air/base/container_decl.h"
+#include "air/base/id_wrapper.h"
 #include "air/opt/ssa_container.h"
+#include "air/opt/ssa_decl.h"
 
 namespace air {
 
 namespace opt {
 
+SSA_SYM_PTR MU_NODE::Sym(void) const { return Ssa_cont()->Sym(Sym_id()); }
+SSA_VER_PTR MU_NODE::Opnd(void) const { return Ssa_cont()->Ver(Opnd_id()); }
+
+MU_NODE_PTR MU_NODE::Next(void) const {
+  return Next_id() != air::base::Null_id ? Ssa_cont()->Mu_node(Next_id())
+                                         : MU_NODE_PTR();
+}
+
 void MU_NODE::Print(std::ostream& os, uint32_t indent) const {
-  _cont->Print(Sym_id(), os, indent);
-  os << ":mu(";
-  _cont->Print_ver(Opnd_id(), os);
+  os << "MU(";
+  Ssa_cont()->Print(Sym_id(), os, indent);
+  os << ".";
+  Ssa_cont()->Print_version(Opnd_id(), os);
   os << ")";
 }
 
@@ -35,12 +47,26 @@ std::string MU_NODE::To_str() const {
   return buf.str();
 }
 
+CHI_NODE_PTR CHI_NODE::Next(void) const {
+  return Next_id() != air::base::Null_id ? Ssa_cont()->Chi_node(Next_id())
+                                         : CHI_NODE_PTR();
+}
+SSA_SYM_PTR CHI_NODE::Sym(void) const { return Ssa_cont()->Sym(Sym_id()); }
+SSA_VER_PTR CHI_NODE::Result(void) const {
+  return Ssa_cont()->Ver(Result_id());
+}
+SSA_VER_PTR    CHI_NODE::Opnd(void) const { return Ssa_cont()->Ver(Opnd_id()); }
+base::STMT_PTR CHI_NODE::Def_stmt(void) const {
+  return Ssa_cont()->Container()->Stmt(Def_stmt_id());
+}
+
 void CHI_NODE::Print(std::ostream& os, uint32_t indent) const {
   _cont->Print(Sym_id(), os, indent);
-  os << ":";
-  _cont->Print_ver(Result_id(), os);
-  os << "=chi(";
-  _cont->Print_ver(Opnd_id(), os);
+  os << ".";
+  Ssa_cont()->Print_version(Result_id(), os);
+
+  os << "=CHI(";
+  Ssa_cont()->Print_version(Opnd_id(), os);
   os << ")";
   if (Is_dead()) {
     os << " dead";
@@ -59,16 +85,30 @@ std::string CHI_NODE::To_str() const {
   return buf.str();
 }
 
+PHI_NODE_PTR PHI_NODE::Next(void) const {
+  return Ssa_cont()->Phi_node(Next_id());
+}
+SSA_SYM_PTR PHI_NODE::Sym(void) const { return Ssa_cont()->Sym(Sym_id()); }
+SSA_VER_PTR PHI_NODE::Result(void) const {
+  return Ssa_cont()->Ver(Result_id());
+}
+SSA_VER_PTR PHI_NODE::Opnd(uint32_t idx) const {
+  return Ssa_cont()->Ver(Opnd_id(idx));
+}
+base::STMT_PTR PHI_NODE::Def_stmt(void) const {
+  return Ssa_cont()->Container()->Stmt(Def_stmt_id());
+}
+
 void PHI_NODE::Print(std::ostream& os, uint32_t indent) const {
-  _cont->Print(Sym_id(), os, indent);
-  os << ":";
-  _cont->Print_ver(Result_id(), os);
-  os << "=phi(";
+  Ssa_cont()->Print(Sym_id(), os, indent);
+  os << ".";
+  Ssa_cont()->Print_version(Result_id(), os);
+  os << "=PHI(";
   for (uint32_t i = 0; i < Size(); ++i) {
     if (i > 0) {
       os << ", ";
     }
-    _cont->Print_ver(Opnd_id(i), os);
+    Ssa_cont()->Print_version(Opnd_id(i), os);
   }
   os << ")";
   if (Is_dead()) {

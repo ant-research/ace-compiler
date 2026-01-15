@@ -16,8 +16,8 @@ using namespace air::base;
 
 bool Register_sihe_domain() {
   static const struct OPR_INFO sihe_opr_info[] = {
-#define SIHE_OPCODE(NAME, name, cat, kid_num, fld_num, prop) \
-  {#name, (cat), kid_num, fld_num, (prop)},
+#define SIHE_OPCODE(NAME, name, kid_num, fld_num, prop) \
+  {#name, kid_num, fld_num, (prop)},
 #include "fhe/sihe/opcode_def.inc"
   };
 

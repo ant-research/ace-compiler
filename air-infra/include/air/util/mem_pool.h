@@ -46,7 +46,8 @@ public:
    * @param n Size in byte to be allocated
    * @return char* Pointer to the allocated buffer
    */
-  char* Allocate(size_t n) {
+
+  char* Allocate(size_t n, size_t align = sizeof(uintptr_t)) {
     if (n > MEM_BLOCK<BLK_SIZE>::MAX_AVAIL_SIZE) {
       // create a large block
       MEM_LARGE_BLOCK* blk = MEM_LARGE_BLOCK::Create(n);
@@ -56,7 +57,7 @@ public:
       return blk->Address();
     } else {
       char* buf;
-      if (_mem_block && (buf = _mem_block->Allocate(n)) != nullptr) {
+      if (_mem_block && (buf = _mem_block->Allocate(n, align)) != nullptr) {
         // allocated memory from current memory block
         return buf;
       }
@@ -65,7 +66,7 @@ public:
       AIR_ASSERT(blk != nullptr);
       blk->Prev(_mem_block);
       _mem_block = blk;
-      return blk->Allocate(n);
+      return blk->Allocate(n, align);
     }
   }
 

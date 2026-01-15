@@ -66,35 +66,42 @@ private:
     ITERATOR                        End() const { return _sym.end(); }
   };
 
-  // find or create SSA symbol corresponding to given var and index in the map
-  SSA_SYM_PTR Get_ssa_sym(U64_SYM_MAP& map, SSA_SYM_KIND kind, uint32_t var,
-                          uint32_t index) {
+  // find SSA symbol corresponding to given var and index in the map
+  SSA_SYM_PTR Ssa_sym(const U64_SYM_MAP& map, uint32_t var,
+                      uint32_t index) const {
+    uint64_t                    key = ((uint64_t)var << 32) | index;
+    U64_SYM_MAP::const_iterator it  = map.find(key);
+    AIR_ASSERT(it != map.end());
+    AIR_ASSERT(it->second != air::base::Null_id);
+    return _ssa_cont->Sym(it->second);
+  }
+
+  // create SSA symbol corresponding to given var and index in the map
+  void Enter_var(U64_SYM_MAP& map, SSA_SYM_KIND kind, uint32_t var,
+                 uint32_t index, base::TYPE_ID type_id, bool real_occ) {
     uint64_t              key = ((uint64_t)var << 32) | index;
     U64_SYM_MAP::iterator it  = map.find(key);
     if (it != map.end()) {
       SSA_SYM_PTR sym = _ssa_cont->Sym(it->second);
-      if (!sym->Real_use()) {
-        sym->Set_real_use();
+      if (real_occ && !sym->Real_occ()) {
+        sym->Set_real_occ();
       }
-      return sym;
+    } else {
+      SSA_SYM_PTR sym = _ssa_cont->New_sym(kind, var, index, type_id);
+      if (real_occ) {
+        sym->Set_real_occ();
+      }
+      map.insert(it, std::make_pair(key, sym->Id()));
+      if (index != SSA_SYM::NO_INDEX) {
+        // add to group if sym is a field or element
+        // TODO: find parent field_id instead of NO_INDEX for nested struct?
+        SSA_SYM_PTR p_sym = Ssa_sym(map, var, SSA_SYM::NO_INDEX);
+        AIR_ASSERT(p_sym != air::base::Null_ptr);
+        sym->Set_parent(p_sym->Id());
+        sym->Set_sibling(p_sym->Child_id());
+        p_sym->Set_child(sym->Id());
+      }
     }
-    SSA_SYM_PTR sym = _ssa_cont->New_sym(kind, var, index);
-    sym->Set_real_use();
-    if (index != SSA_SYM::NO_INDEX) {
-      // add to group if sym is a field or element
-      // TODO: find parent field_id instead of NO_INDEX for nested struct?
-      uint32_t              p_idx = SSA_SYM::NO_INDEX;
-      uint64_t              p_key = ((uint64_t)var << 32) | p_idx;
-      U64_SYM_MAP::iterator p_it  = map.find(p_key);
-      SSA_SYM_PTR           p_sym = (p_it == map.end())
-                                        ? _ssa_cont->New_sym(kind, var, p_idx)
-                                        : _ssa_cont->Sym(p_it->second);
-      sym->Set_parent(p_sym->Id());
-      sym->Set_sibling(p_sym->Child_id());
-      p_sym->Set_child(sym->Id());
-    }
-    map.insert(it, std::make_pair(key, sym->Id()));
-    return sym;
   }
 
   // find or create SCF_SYM_INFO corresponding to given SCF stmt id
@@ -119,14 +126,121 @@ private:
     }
   }
 
-  void Handle_variable(U64_SYM_MAP& map, SSA_SYM_KIND kind, uint32_t var,
-                       uint32_t index, air::base::NODE_PTR node, bool def) {
-    SSA_SYM_PTR sym = Get_ssa_sym(map, kind, var, index);
-    if (def) {
-      AIR_ASSERT(node->Is_root());
+  CHI_NODE_ID Handle_child_def(SSA_SYM_PTR sym, air::base::NODE_PTR node,
+                               CHI_NODE_ID pre_chi_id) {
+    // handle child
+    SSA_SYM_ID child = sym->Child_id();
+    if (child != air::base::Null_id) {
+      pre_chi_id = Handle_child_def(_ssa_cont->Sym(child), node, pre_chi_id);
+      AIR_ASSERT(pre_chi_id != air::base::Null_id);
+    }
+    // handle sibling
+    SSA_SYM_ID sibling = sym->Sibling_id();
+    if (sibling != air::base::Null_id) {
+      pre_chi_id = Handle_child_def(_ssa_cont->Sym(sibling), node, pre_chi_id);
+      AIR_ASSERT(pre_chi_id != air::base::Null_id);
+    }
+    if (sym->Real_occ()) {
+      // set sym updated by node for phi insertion
+      Append_phi_def(node->Stmt(), sym->Id());
+      // create chi for sym
+      CHI_NODE_PTR chi = _ssa_cont->New_chi(sym->Id());
+      chi->Set_next(pre_chi_id);
+      pre_chi_id = chi->Id();
+    }
+    return pre_chi_id;
+  }
+
+  CHI_NODE_ID Handle_alias_def(SSA_SYM_PTR sym, air::base::NODE_PTR node,
+                               CHI_NODE_ID pre_chi_id) {
+    // handle child
+    SSA_SYM_ID child = sym->Child_id();
+    if (child != air::base::Null_id) {
+      pre_chi_id = Handle_child_def(_ssa_cont->Sym(child), node, pre_chi_id);
+      AIR_ASSERT(pre_chi_id != air::base::Null_id);
+    }
+    // handle parents
+    SSA_SYM_ID parent = sym->Parent_id();
+    while (parent != air::base::Null_id) {
+      SSA_SYM_PTR par_ptr = _ssa_cont->Sym(parent);
+      if (par_ptr->Real_occ()) {
+        Append_phi_def(node->Stmt(), parent);
+        CHI_NODE_PTR chi = _ssa_cont->New_chi(parent);
+        chi->Set_next(pre_chi_id);
+        pre_chi_id = chi->Id();
+      }
+      parent = par_ptr->Parent_id();
+    }
+    return pre_chi_id;
+  }
+
+  void Handle_var_def(U64_SYM_MAP& map, uint32_t var, uint32_t index,
+                      air::base::NODE_PTR node, bool alias_def) {
+    AIR_ASSERT(node->Is_root());
+    SSA_SYM_PTR sym         = Ssa_sym(map, var, index);
+    CHI_NODE_ID orig_chi_id = _ssa_cont->Node_chi(node->Id());
+    CHI_NODE_ID chi_id      = orig_chi_id;
+    if (alias_def) {
+      AIR_ASSERT(node->Is_entry() ||
+                 (node->Is_call() && node->Ret_preg_id().Value() != var));
+      if (sym->Real_occ()) {
+        // append to CHI list for alias def
+        CHI_NODE_PTR chi = _ssa_cont->New_chi(sym->Id());
+        chi->Set_next(chi_id);
+        chi_id = chi->Id();
+        Append_phi_def(node->Stmt(), sym->Id());
+      }
+    } else {
+      AIR_ASSERT(node->Is_st() ||
+                 (node->Is_call() && node->Ret_preg_id().Value() == var));
+      // annotate on node for direct def
+      _ssa_cont->Set_node_sym(node->Id(), sym->Id());
       Append_phi_def(node->Stmt(), sym->Id());
     }
-    _ssa_cont->Set_node_sym(node->Id(), sym->Id());
+
+    // append alias def for all fields/elements
+    chi_id = Handle_alias_def(sym, node, chi_id);
+    if (chi_id != orig_chi_id) {
+      _ssa_cont->Set_node_chi(node->Id(), chi_id);
+    }
+  }
+
+  MU_NODE_ID Handle_child_use(SSA_SYM_PTR sym, air::base::NODE_PTR node,
+                              MU_NODE_ID pre_mu_id) {
+    // handle child
+    SSA_SYM_ID child = sym->Child_id();
+    if (child != air::base::Null_id) {
+      pre_mu_id = Handle_child_use(_ssa_cont->Sym(child), node, pre_mu_id);
+      AIR_ASSERT(pre_mu_id != air::base::Null_id);
+    }
+    // handle sibling
+    SSA_SYM_ID sibling = sym->Sibling_id();
+    if (sibling != air::base::Null_id) {
+      pre_mu_id = Handle_child_use(_ssa_cont->Sym(sibling), node, pre_mu_id);
+      AIR_ASSERT(pre_mu_id != air::base::Null_id);
+    }
+    if (sym->Real_occ()) {
+      // create mu for sym
+      MU_NODE_PTR mu = _ssa_cont->New_mu(sym->Id());
+      mu->Set_next(pre_mu_id);
+      pre_mu_id = mu->Id();
+    }
+    return pre_mu_id;
+  }
+
+  void Handle_var_use(U64_SYM_MAP& map, uint32_t var, uint32_t index,
+                      air::base::NODE_PTR node, bool alias_use) {
+    SSA_SYM_PTR sym = Ssa_sym(map, var, index);
+    if (alias_use) {
+      // alias use, append to mu list
+      MU_NODE_ID mu =
+          Handle_child_use(sym, node, _ssa_cont->Node_mu(node->Id()));
+      AIR_ASSERT(mu != air::base::Null_id);
+      _ssa_cont->Set_node_mu(node->Id(), mu);
+    } else {
+      // directly use, annotate to node
+      _ssa_cont->Set_node_sym(node->Id(), sym->Id());
+    }
   }
 
 public:
@@ -153,36 +267,45 @@ public:
   }
 
 public:
-  void Handle_variable(air::base::ADDR_DATUM_ID var, uint32_t index,
-                       air::base::NODE_PTR node, bool def) {
-    SSA_SYM_KIND kind = SSA_SYM_KIND::ADDR_DATUM;
-    Handle_variable(*_datum_map, kind, var.Value(), index, node, def);
+  uint32_t Vsym_index(air::base::NODE_PTR node) {
+    return SSA_CONTAINER::Vsym_index(node);
   }
 
-  void Handle_variable(air::base::PREG_ID var, uint32_t index,
-                       air::base::NODE_PTR node, bool def) {
+  void Enter_var(air::base::ADDR_DATUM_ID var, uint32_t index,
+                 air::base::TYPE_ID type_id, bool real_occ) {
+    SSA_SYM_KIND kind = SSA_SYM_KIND::ADDR_DATUM;
+    Enter_var(*_datum_map, kind, var.Value(), index, type_id, real_occ);
+  }
+
+  void Enter_var(air::base::PREG_ID var, uint32_t index,
+                 air::base::TYPE_ID type_id, bool real_occ) {
     SSA_SYM_KIND kind = SSA_SYM_KIND::PREG;
-    Handle_variable(*_preg_map, kind, var.Value(), index, node, def);
+    Enter_var(*_preg_map, kind, var.Value(), index, type_id, real_occ);
   }
 
-  void Handle_virtual_variable(base::ADDR_DATUM_ID var, uint32_t index,
-                               air::base::NODE_PTR node, bool def) {
-    SSA_SYM_KIND kind = SSA_SYM_KIND::ADDR_DATUM;
-    SSA_SYM_PTR  sym  = Get_ssa_sym(*_datum_map, kind, var.Value(), index);
-    if (def) {
-      AIR_ASSERT(node->Is_root());
-      Append_phi_def(node->Stmt(), sym->Id());
-      CHI_NODE_PTR chi = _ssa_cont->New_chi(sym->Id());
-      _ssa_cont->Set_node_chi(node->Id(), chi->Id());
-    } else {
-      MU_NODE_PTR mu = _ssa_cont->New_mu(sym->Id());
-      _ssa_cont->Set_node_mu(node->Id(), mu->Id());
-    }
+  void Handle_var_def(air::base::ADDR_DATUM_ID var, uint32_t index,
+                      air::base::NODE_PTR node, bool alias_def = false) {
+    Handle_var_def(*_datum_map, var.Value(), index, node, alias_def);
+  }
+
+  void Handle_var_def(air::base::PREG_ID var, uint32_t index,
+                      air::base::NODE_PTR node, bool alias_def = false) {
+    Handle_var_def(*_preg_map, var.Value(), index, node, alias_def);
+  }
+
+  void Handle_var_use(air::base::ADDR_DATUM_ID var, uint32_t index,
+                      air::base::NODE_PTR node, bool alias_use = false) {
+    Handle_var_use(*_datum_map, var.Value(), index, node, alias_use);
+  }
+
+  void Handle_var_use(air::base::PREG_ID var, uint32_t index,
+                      air::base::NODE_PTR node, bool alias_use = false) {
+    Handle_var_use(*_preg_map, var.Value(), index, node, alias_use);
   }
 
   void Handle_do_loop_iv(air::base::NODE_PTR node) {
-    SSA_SYM_PTR sym = Get_ssa_sym(*_datum_map, SSA_SYM_KIND::ADDR_DATUM,
-                                  node->Iv_id().Value(), SSA_SYM::NO_INDEX);
+    SSA_SYM_PTR sym =
+        Ssa_sym(*_datum_map, node->Iv_id().Value(), SSA_SYM::NO_INDEX);
     sym->Set_iv();
     // IV-init
     _ssa_cont->Set_node_sym(node->Child_id(0), sym->Id());
@@ -222,25 +345,30 @@ private:
 };
 
 //! @brief SIMPLE_SYMTAB_HANDLER
-//! Handle load/store/call/do_loop to generate SSA_SYM and update NODE
+//! Handle load/store/call/do_loop to generate SSA_SYM
 class SIMPLE_SYMTAB_HANDLER : public air::core::DEFAULT_HANDLER {
 public:
   template <typename RETV, typename VISITOR>
   RETV Handle_idname(VISITOR* visitor, air::base::NODE_PTR node) {
-    visitor->Context().Handle_variable(node->Addr_datum_id(), SSA_SYM::NO_INDEX,
-                                       node, false);
+    visitor->Context().Enter_var(node->Addr_datum_id(), SSA_SYM::NO_INDEX,
+                                 node->Rtype_id(), false);
   }
 
   template <typename RETV, typename VISITOR>
   RETV Handle_ld(VISITOR* visitor, air::base::NODE_PTR node) {
-    visitor->Context().Handle_variable(node->Addr_datum_id(), SSA_SYM::NO_INDEX,
-                                       node, false);
+    visitor->Context().Enter_var(node->Addr_datum_id(), SSA_SYM::NO_INDEX,
+                                 node->Rtype_id(), true);
   }
 
   template <typename RETV, typename VISITOR>
   RETV Handle_ild(VISITOR* visitor, air::base::NODE_PTR node) {
     // 1. handle address node
     base::NODE_PTR addr_child = node->Child(0);
+    if (addr_child->Opcode() == air::core::OPC_ADD ||
+        addr_child->Opcode() == air::core::OPC_SUB) {
+      // ist(add(array(lda, idx), ofst), rhs_node)
+      addr_child = addr_child->Child(0);
+    }
     AIR_ASSERT(addr_child->Opcode() == air::core::OPC_ARRAY);
     air::base::NODE_PTR base = addr_child->Child(0);
     if (base->Opcode() == air::core::OPC_LDCA) {
@@ -250,15 +378,26 @@ public:
     visitor->template Visit<RETV>(addr_child);
 
     // 2. handle may used virtual variable
-    base::ADDR_DATUM_ID array_addr_datum_id = base->Addr_datum_id();
-    SIMPLE_BUILDER_CTX& ctx                 = visitor->Context();
-    ctx.Handle_virtual_variable(array_addr_datum_id, SSA_SYM::NO_INDEX, node,
-                                false);
+    base::ADDR_DATUM_PTR array_addr_datum = base->Addr_datum();
+    SIMPLE_BUILDER_CTX&  ctx              = visitor->Context();
+    uint32_t             index            = ctx.Vsym_index(addr_child);
+    if (index != SSA_SYM::NO_INDEX) {
+      // create variable (no real-occ) for whole array if only read an element
+      ctx.Enter_var(array_addr_datum->Id(), SSA_SYM::NO_INDEX,
+                    array_addr_datum->Type_id(), false);
+    }
+    ctx.Enter_var(array_addr_datum->Id(), index, node->Rtype_id(), true);
   }
 
   template <typename RETV, typename VISITOR>
   RETV Handle_ldf(VISITOR* visitor, air::base::NODE_PTR node) {
-    AIR_ASSERT(false);
+    SIMPLE_BUILDER_CTX&  ctx        = visitor->Context();
+    base::ADDR_DATUM_PTR addr_datum = node->Addr_datum();
+    // create variable for whole struct (no real-occ) and field (real-occ)
+    ctx.Enter_var(addr_datum->Id(), SSA_SYM::NO_INDEX, addr_datum->Type_id(),
+                  false);
+    ctx.Enter_var(addr_datum->Id(), node->Field_id().Value(),
+                  node->Access_type_id(), true);
   }
 
   template <typename RETV, typename VISITOR>
@@ -268,20 +407,26 @@ public:
 
   template <typename RETV, typename VISITOR>
   RETV Handle_ldp(VISITOR* visitor, air::base::NODE_PTR node) {
-    visitor->Context().Handle_variable(node->Preg_id(), SSA_SYM::NO_INDEX, node,
-                                       false);
+    visitor->Context().Enter_var(node->Preg_id(), SSA_SYM::NO_INDEX,
+                                 node->Rtype_id(), true);
   }
 
   template <typename RETV, typename VISITOR>
   RETV Handle_ldpf(VISITOR* visitor, air::base::NODE_PTR node) {
-    AIR_ASSERT(false);
+    SIMPLE_BUILDER_CTX& ctx  = visitor->Context();
+    base::PREG_PTR      preg = node->Preg();
+    // create preg for whole struct (no real-occ) and field (real-occ)
+    ctx.Enter_var(preg->Id(), SSA_SYM::NO_INDEX, preg->Type_id(), false);
+    ctx.Enter_var(preg->Id(), node->Field_id().Value(), node->Access_type_id(),
+                  true);
   }
 
   template <typename RETV, typename VISITOR>
   RETV Handle_st(VISITOR* visitor, air::base::NODE_PTR node) {
     visitor->template Visit<RETV>(node->Child(0));
-    visitor->Context().Handle_variable(node->Addr_datum_id(), SSA_SYM::NO_INDEX,
-                                       node, true);
+    base::ADDR_DATUM_PTR addr_datum = node->Addr_datum();
+    visitor->Context().Enter_var(addr_datum->Id(), SSA_SYM::NO_INDEX,
+                                 addr_datum->Type_id(), true);
   }
 
   template <typename RETV, typename VISITOR>
@@ -292,6 +437,11 @@ public:
 
     // 2. handle address node
     base::NODE_PTR addr_child = node->Child(0);
+    if (addr_child->Opcode() == air::core::OPC_ADD ||
+        addr_child->Opcode() == air::core::OPC_SUB) {
+      // ist(add(array(lda, idx), ofst), rhs_node)
+      addr_child = addr_child->Child(0);
+    }
     AIR_ASSERT(addr_child->Opcode() == air::core::OPC_ARRAY);
     air::base::NODE_PTR base = addr_child->Child(0);
     AIR_ASSERT(base->Opcode() == air::core::OPC_LDA);
@@ -299,15 +449,32 @@ public:
 
     // 3. handle may defined virtual variables
     // for ist(array(lda, idx), rhs_node), add chi of addr_datum of array.
-    base::ADDR_DATUM_ID array_addr_datum_id = base->Addr_datum_id();
-    SIMPLE_BUILDER_CTX& ctx                 = visitor->Context();
-    ctx.Handle_virtual_variable(array_addr_datum_id, SSA_SYM::NO_INDEX, node,
-                                true);
+    base::ADDR_DATUM_PTR array_addr_datum = base->Addr_datum();
+    SIMPLE_BUILDER_CTX&  ctx              = visitor->Context();
+    uint32_t             index            = ctx.Vsym_index(addr_child);
+
+    bool invalid_idx = (index == SSA_SYM::NO_INDEX);
+    ctx.Enter_var(array_addr_datum->Id(), SSA_SYM::NO_INDEX,
+                  array_addr_datum->Type_id(), invalid_idx);
+
+    if (!invalid_idx) {
+      // create a real-occ variable for an array element when writing to an
+      // element with a constant index.
+      ctx.Enter_var(array_addr_datum->Id(), index, node->Access_type_id(),
+                    true);
+    }
   }
 
   template <typename RETV, typename VISITOR>
   RETV Handle_stf(VISITOR* visitor, air::base::NODE_PTR node) {
-    AIR_ASSERT(false);
+    visitor->template Visit<RETV>(node->Child(0));
+    SIMPLE_BUILDER_CTX&  ctx        = visitor->Context();
+    base::ADDR_DATUM_PTR addr_datum = node->Addr_datum();
+    // create variable for whole struct (no real-occ) and field (real-occ)
+    ctx.Enter_var(addr_datum->Id(), SSA_SYM::NO_INDEX, addr_datum->Type_id(),
+                  false);
+    ctx.Enter_var(addr_datum->Id(), node->Field_id().Index(),
+                  node->Access_type_id(), true);
   }
 
   template <typename RETV, typename VISITOR>
@@ -318,13 +485,19 @@ public:
   template <typename RETV, typename VISITOR>
   RETV Handle_stp(VISITOR* visitor, air::base::NODE_PTR node) {
     visitor->template Visit<RETV>(node->Child(0));
-    visitor->Context().Handle_variable(node->Preg_id(), SSA_SYM::NO_INDEX, node,
-                                       true);
+    visitor->Context().Enter_var(node->Preg_id(), SSA_SYM::NO_INDEX,
+                                 node->Access_type_id(), true);
   }
 
   template <typename RETV, typename VISITOR>
   RETV Handle_stpf(VISITOR* visitor, air::base::NODE_PTR node) {
-    AIR_ASSERT(false);
+    visitor->template Visit<RETV>(node->Child(0));
+    SIMPLE_BUILDER_CTX& ctx  = visitor->Context();
+    base::PREG_PTR      preg = node->Preg();
+    // create preg for whole struct (no real-occ) and field (real-occ)
+    ctx.Enter_var(preg->Id(), SSA_SYM::NO_INDEX, preg->Type_id(), false);
+    ctx.Enter_var(preg->Id(), node->Field_id().Index(), node->Access_type_id(),
+                  true);
   }
 
   template <typename RETV, typename VISITOR>
@@ -332,9 +505,186 @@ public:
     for (uint32_t i = 0; i < node->Num_child(); ++i) {
       visitor->template Visit<RETV>(node->Child(i));
     }
-    air::base::PREG_ID preg = node->Ret_preg_id();
-    if (!air::base::Is_null_id(preg)) {
-      visitor->Context().Handle_variable(preg, SSA_SYM::NO_INDEX, node, true);
+    air::base::PREG_PTR preg = node->Ret_preg();
+    if (!air::base::Is_null_id(preg->Id())) {
+      visitor->Context().Enter_var(preg->Id(), SSA_SYM::NO_INDEX,
+                                   preg->Type_id(), true);
+    }
+  }
+
+  template <typename RETV, typename VISITOR>
+  RETV Handle_do_loop(VISITOR* visitor, air::base::NODE_PTR node) {
+    // enter IV variable
+    visitor->Context().Enter_var(node->Iv_id(), SSA_SYM::NO_INDEX,
+                                 node->Iv()->Type_id(), true);
+    // normal handling of do_loop children
+    for (uint32_t i = 0; i < node->Num_child(); ++i) {
+      visitor->template Visit<RETV>(node->Child(i));
+    }
+  }
+};
+
+//! @brief SIMPLE_MU_CHI_HANDLER
+//! Handle load/store/call to create MU and CHI list
+class SIMPLE_MU_CHI_HANDLER : public air::core::DEFAULT_HANDLER {
+public:
+  template <typename RETV, typename VISITOR>
+  RETV Handle_func_entry(VISITOR* visitor, air::base::NODE_PTR node) {
+    SIMPLE_BUILDER_CTX& ctx = visitor->Context();
+    int                 i;
+    for (i = 0; i < node->Num_child() - 1; ++i) {
+      air::base::NODE_PTR param = node->Child(i);
+      AIR_ASSERT(param->Opcode() == air::core::OPC_IDNAME);
+      visitor->template Visit<RETV>(param);
+      // create chi list for param on func_entry
+      ctx.Handle_var_def(param->Addr_datum_id(), SSA_SYM::NO_INDEX, node, true);
+    }
+    // visit function body
+    visitor->template Visit<RETV>(node->Child(i));
+  }
+
+  template <typename RETV, typename VISITOR>
+  RETV Handle_idname(VISITOR* visitor, air::base::NODE_PTR node) {
+    visitor->Context().Handle_var_use(node->Addr_datum_id(), SSA_SYM::NO_INDEX,
+                                      node);
+  }
+
+  template <typename RETV, typename VISITOR>
+  RETV Handle_ld(VISITOR* visitor, air::base::NODE_PTR node) {
+    visitor->Context().Handle_var_use(node->Addr_datum_id(), SSA_SYM::NO_INDEX,
+                                      node);
+  }
+
+  template <typename RETV, typename VISITOR>
+  RETV Handle_ild(VISITOR* visitor, air::base::NODE_PTR node) {
+    // 1. handle address node
+    base::NODE_PTR addr_child = node->Child(0);
+    if (addr_child->Opcode() == air::core::OPC_ADD ||
+        addr_child->Opcode() == air::core::OPC_SUB) {
+      // ist(add(array(lda, idx), ofst), rhs_node)
+      addr_child = addr_child->Child(0);
+    }
+    AIR_ASSERT(addr_child->Opcode() == air::core::OPC_ARRAY);
+    air::base::NODE_PTR base = addr_child->Child(0);
+    if (base->Opcode() == air::core::OPC_LDCA) {
+      return RETV();
+    }
+    AIR_ASSERT(base->Opcode() == air::core::OPC_LDA);
+    visitor->template Visit<RETV>(addr_child);
+
+    // 2. handle direct access virtual variable. ignore aliased use
+    base::ADDR_DATUM_PTR array_addr_datum = base->Addr_datum();
+    SIMPLE_BUILDER_CTX&  ctx              = visitor->Context();
+    uint32_t             index            = ctx.Vsym_index(addr_child);
+    ctx.Handle_var_use(array_addr_datum->Id(), index, node);
+  }
+
+  template <typename RETV, typename VISITOR>
+  RETV Handle_ldf(VISITOR* visitor, air::base::NODE_PTR node) {
+    visitor->Context().Handle_var_use(node->Addr_datum_id(),
+                                      node->Field_id().Value(), node);
+  }
+
+  template <typename RETV, typename VISITOR>
+  RETV Handle_ldo(VISITOR* visitor, air::base::NODE_PTR node) {
+    AIR_ASSERT(false);
+  }
+
+  template <typename RETV, typename VISITOR>
+  RETV Handle_ldp(VISITOR* visitor, air::base::NODE_PTR node) {
+    visitor->Context().Handle_var_use(node->Preg_id(), SSA_SYM::NO_INDEX, node);
+  }
+
+  template <typename RETV, typename VISITOR>
+  RETV Handle_ldpf(VISITOR* visitor, air::base::NODE_PTR node) {
+    visitor->Context().Handle_var_use(node->Preg_id(), node->Field_id().Value(),
+                                      node);
+  }
+
+  template <typename RETV, typename VISITOR>
+  RETV Handle_retv(VISITOR* visitor, air::base::NODE_PTR node) {
+    air::base::NODE_PTR retv = node->Child(0);
+    visitor->template Visit<RETV>(retv);
+
+    if (retv->Opcode() == air::core::OPC_LD) {
+      visitor->Context().Handle_var_use(retv->Addr_datum_id(),
+                                        SSA_SYM::NO_INDEX, node, true);
+    } else {
+      visitor->Context().Handle_var_use(retv->Preg_id(), SSA_SYM::NO_INDEX,
+                                        node, true);
+    }
+  }
+
+  template <typename RETV, typename VISITOR>
+  RETV Handle_st(VISITOR* visitor, air::base::NODE_PTR node) {
+    visitor->template Visit<RETV>(node->Child(0));
+    base::ADDR_DATUM_PTR addr_datum = node->Addr_datum();
+    visitor->Context().Handle_var_def(addr_datum->Id(), SSA_SYM::NO_INDEX,
+                                      node);
+  }
+
+  template <typename RETV, typename VISITOR>
+  RETV Handle_ist(VISITOR* visitor, air::base::NODE_PTR node) {
+    // 1. handle rhs node
+    base::NODE_PTR rhs_child = node->Child(1);
+    visitor->template Visit<RETV>(rhs_child);
+
+    // 2. handle address node
+    base::NODE_PTR addr_child = node->Child(0);
+    if (addr_child->Opcode() == air::core::OPC_ADD ||
+        addr_child->Opcode() == air::core::OPC_SUB) {
+      // ist(add(array(lda, idx), ofst), rhs_node)
+      addr_child = addr_child->Child(0);
+    }
+    AIR_ASSERT(addr_child->Opcode() == air::core::OPC_ARRAY);
+    air::base::NODE_PTR base = addr_child->Child(0);
+    AIR_ASSERT(base->Opcode() == air::core::OPC_LDA);
+    visitor->template Visit<RETV>(addr_child);
+
+    // 3. handle may defined virtual variables
+    // for ist(array(lda, idx), rhs_node), add chi of addr_datum of array.
+    base::ADDR_DATUM_PTR array_addr_datum = base->Addr_datum();
+    SIMPLE_BUILDER_CTX&  ctx              = visitor->Context();
+    uint32_t             index            = ctx.Vsym_index(addr_child);
+    ctx.Handle_var_def(array_addr_datum->Id(), index, node);
+  }
+
+  template <typename RETV, typename VISITOR>
+  RETV Handle_stf(VISITOR* visitor, air::base::NODE_PTR node) {
+    visitor->template Visit<RETV>(node->Child(0));
+    base::ADDR_DATUM_PTR addr_datum = node->Addr_datum();
+    visitor->Context().Handle_var_def(addr_datum->Id(),
+                                      node->Field_id().Index(), node);
+  }
+
+  template <typename RETV, typename VISITOR>
+  RETV Handle_sto(VISITOR* visitor, air::base::NODE_PTR node) {
+    AIR_ASSERT(false);
+  }
+
+  template <typename RETV, typename VISITOR>
+  RETV Handle_stp(VISITOR* visitor, air::base::NODE_PTR node) {
+    visitor->template Visit<RETV>(node->Child(0));
+    base::PREG_PTR preg = node->Preg();
+    visitor->Context().Handle_var_def(preg->Id(), SSA_SYM::NO_INDEX, node);
+  }
+
+  template <typename RETV, typename VISITOR>
+  RETV Handle_stpf(VISITOR* visitor, air::base::NODE_PTR node) {
+    visitor->template Visit<RETV>(node->Child(0));
+    base::PREG_PTR preg = node->Preg();
+    visitor->Context().Handle_var_def(preg->Id(), node->Field_id().Index(),
+                                      node);
+  }
+
+  template <typename RETV, typename VISITOR>
+  RETV Handle_call(VISITOR* visitor, air::base::NODE_PTR node) {
+    for (uint32_t i = 0; i < node->Num_child(); ++i) {
+      visitor->template Visit<RETV>(node->Child(i));
+    }
+    air::base::PREG_PTR preg = node->Ret_preg();
+    if (!air::base::Is_null_id(preg->Id())) {
+      visitor->Context().Handle_var_def(preg->Id(), SSA_SYM::NO_INDEX, node);
     }
   }
 

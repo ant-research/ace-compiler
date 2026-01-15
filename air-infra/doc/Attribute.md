@@ -6,7 +6,7 @@
 
 |Version|Author     |Date      |Description|
 |-------|-----------|----------|-----------|
-|0.1    ||2023.09.28|Initial version.|
+|0.1    |jianxin.lai|2023.09.28|Initial version.|
 
 ## Introduction
 Attribute is used to carry auxiliary information for NODE, TYPE and SYMBOL, etc.

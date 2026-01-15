@@ -16,7 +16,9 @@ typedef struct {
 } TM_STAT;
 
 static TM_STAT Tm_stat;
+#ifdef _OPENMP
 #pragma omp threadprivate(Tm_stat)
+#endif
 
 void Tm_start(const char* msg) { Tm_stat._time_stamp = clock(); }
 
@@ -25,4 +27,5 @@ void Tm_taken(const char* msg) {
   fprintf(stdout, "[RT_STAT] %s takes %.3f seconds.\n", msg,
           ((double)(cur_stamp - Tm_stat._time_stamp)) / (double)CLOCKS_PER_SEC);
   Tm_stat._time_stamp = cur_stamp;
+  fflush(stdout);
 }

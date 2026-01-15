@@ -11,6 +11,7 @@
 #include "nn/onnx2air/air_gen.h"
 #include "nn/onnx2air/air_stmt.h"
 #include "nn/onnx2air/air_utils.h"
+#include "nn/onnx2air/onnx_pb.h"
 
 namespace nn {
 namespace onnx2air {

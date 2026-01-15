@@ -22,7 +22,6 @@
 #include "air/util/debug.h"
 #include "air/util/error.h"
 #include "air/util/messg.h"
-#include "err_msg.inc.h"
 #include "fhe/ckks/ckks_opcode.h"
 #include "fhe/core/scheme_info.h"
 
@@ -57,6 +56,84 @@ bool CTX_PARAM_ANA_CTX::Update_mul_level_of_ssa_ver(SSA_VER_ID id,
   // mul_level of variable inc to new_level
   res.first->second = new_level;
   return true;
+}
+
+STMT_PTR CTX_PARAM_ANA_CTX::Gen_modswitch(air::opt::SSA_SYM_PTR sym,
+                                          uint32_t mul_lev, uint32_t in_lev,
+                                          SPOS spos) {
+  CONTAINER*     cont = Ssa_cntr()->Container();
+  FUNC_SCOPE*    fs   = cont->Parent_func_scope();
+  ckks::CKKS_GEN ckks_gen(cont, Lower_ctx());
+
+  if (sym->Is_preg()) {
+    PREG_PTR preg = fs->Preg(PREG_ID(sym->Var_id()));
+    TYPE_ID  type = preg->Type_id();
+    AIR_ASSERT(Lower_ctx()->Is_cipher_type(type) ||
+               Lower_ctx()->Is_cipher3_type(type));
+    // single ciphertext
+    NODE_PTR modswitch = cont->New_ldp(preg, spos);
+    Set_node_mul_level(modswitch, in_lev);
+    while (mul_lev < in_lev) {
+      modswitch = ckks_gen.Gen_modswitch(modswitch);
+      --in_lev;
+      Set_node_mul_level(modswitch, in_lev);
+    }
+    return cont->New_stp(modswitch, preg, spos);
+  }
+
+  AIR_ASSERT(sym->Is_addr_datum());
+  ADDR_DATUM_PTR datum = fs->Addr_datum(ADDR_DATUM_ID(sym->Var_id()));
+  if (!datum->Type()->Is_array()) {
+    // single ciphertext
+    NODE_PTR modswitch = cont->New_ld(datum, spos);
+    Set_node_mul_level(modswitch, in_lev);
+    while (mul_lev < in_lev) {
+      modswitch = ckks_gen.Gen_modswitch(modswitch);
+      --in_lev;
+      Set_node_mul_level(modswitch, in_lev);
+    }
+    return cont->New_st(modswitch, datum, spos);
+  }
+
+  AIR_ASSERT(datum->Type()->Cast_to_arr()->Dim() == 1);
+  TYPE_PTR elem_type  = datum->Type()->Cast_to_arr()->Elem_type();
+  uint64_t elem_count = datum->Type()->Cast_to_arr()->Elem_count();
+  AIR_ASSERT(Lower_ctx()->Is_cipher_type(elem_type->Id()) ||
+             Lower_ctx()->Is_cipher3_type(elem_type->Id()));
+  NODE_PTR       lda   = cont->New_lda(datum, POINTER_KIND::FLAT64, spos);
+  NODE_PTR       array = cont->New_array(lda, 1, spos);
+  ADDR_DATUM_PTR iv;
+  TYPE_PTR       s32_type =
+      cont->Glob_scope()->Prim_type(air::base::PRIMITIVE_TYPE::INT_S32);
+  if (sym->Index() != air::opt::SSA_SYM::NO_INDEX) {
+    AIR_ASSERT(sym->Index() < elem_count);
+    cont->Set_array_idx(array, 0,
+                        cont->New_intconst(s32_type, sym->Index(), spos));
+  } else {
+    iv = cont->Parent_func_scope()->New_var(s32_type, "modswitch_iv", spos);
+    cont->Set_array_idx(array, 0, cont->New_ld(iv, spos));
+  }
+  NODE_PTR modswitch = cont->New_ild(array, spos);
+  while (mul_lev < in_lev) {
+    modswitch = ckks_gen.Gen_modswitch(modswitch);
+    --in_lev;
+    Set_node_mul_level(modswitch, in_lev);
+  }
+  STMT_PTR st = cont->New_ist(cont->Clone_node_tree(array), modswitch, spos);
+  if (sym->Index() == air::opt::SSA_SYM::NO_INDEX) {
+    // generate a loop to process each element
+    NODE_PTR init = cont->New_intconst(s32_type, 0, spos);
+    NODE_PTR comp = cont->New_bin_arith(
+        air::core::OPC_LT, s32_type, cont->New_ld(iv, spos),
+        cont->New_intconst(s32_type, elem_count, spos), spos);
+    NODE_PTR incr = cont->New_bin_arith(
+        air::core::OPC_ADD, s32_type, cont->New_ld(iv, spos),
+        cont->New_intconst(s32_type, 1, spos), spos);
+    NODE_PTR body = cont->New_stmt_block(spos);
+    STMT_LIST(body).Append(st);
+    st = cont->New_do_loop(iv, init, comp, incr, body, spos);
+  }
+  return st;
 }
 
 void CTX_PARAM_ANA_CTX::Print(std::ostream& out) const {
@@ -170,16 +247,69 @@ IV_INFO CORE_ANA_IMPL::Get_loop_iv_info(NODE_PTR loop) {
   return IV_INFO(iv_sym_id, init_val, stride_val, itr_cnt);
 }
 
+void CORE_ANA_IMPL::Fixup_phi_res(CTX_PARAM_ANA_CTX& ctx, NODE_PTR node) {
+  // check level of whole array and array elements and make sure they
+  // have the same level
+  typedef std::unordered_map<uint32_t, uint32_t> VER_LEVEL_MAP;
+  typedef std::vector<air::opt::PHI_NODE_ID>     PHI_VEC;
+
+  auto handler = [](PHI_NODE_PTR phi, CTX_PARAM_ANA_CTX& ctx,
+                    VER_LEVEL_MAP& map, PHI_VEC& vec) {
+    air::opt::SSA_SYM_PTR sym = phi->Sym();
+    // only check addr_datum
+    if (sym->Is_preg()) {
+      return;
+    }
+    // add phi to list if it's whole array
+    if (sym->Index() == air::opt::SSA_SYM::NO_INDEX) {
+      vec.push_back(phi->Id());
+      return;
+    }
+    // validate all elements have the same level
+    VER_LEVEL_MAP::iterator it = map.find(sym->Var_id());
+    if (it != map.end()) {
+      AIR_ASSERT(ctx.Get_mul_level_of_ssa_ver(phi->Result_id()) == it->second);
+    } else {
+      map[sym->Var_id()] = ctx.Get_mul_level_of_ssa_ver(phi->Result_id());
+    }
+  };
+
+  air::opt::PHI_NODE_ID phi_id = ctx.Ssa_cntr()->Node_phi(node->Id());
+  air::opt::PHI_LIST    phi_list(ctx.Ssa_cntr(), phi_id);
+  VER_LEVEL_MAP         map;
+  PHI_VEC               vec;
+  phi_list.For_each(handler, ctx, map, vec);
+
+  for (PHI_VEC::iterator it = vec.begin(); it != vec.end(); ++it) {
+    PHI_NODE_PTR          phi = ctx.Ssa_cntr()->Phi_node(*it);
+    air::opt::SSA_SYM_PTR sym = phi->Sym();
+    AIR_ASSERT(sym->Is_addr_datum() &&
+               sym->Index() == air::opt::SSA_SYM::NO_INDEX);
+    VER_LEVEL_MAP::iterator level = map.find(sym->Var_id());
+    // if (level != map.end()) {
+    if (level != map.end() &&
+        ctx.Get_mul_level_of_ssa_ver(phi->Result_id()) <= level->second) {
+      AIR_ASSERT(ctx.Get_mul_level_of_ssa_ver(phi->Result_id()) <=
+                 level->second);
+
+      ctx.Trace(ckks::TRACE_DETAIL::TD_CKKS_LEVEL_MGT,
+                "  fixup: ", phi->To_str(), " l=", level->second, "\n");
+
+      ctx.Update_mul_level_of_ssa_ver(phi->Result_id(), level->second);
+    }
+  }
+}
+
 void CTX_PARAM_ANA::Build_ssa() {
   air::opt::SSA_BUILDER ssa_builder(Func_scope(), &Ssa_cntr(), Driver_ctx());
   // update SSA_CONFIG
   air::opt::SSA_CONFIG& ssa_config = ssa_builder.Ssa_config();
   ssa_config.Set_trace_ir_before_ssa(
-      Config()->Is_trace(ckks::TRACE_DETAIL::TRACE_IR_BEFORE_SSA));
+      Config()->Is_trace(ckks::TRACE_DETAIL::TD_IR_BEFORE_SSA));
   ssa_config.Set_trace_ir_after_insert_phi(
-      Config()->Is_trace(ckks::TRACE_DETAIL::TRACE_IR_AFTER_SSA_INSERT_PHI));
+      Config()->Is_trace(ckks::TRACE_DETAIL::TD_IR_AFTER_SSA_INSERT_PHI));
   ssa_config.Set_trace_ir_after_ssa(
-      Config()->Is_trace(ckks::TRACE_DETAIL::TRACE_IR_AFTER_SSA));
+      Config()->Is_trace(ckks::TRACE_DETAIL::TD_IR_AFTER_SSA));
   ssa_builder.Perform();
 }
 
@@ -188,17 +318,17 @@ R_CODE CTX_PARAM_ANA::Update_ctx_param_with_config() {
   uint32_t   poly_deg  = Config()->Poly_deg();
   if (poly_deg != 0) {
     if (poly_deg < ctx_param.Get_poly_degree()) {
-      std::string err_msg = "poly_deg(N) must be >= " +
+      // trust user provides correct poly degree. only issue a warning
+      std::string err_msg = "Warning: poly_deg(N) must be >= " +
                             std::to_string(ctx_param.Get_poly_degree());
-      CMPLR_USR_MSG(U_CODE::Incorrect_Option, err_msg.c_str());
-      return R_CODE::USER;
+      CMPLR_WARN_MSG(Driver_ctx()->Tfile(), err_msg.c_str());
     }
     // poly_deg from config must be pow of 2
     if ((poly_deg & (poly_deg - 1U)) != 0) {
       CMPLR_USR_MSG(U_CODE::Incorrect_Option, "poly_deg(N) must be pow of 2");
       return R_CODE::USER;
     }
-    ctx_param.Set_poly_degree(poly_deg);
+    ctx_param.Set_poly_degree(poly_deg, true);
   }
 
   uint32_t q0_bit_num = Config()->Q0_bit_num();
@@ -217,24 +347,51 @@ R_CODE CTX_PARAM_ANA::Update_ctx_param_with_config() {
     ctx_param.Set_scaling_factor_bit_num(sf_bit_num);
     ctx_param.Set_first_prime_bit_num(q0_bit_num);
   }
+
+  uint32_t lev_in = Config()->Input_cipher_lvl();
+  if (lev_in > 0) {
+    if (lev_in > ctx_param.Get_mul_level()) {
+      CMPLR_USR_MSG(U_CODE::Incorrect_Option, "input level must not exceed ",
+                    ctx_param.Get_mul_level());
+      return R_CODE::USER;
+    }
+  }
   return R_CODE::NORMAL;
 }
 
 R_CODE CTX_PARAM_ANA::Run() {
+  CTX_PARAM_ANA_CTX& ana_ctx = Get_ana_ctx();
+  ana_ctx.Trace(ckks::TRACE_DETAIL::TD_CKKS_LEVEL_MGT,
+                ">>> CKKS PARAM ANA AND LEVEL MANAGEMENT: \n\n");
+
   // 1. build ssa
   Build_ssa();
 
+  ana_ctx.Trace(ckks::TRACE_DETAIL::TD_CKKS_LEVEL_MGT,
+                ">>> SSA dump before level management:\n\n");
+  ana_ctx.Trace_obj(ckks::TRACE_DETAIL::TD_CKKS_LEVEL_MGT, ana_ctx.Ssa_cntr());
+
   // 2. analyze mul_level and rotate index of function
-  CTX_PARAM_ANA_CTX& ana_ctx = Get_ana_ctx();
-  ANA_VISITOR        visitor(ana_ctx, {CORE_HANDLER(), CKKS_HANDLER()});
-  NODE_PTR           func_body = Func_scope()->Container().Entry_node();
+  ANA_VISITOR visitor(ana_ctx, {CORE_HANDLER(), CKKS_HANDLER()});
+  NODE_PTR    func_body = Func_scope()->Container().Entry_node();
   visitor.template Visit<ANA_RETV>(func_body);
 
-  ana_ctx.Trace_obj(ckks::TRACE_DETAIL::TRACE_CKKS_ANA_RES, &ana_ctx);
+  ana_ctx.Trace_obj(ckks::TRACE_DETAIL::TD_CKKS_LEVEL_MGT, &ana_ctx);
 
   // 3. update CTX_PARAM in LOWER_CTX
   CTX_PARAM& ctx_param = Lower_ctx()->Get_ctx_param();
-  ctx_param.Set_mul_level(ana_ctx.Get_mul_level(), true);
+  uint32_t   mul_lev   = ana_ctx.Get_mul_level();
+  if (ana_ctx.Max_cipher_lvl() > 0) {
+    if (mul_lev > ana_ctx.Max_cipher_lvl()) {
+      CMPLR_ASSERT(false,
+                   "Warning: The max cipher level set by the compiler option "
+                   "is less than the required value: ",
+                   mul_lev, "\n");
+    } else {
+      mul_lev = ana_ctx.Max_cipher_lvl();
+    }
+  }
+  ctx_param.Set_mul_level(mul_lev, true);
   ctx_param.Add_rotate_index(ana_ctx.Get_rotate_index());
 
   // 4. update CTX_PARAM with Config
@@ -242,7 +399,7 @@ R_CODE CTX_PARAM_ANA::Run() {
   if (res != R_CODE::NORMAL) {
     return res;
   }
-  ana_ctx.Trace_obj(ckks::TRACE_DETAIL::TRACE_CKKS_ANA_RES, &ctx_param);
+  ana_ctx.Trace_obj(ckks::TRACE_DETAIL::TD_CKKS_LEVEL_MGT, &ctx_param);
   return R_CODE::NORMAL;
 }
 

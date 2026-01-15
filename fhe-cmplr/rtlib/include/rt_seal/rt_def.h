@@ -11,7 +11,7 @@
 
 // NOLINTBEGIN (readability-identifier-naming)
 
-//! @brief forward declaration of SEAL types
+//! @brief Forward declaration of SEAL types
 namespace seal {
 class Ciphertext;
 class Plaintext;
@@ -19,10 +19,15 @@ class Plaintext;
 
 //! @brief Define CIPHERTEXT/CIPHER/PLAINTEXT/PLAIN for rt APIs
 typedef seal::Ciphertext  CIPHERTEXT;
+typedef seal::Ciphertext  CIPHERTEXT3;
 typedef seal::Ciphertext* CIPHER;
+typedef seal::Ciphertext* CIPHER3;
 typedef seal::Plaintext   PLAINTEXT;
 typedef seal::Plaintext*  PLAIN;
 
 // NOLINTEND (readability-identifier-naming)
+
+#define CIPHER_DEFINED 1
+#define PLAIN_DEFINED  1
 
 #endif  // RTLIB_RT_SEAL_RT_DEF_H

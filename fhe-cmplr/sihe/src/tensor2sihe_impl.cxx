@@ -25,6 +25,7 @@
 #include "fhe/core/lower_ctx.h"
 #include "fhe/sihe/sihe_gen.h"
 #include "fhe/util/app_composite_poly.h"
+#include "nn/vector/vector_utils.h"
 
 namespace fhe {
 namespace sihe {
@@ -36,13 +37,14 @@ enum class RELU_FUNC_INFO {
   FUNC_NAME        = 0,
   INIT_FORMAL_NAME = 1,
   NORM_FORMAL_NAME = 2,
-  ENTRY_NAME       = 3,
-  TMP_PREFIX       = 4,
-  END              = 5,
+  MASK_LEN_NAME    = 3,
+  ENTRY_NAME       = 4,
+  TMP_PREFIX       = 5,
+  END              = 6,
 };
 
 static const char* Relu_func_info[static_cast<uint32_t>(RELU_FUNC_INFO::END)] =
-    {"App_relu", "input_ct0", "input_ct1", "App_relu", "_relu_tmp"};
+    {"App_relu", "input_ct0", "input_ct1", "mask_len", "App_relu", "_relu_tmp"};
 
 ADDR_DATUM_PTR APP_RELU_FUNC_GEN::Gen_tmp_for_node(NODE_PTR    node,
                                                    const SPOS& spos) {
@@ -90,17 +92,32 @@ NODE_PTR APP_RELU_FUNC_GEN::Gen_leaf_node_poly(
     CONSTANT_PTR cst_coeff =
         Glob_scope()->New_const(CONSTANT_KIND::FLOAT, f64_type, coeff);
     NODE_PTR item_node = Container()->New_ldc(cst_coeff, spos);
-
-    if (outmost_poly) {
-      // gen item of outmost polynomial
-      ADDR_DATUM_PTR formal0   = Func_scope()->Formal(0);
-      NODE_PTR       ld_formal = Container()->New_ld(formal0, spos);
-      item_node                = sihe_gen.Gen_mul(ld_formal, item_node, spos);
-    }
-    // gen item of inner polynomial item = coeff * poly_arg^deg
-    if (deg > 0) {
+    if (deg == 1) {
+      TYPE_PTR plain_type = Lower_ctx()->Get_plain_type(Glob_scope());
+      NODE_PTR len        = Container()->New_ld(Func_scope()->Formal(2), spos);
+      item_node = sihe_gen.Gen_encode_mask(plain_type, coeff, len, spos);
       NODE_PTR load_tmp = Container()->New_ld(Precompute_item()[deg], spos);
       item_node         = sihe_gen.Gen_mul(load_tmp, item_node, spos);
+      if (outmost_poly) {
+        ADDR_DATUM_PTR formal0   = Func_scope()->Formal(0);
+        NODE_PTR       ld_formal = Container()->New_ld(formal0, spos);
+        item_node                = sihe_gen.Gen_mul(ld_formal, item_node, spos);
+      }
+    } else {
+      if (outmost_poly) {
+        TYPE_PTR plain_type = Lower_ctx()->Get_plain_type(Glob_scope());
+        NODE_PTR len = Container()->New_ld(Func_scope()->Formal(2), spos);
+        item_node    = sihe_gen.Gen_encode_mask(plain_type, coeff, len, spos);
+
+        ADDR_DATUM_PTR formal0   = Func_scope()->Formal(0);
+        NODE_PTR       ld_formal = Container()->New_ld(formal0, spos);
+        item_node                = sihe_gen.Gen_mul(ld_formal, item_node, spos);
+      }
+      // gen item of inner polynomial item = coeff * poly_arg^deg
+      if (deg > 0) {
+        NODE_PTR load_tmp = Container()->New_ld(Precompute_item()[deg], spos);
+        item_node         = sihe_gen.Gen_mul(load_tmp, item_node, spos);
+      }
     }
 
     // accumulate item into polynomial
@@ -333,11 +350,11 @@ void APP_RELU_FUNC_GEN::Gen_func_body() {
   NODE_PTR ld_sign_res = cont->New_ld(poly_arg, spos);
 
   // 2. gen SIHE IR of (0.5 * x)
-  CONSTANT_PTR half_cst    = Glob_scope()->New_const(CONSTANT_KIND::FLOAT,
-                                                     f32_type, (long double)(0.5));
-  NODE_PTR     ld_half_cst = cont->New_ldc(half_cst, spos);
-  NODE_PTR     ld_formal   = cont->New_ld(formal0, spos);
-  NODE_PTR     half_formal = sihe_gen.Gen_mul(ld_formal, ld_half_cst, spos);
+  TYPE_PTR plain_type  = Lower_ctx()->Get_plain_type(Glob_scope());
+  NODE_PTR len         = Container()->New_ld(Func_scope()->Formal(2), spos);
+  NODE_PTR ld_half_cst = sihe_gen.Gen_encode_mask(plain_type, 0.5, len, spos);
+  NODE_PTR ld_formal   = cont->New_ld(formal0, spos);
+  NODE_PTR half_formal = sihe_gen.Gen_mul(ld_formal, ld_half_cst, spos);
 
   // 3. gen relu(x) = (0.5 * x * sign(x)) + (0.5 * x)
   NODE_PTR       relu_res = sihe_gen.Gen_add(ld_sign_res, half_formal, spos);
@@ -360,13 +377,15 @@ FUNC_SCOPE* APP_RELU_FUNC_GEN::Gen_app_relu() {
       Relu_func_info[static_cast<uint32_t>(RELU_FUNC_INFO::INIT_FORMAL_NAME)];
   const char* formal1_name =
       Relu_func_info[static_cast<uint32_t>(RELU_FUNC_INFO::NORM_FORMAL_NAME)];
+  const char* formal2_name =
+      Relu_func_info[static_cast<uint32_t>(RELU_FUNC_INFO::MASK_LEN_NAME)];
   SIGNATURE_TYPE_PTR sig_type    = glob_scope->New_sig_type();
   TYPE_PTR           cipher_type = Lower_ctx()->Get_cipher_type(glob_scope);
+  TYPE_PTR           u32 = glob_scope->Prim_type(PRIMITIVE_TYPE::INT_U32);
   glob_scope->New_ret_param(cipher_type, sig_type);
-  STR_PTR param0_name = glob_scope->New_str(formal0_name);
-  glob_scope->New_param(param0_name, cipher_type, sig_type, spos);
-  STR_PTR param1_name = glob_scope->New_str(formal1_name);
-  glob_scope->New_param(param1_name, cipher_type, sig_type, spos);
+  glob_scope->New_param(formal0_name, cipher_type, sig_type, spos);
+  glob_scope->New_param(formal1_name, cipher_type, sig_type, spos);
+  glob_scope->New_param(formal2_name, u32, sig_type, spos);
   sig_type->Set_complete();
 
   const char* entry_name =
@@ -383,5 +402,68 @@ FUNC_SCOPE* APP_RELU_FUNC_GEN::Gen_app_relu() {
   return relu_func;
 }
 
+FUNC_SCOPE* TENSOR2SIHE_IMPL::Get_approx_relu(VECTOR2SIHE_CTX& ctx) {
+  air::base::CONTAINER* cntr       = ctx.Container();
+  core::LOWER_CTX&      lower_ctx  = ctx.Lower_ctx();
+  FUNC_SCOPE*           func_scope = cntr->Parent_func_scope();
+  GLOB_SCOPE*           glob_scope = &func_scope->Glob_scope();
+
+  core::FHE_FUNC_INFO& approx_relu_info =
+      lower_ctx.Get_func_info(core::FHE_FUNC::APPROX_RELU);
+  const char* func_name =
+      Relu_func_info[static_cast<uint32_t>(RELU_FUNC_INFO::FUNC_NAME)];
+  FUNC_SCOPE* approx_relu = approx_relu_info.Get_func_scope(glob_scope);
+  if (approx_relu != nullptr) {
+    return approx_relu;
+  }
+
+  uint32_t relu_mul_depth = (ctx.Relu_mul_depth() > 0)
+                                ? ctx.Relu_mul_depth()
+                                : DEFAULT_APP_RELU_MUL_DEPTH;
+
+  util::POLY_BASIS_TYPE base_poly_type =
+      (ctx.Relu_base_poly_type() != (uint32_t)(util::POLY_BASIS_TYPE::POWER))
+          ? util::POLY_BASIS_TYPE::CHEBYSHEV
+          : util::POLY_BASIS_TYPE::POWER;
+  APP_RELU_FUNC_GEN gen(glob_scope, &lower_ctx, relu_mul_depth, base_poly_type);
+  approx_relu = gen.Gen_app_relu();
+  approx_relu_info.Set_func_id(approx_relu->Owning_func_id());
+  approx_relu_info.Set_mul_depth(relu_mul_depth);
+  AIR_ASSERT(approx_relu != nullptr);
+  return approx_relu;
+}
+
+STMT_PTR TENSOR2SIHE_IMPL::Gen_call_approx_relu(VECTOR2SIHE_CTX& ctx,
+                                                FUNC_SCOPE*      approx_relu,
+                                                PREG_PTR retv, PREG_PTR arg,
+                                                PREG_PTR scaled_arg,
+                                                uint32_t mask_len, SPOS spos) {
+  air::base::CONTAINER* cntr = ctx.Container();
+  // 1. gen call stmt
+  ENTRY_PTR entry_point = approx_relu->Owning_func()->Entry_point();
+  STMT_PTR  relu_call   = cntr->New_call(entry_point, retv, 3, spos);
+
+  // 2. gen child 0: init ReLU opnd
+  NODE_PTR opnd0 = cntr->New_ldp(arg, spos);
+  relu_call->Node()->Set_child(0, opnd0);
+
+  // 3. gen child 1: normalized ReLU opnd
+  NODE_PTR opnd1 = cntr->New_ldp(scaled_arg, spos);
+  relu_call->Node()->Set_child(1, opnd1);
+
+  // 4. gen child 2: mask len
+  core::LOWER_CTX& lower_ctx  = ctx.Lower_ctx();
+  GLOB_SCOPE*      glob_scope = cntr->Glob_scope();
+  TYPE_PTR         u32        = glob_scope->Prim_type(PRIMITIVE_TYPE::INT_U32);
+  NODE_PTR         ldc        = cntr->New_intconst(u32, mask_len, spos);
+  relu_call->Node()->Set_child(2, ldc);
+
+  // 4 set mul_depth attr for App_relu
+  core::FHE_FUNC_INFO& approx_relu_info =
+      lower_ctx.Get_func_info(core::FHE_FUNC::APPROX_RELU);
+  uint32_t attr_val = approx_relu_info.Get_mul_depth();
+  relu_call->Node()->Set_attr(core::FHE_ATTR_KIND::MUL_DEPTH, &attr_val, 1);
+  return relu_call;
+}
 }  // namespace sihe
 }  // namespace fhe

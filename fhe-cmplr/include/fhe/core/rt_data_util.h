@@ -12,11 +12,9 @@
 #include <iostream>
 #include <vector>
 
-#include "air/core/ir2c_ctx.h"
-#include "fhe/core/lower_ctx.h"
+#include "air/util/debug.h"
 #include "fhe/core/rt_data_def.h"
 #include "fhe/core/rt_version.h"
-#include "fhe/poly/poly2c_config.h"
 
 namespace fhe {
 

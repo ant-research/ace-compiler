@@ -8,20 +8,21 @@
 
 #include <math.h>
 
-#include "ckks/plain_eval.h"
+#include "ckks/plain.h"
+#include "ckks/plaintext.h"
 #include "fhe/core/rt_encode_api.h"
-#include "util/plaintext.h"
 
 int main() {
+  Init_rtlib_timing();
   // encode plaintext from const_val
   float     input1[] = {1.0380784273147583, -3.1710917949676514,
                         -0.024826018139719963, 0.6483810544013977};
   PLAINTEXT pt;
   memset(&pt, 0, sizeof(pt));
-  Prepare_encode_context(16, 0, 8, 33, 30);
+  Prepare_encode_context(16, 0, 8, 0, 33, 30, 3, 0);
 
   // test encode & decode
-  Encode_plain_from_float(&pt, input1, 4, 1, 0);
+  Encode_float(&pt, input1, 4, 1, 0);
   double* msg       = Get_msg_from_plain(&pt);
   bool    found_err = false;
   for (int i = 0; i < 4; ++i) {

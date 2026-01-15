@@ -39,4 +39,7 @@
 
 //! environment variable to control clear imaginary part at the end of bootstrap
 #define ENV_BOOTSTRAP_CLEAR_IMAG "RT_BTS_CLEAR_IMAG"
+
+//! environment variable to control keyswitch dot product optimization
+#define ENV_FAST_DOT_PROD "FAST_DOT_PROD"
 #endif  // RTLIB_COMMON_RT_ENV_H

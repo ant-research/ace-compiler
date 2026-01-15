@@ -19,7 +19,7 @@ namespace core {
 // Mul_depth of CKKS bootstrapping is determined by the impl in rtlib.
 // Following mul_depth values must be modified according to the
 // parameters setted in:
-//   rtlib/ant/include/util/ckks_bootstrap_context.h
+//   rtlib/ant/include/ckks/bootstrap.h
 //   rtlib/ant/src/ckks/cipher_eval.c:Bootstrap.
 // CKKS bootstrapping is composed of 4 steps: Mod_raise, Coeff2slot, Mod_reduce,
 // and Slot2coeff. Mod_raise consumes zero mul_depth.
@@ -34,7 +34,9 @@ namespace core {
 #define BOOTSTRAP_MUL_DEPTH_UNDER_THRESHOLD 15
 #define BOOTSTRAP_MUL_DEPTH_ABOVE_THRESHOLD 19
 
-#define HIGH_MUL_LEVEL_THRESHOLD 18
+#define LOW_MUL_LEVEL_PRIME_COUNT  1
+#define HIGH_MUL_LEVEL_PRIME_COUNT 16
+#define HIGH_MUL_LEVEL_THRESHOLD   18
 
 // bit number of P prime of CRT primes
 #define BIT_NUM_OF_P_PRIME 60
@@ -46,13 +48,13 @@ enum PRIME_INFO_KIND : uint32_t {
 };
 
 // prime info for mul_level in [1, 18)
-static const CTX_PARAM::PRIME_INFO Low_mul_level_prime_info[] = {
+static const CTX_PARAM::PRIME_INFO Low_mul_level_prime_info[LOW_MUL_LEVEL_PRIME_COUNT] = {
     {33, 30},
 };
 
 #define LEAST_POLY_DEG_POW 3
 // prime info for mul_level in [18, -)
-static const CTX_PARAM::PRIME_INFO High_mul_level_prime_info[] = {
+static const CTX_PARAM::PRIME_INFO High_mul_level_prime_info[HIGH_MUL_LEVEL_PRIME_COUNT] = {
     CTX_PARAM::PRIME_INFO(60, 50),  // poly_deg = 2^3
     CTX_PARAM::PRIME_INFO(60, 51),  // poly_deg = 2^4
     CTX_PARAM::PRIME_INFO(60, 51),  // poly_deg = 2^5
@@ -67,6 +69,8 @@ static const CTX_PARAM::PRIME_INFO High_mul_level_prime_info[] = {
     CTX_PARAM::PRIME_INFO(60, 59),  // poly_deg = 2^14
     CTX_PARAM::PRIME_INFO(60, 59),  // poly_deg = 2^15
     CTX_PARAM::PRIME_INFO(60, 59),  // poly_deg = 2^16
+    CTX_PARAM::PRIME_INFO(60, 59),  // poly_deg = 2^17
+    CTX_PARAM::PRIME_INFO(60, 59),  // poly_deg = 2^18
 };
 
 void CTX_PARAM::Update_prime_info() {
@@ -76,6 +80,9 @@ void CTX_PARAM::Update_prime_info() {
     uint32_t poly_deg_pow = round(log2(Get_poly_degree()));
     AIR_ASSERT(poly_deg_pow >= LEAST_POLY_DEG_POW);
     uint32_t prime_info_id = poly_deg_pow - LEAST_POLY_DEG_POW;
+    if (prime_info_id >= HIGH_MUL_LEVEL_PRIME_COUNT) {
+      prime_info_id = HIGH_MUL_LEVEL_PRIME_COUNT - 1;
+    }
     prime_info             = &High_mul_level_prime_info[prime_info_id];
   } else {
     prime_info = &Low_mul_level_prime_info[0];
@@ -85,9 +92,12 @@ void CTX_PARAM::Update_prime_info() {
   Set_scaling_factor_bit_num(prime_info->Scale_factor_bit_num());
 
   // 2. update q_part_num
-  if (Get_mul_level() > 3)
+  // keep consistent with rtlib: fhe_std_parms.c:Get_default_num_q_parts().
+  // mul_level is 1 greater than mul_depth.
+  AIR_ASSERT_MSG(Get_mul_level() >= 1, "invalid mul_level");
+  if (Get_mul_level() > 4)
     Set_q_part_num(3);
-  else if (Get_mul_level() == 0)
+  else if (Get_mul_level() == 1)
     Set_q_part_num(1);
   else
     Set_q_part_num(2);
@@ -99,6 +109,7 @@ void CTX_PARAM::Print(std::ostream& out) {
   out << indent << Get_poly_degree() << ", // poly degree" << std::endl;
   out << indent << Get_security_level() << ", // security level" << std::endl;
   out << indent << Get_mul_level() << ", // mul level" << std::endl;
+  out << indent << Get_input_level() << ", // input level" << std::endl;
   out << indent << Get_first_prime_bit_num() << ", // first prime bit num"
       << std::endl;
   out << indent << Get_scaling_factor_bit_num() << ", // scaling factor bit num"
@@ -126,6 +137,7 @@ uint32_t CTX_PARAM::Mul_depth_of_bootstrap() {
 }
 
 uint32_t CTX_PARAM::Get_p_prime_num() const {
+  AIR_ASSERT(Get_q_part_num());
   uint32_t num_per_part = std::ceil(1. * Get_mul_level() / Get_q_part_num());
   uint32_t bit_num      = Get_first_prime_bit_num() +
                      (num_per_part - 1) * Get_scaling_factor_bit_num();

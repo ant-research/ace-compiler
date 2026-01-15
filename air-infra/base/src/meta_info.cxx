@@ -16,14 +16,6 @@ namespace base {
 // vector to keep all domain info pointers
 std::vector<const DOMAIN_INFO*> META_INFO::Domains;
 
-// get operator category name
-const char* META_INFO::Op_cate_name(OPR_CAT cat) {
-  static constexpr const char* NAMES[] = {"ENTRY", "PRAGMA", "CFLOW", "LDST",
-                                          "STMT",  "EXPR",   "CALL"};
-  AIR_STATIC_ASSERT(sizeof(NAMES) / sizeof(NAMES[0]) == (int)OPR_CAT::LAST_CAT);
-  return cat < OPR_CAT::LAST_CAT ? NAMES[(int)cat] : "ERROR";
-}
-
 // get operator property name
 const char* META_INFO::Op_prop_name(OPR_PROP prop) {
   static constexpr const char* NAMES[] = {
@@ -64,8 +56,8 @@ void META_INFO::Print(std::ostream& os) {
 }
 
 void META_INFO::Print(std::ostream& os, const OPR_INFO* opr) {
-  os << "  " << std::left << std::setw(16) << opr->_name << "  " << std::setw(6)
-     << Op_cate_name(opr->_cate) << " kids: " << std::setw(4) << opr->_nkids;
+  os << "  " << std::left << std::setw(16) << opr->_name
+     << " kids: " << std::setw(4) << opr->_nkids;
   bool comma = false;
   for (uint32_t i = 0; i < (uint32_t)OPR_PROP::LAST_PROP; ++i) {
     if ((opr->_prop & (PROP_TO_INT(i))) != 0) {

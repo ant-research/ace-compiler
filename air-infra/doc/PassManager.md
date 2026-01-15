@@ -6,7 +6,7 @@
 
 |Version|Author     |Date      |Description|
 |-------|-----------|----------|-----------|
-|0.1    ||2023.07.31|Initial version.|
+|0.1    |jianxin.lai|2023.07.31|Initial version.|
 
 
 ## Introduction

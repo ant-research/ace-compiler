@@ -7,7 +7,8 @@
 //=============================================================================
 
 #include "gtest/gtest.h"
-#include "util/fhe_utils.h"
+#include "modular_impl.h"
+#include "number_theory_impl.h"
 #include "util/number_theory.h"
 
 TEST(number_theory, mod_exp) {

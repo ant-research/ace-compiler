@@ -9,6 +9,8 @@
 #ifndef AIR_UTIL_DEBUG_H
 #define AIR_UTIL_DEBUG_H
 
+#include <stdint.h>
+
 #include "air/util/error.h"
 #include "air/util/messg.h"
 
@@ -20,6 +22,8 @@ extern const MSG_DESC User_msg[];
 #define AIR_STATIC_ASSERT(cond) static_assert((cond))
 
 #if !defined(NDEBUG)
+
+#define AIR_DEBUG_ON true
 
 #define AIR_DEBUG_FLAG(x) bool dbg_flag = x;
 
@@ -50,6 +54,7 @@ extern const MSG_DESC User_msg[];
 
 #else  // NDEBUG
 
+#define AIR_DEBUG_ON false
 #define AIR_DEBUG_FLAG(x)
 #define AIR_DEBUG(...)
 #define AIR_TRACE(tf, ...)
@@ -66,6 +71,13 @@ extern const MSG_DESC User_msg[];
   AIR_ASSERT_MSG(Conditional_stmt, #Conditional_stmt)
 
 #endif  // NDEBUG
+
+//! @brief cmplr warn message for developer
+#define CMPLR_DEV_WARN(...)                             \
+  {                                                     \
+    Msg_hdr(std::cerr, __FILE__, __LINE__, SEVL::WARN); \
+    Templ_print(std::cerr, __VA_ARGS__);                \
+  }
 
 //! @brief cmplr warn message macro prints value
 #define CMPLR_WARN_MSG(tf, ...)                          \

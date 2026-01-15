@@ -603,7 +603,7 @@ CIPHERTEXT App_relu(CIPHERTEXT input_ct) {
   Init_ciph_down_scale(&_pgen_tmp_14, &_relu_tmp4);
   Rescale(&_pgen_tmp_14._c0_poly, &_relu_tmp4._c0_poly);
   Rescale(&_pgen_tmp_14._c1_poly, &_relu_tmp4._c1_poly);
-  Encode_plain_from_float(&_pgen_tmp_16, &_cst_0, 1, Sc_degree(&input_ct), Level(&input_ct));
+  Encode_float(&_pgen_tmp_16, &_cst_0, 1, Sc_degree(&input_ct), Level(&input_ct));
   Init_ciph_up_scale_plain(&_pgen_tmp_15, &input_ct, &_pgen_tmp_16);
   {
     _pgen_modulus = Q_modulus();
@@ -691,7 +691,7 @@ CIPHERTEXT App_relu(CIPHERTEXT input_ct) {
     Free_poly(_pgen_tmp_poly);
     Free_poly(_pgen_decomp);
   }
-  Encode_plain_from_float(&_pgen_tmp_20, &_cst_1, 1, Sc_degree(&input_ct), Level(&input_ct));
+  Encode_float(&_pgen_tmp_20, &_cst_1, 1, Sc_degree(&input_ct), Level(&input_ct));
   Init_ciph_up_scale_plain(&_pgen_tmp_21, &input_ct, &_pgen_tmp_20);
   Init_ciph_same_scale(&_pgen_tmp_11, &_pgen_tmp_12, &_pgen_tmp_21);
   {
@@ -785,7 +785,7 @@ CIPHERTEXT App_relu(CIPHERTEXT input_ct) {
   Init_ciph_down_scale(&_pgen_tmp_27, &_relu_tmp4);
   Rescale(&_pgen_tmp_27._c0_poly, &_relu_tmp4._c0_poly);
   Rescale(&_pgen_tmp_27._c1_poly, &_relu_tmp4._c1_poly);
-  Encode_plain_from_float(&_pgen_tmp_29, &_cst_2, 1, Sc_degree(&input_ct), Level(&input_ct));
+  Encode_float(&_pgen_tmp_29, &_cst_2, 1, Sc_degree(&input_ct), Level(&input_ct));
   Init_ciph_up_scale_plain(&_pgen_tmp_28, &input_ct, &_pgen_tmp_29);
   {
     _pgen_modulus = Q_modulus();
@@ -873,7 +873,7 @@ CIPHERTEXT App_relu(CIPHERTEXT input_ct) {
     Free_poly(_pgen_tmp_poly);
     Free_poly(_pgen_decomp);
   }
-  Encode_plain_from_float(&_pgen_tmp_33, &_cst_3, 1, Sc_degree(&input_ct), Level(&input_ct));
+  Encode_float(&_pgen_tmp_33, &_cst_3, 1, Sc_degree(&input_ct), Level(&input_ct));
   Init_ciph_up_scale_plain(&_pgen_tmp_34, &input_ct, &_pgen_tmp_33);
   Init_ciph_same_scale(&_pgen_tmp_35, &_pgen_tmp_25, &_pgen_tmp_34);
   Init_ciph_same_scale(&_relu_tmp30, &_pgen_tmp_8, &_pgen_tmp_35);
@@ -1222,7 +1222,7 @@ CIPHERTEXT App_relu(CIPHERTEXT input_ct) {
   Init_ciph_down_scale(&_pgen_tmp_68, &_relu_tmp30);
   Rescale(&_pgen_tmp_68._c0_poly, &_relu_tmp30._c0_poly);
   Rescale(&_pgen_tmp_68._c1_poly, &_relu_tmp30._c1_poly);
-  Encode_plain_from_float(&_pgen_tmp_69, &_cst_4, 1, Sc_degree(&_pgen_tmp_68), Level(&_pgen_tmp_68));
+  Encode_float(&_pgen_tmp_69, &_cst_4, 1, Sc_degree(&_pgen_tmp_68), Level(&_pgen_tmp_68));
   Init_ciph_up_scale_plain(&_pgen_tmp_67, &_pgen_tmp_68, &_pgen_tmp_69);
   {
     _pgen_modulus = Q_modulus();
@@ -1313,7 +1313,7 @@ CIPHERTEXT App_relu(CIPHERTEXT input_ct) {
   Init_ciph_down_scale(&_pgen_tmp_73, &_relu_tmp30);
   Rescale(&_pgen_tmp_73._c0_poly, &_relu_tmp30._c0_poly);
   Rescale(&_pgen_tmp_73._c1_poly, &_relu_tmp30._c1_poly);
-  Encode_plain_from_float(&_pgen_tmp_74, &_cst_5, 1, Sc_degree(&_pgen_tmp_73), Level(&_pgen_tmp_73));
+  Encode_float(&_pgen_tmp_74, &_cst_5, 1, Sc_degree(&_pgen_tmp_73), Level(&_pgen_tmp_73));
   Init_ciph_up_scale_plain(&_pgen_tmp_75, &_pgen_tmp_73, &_pgen_tmp_74);
   Init_ciph_same_scale(&_pgen_tmp_63, &_pgen_tmp_64, &_pgen_tmp_75);
   {
@@ -1407,12 +1407,12 @@ CIPHERTEXT App_relu(CIPHERTEXT input_ct) {
   Init_ciph_down_scale(&_pgen_tmp_79, &_relu_tmp38);
   Rescale(&_pgen_tmp_79._c0_poly, &_relu_tmp38._c0_poly);
   Rescale(&_pgen_tmp_79._c1_poly, &_relu_tmp38._c1_poly);
-  Encode_plain_from_float(&_pgen_tmp_80, &_cst_7, 1, Sc_degree(&_pgen_tmp_79), Level(&_pgen_tmp_79));
+  Encode_float(&_pgen_tmp_80, &_cst_7, 1, Sc_degree(&_pgen_tmp_79), Level(&_pgen_tmp_79));
   Init_ciph_up_scale_plain(&_pgen_tmp_81, &_pgen_tmp_79, &_pgen_tmp_80);
   Init_ciph_down_scale(&_pgen_tmp_82, &_relu_tmp30);
   Rescale(&_pgen_tmp_82._c0_poly, &_relu_tmp30._c0_poly);
   Rescale(&_pgen_tmp_82._c1_poly, &_relu_tmp30._c1_poly);
-  Encode_plain_from_float(&_pgen_tmp_83, &_cst_6, 1, Sc_degree(&_pgen_tmp_82), Level(&_pgen_tmp_82));
+  Encode_float(&_pgen_tmp_83, &_cst_6, 1, Sc_degree(&_pgen_tmp_82), Level(&_pgen_tmp_82));
   Init_ciph_up_scale_plain(&_pgen_tmp_84, &_pgen_tmp_82, &_pgen_tmp_83);
   Init_ciph_same_scale(&_pgen_tmp_85, &_pgen_tmp_81, &_pgen_tmp_84);
   Init_ciph_same_scale(&_pgen_tmp_59, &_pgen_tmp_60, &_pgen_tmp_85);
@@ -1514,12 +1514,12 @@ CIPHERTEXT App_relu(CIPHERTEXT input_ct) {
   Init_ciph_down_scale(&_pgen_tmp_93, &_relu_tmp38);
   Rescale(&_pgen_tmp_93._c0_poly, &_relu_tmp38._c0_poly);
   Rescale(&_pgen_tmp_93._c1_poly, &_relu_tmp38._c1_poly);
-  Encode_plain_from_float(&_pgen_tmp_94, &_cst_9, 1, Sc_degree(&_pgen_tmp_93), Level(&_pgen_tmp_93));
+  Encode_float(&_pgen_tmp_94, &_cst_9, 1, Sc_degree(&_pgen_tmp_93), Level(&_pgen_tmp_93));
   Init_ciph_up_scale_plain(&_pgen_tmp_95, &_pgen_tmp_93, &_pgen_tmp_94);
   Init_ciph_down_scale(&_pgen_tmp_96, &_relu_tmp30);
   Rescale(&_pgen_tmp_96._c0_poly, &_relu_tmp30._c0_poly);
   Rescale(&_pgen_tmp_96._c1_poly, &_relu_tmp30._c1_poly);
-  Encode_plain_from_float(&_pgen_tmp_97, &_cst_8, 1, Sc_degree(&_pgen_tmp_96), Level(&_pgen_tmp_96));
+  Encode_float(&_pgen_tmp_97, &_cst_8, 1, Sc_degree(&_pgen_tmp_96), Level(&_pgen_tmp_96));
   Init_ciph_up_scale_plain(&_pgen_tmp_98, &_pgen_tmp_96, &_pgen_tmp_97);
   Init_ciph_same_scale(&_pgen_tmp_92, &_pgen_tmp_95, &_pgen_tmp_98);
   {
@@ -1615,12 +1615,12 @@ CIPHERTEXT App_relu(CIPHERTEXT input_ct) {
   Init_ciph_down_scale(&_pgen_tmp_102, &_relu_tmp38);
   Rescale(&_pgen_tmp_102._c0_poly, &_relu_tmp38._c0_poly);
   Rescale(&_pgen_tmp_102._c1_poly, &_relu_tmp38._c1_poly);
-  Encode_plain_from_float(&_pgen_tmp_103, &_cst_11, 1, Sc_degree(&_pgen_tmp_102), Level(&_pgen_tmp_102));
+  Encode_float(&_pgen_tmp_103, &_cst_11, 1, Sc_degree(&_pgen_tmp_102), Level(&_pgen_tmp_102));
   Init_ciph_up_scale_plain(&_pgen_tmp_104, &_pgen_tmp_102, &_pgen_tmp_103);
   Init_ciph_down_scale(&_pgen_tmp_105, &_relu_tmp30);
   Rescale(&_pgen_tmp_105._c0_poly, &_relu_tmp30._c0_poly);
   Rescale(&_pgen_tmp_105._c1_poly, &_relu_tmp30._c1_poly);
-  Encode_plain_from_float(&_pgen_tmp_106, &_cst_10, 1, Sc_degree(&_pgen_tmp_105), Level(&_pgen_tmp_105));
+  Encode_float(&_pgen_tmp_106, &_cst_10, 1, Sc_degree(&_pgen_tmp_105), Level(&_pgen_tmp_105));
   Init_ciph_up_scale_plain(&_pgen_tmp_107, &_pgen_tmp_105, &_pgen_tmp_106);
   Init_ciph_same_scale(&_pgen_tmp_108, &_pgen_tmp_104, &_pgen_tmp_107);
   Init_ciph_same_scale(&_pgen_tmp_109, &_pgen_tmp_89, &_pgen_tmp_108);
@@ -2048,7 +2048,7 @@ CIPHERTEXT App_relu(CIPHERTEXT input_ct) {
   Init_ciph_down_scale(&_pgen_tmp_142, &_relu_tmp90);
   Rescale(&_pgen_tmp_142._c0_poly, &_relu_tmp90._c0_poly);
   Rescale(&_pgen_tmp_142._c1_poly, &_relu_tmp90._c1_poly);
-  Encode_plain_from_float(&_pgen_tmp_143, &_cst_12, 1, Sc_degree(&_pgen_tmp_142), Level(&_pgen_tmp_142));
+  Encode_float(&_pgen_tmp_143, &_cst_12, 1, Sc_degree(&_pgen_tmp_142), Level(&_pgen_tmp_142));
   Init_ciph_up_scale_plain(&_pgen_tmp_141, &_pgen_tmp_142, &_pgen_tmp_143);
   {
     _pgen_modulus = Q_modulus();
@@ -2142,7 +2142,7 @@ CIPHERTEXT App_relu(CIPHERTEXT input_ct) {
   Init_ciph_down_scale(&_pgen_tmp_151, &_relu_tmp90);
   Rescale(&_pgen_tmp_151._c0_poly, &_relu_tmp90._c0_poly);
   Rescale(&_pgen_tmp_151._c1_poly, &_relu_tmp90._c1_poly);
-  Encode_plain_from_float(&_pgen_tmp_152, &_cst_14, 1, Sc_degree(&_pgen_tmp_151), Level(&_pgen_tmp_151));
+  Encode_float(&_pgen_tmp_152, &_cst_14, 1, Sc_degree(&_pgen_tmp_151), Level(&_pgen_tmp_151));
   Init_ciph_up_scale_plain(&_pgen_tmp_150, &_pgen_tmp_151, &_pgen_tmp_152);
   {
     _pgen_modulus = Q_modulus();
@@ -2233,7 +2233,7 @@ CIPHERTEXT App_relu(CIPHERTEXT input_ct) {
   Init_ciph_down_scale(&_pgen_tmp_156, &_relu_tmp90);
   Rescale(&_pgen_tmp_156._c0_poly, &_relu_tmp90._c0_poly);
   Rescale(&_pgen_tmp_156._c1_poly, &_relu_tmp90._c1_poly);
-  Encode_plain_from_float(&_pgen_tmp_157, &_cst_13, 1, Sc_degree(&_pgen_tmp_156), Level(&_pgen_tmp_156));
+  Encode_float(&_pgen_tmp_157, &_cst_13, 1, Sc_degree(&_pgen_tmp_156), Level(&_pgen_tmp_156));
   Init_ciph_up_scale_plain(&_pgen_tmp_158, &_pgen_tmp_156, &_pgen_tmp_157);
   Init_ciph_same_scale(&_pgen_tmp_159, &_pgen_tmp_147, &_pgen_tmp_158);
   Init_ciph_same_scale(&_pgen_tmp_137, &_pgen_tmp_138, &_pgen_tmp_159);
@@ -2336,7 +2336,7 @@ CIPHERTEXT App_relu(CIPHERTEXT input_ct) {
   Init_ciph_down_scale(&_pgen_tmp_171, &_relu_tmp90);
   Rescale(&_pgen_tmp_171._c0_poly, &_relu_tmp90._c0_poly);
   Rescale(&_pgen_tmp_171._c1_poly, &_relu_tmp90._c1_poly);
-  Encode_plain_from_float(&_pgen_tmp_172, &_cst_16, 1, Sc_degree(&_pgen_tmp_171), Level(&_pgen_tmp_171));
+  Encode_float(&_pgen_tmp_172, &_cst_16, 1, Sc_degree(&_pgen_tmp_171), Level(&_pgen_tmp_171));
   Init_ciph_up_scale_plain(&_pgen_tmp_170, &_pgen_tmp_171, &_pgen_tmp_172);
   {
     _pgen_modulus = Q_modulus();
@@ -2427,7 +2427,7 @@ CIPHERTEXT App_relu(CIPHERTEXT input_ct) {
   Init_ciph_down_scale(&_pgen_tmp_176, &_relu_tmp90);
   Rescale(&_pgen_tmp_176._c0_poly, &_relu_tmp90._c0_poly);
   Rescale(&_pgen_tmp_176._c1_poly, &_relu_tmp90._c1_poly);
-  Encode_plain_from_float(&_pgen_tmp_177, &_cst_15, 1, Sc_degree(&_pgen_tmp_176), Level(&_pgen_tmp_176));
+  Encode_float(&_pgen_tmp_177, &_cst_15, 1, Sc_degree(&_pgen_tmp_176), Level(&_pgen_tmp_176));
   Init_ciph_up_scale_plain(&_pgen_tmp_178, &_pgen_tmp_176, &_pgen_tmp_177);
   Init_ciph_same_scale(&_pgen_tmp_166, &_pgen_tmp_167, &_pgen_tmp_178);
   {
@@ -2524,7 +2524,7 @@ CIPHERTEXT App_relu(CIPHERTEXT input_ct) {
   Init_ciph_down_scale(&_pgen_tmp_186, &_relu_tmp90);
   Rescale(&_pgen_tmp_186._c0_poly, &_relu_tmp90._c0_poly);
   Rescale(&_pgen_tmp_186._c1_poly, &_relu_tmp90._c1_poly);
-  Encode_plain_from_float(&_pgen_tmp_187, &_cst_18, 1, Sc_degree(&_pgen_tmp_186), Level(&_pgen_tmp_186));
+  Encode_float(&_pgen_tmp_187, &_cst_18, 1, Sc_degree(&_pgen_tmp_186), Level(&_pgen_tmp_186));
   Init_ciph_up_scale_plain(&_pgen_tmp_185, &_pgen_tmp_186, &_pgen_tmp_187);
   {
     _pgen_modulus = Q_modulus();
@@ -2615,7 +2615,7 @@ CIPHERTEXT App_relu(CIPHERTEXT input_ct) {
   Init_ciph_down_scale(&_pgen_tmp_191, &_relu_tmp90);
   Rescale(&_pgen_tmp_191._c0_poly, &_relu_tmp90._c0_poly);
   Rescale(&_pgen_tmp_191._c1_poly, &_relu_tmp90._c1_poly);
-  Encode_plain_from_float(&_pgen_tmp_192, &_cst_17, 1, Sc_degree(&_pgen_tmp_191), Level(&_pgen_tmp_191));
+  Encode_float(&_pgen_tmp_192, &_cst_17, 1, Sc_degree(&_pgen_tmp_191), Level(&_pgen_tmp_191));
   Init_ciph_up_scale_plain(&_pgen_tmp_193, &_pgen_tmp_191, &_pgen_tmp_192);
   Init_ciph_same_scale(&_pgen_tmp_194, &_pgen_tmp_182, &_pgen_tmp_193);
   Init_ciph_same_scale(&_pgen_tmp_195, &_pgen_tmp_163, &_pgen_tmp_194);
@@ -2635,7 +2635,7 @@ CIPHERTEXT App_relu(CIPHERTEXT input_ct) {
       _pgen_modulus = _pgen_modulus + 1;
     }
   }
-  Encode_plain_from_float(&_pgen_tmp_196, &_cst_19, 1, Sc_degree(&input_ct), Level(&input_ct));
+  Encode_float(&_pgen_tmp_196, &_cst_19, 1, Sc_degree(&input_ct), Level(&input_ct));
   Init_ciph_up_scale_plain(&_pgen_tmp_197, &input_ct, &_pgen_tmp_196);
   Init_ciph_same_scale(&_relu_tmp152, &_relu_tmp146, &_pgen_tmp_197);
   {
@@ -2654,23 +2654,25 @@ CIPHERTEXT App_relu(CIPHERTEXT input_ct) {
 
 CKKS_PARAMS* Get_context_params() {
   static CKKS_PARAMS parm = {
-    LIB_ANT, 128, 0, 31, 33, 30, 0, 0, 0,
+    LIB_ANT, 128, 0, 31, 0, 33, 30, 0, 0, 0,
     {  }
   };
   return &parm;
 }
 
 DATA_SCHEME* Get_encode_scheme(int idx) {
+  static MAP_DESC desc_0[] = {{NORMAL, 0, 0, 0, 0}};
   static DATA_SCHEME scheme_0 = {
-    "input", {0, 0, 0, 0}, 1, {NORMAL, 0, 0, 0, 0}
+    "input", {0, 0, 0, 0}, 1, desc_0
   };
   static DATA_SCHEME* scheme[] = { &scheme_0 };
   return scheme[idx];
 }
 
 DATA_SCHEME* Get_decode_scheme(int idx) {
+  static MAP_DESC desc[] = {{NORMAL, 0, 0, 0, 0}};
   static DATA_SCHEME scheme = {
-    "output", {0, 0, 0, 0}, 1, {NORMAL, 0, 0, 0, 0}
+    "output", {0, 0, 0, 0}, 1, desc
   };
   return &scheme;
 }

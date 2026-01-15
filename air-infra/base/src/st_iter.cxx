@@ -94,6 +94,37 @@ PARAM_ITER::operator*() {
 }
 
 //=============================================================================
+// class LITERAL_ITER member functions
+//=============================================================================
+
+LITERAL_ITER::LITERAL_ITER(const GLOB_SCOPE& glob)
+    : _scope(&glob), _cur(glob.Lit_table().Begin()), _end(false) {
+  if (_cur == glob.Lit_table().End()) _end = true;
+}
+
+LITERAL_ITER& LITERAL_ITER::operator++() {
+  if (_end) return *this;
+
+  AIR_ASSERT(_scope);
+  if (++_cur == _scope->Lit_table().End()) _end = true;
+  return *this;
+}
+
+LITERAL_PTR
+LITERAL_ITER::operator*() const {
+  AIR_ASSERT(!_end);
+  return _scope->Literal(LITERAL_ID(*_cur));
+}
+
+bool LITERAL_ITER::operator==(const LITERAL_ITER& o) const {
+  if (_end && o._end) return true;
+  if ((_end && !o._end) || (!_end && o._end)) return false;
+  AIR_ASSERT(_scope);
+  AIR_ASSERT(_scope == o._scope);
+  return (_cur == o._cur);
+}
+
+//=============================================================================
 // class STR_ITER member functions
 //=============================================================================
 

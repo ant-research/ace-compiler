@@ -40,29 +40,27 @@ namespace air {
 namespace opt {
 
 enum SSA_TRACE_DETAIL {
-  TRACE_IR_BEFORE_SSA       = 0,
-  TRACE_IR_AFTER_INSERT_PHI = 1,
-  TRACE_IR_AFTER_SSA        = 2,
+  TD_IR_BEFORE_SSA       = 0x1,
+  TD_IR_AFTER_INSERT_PHI = 0x2,
+  TD_IR_AFTER_SSA        = 0x4,
 };
 
 //! @brief Config for building SSA
 class SSA_CONFIG {
 public:
-  SSA_CONFIG(uint32_t td) : _trace_detail(td) {}
+  SSA_CONFIG(uint64_t td) : _trace_detail(td) {}
   ~SSA_CONFIG() {}
 
   void Set_trace_ir_before_ssa(bool val) {
-    _trace_detail |= (((uint32_t)val) << TRACE_IR_BEFORE_SSA);
+    _trace_detail |= val ? TD_IR_BEFORE_SSA : 0;
   }
   void Set_trace_ir_after_insert_phi(bool val) {
-    _trace_detail |= (((uint32_t)val) << TRACE_IR_AFTER_INSERT_PHI);
+    _trace_detail |= val ? TD_IR_AFTER_INSERT_PHI : 0;
   }
   void Set_trace_ir_after_ssa(bool val) {
-    _trace_detail |= (((uint32_t)val) << TRACE_IR_AFTER_SSA);
+    _trace_detail |= val ? TD_IR_AFTER_SSA : 0;
   }
-  bool Is_trace(uint32_t flag) const {
-    return (_trace_detail & (1U << flag)) != 0;
-  }
+  bool Is_trace(uint64_t flag) const { return (_trace_detail & flag) != 0; }
 
 private:
   // REQUIRED UNDEFINED UNWANTED methods
@@ -70,7 +68,7 @@ private:
   SSA_CONFIG(const SSA_CONFIG&);
   SSA_CONFIG operator=(const SSA_CONFIG&);
 
-  uint32_t _trace_detail = 0;
+  uint64_t _trace_detail = 0;
 };
 
 //

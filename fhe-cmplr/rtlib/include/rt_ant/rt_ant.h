@@ -16,8 +16,13 @@
 
 #include "common/pt_mgr.h"
 #include "common/rt_stat.h"
+#include "common/rtlib_timing.h"
 #include "common/tensor.h"
 #include "rt_ant/ant_api.h"
 #include "rt_ant/rt_api.h"
+#include "rt_ant/rt_def.h"
+
+// include APIs for runtime validation
+#include "common/rt_validate.h"
 
 #endif  // RTLIB_RT_ANT_RT_ANT_H

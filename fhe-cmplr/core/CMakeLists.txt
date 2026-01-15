@@ -1,3 +1,10 @@
+#=============================================================================
+#
+# Copyright (c) Ant Group Co., Ltd
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+#
+#=============================================================================
+
 file (GLOB_RECURSE FHECORE_SRC_FILES CONFIGURE_DEPENDS src/*.cxx)
 
 set (FHECORE_INCLUDE_DIRS "")
@@ -7,7 +14,7 @@ include_directories (${FHECORE_INCLUDE_DIRS})
 set (FHECORE_INCLUDE_DIRS "${FHECORE_INCLUDE_DIRS}" CACHE INTERNAL "")
 
 add_library (fhecore_obj OBJECT ${FHECORE_SRC_FILES})
-
+add_dependencies(fhecore_obj fhe_depend)
 set_property (TARGET fhecore_obj PROPERTY POSITION_INDEPENDENT_CODE 1)
 
 if (BUILD_STATIC)
@@ -23,59 +30,14 @@ if (BUILD_STATIC)
 	add_dependencies (fhecore_all FHEcore)
 endif()
 
-set (FHECORE_UTAPP "")
-if (BUILD_UNITTEST)
-	file (GLOB FHECORE_UNITTEST_SRC_FILES CONFIGURE_DEPENDS unittest/*.cxx)
-	set (FHECORE_UNITTEST_SRC_FILES ${FHECORE_UNITTEST_SRC_FILES})
-	add_executable (ut_fhecore ${FHECORE_UNITTEST_SRC_FILES} ${UNITTESTMAIN})
-	set_property (TARGET ut_fhecore PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/unittest)
-	target_link_libraries (ut_fhecore ${FHE_UTLIBS})
-	set (FHECORE_UTAPP ${FHECORE_UTAPP} ut_fhecore)
-
-	add_dependencies (fhecore_all ut_fhecore)
-
-	add_custom_command (OUTPUT run_fhecore_utapp WORKING_DIRECTORY ${CMAKE_BINARY_DIR} COMMAND ${CMAKE_BINARY_DIR}/unittest/ut_fhecore)
-	add_custom_target (test_fhecore_ut DEPENDS ut_fhecore run_fhecore_utapp)
-	add_test( NAME ut_fhecore COMMAND ${CMAKE_BINARY_DIR}/unittest/ut_fhecore)
-endif()
-
-set (FHECORE_TESTAPP "")
 if (FHE_BUILD_TEST)
-	file (GLOB FHECORE_TESTAPP_SRC_FILES CONFIGURE_DEPENDS test/*.cxx)
-	foreach (app ${FHECORE_TESTAPP_SRC_FILES})
-		get_filename_component (exe ${app} NAME_WE)
-		add_executable (${exe} ${app})
-		set_property (TARGET ${exe} PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test)
-		set (FHECORE_TESTAPP ${FHECORE_TESTAPP} ${exe})
-		target_link_libraries (${exe} ${FHE_LIBS})
-		add_test( NAME ${exe} COMMAND ${CMAKE_BINARY_DIR}/test/${exe})
-	endforeach ()
+	build_app_test (FHE_INSTALL_APP "${FHE_LIBS}")
+endif ()
 
-	add_custom_target (fhecore_test)
-	add_dependencies (fhecore_test ${FHECORE_TESTAPP})
-	add_dependencies (fhecore_all fhecore_test)
-endif()
-
-set (FHECORE_EGAPP "")
 if (FHE_BUILD_EXAMPLE)
-	file (GLOB FHECORE_EXAMPLE_SRC_FILES CONFIGURE_DEPENDS example/*.cxx)
-	foreach (app ${FHECORE_EXAMPLE_SRC_FILES})
-		get_filename_component (exe ${app} NAME_WE)
-		add_executable (${exe} ${app})
-		set_property (TARGET ${exe} PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/example)
-		set (FHECORE_EGAPP ${FHECORE_EGAPP} ${exe})
-		target_link_libraries (${exe} ${FHE_LIBS})
-		add_test( NAME ${exe} COMMAND ${CMAKE_BINARY_DIR}/example/${exe})
-	endforeach ()
-
-	add_custom_target (fhecore_example)
-	add_dependencies (fhecore_example ${FHECORE_EGAPP})
-	add_dependencies (fhecore_all fhecore_example)
+	build_app_example (FHE_INSTALL_APP "${FHE_LIBS}")
 endif ()
 
-if (FHE_INSTALL_APP)
-	install (TARGETS ${FHECORE_UTAPP} RUNTIME DESTINATION unittest)
-	install (TARGETS ${FHECORE_BMAPP} RUNTIME DESTINATION bench)
-	install (TARGETS ${FHECORE_TESTAPP} RUNTIME DESTINATION test)
-	install (TARGETS ${FHECORE_EGAPP} RUNTIME DESTINATION example)
-endif ()
+if (BUILD_UNITTEST)
+	build_app_unittest (FHE_INSTALL_APP "${FHE_UTLIBS}" "ut_fhecore")
+endif()

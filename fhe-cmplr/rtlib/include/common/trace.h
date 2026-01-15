@@ -39,19 +39,19 @@ extern "C" {
 
 #define T_FILE Get_trace_file()
 
-//! @brief set trace file
+//! @brief Set trace file
 extern void Set_trace_file(char* filename);
 
-//! @brief get trace file
+//! @brief Get trace file
 extern FILE* Get_trace_file(void);
 
-//! @brief close trace file
+//! @brief Close trace file
 extern void Close_trace_file(void);
 
-//! @brief set trace_on flag
+//! @brief Set trace_on flag
 extern void Set_trace_on(bool v);
 
-//! @brief return trace_on flag
+//! @brief Return trace_on flag
 extern bool Is_trace_on(void);
 
 #ifdef __cplusplus

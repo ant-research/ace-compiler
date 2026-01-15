@@ -43,7 +43,14 @@ private:
   void  Deallocate(uint32_t id);
 
   uint32_t Compute_new_id(BYTE_PTR addr, size_t sz);
-  uint32_t Size() const { return _id_array.size(); }
+  size_t   Size() const { return _id_array.size(); }
+  size_t   Mem_size() const {
+    size_t size = 0;
+    for (size_t i = 0; i < _sz_array.size(); i++) {
+      size += _sz_array[i];
+    }
+    return size;
+  }
 
   void* Find(uint32_t id) const {
     void* ptr = _id_array[id];
@@ -51,7 +58,7 @@ private:
   }
   void Adjust_addr(uint32_t id, size_t ofst) {
     _id_array[id] += ofst;
-    _sz_array[id] = -_sz_array[id];
+    // _sz_array[id] = -_sz_array[id];
   }
 
   uint32_t Prev_id(uint32_t base) const;
@@ -71,8 +78,8 @@ private:
   void Clone(ARENA_ITEM_ARRAY& o) {
     _id_array.clear();
     _sz_array.clear();
-    for (uint32_t i = 0; i < o._id_array.size(); i++) {
-      uint32_t sz = o._sz_array[i];
+    for (size_t i = 0; i < o._id_array.size(); i++) {
+      size_t   sz = o._sz_array[i];
       uint32_t new_id;
       BYTE_PTR addr = (BYTE_PTR)Allocate(sz, &new_id);
       memcpy(addr, o._id_array[i], sz);
@@ -81,18 +88,21 @@ private:
   }
 
   BYTE_PTR Archive(BYTE_PTR pos) {
-    uint32_t num = _id_array.size();
+    uint32_t num = _sz_array.size();
+    AIR_ASSERT(num == _id_array.size());
+
     memcpy(pos, reinterpret_cast<BYTE_PTR>(&num), sizeof(uint32_t));
     pos += sizeof(uint32_t);
 
+    memcpy(pos, _sz_array.data(), num * sizeof(uint32_t));
+    pos += num * sizeof(uint32_t);
+
     for (uint32_t i = 0; i < num; i++) {
       uint32_t sz = _sz_array[i];
-      memcpy(pos, reinterpret_cast<BYTE_PTR>(&sz), sizeof(uint32_t));
-      pos += sizeof(uint32_t);
-
       memcpy(pos, _id_array[i], sz);
       pos += sz;
     }
+
     return pos;
   }
 
@@ -105,12 +115,19 @@ private:
 
     for (uint32_t i = 0; i < num; i++) {
       uint32_t sz = *reinterpret_cast<uint32_t*>(pos);
-      uint32_t new_id;
-      BYTE_PTR addr = (BYTE_PTR)Allocate(sz, &new_id);
-      memcpy(addr, pos + sizeof(uint32_t), sz);
-      pos += sizeof(uint32_t) + sz;
-      AIR_ASSERT(new_id == i);
+      _sz_array.push_back(sz);
+      pos += sizeof(uint32_t);
     }
+
+    for (uint32_t i = 0; i < num; i++) {
+      uint32_t sz = _sz_array[i];
+      _id_array.push_back(pos);
+      pos += sz;
+    }
+
+    AIR_ASSERT(num == _sz_array.size());
+    AIR_ASSERT(num == _id_array.size());
+
     return pos;
   }
 
@@ -147,7 +164,7 @@ private:
   const size_t          _align;
   ARENA_ALLOCATOR*      _allocator;
   std::vector<BYTE_PTR> _id_array;
-  std::vector<uint32_t> _sz_array;
+  std::vector<size_t>   _sz_array;
 };
 
 class PRIM_ID_ITER {
@@ -217,7 +234,8 @@ public:
   }
   void     Deallocate(uint32_t id) { _item_array.Deallocate(id); }
   void*    Find(uint32_t id) const { return _item_array.Find(id); }
-  uint32_t Size() const { return _item_array.Size(); }
+  size_t   Size() const { return _item_array.Size(); }
+  size_t   Mem_size() const { return _item_array.Mem_size(); }
   uint32_t Compute_new_id(char* addr, size_t sz) {
     return _item_array.Compute_new_id(addr, sz);
   }

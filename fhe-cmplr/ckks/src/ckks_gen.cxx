@@ -37,7 +37,7 @@ enum class POLY_TYPE_FIELD {
 
 static const char*
     Poly_type_field_name[static_cast<uint32_t>(POLY_TYPE_FIELD::LAST)] = {
-        "POLY",
+        "POLYNOMIAL",
         "_ring_degree",
         "_data",
 };
@@ -120,7 +120,7 @@ TYPE_ID CKKS_GEN::Gen_cipher3_type() {
   RECORD_TYPE_PTR cipher3_type =
       _glob_scope->New_rec_type(RECORD_KIND::STRUCT, type_name, spos);
 
-  TYPE_PTR poly_type = _lower_ctx->Get_poly_type(_glob_scope);
+  TYPE_PTR poly_type = _lower_ctx->Get_rns_poly_type(_glob_scope);
   // create fields
   for (uint32_t id = 1; id < static_cast<uint32_t>(CIPHER3_TYPE_FIELD::LAST);
        ++id) {
@@ -137,7 +137,7 @@ TYPE_ID CKKS_GEN::Update_plain_type() {
   TYPE_ID         plain_type_id = _lower_ctx->Get_plain_type_id();
   RECORD_TYPE_PTR plain_type = _glob_scope->Type(plain_type_id)->Cast_to_rec();
 
-  TYPE_PTR    poly_type = _lower_ctx->Get_poly_type(_glob_scope);
+  TYPE_PTR    poly_type = _lower_ctx->Get_rns_poly_type(_glob_scope);
   const char* name_of_ploy =
       Plain_type_field_name[static_cast<uint32_t>(PLAIN_TYPE_FIELD::POLY)];
   STR_PTR   ploy_str = _glob_scope->New_str(name_of_ploy);
@@ -153,22 +153,79 @@ TYPE_ID CKKS_GEN::Update_cipher_type() {
   RECORD_TYPE_PTR cipher_type =
       _glob_scope->Type(cipher_type_id)->Cast_to_rec();
 
-  TYPE_PTR poly_type = _lower_ctx->Get_poly_type(_glob_scope);
-  // create fields
-  for (uint32_t id = 1; id < static_cast<uint32_t>(CIPHER_TYPE_FIELD::LAST);
-       ++id) {
-    STR_PTR   fld_str = _glob_scope->New_str(Cipher_type_field_name[id]);
-    FIELD_PTR fld     = _glob_scope->New_fld(fld_str, poly_type, cipher_type,
-                                             cipher_type->Spos());
-    cipher_type->Add_fld(fld->Id());
+  TYPE_PTR poly_type    = _lower_ctx->Get_rns_poly_type(_glob_scope);
+  TYPE_ID  poly_type_id = poly_type->Id();
+
+  // Check if fields already exist and verify they use the correct POLY type
+  bool fields_exist = false;
+  if (cipher_type->Is_complete() && cipher_type->Num_fld() > 0) {
+    fields_exist        = true;
+    FIELD_ITER fld_iter = cipher_type->Begin();
+    FIELD_ITER fld_end  = cipher_type->End();
+    uint32_t   expected_fld_count =
+        static_cast<uint32_t>(CIPHER_TYPE_FIELD::LAST) - 1;
+    uint32_t fld_idx = 0;
+
+    // Verify existing fields use the correct POLY type
+    for (; fld_iter != fld_end && fld_idx < expected_fld_count;
+         ++fld_iter, ++fld_idx) {
+      FIELD_PTR existing_fld      = *fld_iter;
+      TYPE_PTR  existing_fld_type = existing_fld->Type();
+    }
+  }
+
+  // Only add fields if they don't already exist
+  if (!fields_exist) {
+    // create fields
+    for (uint32_t id = 1; id < static_cast<uint32_t>(CIPHER_TYPE_FIELD::LAST);
+         ++id) {
+      STR_PTR   fld_str = _glob_scope->New_str(Cipher_type_field_name[id]);
+      FIELD_PTR fld     = _glob_scope->New_fld(fld_str, poly_type, cipher_type,
+                                               cipher_type->Spos());
+      cipher_type->Add_fld(fld->Id());
+    }
   }
   cipher_type->Set_complete();
   return cipher_type_id;
 }
 
 void CKKS_GEN::Register_ckks_types() {
-  TYPE_ID poly_type_id = Gen_poly_type();
-  _lower_ctx->Set_poly_type_id(poly_type_id);
+  // Check if CIPHERTEXT fields already exist with a POLY type
+  // If so, we should reuse that POLY type instead of creating a new one
+  TYPE_ID         existing_poly_type_id = air::base::TYPE_ID();
+  TYPE_ID         cipher_type_id        = _lower_ctx->Get_cipher_type_id();
+  RECORD_TYPE_PTR cipher_type =
+      _glob_scope->Type(cipher_type_id)->Cast_to_rec();
+
+  if (cipher_type->Is_complete() && cipher_type->Num_fld() > 0) {
+    // Fields already exist - check if they use a POLY type
+    FIELD_ITER fld_iter = cipher_type->Begin();
+    if (fld_iter != cipher_type->End()) {
+      FIELD_PTR first_fld         = *fld_iter;
+      TYPE_PTR  first_fld_type    = first_fld->Type();
+      TYPE_ID   first_fld_type_id = first_fld_type->Id();
+
+      // Check if the field type looks like a POLY type (has _ring_degree and
+      // _data fields)
+      if (first_fld_type->Is_record()) {
+        RECORD_TYPE_PTR fld_rec_type = first_fld_type->Cast_to_rec();
+        if (fld_rec_type->Is_complete() && fld_rec_type->Num_fld() >= 2) {
+          // This looks like a POLY type - use it instead of creating a new one
+          existing_poly_type_id = first_fld_type_id;
+        }
+      }
+    }
+  }
+
+  TYPE_ID poly_type_id;
+  if (!existing_poly_type_id.Is_null()) {
+    // Use existing POLY type
+    poly_type_id = existing_poly_type_id;
+  } else {
+    // Create new POLY type
+    poly_type_id = Gen_poly_type();
+  }
+  _lower_ctx->Set_rns_poly_type_id(poly_type_id);
 
   TYPE_ID cipher3_type_id = Gen_cipher3_type();
   _lower_ctx->Set_cipher3_type_id(cipher3_type_id);

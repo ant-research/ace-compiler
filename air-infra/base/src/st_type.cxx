@@ -6,10 +6,14 @@
 //
 //=============================================================================
 
+#include "air/base/st_type.h"
+
 #include <iostream>
 #include <sstream>
 
+#include "air/base/id_wrapper.h"
 #include "air/base/st.h"
+#include "air/util/debug.h"
 
 namespace air {
 namespace base {
@@ -76,6 +80,21 @@ void FIELD::Print(std::ostream& os, uint32_t indent) const {
 
 void FIELD::Print() const { Print(std::cout, 0); }
 
+bool FIELD::Is_same_fld(const FIELD_PTR o) const {
+  if (_glob != &o->Glob_scope()) return false;
+  if (_fld.Id() == o->Data().Id()) return true;
+
+  if (_fld->Alignment() != o->Alignment()) return false;
+  if (Bit_size() != o->Bit_size()) return false;
+  if (Is_bit_fld() != o->Is_bit_fld()) return false;
+  if (Is_bit_fld() && Bit_ofst() != o->Bit_ofst()) return false;
+  if (Ofst() != o->Ofst()) return false;
+  if (!Name()->Is_equal(o->Name())) return false;
+  if (!Spos().Is_same_pos(o->Spos())) return false;
+
+  if (!Type()->Is_compatible_type(o->Type())) return false;
+  return true;
+}
 //=============================================================================
 // class ARB member functions
 //=============================================================================
@@ -147,6 +166,8 @@ TYPE::Id() const {
 void TYPE::Set_name(STR_ID name) {
   _type->Set_name(name.Is_null() ? Glob_scope().Undefined_name_id() : name);
 }
+
+void TYPE::Set_name(CONST_STR_PTR name) { Set_name(name->Id()); }
 
 TYPE_PTR
 TYPE::Base_type() const {
@@ -376,6 +397,38 @@ std::string TYPE::To_str() const {
   return buf.str();
 }
 
+bool TYPE::Is_compatible_type(CONST_TYPE_PTR o) const {
+  if (&Glob_scope() != &o->Glob_scope()) return false;
+  if (!Id().Is_null() && Id() == o->Id()) return true;
+  if (Kind() != o->Kind()) return false;
+
+  switch (Kind()) {
+    case TYPE_TRAIT::PRIMITIVE:
+      return Cast_to_prim()->Is_compatible_type(o->Cast_to_prim());
+    case TYPE_TRAIT::ARRAY:
+      return Cast_to_arr()->Is_compatible_type(o->Cast_to_arr());
+    case TYPE_TRAIT::POINTER:
+      return Cast_to_ptr()->Is_compatible_type(o->Cast_to_ptr());
+    case TYPE_TRAIT::RECORD:
+      return Cast_to_rec()->Is_compatible_type(o->Cast_to_rec());
+    case TYPE_TRAIT::SIGNATURE:
+      AIR_ASSERT_MSG(false,
+                     "currently not support SIGNATURE compatibility check");
+      return false;
+    case TYPE_TRAIT::SUBTYPE:
+      AIR_ASSERT_MSG(false,
+                     "currently not support SUBTYPE compatibility check");
+      return false;
+    case TYPE_TRAIT::VA_LIST:
+      AIR_ASSERT_MSG(false,
+                     "currently not support VA_LIST compatibility check");
+      return false;
+    default:
+      AIR_ASSERT_MSG(false, "not supported type trait");
+      return false;
+  }
+}
+
 //=============================================================================
 // class PRIM_TYPE member functions
 //=============================================================================
@@ -542,6 +595,24 @@ void ARRAY_TYPE::Analyze() {
     _type->Set_alignment(Elem_type()->Alignment());
   }
   _type->Cast_type_data<TYPE_TRAIT::ARRAY>().Set_analyzed();
+}
+
+bool ARRAY_TYPE::Is_compatible_type(CONST_ARRAY_TYPE_PTR o) const {
+  // 1. check if dimensions are identical.
+  if (Dim() != o->Dim()) return false;
+
+  // 2. check if ARBs are identical across each dimension.
+  DIM_ITER dim_iter   = Begin_dim();
+  DIM_ITER o_dim_iter = o->Begin_dim();
+  for (; dim_iter != End_dim(); ++dim_iter, ++o_dim_iter) {
+    if (!(*dim_iter)->Is_same_arb(*o_dim_iter)) return false;
+  }
+  AIR_ASSERT(o_dim_iter == o->End_dim());
+
+  // 3. check if array element types are compatible
+  if (!Elem_type()->Is_compatible_type(o->Elem_type())) return false;
+
+  return true;
 }
 
 //=============================================================================
@@ -712,6 +783,23 @@ void RECORD_TYPE::Set_kind(RECORD_KIND kind) {
   _type->Cast_type_data<TYPE_TRAIT::RECORD>().Set_kind(kind);
 }
 
+bool RECORD_TYPE::Is_compatible_type(CONST_RECORD_TYPE_PTR o) const {
+  // 1. check if rec_kind, field cnt, and alignment are identical.
+  if (Rec_kind() != o->Rec_kind()) return false;
+  if (!Is_complete() || !o->Is_complete()) return false;
+  if (Num_fld() != o->Num_fld()) return false;
+  if (Alignment() != o->Alignment()) return false;
+
+  // 2. check if each field is identical.
+  FIELD_ITER fld_iter   = Begin();
+  FIELD_ITER o_fld_iter = o->Begin();
+  for (; fld_iter != End(); ++fld_iter, ++o_fld_iter) {
+    if (!(*fld_iter)->Is_same_fld(*o_fld_iter)) return false;
+  }
+  AIR_ASSERT(o_fld_iter == o->End());
+  return true;
+}
+
 //=============================================================================
 // class SIGNATURE_TYPE member functions
 //=============================================================================
@@ -771,6 +859,30 @@ SIGNATURE_TYPE::Last_param_id() const {
 
 void SIGNATURE_TYPE::Set_last_param_id(PARAM_ID id) {
   _type->Cast_type_data<TYPE_TRAIT::SIGNATURE>().Set_last_param_id(id);
+}
+
+PARAM_ID SIGNATURE_TYPE::Ret_param_id() const {
+  PARAM_ITER iter = Begin_param();
+  PARAM_ITER end  = End_param();
+  for (; iter != end; ++iter) {
+    if ((*iter)->Is_ret()) return (*iter)->Id();
+  }
+  return PARAM_ID();
+}
+
+PARAM_PTR SIGNATURE_TYPE::Ret_param() const {
+  PARAM_ID id = Ret_param_id();
+  if (id.Is_null())
+    return PARAM_PTR();
+  else
+    return Glob_scope().Param(id);
+}
+
+bool SIGNATURE_TYPE::Has_non_void_ret() const {
+  PARAM_ID id = Ret_param_id();
+  if (id.Is_null()) return false;
+  TYPE_PTR rtype = Glob_scope().Param(id)->Type();
+  return (!rtype->Is_prim() || !rtype->Cast_to_prim()->Is_void());
 }
 
 TYPE_PTR

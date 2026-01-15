@@ -13,19 +13,22 @@
 #include <vector>
 
 #include "air/base/container.h"
+#include "air/base/container_decl.h"
 #include "air/base/st.h"
+#include "air/base/st_decl.h"
 #include "air/base/transform_util.h"
 #include "fhe/core/lower_ctx.h"
+#include "fhe/core/rt_timing.h"
 #include "fhe/sihe/sihe_gen.h"
 #include "fhe/sihe/vector2sihe_ctx.h"
 #include "fhe/util/app_composite_poly.h"
+#include "nn/core/attr.h"
 #include "nn/core/invalid_handler.h"
 #include "nn/core/opcode.h"
 
 namespace fhe {
 namespace sihe {
 #define DEFAULT_APP_RELU_MUL_DEPTH 11
-
 //! Generator of approximate ReLU function.
 //! index of _precompute_item is degree of item which is precomputed to minimize
 //! multiplications in BSGS. index of _pow2_item is the power of item degree.
@@ -127,6 +130,15 @@ private:
   // REQUIRED UNDEFINED UNWANTED methods
   TENSOR2SIHE_IMPL(const TENSOR2SIHE_IMPL&);
   TENSOR2SIHE_IMPL& operator=(const TENSOR2SIHE_IMPL&);
+
+  //! @brief Return the existing function scope of approx_relu,
+  //! or create and return a new function scope.
+  FUNC_SCOPE* Get_approx_relu(VECTOR2SIHE_CTX& ctx);
+  //! @brief Generate a new call stmt of approx_relu
+  STMT_PTR Gen_call_approx_relu(VECTOR2SIHE_CTX& ctx, FUNC_SCOPE* approx_relu,
+                                PREG_PTR retv, PREG_PTR arg,
+                                PREG_PTR scaled_arg, uint32_t mask_len,
+                                SPOS spos);
 };
 
 template <typename RETV, typename VISITOR>
@@ -136,8 +148,17 @@ RETV TENSOR2SIHE_IMPL::Handle_relu(VISITOR* visitor, NODE_PTR node) {
   util.template Initialize<RETV>(visitor, node, v_op);
   NODE_PTR op0 = util.Child(0);
   AIR_ASSERT(op0->Opcode() == air::core::OPC_LD ||
-             op0->Opcode() == air::core::OPC_LDP);
-  AIR_ASSERT(node->Rtype()->Is_array());
+             op0->Opcode() == air::core::OPC_LDP ||
+             op0->Opcode() == air::core::OPC_ILD);
+  TYPE_PTR rtype = node->Rtype();
+  AIR_ASSERT(rtype->Is_array());
+
+  std::vector<int64_t> shape = rtype->Cast_to_arr()->Shape();
+  int64_t              slot  = 1;
+  for (const int64_t& elem : shape) {
+    AIR_ASSERT(elem > 0);
+    slot *= elem;
+  }
 
   VECTOR2SIHE_CTX&      ctx       = visitor->Context();
   air::base::CONTAINER* cntr      = ctx.Container();
@@ -152,9 +173,8 @@ RETV TENSOR2SIHE_IMPL::Handle_relu(VISITOR* visitor, NODE_PTR node) {
   // 1. bootstapping before relu: bs_tmp = SIHE.bootstrap(op0)
   PREG_PTR bs_tmp = func_scope->New_preg(cipher_type);
   {
-    TIMING_UTIL timing(ctx, node->Spos(), "FHE::bootstrap", true);
-    NODE_PTR    bs_node    = sihe_gen.Gen_bootstrap(op0, spos);
-    STMT_PTR    st_bs_node = cntr->New_stp(bs_node, bs_tmp, spos);
+    NODE_PTR bs_node    = sihe_gen.Gen_bootstrap(op0, slot, spos);
+    STMT_PTR st_bs_node = cntr->New_stp(bs_node, bs_tmp, spos);
     visitor->Context().Prepend(st_bs_node);
     if (ctx.Rt_validate()) {
       NODE_PTR bts_val = cntr->Clone_node_tree(op0);
@@ -170,61 +190,43 @@ RETV TENSOR2SIHE_IMPL::Handle_relu(VISITOR* visitor, NODE_PTR node) {
     }
   }
 
-  // 2. call App_relu: CORE.call App_relu(bs_tmp)
-  TIMING_UTIL          timing(ctx, node->Spos(), "FHE::relu", false);
-  PREG_PTR             relu_ret_var     = func_scope->New_preg(cipher_type);
-  core::FHE_FUNC_INFO& approx_relu_info = lower_ctx.Get_approx_relu_func_info();
-  FUNC_SCOPE* approx_relu = approx_relu_info.Get_func_scope(glob_scope);
-  if (approx_relu == nullptr) {
-    uint32_t relu_mul_depth = (ctx.Relu_mul_depth() > 0)
-                                  ? ctx.Relu_mul_depth()
-                                  : DEFAULT_APP_RELU_MUL_DEPTH;
-
-    util::POLY_BASIS_TYPE base_poly_type =
-        (ctx.Relu_base_type() != (uint32_t)(util::POLY_BASIS_TYPE::POWER))
-            ? util::POLY_BASIS_TYPE::CHEBYSHEV
-            : util::POLY_BASIS_TYPE::POWER;
-    APP_RELU_FUNC_GEN gen(glob_scope, &lower_ctx, relu_mul_depth,
-                          base_poly_type);
-    approx_relu = gen.Gen_app_relu();
-    approx_relu_info.Set_func_id(approx_relu->Owning_func_id());
-    approx_relu_info.Set_mul_depth(relu_mul_depth);
-  }
+  // 2. call App_relu: CORE.call App_relu(bs_tmp, bs_tmp/relu_value_range,
+  // mask_len)
+  // 2.1 Get function scope of approx_relu
+  const uint32_t* mask_len_attr = node->Attr<uint32_t>(nn::core::ATTR::MASK);
+  uint32_t        mask_len      = (mask_len_attr != nullptr)
+                                      ? *mask_len_attr
+                                      : rtype->Cast_to_arr()->Elem_count();
+  FUNC_SCOPE*     approx_relu   = Get_approx_relu(ctx);
   AIR_ASSERT(approx_relu != nullptr);
-  ENTRY_PTR entry_point = approx_relu->Owning_func()->Entry_point();
-  STMT_PTR  relu_call   = cntr->New_call(entry_point, relu_ret_var, 2, spos);
-  NODE_PTR  ld_formal0  = cntr->New_ldp(bs_tmp, spos);
-  relu_call->Node()->Set_child(0, ld_formal0);
 
-  NODE_PTR ld_formal1       = cntr->New_ldp(bs_tmp, spos);
-  double   relu_value_range = ctx.Relu_value_range(node->Attr("name"));
-  ctx.Trace(TRACE_RELU_VR, "Relu range for ", node->Attr("name"), " is [-",
+  // 2.2 Gen call stmt
+  PREG_PTR relu_ret_var     = func_scope->New_preg(cipher_type);
+  double   relu_value_range = ctx.Relu_vr(node->Attr("name"));
+  ctx.Trace(TD_RELU_VR, "Relu range for ", node->Attr("name"), " is [-",
             relu_value_range, ", ", relu_value_range, "]\n");
-
+  PREG_PTR scaled_opnd = bs_tmp;
   // Normalize the ReLU parameter to fit within the [-1,1], if it extends beyond
   // it.
-  if (relu_value_range > 1.0) {
+  if (relu_value_range > 1.) {
     TYPE_PTR     f32_type = glob_scope->Prim_type(PRIMITIVE_TYPE::FLOAT_32);
     CONSTANT_PTR vr_cst   = glob_scope->New_const(
         CONSTANT_KIND::FLOAT, f32_type, (long double)(1. / relu_value_range));
     NODE_PTR ld_cst   = cntr->New_ldc(vr_cst, spos);
-    NODE_PTR mul_node = sihe_gen.Gen_mul(ld_formal1, ld_cst, spos);
-    relu_call->Node()->Set_child(1, mul_node);
-  } else {
-    relu_call->Node()->Set_child(1, ld_formal1);
+    NODE_PTR ld_opnd0 = cntr->New_ldp(bs_tmp, spos);
+    NODE_PTR opnd1    = sihe_gen.Gen_mul(ld_opnd0, ld_cst, spos);
+    scaled_opnd       = func_scope->New_preg(cipher_type);
+    STMT_PTR stp      = cntr->New_stp(opnd1, scaled_opnd, spos);
+    visitor->Context().Prepend(stp);
   }
-
-  // set mul_depth attr for App_relu
-  const char* attr_name =
-      ctx.Lower_ctx().Attr_name(core::FHE_ATTR_KIND::MUL_DEPTH);
-  uint32_t attr_val = approx_relu_info.Get_mul_depth();
-  relu_call->Node()->Set_attr(attr_name, &attr_val, 1);
-
+  STMT_PTR relu_call = Gen_call_approx_relu(
+      ctx, approx_relu, relu_ret_var, bs_tmp, scaled_opnd, mask_len, spos);
   visitor->Context().Prepend(relu_call);
+
   NODE_PTR ret = cntr->New_ldp(relu_ret_var, spos);
   ret          = util.Finalize(visitor, ret, -5);
   if (ctx.Rt_validate()) {
-    NODE_PTR relu_val = cntr->Clone_node_tree(ld_formal0);
+    NODE_PTR relu_val = cntr->Clone_node_tree(cntr->New_ldp(bs_tmp, spos));
     NODE_PTR relu_msg =
         cntr->New_cust_node(fhe::sihe::OPC_RELU_MSG, node->Rtype(), spos);
     relu_msg->Set_child(0, relu_val);

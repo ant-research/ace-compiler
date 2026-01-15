@@ -76,7 +76,9 @@ public:
 
   void* Find(uint32_t base) const { return _core.Find(base); }
 
-  uint32_t Size() const { return _core.Size(); }
+  size_t Size() const { return _core.Size(); }
+
+  size_t Mem_size() const { return _core.Mem_size(); }
 
   void Adjust_addr(uint32_t base_id, size_t ofst) {
     _core.Adjust_addr(base_id, ofst);

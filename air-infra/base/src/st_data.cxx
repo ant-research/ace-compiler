@@ -325,7 +325,7 @@ CONSTANT_ID CONSTANT_DATA::Ptr_val() const {
   return POINTER_CONSTANT_DATA::Cast_to_me(*this)._ptr_val;
 }
 
-STR_ID CONSTANT_DATA::Str_array_val() const {
+LITERAL_ID CONSTANT_DATA::Str_array_val() const {
   AIR_ASSERT(Kind() == CONSTANT_KIND::STR_ARRAY);
   return STR_CONSTANT_DATA::Cast_to_me(*this)._str;
 }
@@ -474,7 +474,7 @@ void CONSTANT_DATA::Set_ptr_ofst_val(CONSTANT_ID base, int64_t ofst) {
   DERIVED_PTR_CONSTANT_DATA::Cast_to_me(*this)._base = base;
 }
 
-void CONSTANT_DATA::Set_str_array_val(STR_ID str) {
+void CONSTANT_DATA::Set_str_array_val(LITERAL_ID str) {
   AIR_ASSERT(Kind() == CONSTANT_KIND::STR_ARRAY);
   STR_CONSTANT_DATA::Cast_to_me(*this)._str = str;
 }

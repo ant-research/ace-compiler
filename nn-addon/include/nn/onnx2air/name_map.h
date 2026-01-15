@@ -10,7 +10,6 @@
 #define NAME_MAP_H
 
 #include "nn/onnx2air/onnx2air_decl.h"
-#include "onnx.pb.h"
 
 namespace nn {
 namespace onnx2air {

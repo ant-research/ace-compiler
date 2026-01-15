@@ -64,8 +64,8 @@ protected:
 
   typedef PRIM_ID_ITER ITER_TYPE;
 
-  ITER_TYPE   _cur;
   SCOPE_BASE* _scope;
+  ITER_TYPE   _cur;
 };
 
 template <class V, class B, class S>
@@ -165,8 +165,8 @@ protected:
     if (!aux) _tab = 0;
   }
 
-  AUX_DATA_PTR _aux;
   AUX_TAB*     _tab;
+  AUX_DATA_PTR _aux;
 };
 
 class PARAM_ITER {
@@ -187,8 +187,26 @@ protected:
 
   bool Is_end() const { return _cur.Is_null(); }
 
-  PARAM_ID    _cur;
   GLOB_SCOPE* _glob;
+  PARAM_ID    _cur;
+};
+
+class LITERAL_ITER {
+public:
+  LITERAL_ITER() : _scope(0), _end(true) {}
+  LITERAL_ITER(const GLOB_SCOPE& glob);
+
+  LITERAL_ITER& operator++();
+  LITERAL_PTR   operator*() const;
+  bool          operator==(const LITERAL_ITER&) const;
+  bool operator!=(const LITERAL_ITER& iter) const { return !operator==(iter); }
+
+protected:
+  typedef PRIM_ID_ITER ITER_TYPE;
+
+  const GLOB_SCOPE* _scope;
+  ITER_TYPE         _cur;
+  bool              _end;
 };
 
 class STR_ITER {
@@ -293,10 +311,7 @@ private:
   ATTR_PTR _cur;
 };
 
-/**
- * @brief ARB_TAB entry iterator
- *
- */
+//! ARB_TAB entry iterator
 class ARB_ITER {
 public:
   ARB_ITER() : _scope(0), _end(true) {}
@@ -315,10 +330,7 @@ protected:
   bool              _end;
 };
 
-/**
- * @brief ARRAY_TYPE demension iterator
- *
- */
+//! ARRAY_TYPE demension iterator
 class DIM_ITER {
   friend class ARRAY_TYPE;
 
@@ -380,8 +392,8 @@ private:
   bool Is_end() const { return _scope == 0; }
 
   FUNC_SCOPE* _prev;
-  FUNC_ITER   _cur;
   GLOB_SCOPE* _scope;
+  FUNC_ITER   _cur;
 };
 
 }  // namespace base

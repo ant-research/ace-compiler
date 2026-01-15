@@ -12,6 +12,7 @@
 #include "common/error.h"
 #include "common/io_api.h"
 #include "common/rt_api.h"
+#include "common/rtlib_timing.h"
 #include "rt_openfhe/openfhe_api.h"
 
 class OPENFHE_CONTEXT {
@@ -62,9 +63,11 @@ public:
     IS_TRUE(data != nullptr, "not find data");
     Plaintext pt;
     _ctx->Decrypt(_kp.secretKey, *data, &pt);
-    std::vector<double>* vec = new std::vector<double>;
-    *vec                     = pt->GetRealPackedValue();
-    return vec->data();
+    std::vector<double> vec;
+    vec         = pt->GetRealPackedValue();
+    double* msg = (double*)malloc(sizeof(double) * vec.size());
+    memcpy(msg, vec.data(), sizeof(double) * vec.size());
+    return msg;
   }
 
   void Encode_float(Plaintext* pt, float* input, size_t len, uint32_t sc_degree,
@@ -84,24 +87,59 @@ public:
   }
 
 public:
-  void Add(Ciphertext* op1, Ciphertext* op2, Ciphertext* res) {
-    *res = _ctx->EvalAdd(*op1, *op2);
+  void Add(const Ciphertext* op1, const Ciphertext* op2, Ciphertext* res) {
+    if (res == op1) {
+      _ctx->EvalAddInPlace(*res, *op2);
+    } else if (res == op2) {
+      _ctx->EvalAddInPlace(*res, *op1);
+    } else {
+      *res = _ctx->EvalAdd(*op1, *op2);
+    }
   }
 
-  void Add(Ciphertext* op1, Plaintext* op2, Ciphertext* res) {
-    *res = _ctx->EvalAdd(*op1, *op2);
+  void Add(const Ciphertext* op1, const Plaintext* op2, Ciphertext* res) {
+    Plaintext op2_copy = *op2;
+    if (res == op1) {
+      _ctx->EvalAddInPlace(op2_copy, *res);
+    } else {
+      *res = _ctx->EvalAdd(*op1, op2_copy);
+    }
   }
 
-  void Mul(Ciphertext* op1, Ciphertext* op2, Ciphertext* res) {
+  void Mul(const Ciphertext* op1, const Ciphertext* op2, Ciphertext* res) {
+    *res = _ctx->EvalMultNoRelin(*op1, *op2);
+  }
+
+  void Mul(const Ciphertext* op1, const Plaintext* op2, Ciphertext* res) {
     *res = _ctx->EvalMult(*op1, *op2);
   }
 
-  void Mul(Ciphertext* op1, Plaintext* op2, Ciphertext* res) {
-    *res = _ctx->EvalMult(*op1, *op2);
-  }
-
-  void Rotate(Ciphertext* op1, int step, Ciphertext* res) {
+  void Rotate(const Ciphertext* op1, int step, Ciphertext* res) {
     *res = _ctx->EvalRotate(*op1, step);
+  }
+
+  void Rescale(const Ciphertext* op1, Ciphertext* res) {
+    if (op1 == res) {
+      _ctx->RescaleInPlace(*res);
+    } else {
+      *res = _ctx->Rescale(*op1);
+    }
+  }
+
+  void Mod_switch(const Ciphertext* op1, Ciphertext* res) {
+    if (op1 == res) {
+      _ctx->LevelReduceInPlace(*res, nullptr);
+    } else {
+      *res = _ctx->LevelReduce(*op1, nullptr);
+    }
+  }
+
+  void Relin(const Ciphertext* op1, Ciphertext* res) {
+    if (op1 == res) {
+      _ctx->RelinearizeInPlace(*res);
+    } else {
+      *res = _ctx->Relinearize(*op1);
+    }
   }
 
 private:
@@ -137,7 +175,21 @@ OPENFHE_CONTEXT::OPENFHE_CONTEXT() {
 
   uint32_t                degree = prog_param->_poly_degree;
   lbcrypto::SecurityLevel sec    = lbcrypto::SecurityLevel::HEStd_128_classic;
-  if (degree < 4096) {
+  switch (prog_param->_sec_level) {
+    case 128:
+      sec = lbcrypto::SecurityLevel::HEStd_128_classic;
+      break;
+    case 192:
+      sec = lbcrypto::SecurityLevel::HEStd_192_classic;
+      break;
+    case 256:
+      sec = lbcrypto::SecurityLevel::HEStd_256_classic;
+      break;
+    default:
+      sec = lbcrypto::SecurityLevel::HEStd_NotSet;
+      break;
+  }
+  if (degree < 4096 && sec != lbcrypto::SecurityLevel::HEStd_NotSet) {
     DEV_WARN("WARNING: degree %d too small, reset security level to none\n",
              degree);
     sec = lbcrypto::SecurityLevel::HEStd_NotSet;
@@ -164,6 +216,7 @@ OPENFHE_CONTEXT::~OPENFHE_CONTEXT() {}
 
 // Vendor-specific RT API
 void Prepare_context() {
+  Init_rtlib_timing();
   Io_init();
   OPENFHE_CONTEXT::Init_context();
 }
@@ -175,6 +228,10 @@ void Finalize_context() {
 
 void Prepare_input(TENSOR* input, const char* name) {
   OPENFHE_CONTEXT::Context()->Prepare_input(input, name);
+}
+
+void Prepare_input_dup(TENSOR* input, const char* name) {
+    OPENFHE_CONTEXT::Context()->Prepare_input(input, name);
 }
 
 double* Handle_output(const char* name) {
@@ -190,8 +247,8 @@ CIPHERTEXT Openfhe_get_input_data(const char* name, size_t idx) {
   return OPENFHE_CONTEXT::Context()->Get_input_data(name, idx);
 }
 
-void Openfhe_encode_from_float(PLAIN pt, float* input, size_t len,
-                               uint32_t sc_degree, uint32_t level) {
+void Openfhe_encode_float(PLAIN pt, float* input, size_t len,
+                          uint32_t sc_degree, uint32_t level) {
   OPENFHE_CONTEXT::Context()->Encode_float(pt, input, len, sc_degree, level);
 }
 
@@ -221,6 +278,18 @@ void Openfhe_rotate(CIPHER res, CIPHER op, int step) {
   OPENFHE_CONTEXT::Context()->Rotate(op, step, res);
 }
 
+void Openfhe_rescale(CIPHER res, CIPHER op) {
+  OPENFHE_CONTEXT::Context()->Rescale(op, res);
+}
+
+void Openfhe_mod_switch(CIPHER res, CIPHER op) {
+  OPENFHE_CONTEXT::Context()->Mod_switch(op, res);
+}
+
+void Openfhe_relin(CIPHER res, CIPHER3 op) {
+  OPENFHE_CONTEXT::Context()->Relin(op, res);
+}
+
 void Openfhe_copy(CIPHER res, CIPHER op) { *res = *op; }
 
 void Openfhe_zero(CIPHER res) { res->reset(); }
@@ -244,4 +313,34 @@ void Dump_plain(PLAIN pt, size_t start, size_t len) {
     std::cout << vec[i] << " ";
   }
   std::cout << std::endl;
+}
+
+void Dump_cipher_msg(const char* name, CIPHER ct, uint32_t len) {
+  std::cout << "[" << name << "]: ";
+  Dump_ciph(ct, 0, len);
+}
+
+void Dump_plain_msg(const char* name, PLAIN pt, uint32_t len) {
+  std::cout << "[" << name << "]: ";
+  Dump_plain(pt, 0, len);
+}
+
+double* Get_msg(CIPHER ct) {
+  std::vector<double> vec;
+  OPENFHE_CONTEXT::Context()->Decrypt(ct, vec);
+  double* msg = (double*)malloc(sizeof(double) * vec.size());
+  memcpy(msg, vec.data(), sizeof(double) * vec.size());
+  return msg;
+}
+
+double* Get_msg_from_plain(PLAIN pt) {
+  std::vector<double> vec;
+  OPENFHE_CONTEXT::Context()->Decode(pt, vec);
+  double* msg = (double*)malloc(sizeof(double) * vec.size());
+  memcpy(msg, vec.data(), sizeof(double) * vec.size());
+  return msg;
+}
+
+bool Within_value_range(CIPHER ciph, double* msg, uint32_t len) {
+  FMT_ASSERT(false, "TODO: not implemented in openfhe");
 }

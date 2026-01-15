@@ -11,6 +11,9 @@
 
 #include <stddef.h>
 
+#include <ostream>
+#include <string>
+
 #include "air/util/debug.h"
 
 namespace air {
@@ -21,7 +24,7 @@ class SPOS {
 public:
   SPOS()
       : _file(0), _line(0), _col(0), _count(0), _stmt_begin(0), _bb_begin(0) {}
-  SPOS(uint32_t f, uint32_t line, uint32_t col, uint32_t count) {
+  SPOS(uint64_t f, uint64_t line, uint64_t col, uint64_t count) {
     Set_file(f);
     Set_line(line);
     Set_col(col);
@@ -29,41 +32,59 @@ public:
     _stmt_begin = 0;
     _bb_begin   = 0;
   }
+  SPOS(const SPOS& o) {
+    Set_file(o.File());
+    Set_line(o.Line());
+    Set_col(o.Col());
+    Set_count(o.Count());
+    _stmt_begin = o._stmt_begin;
+    _bb_begin   = o._bb_begin;
+  }
 
-  uint32_t File() const { return _file; }
-  uint32_t Line() const { return _line; }
-  uint32_t Col() const { return _col; }
-  uint32_t Count() const { return _count; }
+  uint64_t File() const { return _file; }
+  uint64_t Line() const { return _line; }
+  uint64_t Col() const { return _col; }
+  uint64_t Count() const { return _count; }
 
   bool Is_stmt_beg() const { return _stmt_begin; }
   bool Is_bb_beg() const { return _bb_begin; }
 
-  void Set_file(uint32_t f) {
+  void Set_file(uint64_t f) {
     AIR_ASSERT(f <= UINT16_MAX);
     _file = f;
   }
-  void Set_line(uint32_t l) {
+  void Set_line(uint64_t l) {
     AIR_ASSERT(l <= 0xFFFFFFU);
     _line = l;
   }
-  void Set_col(uint32_t c) {
+  void Set_col(uint64_t c) {
     AIR_ASSERT(c <= 0xFFFU);
     _col = c;
   }
-  void Set_count(uint32_t c) {
+  void Set_count(uint64_t c) {
     AIR_ASSERT(c <= 0x3FFU);
     _count = c;
   }
   void Set_stmt_beg(bool s) { _stmt_begin = s; }
   void Set_bb_beg(bool b) { _bb_begin = b; }
 
+  void        Print(std::ostream& os, uint32_t indent = 0) const;
+  void        Print() const;
+  std::string To_str() const;
+
+  bool Is_same_pos(const SPOS& o) {
+    return File() == o.File() && Line() == o.Line() && Col() == o.Col() &&
+           Count() == o.Count() && Is_stmt_beg() == o.Is_stmt_beg() &&
+           Is_bb_beg() == o.Is_bb_beg();
+  }
+
 private:
-  uint32_t _file : 16;
-  uint32_t _line : 24;
-  uint32_t _col : 12;
-  uint32_t _count : 10;
-  uint32_t _stmt_begin : 1;
-  uint32_t _bb_begin : 1;
+  uint64_t _file : 16;
+  uint64_t _line : 24;
+  uint64_t _col : 12;
+  uint64_t _count : 10;
+  uint64_t _stmt_begin : 1;
+  uint64_t _bb_begin : 1;
 };
 
 }  // namespace base

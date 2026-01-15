@@ -52,19 +52,22 @@ void Test_build_ssa() {
   // i < c
   NODE_PTR lod_i = cntr->New_ld(i_var, spos);
   NODE_PTR lod_c = cntr->New_ld(c_var, spos);
-  NODE_PTR comp  = cntr->New_bin_arith(air::core::OPC_LT, lod_i, lod_c, spos);
+  NODE_PTR comp =
+      cntr->New_bin_arith(air::core::OPC_LT, sint32, lod_i, lod_c, spos);
   // i+1
-  NODE_PTR one  = cntr->New_intconst(sint32, 1, spos);
-  NODE_PTR incr = cntr->New_bin_arith(air::core::OPC_ADD, lod_i, one, spos);
+  NODE_PTR one = cntr->New_intconst(sint32, 1, spos);
+  NODE_PTR incr =
+      cntr->New_bin_arith(air::core::OPC_ADD, sint32, lod_i, one, spos);
   // body
   NODE_PTR  body = cntr->New_stmt_block(spos);
   STMT_LIST body_list(body);
   NODE_PTR  lod_x;
 
   // x < 10
-  lod_x             = cntr->New_ld(x_var, spos);
-  NODE_PTR ten      = cntr->New_intconst(sint32, 10, spos);
-  NODE_PTR if_cond  = cntr->New_bin_arith(air::core::OPC_LT, lod_x, ten, spos);
+  lod_x        = cntr->New_ld(x_var, spos);
+  NODE_PTR ten = cntr->New_intconst(sint32, 10, spos);
+  NODE_PTR if_cond =
+      cntr->New_bin_arith(air::core::OPC_LT, sint32, lod_x, ten, spos);
   NODE_PTR then_blk = cntr->New_stmt_block(spos);
   NODE_PTR else_blk = cntr->New_stmt_block(spos);
   STMT_PTR if_stmt  = cntr->New_if_then_else(if_cond, then_blk, else_blk, spos);
@@ -78,7 +81,7 @@ void Test_build_ssa() {
   NODE_PTR lod_a = cntr->New_ld(a_var, spos);
   NODE_PTR lod_b = cntr->New_ld(b_var, spos);
   NODE_PTR add_a_b =
-      cntr->New_bin_arith(air::core::OPC_ADD, lod_a, lod_b, spos);
+      cntr->New_bin_arith(air::core::OPC_ADD, sint32, lod_a, lod_b, spos);
   STMT_PTR st_x = cntr->New_st(add_a_b, x_var, spos);
   body_list.Append(st_x);
   // for (i=0; i < c; ++i)

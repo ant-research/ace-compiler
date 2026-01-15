@@ -16,8 +16,8 @@ using namespace air::base;
 
 bool Register_ckks_domain() {
   static const struct OPR_INFO ckks_opr_info[] = {
-#define CKKS_OPCODE(NAME, name, cat, kid_num, fld_num, prop) \
-  {#name, (cat), kid_num, fld_num, (prop)},
+#define CKKS_OPCODE(NAME, name, kid_num, fld_num, prop) \
+  {#name, kid_num, fld_num, (prop)},
 #include "fhe/ckks/opcode_def.inc"
   };
 

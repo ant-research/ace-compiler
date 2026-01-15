@@ -18,7 +18,7 @@
 extern "C" {
 #endif
 
-//! @brief tensor data structure
+//! @brief Tensor data structure
 typedef struct {
   SHAPE  _shape;   //!< Shape of the tensor
   double _vals[];  //!< Elements of the tensor
@@ -34,6 +34,8 @@ typedef struct {
 #define TENSOR_ELEM(T, n, c, h, w) \
   T->_vals[w + TENSOR_W(T) * (h + TENSOR_H(T) * (c + TENSOR_C(T) * n))]
 
+#define TENSOR_VAL(T, idx) T->_vals[idx]
+
 #define FOR_ALL_TENSOR_ELEM(T, n, c, h, w)     \
   for (size_t n = 0; n < TENSOR_N(T); n++)     \
     for (size_t c = 0; c < TENSOR_C(T); c++)   \
@@ -45,19 +47,19 @@ static inline float* Slice(float* vec, size_t row_idx, size_t col) {
   return vec + row_idx * col;
 }
 
-//! @brief allocate tensor (NCHW)
+//! @brief Allocate tensor (NCHW)
 TENSOR* Alloc_tensor(size_t n, size_t c, size_t h, size_t w, const double* val);
 
-//! @brief free tensor
+//! @brief Free tensor
 void Free_tensor(TENSOR* tensor);
 
-//! @brief check tensor t1 & t2 match
+//! @brief Check tensor t1 & t2 match
 bool Is_tensor_match(TENSOR* t1, TENSOR* t2);
 
-//! @brief add two tensor
+//! @brief Add two tensor
 TENSOR* Add_tensor(TENSOR* t1, TENSOR* t2);
 
-//! @brief print tensor
+//! @brief Print tensor
 void Print_tensor(FILE* fp, TENSOR* tensor);
 
 #ifdef __cplusplus

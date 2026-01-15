@@ -8,13 +8,12 @@ This project contains the source code of air-infra.
 - cmake :       [cmake files]
 - devtools :    [development tools]
 - include :     [public header files]
-- third-party : [third party lib]
 - benchmark :   [E2E benchmarks]
 - test :        [E2E tests]
 
 ## Setup
 
-See the [Getting Started page](.aci/doc/SETUP.md) for instructions for installing required Host dependencies and how to checkout air-infra (this project).
+See the [Getting Started page](doc/SETUP.md) for instructions for installing required Host dependencies and how to checkout air-infra (this project).
 
 ## Build
 

@@ -17,8 +17,8 @@ namespace core {
 
 // Operator info for all operators in core
 static const OPR_INFO Opr_info[] = {
-#define DEF_OPCODE(NAME, name, cat, kid_num, fld_num, prop) \
-  OPCODE_META_GEN(NAME, name, cat, kid_num, fld_num, prop)
+#define DEF_OPCODE(NAME, name, kid_num, fld_num, prop) \
+  OPCODE_META_GEN(NAME, name, kid_num, fld_num, prop)
 #include "air/core/opcode_def.inc"
 #undef DEF_OPCODE
 };

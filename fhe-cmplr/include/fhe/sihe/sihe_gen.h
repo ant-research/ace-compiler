@@ -10,6 +10,7 @@
 #define FHE_CORE_SIHE_GEN_H
 
 #include "air/base/container.h"
+#include "air/base/container_decl.h"
 #include "air/base/st.h"
 #include "fhe/core/lower_ctx.h"
 #include "fhe/sihe/config.h"
@@ -41,7 +42,10 @@ public:
   NODE_PTR Gen_mul(NODE_PTR child0, NODE_PTR child1, const SPOS& spos);
   NODE_PTR Gen_sub(NODE_PTR child0, NODE_PTR child1, const SPOS& spos);
   NODE_PTR Gen_encode(NODE_PTR child, TYPE_PTR plain_type, const SPOS& spos);
-  NODE_PTR Gen_bootstrap(NODE_PTR child, const SPOS& spos);
+  //! @brief Generate encode node for mask operation.
+  NODE_PTR Gen_encode_mask(TYPE_PTR plain_type, double val, NODE_PTR len,
+                           const SPOS& spos);
+  NODE_PTR Gen_bootstrap(NODE_PTR child, int64_t slot, const SPOS& spos);
   void     Register_sihe_types();
 
 private:

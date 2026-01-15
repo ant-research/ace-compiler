@@ -1,3 +1,10 @@
+#=============================================================================
+#
+# Copyright (c) Ant Group Co., Ltd
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+#
+#=============================================================================
+
 file (GLOB_RECURSE AIRBASE_SRC_FILES CONFIGURE_DEPENDS src/*.cxx)
 
 set (AIRBASE_INCLUDE_DIRS "")
@@ -7,7 +14,7 @@ include_directories (${AIRBASE_INCLUDE_DIRS})
 set (AIRBASE_INCLUDE_DIRS "${AIRBASE_INCLUDE_DIRS}" CACHE INTERNAL "")
 
 add_library (airbase_obj OBJECT ${AIRBASE_SRC_FILES})
-
+add_dependencies (airbase_obj air_depend)
 set_property (TARGET airbase_obj PROPERTY POSITION_INDEPENDENT_CODE 1)
 
 if (BUILD_STATIC)
@@ -24,59 +31,14 @@ if (BUILD_STATIC)
 	add_dependencies (airbase_all AIRutil)
 endif()
 
-set (AIRBASE_UTAPP "")
-if (BUILD_UNITTEST)
-	file (GLOB AIRBASE_UNITTEST_SRC_FILES CONFIGURE_DEPENDS unittest/*.cxx)
-	set (AIRBASE_UNITTEST_SRC_FILES ${AIRBASE_UNITTEST_SRC_FILES})
-	add_executable (ut_airbase ${AIRBASE_UNITTEST_SRC_FILES} ${UNITTESTMAIN})
-	set_property (TARGET ut_airbase PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/unittest)
-	target_link_libraries (ut_airbase ${AIR_UTLIBS})
-	set (AIRBASE_UTAPP ${AIRBASE_UTAPP} ut_airbase)
-
-	add_dependencies (airbase_all ut_airbase)
-
-	add_custom_command (OUTPUT run_airbase_utapps WORKING_DIRECTORY ${CMAKE_BINARY_DIR} COMMAND ${CMAKE_BINARY_DIR}/unittest/ut_airbase)
-	add_custom_target (test_airbase_ut DEPENDS ut_airbase run_airbase_utapps)
-	add_test( NAME ut_airbase COMMAND ${CMAKE_BINARY_DIR}/unittest/ut_airbase)
-endif()
-
-set (AIRBASE_TESTAPP "")
 if (AIR_BUILD_TEST)
-	file (GLOB AIRBASE_TESTAPP_SRC_FILES CONFIGURE_DEPENDS test/*.cxx)
-	foreach (app ${AIRBASE_TESTAPP_SRC_FILES})
-		get_filename_component (exe ${app} NAME_WE)
-		add_executable (${exe} ${app})
-		set_property (TARGET ${exe} PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test)
-		set (AIRBASE_TESTAPP ${AIRBASE_TESTAPP} ${exe})
-		target_link_libraries (${exe} ${AIR_LIBS})
-		add_test( NAME ${exe} COMMAND ${CMAKE_BINARY_DIR}/test/${exe})
-	endforeach ()
-
-	add_custom_target (airbase_test)
-	add_dependencies (airbase_test ${AIRBASE_TESTAPP})
-	add_dependencies (airbase_all airbase_test)
+	build_app_test (AIR_INSTALL_APP "${AIR_LIBS}")
 endif()
 
-set (AIRBASE_EGAPP "")
 if (AIR_BUILD_EXAMPLE)
-	file (GLOB AIRBASE_EXAMPLE_SRC_FILES CONFIGURE_DEPENDS example/*.cxx)
-	foreach (app ${AIRBASE_EXAMPLE_SRC_FILES})
-		get_filename_component (exe ${app} NAME_WE)
-		add_executable (${exe} ${app})
-		set_property (TARGET ${exe} PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/example)
-		set (AIRBASE_EGAPP ${AIRBASE_EGAPP} ${exe})
-		target_link_libraries (${exe} ${AIR_LIBS})
-		add_test( NAME ${exe} COMMAND ${CMAKE_BINARY_DIR}/example/${exe})
-	endforeach ()
-
-	add_custom_target (airbase_example)
-	add_dependencies (airbase_example ${AIRBASE_EGAPP})
-	add_dependencies (airbase_all airbase_example)
+	build_app_example (AIR_INSTALL_APP "${AIR_LIBS}")
 endif ()
 
-if (AIR_INSTALL_APP)
-	install (TARGETS ${AIRBASE_UTAPP} RUNTIME DESTINATION unittest)
-	install (TARGETS ${AIRBASE_BMAPP} RUNTIME DESTINATION bench)
-	install (TARGETS ${AIRBASE_TESTAPP} RUNTIME DESTINATION test)
-	install (TARGETS ${AIRBASE_EGAPP} RUNTIME DESTINATION example)
-endif ()
+if (BUILD_UNITTEST)
+	build_app_unittest (AIR_INSTALL_APP "${AIR_UTLIBS}" "ut_airbase")
+endif()

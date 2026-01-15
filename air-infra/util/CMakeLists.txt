@@ -1,3 +1,10 @@
+#=============================================================================
+#
+# Copyright (c) Ant Group Co., Ltd
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+#
+#=============================================================================
+
 file (GLOB_RECURSE AIRUTIL_SRC_FILES CONFIGURE_DEPENDS src/*.cxx)
 
 set (AIRUTIL_INCLUDE_DIRS "")
@@ -6,14 +13,17 @@ list (APPEND AIRUTIL_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/include")
 include_directories (${AIRUTIL_INCLUDE_DIRS})
 set (AIRUTIL_INCLUDE_DIRS "${AIRUTIL_INCLUDE_DIRS}" CACHE INTERNAL "")
 
-add_library (airutil_obj OBJECT ${AIRUTIL_SRC_FILES})
+# build jsoncpp dependent libraries
+include(jsoncpp)
 
+add_library (airutil_obj OBJECT ${AIRUTIL_SRC_FILES})
+add_dependencies (airutil_obj air_depend)
 set_property (TARGET airutil_obj PROPERTY POSITION_INDEPENDENT_CODE 1)
 
 if (BUILD_STATIC)
-	add_library (AIRutil STATIC $<TARGET_OBJECTS:airutil_obj>)
+	add_library (AIRutil STATIC $<TARGET_OBJECTS:airutil_obj> $<TARGET_OBJECTS:jsoncpp_objects>)
 	set_property (TARGET AIRutil PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-	target_link_libraries (AIRutil jsoncpp_object)
+	target_include_directories(AIRutil PRIVATE ${JSONCPP_INCLUDE_DIRS})
 	install (TARGETS AIRutil EXPORT AIRTargets DESTINATION lib)
 endif ()
 
@@ -24,60 +34,14 @@ if (BUILD_STATIC)
 	add_dependencies (airutil_all AIRutil)
 endif()
 
-set (AIRUTIL_UTAPP "")
-if (BUILD_UNITTEST)
-	file (GLOB AIRUTIL_UNITTEST_SRC_FILES CONFIGURE_DEPENDS unittest/*.cxx)
-	set (AIRUTIL_UNITTEST_SRC_FILES ${AIRUTIL_UNITTEST_SRC_FILES})
-	add_executable (ut_airutil ${AIRUTIL_UNITTEST_SRC_FILES} ${UNITTESTMAIN})
-	set_property (TARGET ut_airutil PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/unittest)
-	target_link_libraries (ut_airutil ${AIR_UTLIBS})
-	set_target_properties (${exe} PROPERTIES COMPILE_FLAGS "-DNDEBUG")
-	set (AIRUTIL_UTAPP ${AIRUTIL_UTAPP} ut_airutil)
-
-	add_dependencies (airutil_all ut_airutil)
-
-	add_custom_command (OUTPUT run_airutil_utapps WORKING_DIRECTORY ${CMAKE_BINARY_DIR} COMMAND ${CMAKE_BINARY_DIR}/unittest/ut_airutil)
-	add_custom_target (test_airutil_ut DEPENDS ut_airutil run_airutil_utapps)
-	add_test( NAME ut_airutil COMMAND ${CMAKE_BINARY_DIR}/unittest/ut_airutil)
-endif()
-
-set (AIRUTIL_TESTAPP "")
 if (AIR_BUILD_TEST)
-	file (GLOB AIRUTIL_TESTAPP_SRC_FILES CONFIGURE_DEPENDS test/*.cxx)
-	foreach (app ${AIRUTIL_TESTAPP_SRC_FILES})
-		get_filename_component (exe ${app} NAME_WE)
-		add_executable (${exe} ${app})
-		set_property (TARGET ${exe} PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test)
-		set (AIRUTIL_TESTAPP ${AIRUTIL_TESTAPP} ${exe})
-		target_link_libraries (${exe} ${AIR_LIBS})
-		add_test( NAME ${exe} COMMAND ${CMAKE_BINARY_DIR}/test/${exe})
-	endforeach ()
-
-	add_custom_target (airutil_test)
-	add_dependencies (airutil_test ${AIRUTIL_TESTAPP})
-	add_dependencies (airutil_all airutil_test)
+	build_app_test (AIR_INSTALL_APP "${AIR_LIBS}")
 endif()
 
-set (AIRUTIL_EGAPP "")
 if (AIR_BUILD_EXAMPLE)
-	file (GLOB AIRUTIL_EXAMPLE_SRC_FILES CONFIGURE_DEPENDS example/*.cxx)
-	foreach (app ${AIRUTIL_EXAMPLE_SRC_FILES})
-		get_filename_component (exe ${app} NAME_WE)
-		add_executable (${exe} ${app})
-		set_property (TARGET ${exe} PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/example)
-		set (AIRUTIL_EGAPP ${AIRUTIL_EGAPP} ${exe})
-		target_link_libraries (${exe} ${AIR_LIBS})
-		add_test( NAME ${exe} COMMAND ${CMAKE_BINARY_DIR}/example/${exe})
-	endforeach ()
-
-	add_custom_target (airutil_example)
-	add_dependencies (airutil_example ${AIRUTIL_EGAPP})
-	add_dependencies (airutil_all airutil_example)
+	build_app_example (AIR_INSTALL_APP "${AIR_LIBS}")
 endif ()
 
-if (AIR_INSTALL_APP)
-	install (TARGETS ${AIRUTIL_UTAPP} RUNTIME DESTINATION unittest)
-	install (TARGETS ${AIRUTIL_BMAPP} RUNTIME DESTINATION bench)
-	install (TARGETS ${AIRUTIL_TESTAPP} RUNTIME DESTINATION test)
-	install (TARGETS ${AIRUTIL_EGAPP} RUNTIME DESTINATION example)
-endif ()
+if (BUILD_UNITTEST)
+	build_app_unittest (AIR_INSTALL_APP "${AIR_UTLIBS}" "ut_airutil")
+endif()

@@ -1,3 +1,10 @@
+#=============================================================================
+#
+# Copyright (c) Ant Group Co., Ltd
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+#
+#=============================================================================
+
 file (GLOB_RECURSE FHEUTIL_SRC_FILES CONFIGURE_DEPENDS src/*.cxx)
 
 set (FHEUTIL_INCLUDE_DIRS "")
@@ -7,7 +14,7 @@ include_directories (${FHEUTIL_INCLUDE_DIRS})
 set (FHEUTIL_INCLUDE_DIRS "${FHEUTIL_INCLUDE_DIRS}" CACHE INTERNAL "")
 
 add_library (fheutil_obj OBJECT ${FHEUTIL_SRC_FILES})
-
+add_dependencies(fheutil_obj fhe_depend)
 set_property (TARGET fheutil_obj PROPERTY POSITION_INDEPENDENT_CODE 1)
 
 if (BUILD_STATIC)
@@ -23,59 +30,14 @@ if (BUILD_STATIC)
 	add_dependencies (fheutil_all FHEutil)
 endif()
 
-set (FHEUTIL_UTAPP "")
-if (BUILD_UNITTEST)
-	file (GLOB FHEUTIL_UNITTEST_SRC_FILES CONFIGURE_DEPENDS unittest/*.cxx)
-	set (FHEUTIL_UNITTEST_SRC_FILES ${FHEUTIL_UNITTEST_SRC_FILES})
-	add_executable (ut_fheutil ${FHEUTIL_UNITTEST_SRC_FILES} ${UNITTESTMAIN})
-	set_property (TARGET ut_fheutil PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/unittest)
-	target_link_libraries (ut_fheutil ${FHE_UTLIBS})
-	set (FHEUTIL_UTAPP ${FHEUTIL_UTAPP} ut_fheutil)
-
-	add_dependencies (fheutil_all ut_fheutil)
-
-	add_custom_command (OUTPUT run_fheutil_utapp WORKING_DIRECTORY ${CMAKE_BINARY_DIR} COMMAND ${CMAKE_BINARY_DIR}/unittest/ut_fheutil)
-	add_custom_target (test_fheutil_ut DEPENDS ut_fheutil run_fheutil_utapp)
-	add_test( NAME ut_fheutil COMMAND ${CMAKE_BINARY_DIR}/unittest/ut_fheutil)
-endif()
-
-set (FHEUTIL_TESTAPP "")
 if (FHE_BUILD_TEST)
-	file (GLOB FHEUTIL_TESTAPP_SRC_FILES CONFIGURE_DEPENDS test/*.cxx)
-	foreach (app ${FHEUTIL_TESTAPP_SRC_FILES})
-		get_filename_component (exe ${app} NAME_WE)
-		add_executable (${exe} ${app})
-		set_property (TARGET ${exe} PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test)
-		set (FHEUTIL_TESTAPP ${FHEUTIL_TESTAPP} ${exe})
-		target_link_libraries (${exe} ${FHE_LIBS})
-		add_test( NAME ${exe} COMMAND ${CMAKE_BINARY_DIR}/test/${exe})
-	endforeach ()
+	build_app_test (FHE_INSTALL_APP "${FHE_LIBS}")
+endif ()
 
-	add_custom_target (fheutil_test)
-	add_dependencies (fheutil_test ${FHEUTIL_TESTAPP})
-	add_dependencies (fheutil_all fheutil_test)
-endif()
-
-set (FHEUTIL_EGAPP "")
 if (FHE_BUILD_EXAMPLE)
-	file (GLOB FHEUTIL_EXAMPLE_SRC_FILES CONFIGURE_DEPENDS example/*.cxx)
-	foreach (app ${FHEUTIL_EXAMPLE_SRC_FILES})
-		get_filename_component (exe ${app} NAME_WE)
-		add_executable (${exe} ${app})
-		set_property (TARGET ${exe} PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/example)
-		set (FHEUTIL_EGAPP ${FHEUTIL_EGAPP} ${exe})
-		target_link_libraries (${exe} ${FHE_LIBS})
-		add_test( NAME ${exe} COMMAND ${CMAKE_BINARY_DIR}/example/${exe})
-	endforeach ()
-
-	add_custom_target (fheutil_example)
-	add_dependencies (fheutil_example ${FHEUTIL_EGAPP})
-	add_dependencies (fheutil_all fheutil_example)
+	build_app_example (FHE_INSTALL_APP "${FHE_LIBS}")
 endif ()
 
-if (FHE_INSTALL_APP)
-	install (TARGETS ${FHEUTIL_UTAPP} RUNTIME DESTINATION unittest)
-	install (TARGETS ${FHEUTIL_BMAPP} RUNTIME DESTINATION bench)
-	install (TARGETS ${FHEUTIL_TESTAPP} RUNTIME DESTINATION test)
-	install (TARGETS ${FHEUTIL_EGAPP} RUNTIME DESTINATION example)
-endif ()
+if (BUILD_UNITTEST)
+	build_app_unittest (FHE_INSTALL_APP "${FHE_UTLIBS}" "ut_fheutil")
+endif()

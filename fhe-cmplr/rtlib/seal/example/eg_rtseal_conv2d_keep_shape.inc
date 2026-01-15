@@ -23,12 +23,12 @@ bool Main_graph() {
   int32_t _preg_268435457;
   int32_t _preg_268435458;
   int32_t _preg_268435459;
-  uint64_t _preg_268435460;
-  uint64_t _preg_268435461;
+  SCALE_T _preg_268435460;
+  LEVEL_T _preg_268435461;
   PLAINTEXT _preg_268435462;
   CIPHERTEXT _preg_268435463;
-  uint64_t _preg_268435464;
-  uint64_t _preg_268435465;
+  SCALE_T _preg_268435464;
+  LEVEL_T _preg_268435465;
   PLAINTEXT _preg_268435466;
   input = Get_input_data("input", 0);
   Zero_ciph(&tmp_result_n1);
@@ -42,7 +42,7 @@ bool Main_graph() {
       _preg_268435459 = index_khw_n1 + _preg_268435458;
       _preg_268435460 = Sc_degree(&_ckks_gen_tmp_39);
       _preg_268435461 = Level(&_ckks_gen_tmp_39);
-      Encode_plain_from_float(&_preg_268435462, Slice(_cst_4, _preg_268435459, 25), 25, _preg_268435460, _preg_268435461);
+      Encode_float(&_preg_268435462, Slice(_cst_4, _preg_268435459, 25), 25, _preg_268435460, _preg_268435461);
       Copy_ciph(&_preg_268435463, Mul_plain(&_preg_268435463, &_ckks_gen_tmp_39, &_preg_268435462));
       Add_ciph(&tmp_result_n1, &tmp_result_n1, &_preg_268435463);
     }
@@ -50,7 +50,7 @@ bool Main_graph() {
   }
   _preg_268435464 = Sc_degree(&tmp_result_n1);
   _preg_268435465 = Level(&tmp_result_n1);
-  Encode_plain_from_float(&_preg_268435466, _cst_5, 25, _preg_268435464, _preg_268435465);
+  Encode_float(&_preg_268435466, _cst_5, 25, _preg_268435464, _preg_268435465);
   Add_plain(&tmp_result_n1, &tmp_result_n1, &_preg_268435466);
   Copy_ciph(&output, &tmp_result_n1);
   Set_output_data("output", 0, &output);
@@ -62,8 +62,9 @@ int Get_input_count() {
 }
 
 DATA_SCHEME* Get_encode_scheme(int idx) {
+  static MAP_DESC desc_0[] = {{NORMAL, 0, 0, 0, 0}};
   static DATA_SCHEME scheme_0 = {
-    "input", {0, 0, 0, 0}, 1, {NORMAL, 0, 0, 0, 0}
+    "input", {0, 0, 0, 0}, 1, desc_0
   };
   static DATA_SCHEME* scheme[] = { &scheme_0 };
   return scheme[idx];
@@ -74,20 +75,23 @@ int Get_output_count() {
 }
 
 DATA_SCHEME* Get_decode_scheme(int idx) {
+  static MAP_DESC desc[] = {{NORMAL, 0, 0, 0, 0}};
   static DATA_SCHEME scheme = {
-    "output", {0, 0, 0, 0}, 1, {NORMAL, 0, 0, 0, 0}
+    "output", {0, 0, 0, 0}, 1, desc
   };
   return &scheme;
 }
 
 CKKS_PARAMS* Get_context_params() {
   static CKKS_PARAMS parm = {
-    LIB_SEAL, 1024, 0, 1, 33, 30, 2, 0, 11, 
+    LIB_SEAL, 1024, 0, 1, 2, 33, 30, 2, 0, 11,
     { -75, -6, -5, -4, -1, 0, 1, 4,
       5, 6, 25 }
   };
   return &parm;
 }
+
+bool Need_bts() { return false; }
 
 RT_DATA_INFO* Get_rt_data_info() {
   return NULL;

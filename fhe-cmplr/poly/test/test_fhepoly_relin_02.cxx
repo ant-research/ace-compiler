@@ -9,7 +9,8 @@
 #include <limits.h>
 
 #include "fhe/core/ctx_param_ana.h"
-#include "gen_ckks_ir.h"
+#include "fhe/poly/poly2c_driver.h"
+#include "fhe/test/gen_ckks_ir.h"
 #include "gen_expect_data.h"
 
 using namespace air::base;
@@ -27,19 +28,24 @@ int main(int argc, char** argv) {
   CKKS_IR_GEN          ir_gen(fhe_ctx);
   Create_ckks_ir(ir_gen);
 
-  CONTAINER* cntr = ir_gen.Container();
+  CONTAINER* cntr = ir_gen.Main_container();
 
-  fhe::poly::POLY_DRIVER poly_driver;
-  fhe::poly::POLY_CONFIG poly_config;
+  air::driver::DRIVER_CTX driver_ctx;
+  fhe::poly::POLY_DRIVER  poly_driver;
+  fhe::poly::POLY_CONFIG  poly_config;
+
+  poly_config.Pre_process_options();
   // do not inline rotate IR, generate into a new function
-  poly_config.Set_inline_relin(false);
+  poly_config._inline_relin = false;
 
-  GLOB_SCOPE* glob = poly_driver.Run(poly_config, cntr->Glob_scope(), fhe_ctx);
+  GLOB_SCOPE* glob =
+      poly_driver.Run(poly_config, cntr->Glob_scope(), fhe_ctx, &driver_ctx);
 
   std::ofstream            of("test_relin_02.inc");
   fhe::poly::POLY2C_CONFIG p2c_config;
   fhe::poly::POLY2C_DRIVER poly2c(of, fhe_ctx, p2c_config);
-  poly2c.Run(glob);
+  POLY2C_VISITOR           visitor(poly2c.Ctx());
+  poly2c.Run(glob, visitor);
   Gen_expected(of);
   std::cout << "Output: test_relin_02.inc" << std::endl;
   return 0;
@@ -47,7 +53,7 @@ int main(int argc, char** argv) {
 
 // output = relin(mul(input, input))
 void Create_ckks_ir(CKKS_IR_GEN& ir_gen) {
-  CONTAINER* cntr = ir_gen.Container();
+  CONTAINER* cntr = ir_gen.Main_container();
   STMT_LIST  sl   = cntr->Stmt_list();
   SPOS       spos = ir_gen.Spos();
 

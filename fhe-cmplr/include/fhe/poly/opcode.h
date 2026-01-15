@@ -24,8 +24,8 @@ static constexpr uint32_t POLYNOMIAL_DID = 5;
 // @brief Polynomial Operators
 enum OPCODE : uint32_t {
 // enum definition from opcode_def.inc
-#define DEF_OPCODE(NAME, name, cat, kid_num, fld_num, prop) \
-  OPCODE_ENUM_GEN(NAME, name, cat, kid_num, fld_num, prop)
+#define DEF_OPCODE(NAME, name, kid_num, fld_num, prop) \
+  OPCODE_ENUM_GEN(NAME, name, kid_num, fld_num, prop)
 #include "opcode_def.inc"
 #undef DEF_OPCODE
 
@@ -34,7 +34,7 @@ enum OPCODE : uint32_t {
 };
 
 //! @brief Polynomial opcodes
-#define DEF_OPCODE(NAME, name, cat, kid_num, fld_num, prop) \
+#define DEF_OPCODE(NAME, name, kid_num, fld_num, prop) \
   static constexpr air::base::OPCODE OPC_##NAME(POLYNOMIAL_DID, OPCODE::NAME);
 #include "opcode_def.inc"
 #undef DEF_OPCODE

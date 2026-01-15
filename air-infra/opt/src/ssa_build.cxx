@@ -20,8 +20,8 @@ namespace air {
 namespace opt {
 
 void SSA_BUILDER::Build_simple() {
-  Trace(TRACE_IR_BEFORE_SSA, "\nBefore SSA:\n");
-  Trace_obj(TRACE_IR_BEFORE_SSA, _cont);
+  Trace(TD_IR_BEFORE_SSA, "\nBefore SSA:\n");
+  Trace_obj(TD_IR_BEFORE_SSA, _cont);
 
   // step 1: build SSA symtab by traversing IR
   SIMPLE_BUILDER_CTX build_ctx(_cont);
@@ -32,14 +32,21 @@ void SSA_BUILDER::Build_simple() {
   air::base::NODE_PTR body = _scope->Container().Entry_node();
   symtab_trav.template Visit<void>(body);
 
-  // step 2: insert PHI for each def along the block hierarchy
+  // step 2: generate MU/CHI list
+  _cont->Set_state(SSA_CONTAINER::MU_CHI_GEN);
+  air::base::VISITOR<SIMPLE_BUILDER_CTX,
+                     air::core::HANDLER<SIMPLE_MU_CHI_HANDLER> >
+      mu_chi_trav(build_ctx);
+  mu_chi_trav.template Visit<void>(body);
+
+  // step 3: insert PHI for each def along the block hierarchy
   _cont->Set_state(SSA_CONTAINER::PHI_INSERT);
   build_ctx.Insert_phi();
 
-  Trace(TRACE_IR_AFTER_INSERT_PHI, "\nAfter phi insertion:\n");
-  Trace_obj(TRACE_IR_AFTER_INSERT_PHI, _cont);
+  Trace(TD_IR_AFTER_INSERT_PHI, "\nAfter phi insertion:\n");
+  Trace_obj(TD_IR_AFTER_INSERT_PHI, _cont);
 
-  // step 3: rename versions
+  // step 4: rename versions
   RENAME_CTX rename_ctx(_cont);
   _cont->Set_state(SSA_CONTAINER::RENAME);
   rename_ctx.Initialize(body->Id());
@@ -49,10 +56,10 @@ void SSA_BUILDER::Build_simple() {
   rename_ctx.Finalize(body->Id());
   _cont->Set_state(SSA_CONTAINER::SSA);
 
-  Trace(TRACE_IR_AFTER_SSA, "\nAfter renaming:\n");
-  Trace_obj(TRACE_IR_AFTER_SSA, _cont);
+  Trace(TD_IR_AFTER_SSA, "\nAfter renaming:\n");
+  Trace_obj(TD_IR_AFTER_SSA, _cont);
 
-  // step 4 (optional): verify SSA
+  // step 5 (optional): verify SSA
   SIMPLE_VERIFIER_CTX verify_ctx(_cont);
   air::base::VISITOR<SIMPLE_VERIFIER_CTX, air::core::HANDLER<RENAME_HANDLER> >
       verify_trav(verify_ctx);

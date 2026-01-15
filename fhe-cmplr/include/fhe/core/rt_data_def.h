@@ -33,6 +33,7 @@
 
 #define DATA_FILE_MAGIC     "!ANTFHE\0"
 #define DATA_FILE_PAGE_SIZE 4096
+#define DATA_FILE_READ_SIZE (1024 * 1024 * 1024)
 
 #ifdef __cplusplus
 // put into fhe::core namespace for C++ part
@@ -102,10 +103,12 @@ struct DATA_FILE_HDR {
 
 //! @brief lookup table entry in external data file. For both compiler and rt
 struct DATA_LUT_ENTRY {
-  char     _name[16];  //!< name of the message/plaintext
-  uint32_t _index;     //!< index of the message/plaintext
-  uint32_t _size;      //!< size of the data in bytes
-  uint64_t _ent_ofst;  //!< offset of the data in file
+  char     _name[16];       //!< name of the message/plaintext
+  uint32_t _index;          //!< index of the message/plaintext
+  uint32_t _size;           //!< size of the data in bytes
+  uint64_t _scale : 8;      //!< scale of the message/plaintext
+  uint64_t _level : 8;      //!< level of the message/plaintext
+  uint64_t _ent_ofst : 48;  //!< offset of the data in file
 };
 
 #ifdef __cplusplus

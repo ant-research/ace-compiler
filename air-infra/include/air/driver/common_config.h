@@ -9,6 +9,9 @@
 #ifndef AIR_UTIL_COMMON_CONFIG_H
 #define AIR_UTIL_COMMON_CONFIG_H
 
+#include <stdint.h>
+
+#include <cstdint>
 #include <ostream>
 
 namespace air {
@@ -32,10 +35,12 @@ public:
         _rt_timing(false),
         _rt_validate(false),
         _trace_stat(false),
+        _trace_mp(false),
         _trace_ir_before(false),
         _trace_ir_after(false),
         _trace_st_before(false),
         _trace_st_after(false),
+        _verify_ir(false),
         _trace_detail(0),
         _skip_before(-1),
         _skip_after(-1),
@@ -67,6 +72,9 @@ public:
   //   disabled
   bool Trace_stat() const { return _trace_stat; }
 
+  //! @brief Check if trace mempool after pass is enable or disabled
+  bool Trace_mp() const { return _trace_mp; }
+
   //! @brief Check if trace IR before pass is enabled or disabled
   bool Trace_ir_before() const { return _trace_ir_before; }
 
@@ -80,7 +88,7 @@ public:
   bool Trace_st_after() const { return _trace_st_after; }
 
   //! @brief Check if trace on given flag is enabled or disabled
-  bool Is_trace(int flag) const { return (_trace_detail & (1 << flag)) != 0; }
+  bool Is_trace(uint64_t flag) const { return (_trace_detail & flag) != 0; }
 
   //! @brief Check if units with given id is skipped or not
   bool Is_skipped(uint32_t id) const {
@@ -95,6 +103,9 @@ public:
   //! @brief Write ir to elf section
   std::string Write_ir() const { return _write_ir; }
 
+  //! @brief Verify ir
+  bool Verify_ir() const { return _verify_ir; }
+
   //! @brief Enable/disable the pass
   void Set_enable(bool ena) { _enable = ena; }
 
@@ -108,6 +119,7 @@ public:
   bool        _rt_timing;        //!< Runtime timing
   bool        _rt_validate;      //!< Runtime validate
   bool        _trace_stat;       //!< Trace resource statistics
+  bool        _trace_mp;         //!< Trace mempool after pass
   bool        _trace_ir_before;  //!< Trace IR before pass
   bool        _trace_ir_after;   //!< Trace IR after pass
   bool        _trace_st_before;  //!< Trace Symtab before pass
@@ -118,7 +130,8 @@ public:
   int64_t     _skip_equal;   //!< Skip units with same id as _skip_equal
   std::string _read_ir;      //!< Read IR from binary file before pass
   std::string _write_ir;     //!< Write IR to binary file after pass
-};                           // COMMON_CONFIG
+  bool        _verify_ir;    //!< Verify IR
+};  // COMMON_CONFIG
 
 //! @brief Macro to define API to access common config
 #define DECLARE_COMMON_CONFIG_ACCESS_API(cfg)                              \
@@ -127,128 +140,110 @@ public:
   bool        Rt_timing() const { return cfg.Rt_timing(); }                \
   bool        Rt_validate() const { return cfg.Rt_validate(); }            \
   bool        Trace_stat() const { return cfg.Trace_stat(); }              \
+  bool        Trace_mp() const { return cfg.Trace_mp(); }                  \
   bool        Trace_ir_before() const { return cfg.Trace_ir_before(); }    \
   bool        Trace_ir_after() const { return cfg.Trace_ir_after(); }      \
   bool        Trace_st_before() const { return cfg.Trace_st_before(); }    \
   bool        Trace_st_after() const { return cfg.Trace_st_after(); }      \
   bool        Is_trace(int flag) const { return cfg.Is_trace(flag); }      \
   bool        Is_skipped(uint32_t id) const { return cfg.Is_skipped(id); } \
+  bool        Verify_ir() const { return cfg.Verify_ir(); }                \
   std::string Read_ir() const { return cfg.Read_ir(); }                    \
   std::string Write_ir() const { return cfg.Write_ir(); }
 
 //! @brief Macro to append common config description so that
 //!  this can be easily added to pass's whole option description.
-#define DECLARE_COMMON_CONFIG(name, config)                            \
-  {"enable",          "e", "Enable the pass " #name, &config._enable,  \
-   air::util::K_NONE, 0,   air::util::V_NONE},                         \
-      {"show",                                                         \
-       "s",                                                            \
-       "Show the progress of " #name,                                  \
-       &config._show,                                                  \
-       air::util::K_NONE,                                              \
-       0,                                                              \
-       air::util::V_NONE},                                             \
-      {"help",                                                         \
-       "h",                                                            \
-       "Show the option detial of " #name,                             \
-       &config._help,                                                  \
-       air::util::K_NONE,                                              \
-       0,                                                              \
-       air::util::V_NONE},                                             \
-      {"rt_dump",                                                      \
-       "rtd",                                                          \
-       "Enable runtime dump in " #name,                                \
-       &config._rt_dump,                                               \
-       air::util::K_NONE,                                              \
-       0,                                                              \
-       air::util::V_NONE},                                             \
-      {"rt_timing",                                                    \
-       "rtt",                                                          \
-       "Enable runtime timing in " #name,                              \
-       &config._rt_timing,                                             \
-       air::util::K_NONE,                                              \
-       0,                                                              \
-       air::util::V_NONE},                                             \
-      {"rt_validate",                                                  \
-       "rtv",                                                          \
-       "Enable runtime validation in " #name,                          \
-       &config._rt_validate,                                           \
-       air::util::K_NONE,                                              \
-       0,                                                              \
-       air::util::V_NONE},                                             \
-      {"read_ir",                                                      \
-       "b2ir",                                                         \
-       "Enable read ir from elf file before " #name,                   \
-       &config._read_ir,                                               \
-       air::util::K_STR,                                               \
-       0,                                                              \
-       air::util::V_EQUAL},                                            \
-      {"write_ir",                                                     \
-       "ir2b",                                                         \
-       "Enable Write ir to elf file after " #name,                     \
-       &config._write_ir,                                              \
-       air::util::K_STR,                                               \
-       0,                                                              \
-       air::util::V_EQUAL},                                            \
-      {"trace_stat",                                                   \
-       "ts",                                                           \
-       "Enable trace resource statistics in " #name,                   \
-       &config._trace_stat,                                            \
-       air::util::K_NONE,                                              \
-       0,                                                              \
-       air::util::V_NONE},                                             \
-      {"trace_ir_before",                                              \
-       "tib",                                                          \
-       "Enable trace IR before " #name,                                \
-       &config._trace_ir_before,                                       \
-       air::util::K_NONE,                                              \
-       0,                                                              \
-       air::util::V_NONE},                                             \
-      {"trace_ir_after",                                               \
-       "tia",                                                          \
-       "Enable trace IR after " #name,                                 \
-       &config._trace_ir_after,                                        \
-       air::util::K_NONE,                                              \
-       0,                                                              \
-       air::util::V_NONE},                                             \
-      {"trace_st_before",                                              \
-       "tsb",                                                          \
-       "Enable trace Symtab before " #name,                            \
-       &config._trace_st_before,                                       \
-       air::util::K_NONE,                                              \
-       0,                                                              \
-       air::util::V_NONE},                                             \
-      {"trace_st_after",                                               \
-       "tsa",                                                          \
-       "Enable trace Symtab after " #name,                             \
-       &config._trace_st_after,                                        \
-       air::util::K_NONE,                                              \
-       0,                                                              \
-       air::util::V_NONE},                                             \
-      {"trace_detail",                                                 \
-       "td",                                                           \
-       "Enable trace details in " #name,                               \
-       &config._trace_detail,                                          \
-       air::util::K_INT64,                                             \
-       0,                                                              \
-       air::util::V_EQUAL},                                            \
-      {"skip_before",                                                  \
-       "",                                                             \
-       "Skip item before given id in " #name,                          \
-       &config._skip_before,                                           \
-       air::util::K_INT64,                                             \
-       0,                                                              \
-       air::util::V_EQUAL},                                            \
-      {"skip_after",                                                   \
-       "",                                                             \
-       "Skip processing after given id in " #name,                     \
-       &config._skip_after,                                            \
-       air::util::K_INT64,                                             \
-       0,                                                              \
-       air::util::V_EQUAL},                                            \
-  {                                                                    \
-    "skip_equal", "", "Skip processing with id in " #name,             \
-        &config._skip_equal, air::util::K_INT64, 0, air::util::V_EQUAL \
+#define DECLARE_COMMON_CONFIG(config)                                           \
+  {"enable",          "e", "Enable the pass", &config._enable,                  \
+   air::util::K_NONE, 0,   air::util::V_NONE},                                  \
+      {"show",                                                                  \
+       "s",                                                                     \
+       "Show the progress",                                                     \
+       &config._show,                                                           \
+       air::util::K_NONE,                                                       \
+       0,                                                                       \
+       air::util::V_NONE},                                                      \
+      {"help",                                                                  \
+       "h",                                                                     \
+       "Show the option detial",                                                \
+       &config._help,                                                           \
+       air::util::K_NONE,                                                       \
+       0,                                                                       \
+       air::util::V_NONE},                                                      \
+      {"rt_dump",         "rtd", "Enable runtime dump", &config._rt_dump,       \
+       air::util::K_NONE, 0,     air::util::V_NONE},                            \
+      {"rt_timing",       "rtt", "Enable runtime timing", &config._rt_timing,   \
+       air::util::K_NONE, 0,     air::util::V_NONE},                            \
+      {"rt_validate",                                                           \
+       "rtv",                                                                   \
+       "Enable runtime validation",                                             \
+       &config._rt_validate,                                                    \
+       air::util::K_NONE,                                                       \
+       0,                                                                       \
+       air::util::V_NONE},                                                      \
+      {"read_ir",         "b2ir",           "Enable read ir from elf file",     \
+       &config._read_ir,  air::util::K_STR, 0,                                  \
+       air::util::V_EQUAL},                                                     \
+      {"write_ir",        "ir2b",           "Enable Write ir to elf file",      \
+       &config._write_ir, air::util::K_STR, 0,                                  \
+       air::util::V_EQUAL},                                                     \
+      {"verify_ir",       "vir", "Enable IR verification", &config._verify_ir,  \
+       air::util::K_NONE, 0,     air::util::V_NONE},                            \
+      {"trace_stat",                                                            \
+       "ts",                                                                    \
+       "Enable trace resource statistics",                                      \
+       &config._trace_stat,                                                     \
+       air::util::K_NONE,                                                       \
+       0,                                                                       \
+       air::util::V_NONE},                                                      \
+      {"trace_mp",                                                              \
+       "tm",                                                                    \
+       "Enable trace mempool statistics",                                       \
+       &config._trace_mp,                                                       \
+       air::util::K_NONE,                                                       \
+       0,                                                                       \
+       air::util::V_NONE},                                                      \
+      {"trace_ir_before",        "tib",                                         \
+       "Enable trace IR before", &config._trace_ir_before,                      \
+       air::util::K_NONE,        0,                                             \
+       air::util::V_NONE},                                                      \
+      {"trace_ir_after",        "tia",                                          \
+       "Enable trace IR after", &config._trace_ir_after,                        \
+       air::util::K_NONE,       0,                                              \
+       air::util::V_NONE},                                                      \
+      {"trace_st_before",                                                       \
+       "tsb",                                                                   \
+       "Enable trace Symtab before",                                            \
+       &config._trace_st_before,                                                \
+       air::util::K_NONE,                                                       \
+       0,                                                                       \
+       air::util::V_NONE},                                                      \
+      {"trace_st_after",                                                        \
+       "tsa",                                                                   \
+       "Enable trace Symtab after",                                             \
+       &config._trace_st_after,                                                 \
+       air::util::K_NONE,                                                       \
+       0,                                                                       \
+       air::util::V_NONE},                                                      \
+      {"trace_detail",     "td", "Enable trace details", &config._trace_detail, \
+       air::util::K_INT64, 0,    air::util::V_EQUAL},                           \
+      {"skip_before",                                                           \
+       "",                                                                      \
+       "Skip item before given id",                                             \
+       &config._skip_before,                                                    \
+       air::util::K_INT64,                                                      \
+       0,                                                                       \
+       air::util::V_EQUAL},                                                     \
+      {"skip_after",                                                            \
+       "",                                                                      \
+       "Skip processing after given id",                                        \
+       &config._skip_after,                                                     \
+       air::util::K_INT64,                                                      \
+       0,                                                                       \
+       air::util::V_EQUAL},                                                     \
+  {                                                                             \
+    "skip_equal", "", "Skip processing with id", &config._skip_equal,           \
+        air::util::K_INT64, 0, air::util::V_EQUAL                               \
   }
 
 }  // namespace util

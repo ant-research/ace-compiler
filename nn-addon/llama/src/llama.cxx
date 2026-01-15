@@ -15,10 +15,18 @@ namespace llama {
 
 air::base::GLOB_SCOPE* Llama_driver(GLOB_SCOPE*                    glob,
                                     const air::driver::DRIVER_CTX* driver_ctx,
-                                    const nn::llama::LLAMA_CONFIG& cfg) {
+                                    const nn::llama::LLAMA_CONFIG& cfg,
+                                    const char* checkpoint_file) {
   LLAMA lla(glob);
+
+  lla.Read_checkpoint(checkpoint_file);
+
   lla.Create_entry_func();
 
+  lla.Create_weights_const();
+
+  lla.Create_pydsl_kernel();
+#if 0
   ADDR_DATUM_PTR rmsnorm_output = lla.Create_rmsnorm("rmsnorm_output_0");
   if (rmsnorm_output == Null_ptr) return nullptr;
 
@@ -51,6 +59,7 @@ air::base::GLOB_SCOPE* Llama_driver(GLOB_SCOPE*                    glob,
       lla.Create_transpose(attn_output, 1, 2, "attn_output_1");
 
   lla.Create_return(attn_output_1);
+#endif
   return glob;
 }
 

@@ -32,8 +32,8 @@ const char* ATTR::Key() const {
 }
 
 std::string_view ATTR::Value() const {
-  STR_PTR val = _scope->Glob_scope().String(_attr->Value());
-  AIR_ASSERT(val != STR_PTR());
+  LITERAL_PTR val = _scope->Glob_scope().Literal(_attr->Value());
+  AIR_ASSERT(val != LITERAL_PTR());
   return std::string_view(val->Char_str(), val->Len());
 }
 
@@ -42,7 +42,7 @@ void ATTR::Print(std::ostream& os, uint32_t indent) const {
     os << std::string(indent * 2, ' ');
   }
   os << Key() << "=";
-  const char* val = _scope->Glob_scope().String(_attr->Value())->Char_str();
+  const char* val = _scope->Glob_scope().Literal(_attr->Value())->Char_str();
   if (Count() == 0) {
     AIR_ASSERT(Type() == HOST_TYPE_ID<char>);
     os << val;
@@ -120,8 +120,9 @@ ATTR_PTR ATTR_LIST::Get_attr(const char* key) const {
 
 ATTR_PTR ATTR_LIST::Set_attr(const char* key, const std::string_view val,
                              PRIMITIVE_TYPE type, uint32_t count) {
-  STR_PTR val_ptr = _scope->Glob_scope().New_str(val.data(), val.size());
-  ATTR_ID id      = _head;
+  LITERAL_PTR val_ptr =
+      _scope->Glob_scope().New_literal(val.data(), val.size());
+  ATTR_ID id = _head;
   while (id != Null_id) {
     ATTR_PTR attr = _scope->Attr(id);
     if (std::strcmp(attr->Key(), key) == 0) {

@@ -113,7 +113,7 @@ int main(int argc, char* argv[]) {
   NODE_PTR x_node = cntr->New_ld(var_x, spos);
   NODE_PTR y_node = cntr->New_ld(var_y, spos);
   NODE_PTR add_node =
-      cntr->New_bin_arith(air::core::OPC_ADD, x_node, y_node, spos);
+      cntr->New_bin_arith(air::core::OPC_ADD, argc_type, x_node, y_node, spos);
   // z = x + y;
   STMT_PTR  stmt = cntr->New_st(add_node, var_z, spos);
   STMT_LIST sl   = cntr->Stmt_list();

@@ -181,3 +181,48 @@ TEST(Constant, ext_const_file) {
   delete glob;
   std::remove(fname);
 }
+
+TEST(Constant, new_const_char_fname) {
+  char                 cst1[]  = "Constant1";
+  char                 cst2[]  = "Constant2";
+  char                 fname[] = "ext_const.txt";
+  size_t               len     = strlen(cst1);
+  GLOB_SCOPE*          glob    = new GLOB_SCOPE(7, true);
+  FILE_PTR             fout    = glob->New_file(fname, LANG::WO_CONST);
+  TYPE_PTR             etype   = glob->Prim_type(PRIMITIVE_TYPE::INT_S8);
+  std::vector<int64_t> dim(1, len);
+  TYPE_PTR             ctype =
+      glob->New_arr_type("write_type", etype, dim, glob->Unknown_simple_spos());
+  CONSTANT_PTR cst_ptr1 =
+      glob->New_const(CONSTANT_KIND::EXT_FILE, ctype, fname, cst1, len);
+  CONSTANT_PTR cst_ptr2 =
+      glob->New_const(CONSTANT_KIND::EXT_FILE, ctype, fname, cst2, len);
+  EXPECT_FALSE(strcmp(cst_ptr1->Ext_file()->File_name()->Char_str(), fname));
+  EXPECT_EQ(cst_ptr1->Ext_file_id().Value(), fout->Id().Value());
+  EXPECT_EQ(cst_ptr1->Ext_ofst(), 0);
+  EXPECT_EQ(cst_ptr1->Ext_size(), len);
+  EXPECT_FALSE(strcmp(cst_ptr2->Ext_file()->File_name()->Char_str(), fname));
+  EXPECT_EQ(cst_ptr2->Ext_file_id().Value(), fout->Id().Value());
+  EXPECT_EQ(cst_ptr2->Ext_ofst(), len);
+  EXPECT_EQ(cst_ptr2->Ext_size(), len);
+  delete glob;
+  // done write, now read
+  glob         = new GLOB_SCOPE(8, true);
+  FILE_PTR fin = glob->New_file(fname, LANG::RO_CONST);
+  etype        = glob->Prim_type(PRIMITIVE_TYPE::INT_S8);
+  ctype =
+      glob->New_arr_type("read_type", etype, dim, glob->Unknown_simple_spos());
+  cst_ptr1 =
+      glob->New_const(CONSTANT_KIND::EXT_FILE, ctype, fname, (uint64_t)0, len);
+  cst_ptr2 = glob->New_const(CONSTANT_KIND::EXT_FILE, ctype, fname, len, len);
+  EXPECT_FALSE(strcmp(cst_ptr1->Ext_file()->File_name()->Char_str(), fname));
+  EXPECT_EQ(cst_ptr1->Ext_file_id().Value(), fin->Id().Value());
+  EXPECT_EQ(cst_ptr1->Ext_ofst(), 0);
+  EXPECT_EQ(cst_ptr1->Ext_size(), len);
+  EXPECT_FALSE(strcmp(cst_ptr2->Ext_file()->File_name()->Char_str(), fname));
+  EXPECT_EQ(cst_ptr2->Ext_file_id().Value(), fin->Id().Value());
+  EXPECT_EQ(cst_ptr2->Ext_ofst(), len);
+  EXPECT_EQ(cst_ptr2->Ext_size(), len);
+  delete glob;
+  std::remove(fname);
+}

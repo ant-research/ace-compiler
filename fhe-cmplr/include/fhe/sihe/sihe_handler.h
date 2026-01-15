@@ -32,8 +32,8 @@ public:
   RETV Handle(VISITOR* visitor, NODE_PTR node) {
     AIR_ASSERT(node->Domain() == ID);
     switch (SIHE_OPERATOR(node->Operator())) {
-#define SIHE_OPCODE(NAME, name, category, kid_num, fld_num, property) \
-  case SIHE_OPERATOR::NAME:                                           \
+#define SIHE_OPCODE(NAME, name, kid_num, fld_num, property) \
+  case SIHE_OPERATOR::NAME:                                 \
     return Handle_##name<RETV, VISITOR>(visitor, node);
 #include "fhe/sihe/opcode_def.inc"
       default:
@@ -43,7 +43,7 @@ public:
   }
 
 private:
-#define SIHE_OPCODE(NAME, name, category, kid_num, fld_num, property)  \
+#define SIHE_OPCODE(NAME, name, kid_num, fld_num, property)            \
   template <typename RETV, typename VISITOR>                           \
   RETV Handle_##name(VISITOR* visitor, NODE_PTR node) {                \
     return _impl.template Handle_##name<RETV, VISITOR>(visitor, node); \

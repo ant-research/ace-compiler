@@ -12,6 +12,7 @@
 #include <unordered_map>
 
 #include "air/base/container_decl.h"
+#include "air/base/spos.h"
 #include "air/base/st_attr.h"
 #include "air/base/st_const.h"
 #include "air/base/st_decl.h"
@@ -108,8 +109,8 @@ private:
   AUX_ID         First_aux_entry_id() const;
   AUX_DATA_PTR   First_aux_entry() const;
 
-  BLOCK_DATA_PTR _blk;
   GLOB_SCOPE*    _glob;
+  BLOCK_DATA_PTR _blk;
 };
 
 //! Base class for global & local symbol tables
@@ -139,7 +140,7 @@ protected:
   enum class SCOPE_KIND { GLOB, FUNC };
 
   SCOPE_BASE(SCOPE_KIND kind, uint32_t level, bool open);
-  ~SCOPE_BASE(){};
+  ~SCOPE_BASE();
 
   AUX_DATA_PTR Aux_data(AUX_ID id);
   AUX_TAB&     Aux_table() const { return *_aux_tab; }
@@ -150,12 +151,12 @@ protected:
   bool Close();
 
 protected:
-  SCOPE_KIND       _kind;
   MAIN_TAB*        _main_tab;
   AUX_TAB*         _aux_tab;
   ATTR_TAB*        _attr_tab;
-  int32_t          _ref_count;
   ARENA_ALLOCATOR* _mem_pool;
+  int32_t          _ref_count;
+  SCOPE_KIND       _kind;
 };
 
 //! Local symbol tables
@@ -171,6 +172,7 @@ class FUNC_SCOPE : public SCOPE_BASE {
   friend class TAB_ITER_BASE;
 
 public:
+  FUNC_SCOPE(const GLOB_SCOPE& glob, FUNC_ID id, bool open);
   ~FUNC_SCOPE();
 
   GLOB_SCOPE& Glob_scope() const { return *_glob; }
@@ -202,15 +204,20 @@ public:
   REGION_INFO_PTR New_region_info(REGION_INFO_KIND);
   LABEL_PTR       New_label();
   LABEL_PTR       New_label(STR_ID name);
+  ADDR_DATUM_PTR  New_formal(TYPE_PTR type, STR_PTR name, const SPOS& spos);
+  ADDR_DATUM_PTR  New_formal(TYPE_ID type, STR_ID name, const SPOS& spos);
+  ADDR_DATUM_PTR  New_formal(TYPE_ID type, const char* name, const SPOS& spos);
 
   ADDR_DATUM_PTR Addr_datum(ADDR_DATUM_ID id) const;
   //! Get i's formal parameter of the function
   ADDR_DATUM_PTR Formal(uint32_t idx) const;
-  PACKET_PTR     Packet(PACKET_ID id) const;
-  LABEL_PTR      Label(LABEL_ID id) const;
-  SYM_PTR        Sym(SYM_ID id) const;
-  SYM_PTR        Find_sym(SYM_ID id) const;
-  PREG_PTR       Preg(PREG_ID id) const;
+  //! Return number of formal
+  uint32_t   Formal_cnt(void) const;
+  PACKET_PTR Packet(PACKET_ID id) const;
+  LABEL_PTR  Label(LABEL_ID id) const;
+  SYM_PTR    Sym(SYM_ID id) const;
+  SYM_PTR    Find_sym(SYM_ID id) const;
+  PREG_PTR   Preg(PREG_ID id) const;
 
   DATUM_ITER  Begin_addr_datum() const;
   DATUM_ITER  End_addr_datum() const;
@@ -226,16 +233,18 @@ public:
   void Clone(FUNC_SCOPE& func);
   //! @brief Only clone attr tab
   void Clone_attr(FUNC_SCOPE& func);
+  //! @brief Replace container, free original one
+  void Replace_code(CONTAINER* cntr);
 
   void Set_entry_stmt(STMT_PTR stmt);
   void Set_entry_stmt(STMT_ID id);
 
+  size_t      Print_mp_info(std::ostream& os);
   void        Print(std::ostream& os, bool rot = true) const;
   void        Print() const;
   std::string To_str(bool rot = true) const;
 
 private:
-  FUNC_SCOPE(const GLOB_SCOPE& glob, FUNC_ID id, bool open);
   FUNC_SCOPE(const FUNC_SCOPE& parent, FUNC_ID id, bool open);
 
   FUNC_SCOPE(const FUNC_SCOPE& scope);
@@ -244,14 +253,13 @@ private:
   PRIM_ID_ITER Begin(SYM_ID) const { return Main_table().Begin(); }
 
   ADDR_DATUM_PTR New_var(TYPE_ID type, STR_ID name, const SPOS& spos);
-  ADDR_DATUM_PTR New_formal(TYPE_ID type, STR_ID name, const SPOS& spos);
 
-  FUNC_ID     _func_id;
   PREG_TAB*   _preg_tab;
   LABEL_TAB*  _label_tab;
   FUNC_SCOPE* _parent;
   GLOB_SCOPE* _glob;
   CONTAINER*  _cont;
+  FUNC_ID     _func_id;
 };
 
 //! Global symbol tables
@@ -262,9 +270,10 @@ class GLOB_SCOPE : public SCOPE_BASE {
   friend class TAB_ITER_BASE;
 
 public:
-  ~GLOB_SCOPE();
   GLOB_SCOPE(uint32_t id, bool open);
+  ~GLOB_SCOPE();
   uint32_t     Id() const { return _id; }
+  LITERAL_PTR  Literal(LITERAL_ID id) const;
   STR_PTR      String(STR_ID id) const;
   TYPE_PTR     Type(TYPE_ID id) const;
   FUNC_PTR     Func(FUNC_ID id) const;
@@ -277,6 +286,8 @@ public:
   ENTRY_PTR    Entry_point(ENTRY_ID id) const;
   CONSTANT_PTR Constant(CONSTANT_ID id) const;
   ARB_PTR      Arb(ARB_ID id) const;
+  LITERAL_PTR  Undefined_lit() { return Literal(_undefined_lit_id); }
+  LITERAL_ID   Undefined_lit_id() { return _undefined_lit_id; }
   STR_PTR      Undefined_name() { return String(_undefined_name_id); }
   STR_ID       Undefined_name_id() const { return _undefined_name_id; }
   BLOCK_ID     Comp_env_id() const { return _comp_env_id; }
@@ -322,14 +333,20 @@ public:
   //! New array constant
   CONSTANT_PTR New_const(CONSTANT_KIND ck, CONST_TYPE_PTR type, void* buf,
                          size_t byte);
-  CONSTANT_PTR New_const(CONSTANT_KIND ck, STR_ID str);
+  CONSTANT_PTR New_const(CONSTANT_KIND ck, LITERAL_ID str);
   CONSTANT_PTR New_const(CONSTANT_KIND ck, const char* str, size_t len);
   //! New float constant
   CONSTANT_PTR New_const(CONSTANT_KIND ck, CONST_TYPE_PTR type,
                          long double val);
   //! New constant to read from external file
   CONSTANT_PTR New_const(CONSTANT_KIND ck, CONST_TYPE_PTR type,
+                         const char* fname, uint64_t ofst, uint64_t sz);
+  //! New constant to read from external file
+  CONSTANT_PTR New_const(CONSTANT_KIND ck, CONST_TYPE_PTR type,
                          CONST_FILE_PTR file, uint64_t ofst, uint64_t sz);
+  //! New constant to write to external file
+  CONSTANT_PTR New_const(CONSTANT_KIND ck, CONST_TYPE_PTR type,
+                         const char* fname, void* buf, uint64_t sz);
   //! New constant to write to external file
   CONSTANT_PTR New_const(CONSTANT_KIND ck, CONST_TYPE_PTR type,
                          CONST_FILE_PTR file, void* buf, uint64_t sz);
@@ -418,6 +435,14 @@ public:
   ARRAY_TYPE_PTR New_arr_type(CONST_STR_PTR name, CONST_TYPE_PTR etype,
                               const std::vector<int64_t>& dim,
                               const SPOS&                 spos);
+  //! New array type with name of the form [etype_name]_[shape] e.g. f32_3x4
+  ARRAY_TYPE_PTR New_arr_type(CONST_TYPE_PTR etype, CONST_ARB_PTR arb,
+                              const SPOS& spos);
+  //! New array type with constant upper bounds of dimensions,
+  //! with name of the form [etype_name]_[shape] e.g. f32_3x4
+  ARRAY_TYPE_PTR New_arr_type(CONST_TYPE_PTR              etype,
+                              const std::vector<int64_t>& dim,
+                              const SPOS&                 spos);
 
   //! New record type, name in char*
   RECORD_TYPE_PTR New_rec_type(RECORD_KIND k, const char* name,
@@ -482,19 +507,25 @@ public:
   FILE_PTR New_file(CONST_STR_PTR name, LANG lang) {
     return New_file(name->Id(), lang);
   }
-  //! New string literal
-  STR_PTR New_str(const char* str, size_t len = 0);
+  //! @brief New string literals as constants
+  //! that may contain '\0' in the middle
+  LITERAL_PTR New_literal(const char* str, size_t len = 0);
+  //! New null-terminated string for symbol or identifier names
+  STR_PTR New_str(const char* str);
 
   FUNC_SCOPE& New_func_scope(FUNC_PTR func, bool open = true);
   FUNC_SCOPE& New_func_scope(FUNC_ID     func,
                              FUNC_DEF_ID def  = (FUNC_DEF_ID)Null_st_id,
                              bool        open = true);
+  //! Clean up func_scope created via New_func_scope API
+  void        Delete_func_scope(FUNC_SCOPE* func);
   FUNC_SCOPE& Open_func_scope(FUNC_ID id);
 
   // Create an array type given an element type & count
   TYPE_PTR Array_type_ptr(TYPE_PTR etype, size_t count);
 
   TYPE_TAB&     Type_table() const { return *_type_tab; }
+  LITERAL_TAB&  Lit_table() const { return *_lit_tab; }
   STR_TAB&      Str_table() const { return *_str_tab; }
   BLOCK_TAB&    Blk_table() const { return *_blk_tab; }
   FILE_TAB&     File_table() const { return *_file_tab; }
@@ -508,6 +539,8 @@ public:
   // Add write checker in all iterator
   FILE_ITER     Begin_file() const;
   FILE_ITER     End_file() const;
+  LITERAL_ITER  Begin_lit() const;
+  LITERAL_ITER  End_lit() const;
   STR_ITER      Begin_str() const;
   STR_ITER      End_str() const;
   TYPE_ITER     Begin_type() const;
@@ -530,6 +563,10 @@ public:
   FUNC_SCOPE_ITER Begin_func_scope() const;
   FUNC_SCOPE_ITER End_func_scope() const;
 
+  bool Verify_ir() const;
+
+  void Print_mp_info(std::ostream& os, bool func = true) const;
+  void Print_st(std::ostream& os) const;
   void Print_ir(std::ostream& os, bool rot = true) const;
   void Print(std::ostream& os, bool rot = true) const;
   void Print() const;
@@ -555,6 +592,7 @@ private:
   TYPE_TAB*     _type_tab;
   CONSTANT_TAB* _const_tab;
   PARAM_TAB*    _param_tab;
+  LITERAL_TAB*  _lit_tab;
   STR_TAB*      _str_tab;
   FILE_TAB*     _file_tab;
   BLOCK_TAB*    _blk_tab;
@@ -563,10 +601,55 @@ private:
   ARB_TAB*      _arb_tab;
   TARG_INFO*    _targ_info;
 
-  uint32_t _id;
-  BLOCK_ID _comp_env_id;
-  STR_ID   _undefined_name_id;
-  TYPE_ID* _prim_type_tab;
+  TYPE_ID*   _prim_type_tab;
+  uint32_t   _id;
+  BLOCK_ID   _comp_env_id;
+  STR_ID     _undefined_name_id;
+  LITERAL_ID _undefined_lit_id;
+
+  //! STR_HASH & STR_EQ are used to deduplicate items in string table
+  struct STR_HASH {
+    size_t operator()(const char* key) const {
+      return std::hash<std::string_view>{}(std::string_view(key));
+    }
+  };
+
+  struct STR_EQ {
+    bool operator()(const char* str1, const char* str2) const {
+      return (strcmp(str1, str2) == 0);
+    }
+  };
+
+  //! A map for string and its ID in string table
+  typedef std::unordered_map<const char*, STR_ID, STR_HASH, STR_EQ> STR_MAP;
+  STR_MAP                                                           _str_map;
+
+  //! LIT_KEY, LIT_HASH & LIT_EQ are used to deduplicate items in literal table
+  struct LIT_KEY {
+    uint32_t    _len;
+    const char* _str;
+    LIT_KEY(const char* str, size_t len) : _str(str), _len(len) {}
+  };
+
+  struct LIT_HASH {
+    size_t operator()(const LIT_KEY& key) const {
+      return std::hash<std::string_view>{}(
+          std::string_view(key._str, key._len));
+    }
+  };
+
+  struct LIT_EQ {
+    bool operator()(const LIT_KEY& key1, const LIT_KEY& key2) const {
+      if (key1._len != key2._len) {
+        return false;
+      }
+      return (memcmp(key1._str, key2._str, key1._len) == 0);
+    }
+  };
+
+  //! A map for literal and its ID in literal table
+  typedef std::unordered_map<LIT_KEY, LITERAL_ID, LIT_HASH, LIT_EQ> LIT_MAP;
+  LIT_MAP                                                           _lit_map;
 
   typedef std::map<FUNC_ID, FUNC_SCOPE*> FUNC_SCOPE_MAP;
   FUNC_SCOPE_MAP                         _func_scope_map;
@@ -576,6 +659,9 @@ private:
 
   typedef std::map<uint32_t, EXT_CONST_FILE*> ECF_MAP;
   ECF_MAP                                     _ecf_map;
+
+  typedef std::map<uint64_t, FILE_ID> NAME_FILE_MAP;
+  NAME_FILE_MAP                       _name_file_map;
 };
 
 template <SYMBOL_CLASS T>

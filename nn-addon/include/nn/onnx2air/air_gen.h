@@ -11,7 +11,7 @@
 
 #include "air_sym.h"
 #include "air_type.h"
-#include "onnx.pb.h"
+#include "nn/onnx2air/onnx2air_decl.h"
 
 namespace nn {
 namespace onnx2air {

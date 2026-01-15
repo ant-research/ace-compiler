@@ -15,10 +15,12 @@ namespace core {
 
 //! @brief Define all supported library in following format:
 //! DEFINE_PROVIDER(enum_id, cmd_line_opts, name_in_C_code)
-#define ALL_PROVIDERS()                     \
-  DEFINE_PROVIDER(ANT, "ant", "LIB_ANT")    \
-  DEFINE_PROVIDER(SEAL, "seal", "LIB_SEAL") \
-  DEFINE_PROVIDER(OPENFHE, "openfhe", "LIB_OPENFHE")
+#define ALL_PROVIDERS()                              \
+  DEFINE_PROVIDER(ANT, "ant", "LIB_ANT")             \
+  DEFINE_PROVIDER(SEAL, "seal", "LIB_SEAL")          \
+  DEFINE_PROVIDER(OPENFHE, "openfhe", "LIB_OPENFHE") \
+  DEFINE_PROVIDER(PHANTOM, "phantom", "LIB_PHANTOM") \
+  DEFINE_PROVIDER(HYPERFHE, "hyperfhe", "LIB_HYPERFHE")
 
 //! @brief Define enum for all supported library
 enum class PROVIDER : uint32_t {

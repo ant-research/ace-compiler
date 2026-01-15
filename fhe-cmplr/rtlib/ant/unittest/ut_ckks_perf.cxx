@@ -8,19 +8,22 @@
 
 #include <chrono>
 
+#include "ckks/bootstrap.h"
+#include "ckks/ciphertext.h"
+#include "ckks/decryptor.h"
+#include "ckks/encoder.h"
+#include "ckks/encryptor.h"
+#include "ckks/evaluator.h"
+#include "ckks/key_gen.h"
+#include "ckks/param.h"
+#include "ckks/plaintext.h"
+#include "common/rt_api.h"
 #include "common/rt_config.h"
+#include "context/ckks_context.h"
 #include "gtest/gtest.h"
 #include "helper.h"
-#include "util/ciphertext.h"
-#include "util/ckks_bootstrap_context.h"
-#include "util/ckks_decryptor.h"
-#include "util/ckks_encoder.h"
-#include "util/ckks_encryptor.h"
-#include "util/ckks_evaluator.h"
-#include "util/ckks_key_generator.h"
-#include "util/ckks_parameters.h"
-#include "util/matrix_operations.h"
-#include "util/plaintext.h"
+#include "ntt_impl.h"
+#include "util/matrix_operation.h"
 #include "util/random_sample.h"
 
 using namespace std;
@@ -36,35 +39,25 @@ class TEST_EVALUATOR_PERF : public ::testing::Test {
 protected:
   void SetUp() override {
     _degree         = UT_GLOB_ENV::Get_env(TEST_DEGREE);
+    _num_iterations = UT_GLOB_ENV::Get_env(ITERATION);
     size_t parts    = UT_GLOB_ENV::Get_env(NUM_Q_PART);
     size_t num_q    = UT_GLOB_ENV::Get_env(NUM_Q);
-    _num_iterations = UT_GLOB_ENV::Get_env(ITERATION);
-    _param          = Alloc_ckks_parameter();
-    Set_num_q_parts(_param, parts);
-    Init_ckks_parameters_with_prime_size(_param, _degree, HE_STD_NOT_SET, num_q,
-                                         UT_GLOB_ENV::Get_env(Q0_BITS),
-                                         UT_GLOB_ENV::Get_env(SF_BITS), 0);
-    cout << "Degree = " << _degree << " log(q0) = " << _param->_first_mod_size
-         << " log(scaling_factor) = " << log2(Get_param_sc(_param))
-         << " num_q = " << _param->_num_primes
-         << " num_p = " << _param->_num_p_primes
-         << " q_part = " << _param->_num_q_parts << endl;
-    _keygen    = Alloc_ckks_key_generator(_param, NULL, 0);
-    _relin_key = _keygen->_relin_key;
-    _encoder   = Alloc_ckks_encoder(_param);
-    _encryptor = Alloc_ckks_encryptor(_param, Get_pk(_keygen), Get_sk(_keygen));
-    _decryptor = Alloc_ckks_decryptor(_param, Get_sk(_keygen));
-    _evaluator = Alloc_ckks_evaluator(_param, _encoder, _decryptor, _keygen);
+    size_t q0_bits  = UT_GLOB_ENV::Get_env(Q0_BITS);
+    size_t sf_bits  = UT_GLOB_ENV::Get_env(SF_BITS);
+    Set_context_params(_degree, num_q, q0_bits, sf_bits, parts);
+    Prepare_context();
+    // TODO: should be removed after refactor CKKS APIs
+    _param     = (CKKS_PARAMETER*)Param();
+    _keygen    = (CKKS_KEY_GENERATOR*)Keygen();
+    _evaluator = (CKKS_EVALUATOR*)Eval();
+    _encoder   = (CKKS_ENCODER*)Encoder();
+    _decryptor = (CKKS_DECRYPTOR*)Decryptor();
+    _encryptor = (CKKS_ENCRYPTOR*)Encryptor();
   }
 
   void TearDown() override {
     RTLIB_TM_REPORT();
-    Free_ckks_evaluator(_evaluator);
-    Free_ckks_decryptor(_decryptor);
-    Free_ckks_encryptor(_encryptor);
-    Free_ckks_encoder(_encoder);
-    Free_ckks_key_generator(_keygen);
-    Free_ckks_parameters(_param);
+    Finalize_context();
   }
 
   size_t Get_degree() { return _degree; }
@@ -229,17 +222,17 @@ protected:
     Encrypt_msg(ciph1, _encryptor, plain1);
     Encrypt_msg(ciph2, _encryptor, plain2);
     auto start = chrono::system_clock::now();
-    Mul_ciphertext(ciph_prod, ciph1, ciph2, _relin_key, _evaluator);
+    Mul_ciphertext(ciph_prod, ciph1, ciph2, _evaluator);
     auto         end = chrono::system_clock::now();
     microseconds ret(0);
     ret = duration_cast<microseconds>(end - start);
 
     // only for performance test: ignore conv time from ntt to intt
     if (Is_ntt(Get_c0(ciph_prod))) {
-      Conv_ntt2poly_inplace(Get_c0(ciph_prod), _param->_crt_context);
+      Conv_ntt2poly_inplace(Get_c0(ciph_prod));
     }
     if (Is_ntt(Get_c1(ciph_prod))) {
-      Conv_ntt2poly_inplace(Get_c1(ciph_prod), _param->_crt_context);
+      Conv_ntt2poly_inplace(Get_c1(ciph_prod));
     }
     start = chrono::system_clock::now();
     Rescale_ciphertext(ciph_prod, ciph_prod, _evaluator);
@@ -267,7 +260,6 @@ protected:
 
     PLAINTEXT*  plain         = Alloc_plaintext();
     CIPHERTEXT* ciph          = Alloc_ciphertext();
-    SWITCH_KEY* rot_key       = Alloc_switch_key();
     CIPHERTEXT* ciph_rot      = Alloc_ciphertext();
     PLAINTEXT*  decrypted_rot = Alloc_plaintext();
     VALUE_LIST* decoded_rot   = Alloc_value_list(DCMPLX_TYPE, vec_length);
@@ -287,12 +279,8 @@ protected:
     auto end         = chrono::system_clock::now();
     gen_rot_key_time = duration_cast<microseconds>(end - start);
 
-    start             = chrono::system_clock::now();
-    uint32_t auto_idx = Get_precomp_auto_idx(_keygen, rot);
-    IS_TRUE(auto_idx, "cannot get precompute automorphism index");
-    rot_key = Get_auto_key(_keygen, auto_idx);
-    IS_TRUE(rot_key, "cannot find auto key");
-    Eval_fast_rotate(ciph_rot, ciph, rot, rot_key, _evaluator);
+    start = chrono::system_clock::now();
+    Eval_fast_rotate(ciph_rot, ciph, rot, _evaluator);
     end = chrono::system_clock::now();
 
     Decrypt(decrypted_rot, _decryptor, ciph_rot, NULL);
@@ -316,7 +304,6 @@ private:
   CKKS_EVALUATOR*     _evaluator;
   CKKS_PARAMETER*     _param;
   CKKS_KEY_GENERATOR* _keygen;
-  SWITCH_KEY*         _relin_key;
   size_t              _num_iterations;
 };
 
@@ -544,42 +531,30 @@ TEST_F(TEST_EVALUATOR_PERF, Run_inv_ntt) {
 class TEST_BOOTSTRAP_PERF : public ::testing::Test {
 protected:
   void SetUp() override {
-    _degree                 = UT_GLOB_ENV::Get_env(TEST_DEGREE);
-    size_t parts            = UT_GLOB_ENV::Get_env(NUM_Q_PART);
-    size_t num_q            = UT_GLOB_ENV::Get_env(NUM_Q);
-    size_t scaling_mod_size = UT_GLOB_ENV::Get_env(SF_BITS);
-    size_t q0_bits          = UT_GLOB_ENV::Get_env(Q0_BITS);
-    _num_iterations         = UT_GLOB_ENV::Get_env(ITERATION);
+    _degree         = UT_GLOB_ENV::Get_env(TEST_DEGREE);
+    size_t parts    = UT_GLOB_ENV::Get_env(NUM_Q_PART);
+    size_t num_q    = UT_GLOB_ENV::Get_env(NUM_Q);
+    size_t sf_bits  = UT_GLOB_ENV::Get_env(SF_BITS);
+    size_t q0_bits  = UT_GLOB_ENV::Get_env(Q0_BITS);
+    _num_iterations = UT_GLOB_ENV::Get_env(ITERATION);
     // bootstrap need at least 19 levels
-    num_q  = num_q < 20 ? 20 : num_q;
-    _param = Alloc_ckks_parameter();
-    Set_num_q_parts(_param, parts);
-    Init_ckks_parameters_with_prime_size(_param, _degree, HE_STD_NOT_SET, num_q,
-                                         q0_bits, scaling_mod_size, 0);
-    cout << "Degree = " << _degree << " log(q0) = " << _param->_first_mod_size
-         << " log(scaling_factor) = " << log2(Get_param_sc(_param))
-         << " num_q = " << _param->_num_primes
-         << " num_p = " << _param->_num_p_primes
-         << " q_part = " << _param->_num_q_parts << endl;
-    _keygen    = Alloc_ckks_key_generator(_param, NULL, 0);
-    _relin_key = _keygen->_relin_key;
-    _encoder   = Alloc_ckks_encoder(_param);
-    _encryptor = Alloc_ckks_encryptor(_param, Get_pk(_keygen), Get_sk(_keygen));
-    _decryptor = Alloc_ckks_decryptor(_param, Get_sk(_keygen));
-    _evaluator = Alloc_ckks_evaluator(_param, _encoder, _decryptor, _keygen);
-    _bts_ctx   = Get_bts_ctx(_evaluator);
+    num_q = num_q < 20 ? 20 : num_q;
+    Set_context_params(_degree, num_q, q0_bits, sf_bits, parts);
+    Prepare_context();
     // do not clear imag part
     Set_rtlib_config(CONF_BTS_CLEAR_IMAG, 0);
+
+    // TODO: should be removed after refactor CKKS APIs
+    _evaluator = (CKKS_EVALUATOR*)Eval();
+    _bts_ctx   = Get_bts_ctx(_evaluator);
+    _encoder   = (CKKS_ENCODER*)Encoder();
+    _decryptor = (CKKS_DECRYPTOR*)Decryptor();
+    _encryptor = (CKKS_ENCRYPTOR*)Encryptor();
   }
 
   void TearDown() override {
     RTLIB_TM_REPORT();
-    Free_ckks_evaluator(_evaluator);
-    Free_ckks_decryptor(_decryptor);
-    Free_ckks_encryptor(_encryptor);
-    Free_ckks_encoder(_encoder);
-    Free_ckks_key_generator(_keygen);
-    Free_ckks_parameters(_param);
+    Finalize_context();
   }
 
   size_t Get_degree() { return _degree; }
@@ -602,12 +577,8 @@ protected:
 
     Encrypt_msg(ciph, _encryptor, plain);
 
-    // step 1: set parmeters
-    uint32_t num_iteration = 1;
-    uint32_t precision     = 0;
-
     auto start = chrono::system_clock::now();
-    // step 2: bootstrap setup
+    // step 1: bootstrap setup
     Bootstrap_setup(_bts_ctx, level_budget, dim1, num_slots);
     auto end       = chrono::system_clock::now();
     bts_setup_time = duration_cast<microseconds>(end - start);
@@ -620,11 +591,11 @@ protected:
 
     // step 3: call bootstrap driver
     start = chrono::system_clock::now();
-    Eval_bootstrap(res_ciph, ciph, num_iteration, precision, 0, _bts_ctx);
+    Eval_bootstrap(res_ciph, ciph, 0, _bts_ctx);
     end = chrono::system_clock::now();
 
     std::cout << "number of levels remaining after bootstrapping: "
-              << Get_poly_level(Get_c0(res_ciph)) << std::endl;
+              << Poly_level(Get_c0(res_ciph)) << std::endl;
 
     Decrypt(decrypted_plain, _decryptor, res_ciph, NULL);
     Decode(decoded_val, _encoder, decrypted_plain);
@@ -641,16 +612,13 @@ protected:
   }
 
 private:
-  size_t              _degree;
-  CKKS_ENCODER*       _encoder;
-  CKKS_ENCRYPTOR*     _encryptor;
-  CKKS_DECRYPTOR*     _decryptor;
-  CKKS_EVALUATOR*     _evaluator;
-  CKKS_PARAMETER*     _param;
-  CKKS_KEY_GENERATOR* _keygen;
-  SWITCH_KEY*         _relin_key;
-  size_t              _num_iterations;
-  CKKS_BTS_CTX*       _bts_ctx;
+  size_t          _degree;
+  CKKS_ENCODER*   _encoder;
+  CKKS_ENCRYPTOR* _encryptor;
+  CKKS_DECRYPTOR* _decryptor;
+  CKKS_EVALUATOR* _evaluator;
+  size_t          _num_iterations;
+  CKKS_BTS_CTX*   _bts_ctx;
 };
 
 TEST_F(TEST_BOOTSTRAP_PERF, Run_test_bootstrap_full) {

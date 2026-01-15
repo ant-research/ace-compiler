@@ -36,11 +36,11 @@ public:
   }
 
   // define DEF_OP_BLOCK so that Handle_block() won't be expanded below
-#define DEF_OP_BLOCK(NAME, name, category, kid_num, fld_num, property)
+#define DEF_OP_BLOCK(NAME, name, kid_num, fld_num, property)
 
   // invalid handler implementation for each OPCODE
-#define DEF_OPCODE(NAME, name, cat, kid_num, fld_num, prop) \
-  OPCODE_INVALID_HANDLER_GEN(NAME, name, cat, kid_num, fld_num, prop)
+#define DEF_OPCODE(NAME, name, kid_num, fld_num, prop) \
+  OPCODE_INVALID_HANDLER_GEN(NAME, name, kid_num, fld_num, prop)
 #include "opcode_def.inc"
 #undef DEF_OPCODE
 #undef DEF_OP_BLOCK

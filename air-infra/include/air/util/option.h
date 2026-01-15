@@ -19,14 +19,17 @@ namespace air {
 
 namespace util {
 
-#define EQUAL_SIGN   '='
-#define DASH_SIGN    '-'
-#define COMMA_SIGN   ','
-#define COLON_SIGN   ':'
-#define BFILE_SUFFIX ".B"
-#define CFILE_SUFFIX ".c"
-#define TFILE_SUFFIX ".t"
-#define PFILE_SUFFIX ".json"
+#define EQUAL_SIGN      '='
+#define DASH_SIGN       '-'
+#define COMMA_SIGN      ','
+#define COLON_SIGN      ':'
+#define BFILE_SUFFIX    ".B"
+#define CFILE_SUFFIX    ".c"
+#define TFILE_SUFFIX    ".t"
+#define SFILE_SUFFIX    ".s"
+#define PFILE_SUFFIX    ".json"
+#define DFILE_PREFIX    "out"
+#define CFG_FILE_SUFFIX ".cfg"
 
 uint32_t constexpr INDENT_SPACE = 2;
 
@@ -110,14 +113,11 @@ class OPTION_MGR {
 public:
   OPTION_MGR()
       : _ifile(nullptr),
-        _ofile(""),
-        _tfile(""),
-        _pfile(""),
         _next_option(""),
         _exe_name(nullptr),
-        _option_increment(1){};
+        _option_increment(1) {};
 
-  ~OPTION_MGR(){};
+  ~OPTION_MGR() {};
 
   //! @brief show the available command line options
   void Print(std::ostream& os, uint32_t indent = 0);
@@ -159,17 +159,21 @@ public:
   //! @return input file name
   const char* Ifile() const { return _ifile; }
 
-  //! @brief get ouput file name
-  //! @return ouput file name
-  const char* Ofile() const { return _ofile.c_str(); }
-
   //! @brief get trace file name
   //! @return trace file name
-  const char* Tfile() const { return _tfile.c_str(); }
+  std::string Tfile(const char* sfx) const {
+    return _fname + sfx + TFILE_SUFFIX;
+  }
 
   //! @brief get perf file name
   //! @return perf file name
-  const char* Pfile() const { return _pfile.c_str(); }
+  std::string Pfile(const char* sfx) const {
+    return _fname + sfx + PFILE_SUFFIX;
+  }
+
+  //! @brief get output file name
+  //! @return output filename
+  std::string Ofile(const char* ext) const { return _fname + ext; }
 
   //! @brief get executable program name
   const char* Exe_name() const { return _exe_name; }
@@ -248,16 +252,17 @@ private:
   //!  register
   void Group_option_rule_checker();
 
+  //! @brief check whether this option is opt level option
+  bool Is_likely_opt_level_option(const std::string& option);
+
   std::vector<OPTION_GRP*>         _groups;     // all registered option groups
   std::vector<OPTION_DESC_HANDLE*> _top_level;  // top level option handle
   const char*                      _ifile;      // input file
-  std::string                      _ofile;      // output file
-  std::string                      _tfile;      // trace file
-  std::string                      _pfile;      // perf file
-  const char*                      _next_option;  // next command line option
-  const char*                      _exe_name;     // executable program name
+  std::string _fname;        // input file name without path and ext
+  const char* _next_option;  // next command line option
+  const char* _exe_name;     // executable program name
   int _option_increment;  // command line option increment, only support 1 or 2
-};                        // OPTION_MGR
+};  // OPTION_MGR
 
 }  // namespace util
 

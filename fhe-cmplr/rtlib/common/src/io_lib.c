@@ -21,8 +21,10 @@ typedef struct {
 
 static IO_DATA** Input_data;
 static IO_DATA** Output_data;
+#ifdef _OPENMP
 #pragma omp threadprivate(Input_data)
 #pragma omp threadprivate(Output_data)
+#endif
 
 static void Io_set_data(IO_DATA** data, const char* name, size_t idx,
                         void* ct) {
@@ -61,6 +63,9 @@ static void* Io_create_data(const char* name, size_t count) {
 void Io_init() {
   IS_TRUE(Input_data == NULL && Output_data == NULL, "invalid data pointer");
   int isize = Get_input_count();
+  int osize = Get_output_count();
+  if (isize == 0 && osize == 0) return;
+
   IS_TRUE(isize > 0, "invalid input count");
   Input_data = (IO_DATA**)malloc((isize + 1) * sizeof(IO_DATA*));
   for (int i = 0; i < isize; ++i) {
@@ -69,7 +74,6 @@ void Io_init() {
   }
   Input_data[isize] = NULL;
 
-  int osize = Get_output_count();
   IS_TRUE(osize > 0, "invalid output count");
   Output_data = (IO_DATA**)malloc((osize + 1) * sizeof(IO_DATA*));
   for (int i = 0; i < osize; ++i) {

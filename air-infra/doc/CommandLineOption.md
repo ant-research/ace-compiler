@@ -7,7 +7,7 @@
 
 |Version|Author       |Date      |Description|
 |-------|-------------|----------|-----------|
-|0.1    ||2023.09.01|Initial version.|
+|0.1    |tianxiang.sui|2023.09.01|Initial version.|
 
 ## Introduction
 We want every phase(VVHIR, VHIR, HIR, MIR, LIR) be able to run as standalone programs with onnx or AIR file as input file.

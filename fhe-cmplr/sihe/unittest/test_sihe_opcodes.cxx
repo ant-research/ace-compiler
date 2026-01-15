@@ -29,7 +29,7 @@ TEST(SIHE, sihe_opcode) {
   op_is_valid = META_INFO::Valid_operator(SIHE_DOMAIN::ID, SIHE_OPERATOR::MUL);
   ASSERT_TRUE(op_is_valid);
 
-#define SIHE_OPCODE(NAME, name, category, kid_num, fld_num, property)  \
+#define SIHE_OPCODE(NAME, name, kid_num, fld_num, property)            \
   op_is_valid =                                                        \
       META_INFO::Valid_operator(SIHE_DOMAIN::ID, SIHE_OPERATOR::NAME); \
   ASSERT_TRUE(op_is_valid);

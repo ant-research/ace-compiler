@@ -36,6 +36,15 @@ void Init_rtlib_config() {
       Lib_config[CONF_BTS_CLEAR_IMAG] = 0;
     }
   }
+
+  const char* fast_dot_prod = getenv(ENV_FAST_DOT_PROD);
+  if (fast_dot_prod != NULL) {
+    if (atoi(fast_dot_prod) != 0) {
+      Lib_config[CONF_FAST_DOT_PROD] = 1;
+    } else {
+      Lib_config[CONF_FAST_DOT_PROD] = 0;
+    }
+  }
 }
 
 int64_t Get_rtlib_config(RTLIB_CONFIG_ID id) { return Lib_config[id]; }

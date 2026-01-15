@@ -10,6 +10,8 @@
 
 #include <cmath>
 
+#include "fhe/core/lower_ctx.h"
+
 using namespace air::base;
 
 namespace fhe {
@@ -108,7 +110,7 @@ void SCHEME_INFO_ANA::Update_scheme_info_with_ana_res() {
   uint64_t       poly_deg        = (2ULL << msg_len_bit_num);
   SECURITY_LEVEL sec_level       = Config()->Security_level();
   if (sec_level == HE_STD_NOT_SET) {
-    Ctx_param().Set_poly_degree(poly_deg);
+    Ctx_param().Set_poly_degree(poly_deg, true);
     return;
   }
 
@@ -120,7 +122,7 @@ void SCHEME_INFO_ANA::Update_scheme_info_with_ana_res() {
   while (prev_poly_deg != poly_deg) {
     prev_poly_deg = poly_deg;
 
-    Ctx_param().Set_poly_degree(poly_deg);
+    Ctx_param().Set_poly_degree(poly_deg, true);
     uint32_t mod_bit_num          = Ctx_param().Get_modulus_bit_num();
     uint64_t poly_deg_for_mul_lev = mod_info->Min_poly_deg(mod_bit_num);
     poly_deg                      = std::max(poly_deg, poly_deg_for_mul_lev);
@@ -148,12 +150,14 @@ R_CODE SCHEME_INFO_ANA::Ana_func(const FUNC_SCOPE& func_scope) {
 
   // 2. analyze function body
   // calculate max mul_level and msg_length in current function.
-  SCHEME_INFO_ANA_CTX ana_ctx(&Ctx_param(), &func_scope, 0);
+  // mul_level starts from 1, which is 1 larger than mul_depth.
+  SCHEME_INFO_ANA_CTX ana_ctx(&Ctx_param(), &func_scope, INIT_MUL_LEVEL);
   ANA_VISITOR         visitor(ana_ctx, {CORE_HANDLER(), TENSOR_HANDLER()});
 
   NODE_PTR func_entry = func_scope.Container().Entry_node();
   (void)visitor.template Visit<SCHEME_INFO_ANA_RETV>(func_entry);
-  Trace_obj(TRACE_ANA_RES, &ana_ctx);
+  // trace analysis result
+  Trace_obj(TD_ANA_RES, &ana_ctx);
 
   // 3. update mul_level and msg_length of whole program
   Update_msg_len(ana_ctx.Get_max_msg_len());
@@ -163,7 +167,7 @@ R_CODE SCHEME_INFO_ANA::Ana_func(const FUNC_SCOPE& func_scope) {
 
 R_CODE SCHEME_INFO_ANA::Run() {
   // 1. update scheme info with config
-  Trace_obj(TRACE_ANA_OPTION, Config());
+  Trace_obj(TD_ANA_OPTION, Config());
   Update_scheme_info_with_config();
 
   // 2. analyze mul_depth and msg_length of whole program
@@ -181,7 +185,7 @@ R_CODE SCHEME_INFO_ANA::Run() {
   // 3. update scheme info with analyzing result.
   // TODO: update scheme info that stored in target info
   Update_scheme_info_with_ana_res();
-  Trace_obj(TRACE_ANA_RES, &Ctx_param());
+  Trace_obj(TD_ANA_RES, &Ctx_param());
   return R_CODE::NORMAL;
 }
 

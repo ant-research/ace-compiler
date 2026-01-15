@@ -81,7 +81,10 @@ void FILE_MAP::Read(uint32_t prot, uint32_t flags) {
 void FILE_MAP::Write(uint32_t prot, uint32_t flags) {
   Set_map_size(MAPPED_SIZE);
   lseek(_fd, Get_map_size() - 1, SEEK_END);
-  write(_fd, "", 1);
+  ssize_t result = write(_fd, "", 1);
+  if (result == -1) {
+    CMPLR_ASSERT(false, "Failed to write file");
+  }
 
   _map = (char*)mmap(NULL, Get_map_size(), prot, flags, _fd, 0);
   if (_map == MAP_FAILED) {

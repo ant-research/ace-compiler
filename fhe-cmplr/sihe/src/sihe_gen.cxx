@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "air/base/container.h"
+#include "air/base/container_decl.h"
 #include "air/base/meta_info.h"
 #include "air/base/opcode.h"
 #include "air/base/ptr_wrapper.h"
@@ -24,6 +25,8 @@
 #include "air/util/debug.h"
 #include "air/util/messg.h"
 #include "fhe/sihe/sihe_opcode.h"
+#include "nn/core/attr.h"
+#include "nn/vector/vector_utils.h"
 
 namespace fhe {
 namespace sihe {
@@ -41,9 +44,8 @@ NODE_PTR SIHE_GEN::Gen_add(NODE_PTR child0, NODE_PTR child1, const SPOS& spos) {
   CMPLR_ASSERT(child1->Container() == _cntr,
                "container of child1 must be same with that of add_node");
   OPCODE   opcode(SIHE_DOMAIN::ID, SIHE_OPERATOR::ADD);
-  NODE_PTR bin_node = _cntr->New_bin_arith(opcode, child0, child1, spos);
-  TYPE_PTR rtype    = child0->Rtype();
-  bin_node->Set_rtype(rtype);
+  NODE_PTR bin_node =
+      _cntr->New_bin_arith(opcode, child0->Rtype(), child0, child1, spos);
   return bin_node;
 }
 
@@ -53,9 +55,8 @@ NODE_PTR SIHE_GEN::Gen_mul(NODE_PTR child0, NODE_PTR child1, const SPOS& spos) {
   CMPLR_ASSERT(child1->Container() == _cntr,
                "container of child1 must be same with that of mul_node");
   OPCODE   opcode(SIHE_DOMAIN::ID, SIHE_OPERATOR::MUL);
-  NODE_PTR bin_node = _cntr->New_bin_arith(opcode, child0, child1, spos);
-  TYPE_PTR rtype    = child0->Rtype();
-  bin_node->Set_rtype(rtype);
+  NODE_PTR bin_node =
+      _cntr->New_bin_arith(opcode, child0->Rtype(), child0, child1, spos);
   return bin_node;
 }
 
@@ -65,9 +66,8 @@ NODE_PTR SIHE_GEN::Gen_sub(NODE_PTR child0, NODE_PTR child1, const SPOS& spos) {
   CMPLR_ASSERT(child1->Container() == _cntr,
                "container of child1 must be same with that of sub_node");
   OPCODE   opcode(SIHE_DOMAIN::ID, SIHE_OPERATOR::SUB);
-  NODE_PTR bin_node = _cntr->New_bin_arith(opcode, child0, child1, spos);
-  TYPE_PTR rtype    = child0->Rtype();
-  bin_node->Set_rtype(rtype);
+  NODE_PTR bin_node =
+      _cntr->New_bin_arith(opcode, child0->Rtype(), child0, child1, spos);
   return bin_node;
 }
 
@@ -89,7 +89,23 @@ NODE_PTR SIHE_GEN::Gen_encode(NODE_PTR child, TYPE_PTR plain_type,
   return encode_node;
 }
 
-NODE_PTR SIHE_GEN::Gen_bootstrap(NODE_PTR child, const SPOS& spos) {
+NODE_PTR SIHE_GEN::Gen_encode_mask(TYPE_PTR plain_type, double val,
+                                   NODE_PTR len, const SPOS& spos) {
+  CMPLR_ASSERT(len->Container() == _cntr,
+               "container of child0 must be same with that of encode node");
+  TYPE_PTR     f32_type = Glob_scope()->Prim_type(PRIMITIVE_TYPE::FLOAT_32);
+  CONSTANT_PTR cst    = Glob_scope()->New_const(CONSTANT_KIND::FLOAT, f32_type,
+                                                (long double)(val));
+  NODE_PTR     ldc    = Container()->New_ldc(cst, spos);
+  NODE_PTR     encode = _cntr->New_cust_node(OPC_ENCODE, plain_type, spos);
+  encode->Set_child(0, ldc);
+  encode->Set_child(1, len);
+  encode->Set_attr(nn::core::ATTR::MASK, &val, 1);
+  return encode;
+}
+
+NODE_PTR SIHE_GEN::Gen_bootstrap(NODE_PTR child, int64_t slot,
+                                 const SPOS& spos) {
   CMPLR_ASSERT(child->Container() == Container(),
                "container of child must be same with that of bootstrap node");
   CMPLR_ASSERT(Lower_ctx()->Is_cipher_type(child->Rtype_id()),
@@ -99,6 +115,11 @@ NODE_PTR SIHE_GEN::Gen_bootstrap(NODE_PTR child, const SPOS& spos) {
   NODE_PTR bs_node =
       Container()->New_cust_node(bootstrap_op, child->Rtype(), spos);
   bs_node->Set_child(0, child);
+
+  std::vector<uint32_t> slots    = {(uint32_t)slot};
+  const char*           slot_key = nn::core::ATTR::SLOT;
+  bs_node->Set_attr(slot_key, slots.data(), slots.size());
+
   return bs_node;
 }
 

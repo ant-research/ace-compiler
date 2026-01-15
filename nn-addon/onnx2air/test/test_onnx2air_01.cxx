@@ -8,7 +8,7 @@
 #include "air/base/container.h"
 #include "nn/core/opcode.h"
 #include "nn/onnx2air/air_gen.h"
-#include "onnx.pb.h"
+#include "nn/onnx2air/onnx_pb.h"
 
 using namespace air::base;
 using namespace air::core;

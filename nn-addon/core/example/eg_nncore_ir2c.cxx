@@ -50,9 +50,6 @@ private:
   }
 
   void Emit_function(FUNC_SCOPE* func) {
-    // generate function signature
-    _ctx.Emit_func_sig(func->Owning_func());
-
     NODE_PTR body = func->Container().Entry_node();
     air::base::VISITOR<nn::core::IR2C_CTX,
                        air::core::HANDLER<air::core::IR2C_HANDLER>,
@@ -114,8 +111,8 @@ int main(int argc, char* argv[]) {
   NODE_PTR x_node   = cntr->New_ld(var_x, spos);
   NODE_PTR y_node   = cntr->New_ld(var_y, spos);
   NODE_PTR add_node = cntr->New_bin_arith(
-      air::base::OPCODE(air::core::CORE, air::core::OPCODE::ADD), x_node,
-      y_node, spos);
+      air::base::OPCODE(air::core::CORE, air::core::OPCODE::ADD), argc_type,
+      x_node, y_node, spos);
   // z = x + y;
   STMT_PTR  stmt = cntr->New_st(add_node, var_z, spos);
   STMT_LIST sl   = cntr->Stmt_list();
@@ -124,8 +121,8 @@ int main(int argc, char* argv[]) {
   NODE_PTR nnx_node   = cntr->New_ld(var_x, spos);
   NODE_PTR nny_node   = cntr->New_ld(var_y, spos);
   NODE_PTR nnadd_node = cntr->New_bin_arith(
-      air::base::OPCODE(nn::core::NN, nn::core::OPCODE::ADD), nnx_node,
-      nny_node, spos);
+      air::base::OPCODE(nn::core::NN, nn::core::OPCODE::ADD), argc_type,
+      nnx_node, nny_node, spos);
   STMT_PTR nnstmt = cntr->New_st(nnadd_node, var_z, spos);
   sl.Append(nnstmt);
   // return z;

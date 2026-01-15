@@ -6,44 +6,40 @@
 //
 //=============================================================================
 
+#include "ckks/ciphertext.h"
+#include "ckks/decryptor.h"
+#include "ckks/encoder.h"
+#include "ckks/encryptor.h"
+#include "ckks/evaluator.h"
+#include "ckks/key_gen.h"
+#include "ckks/param.h"
+#include "ckks/plaintext.h"
+#include "ckks/public_key.h"
+#include "ckks/secret_key.h"
+#include "common/rt_api.h"
+#include "context/ckks_context.h"
 #include "gtest/gtest.h"
 #include "helper.h"
-#include "util/ciphertext.h"
-#include "util/ckks_decryptor.h"
-#include "util/ckks_encoder.h"
-#include "util/ckks_encryptor.h"
-#include "util/ckks_evaluator.h"
-#include "util/ckks_key_generator.h"
-#include "util/ckks_parameters.h"
-#include "util/fhe_types.h"
-#include "util/plaintext.h"
-#include "util/public_key.h"
 #include "util/random_sample.h"
-#include "util/secret_key.h"
+#include "util/type.h"
 
 class TEST_EVALUATOR : public ::testing::Test {
 protected:
   void SetUp() override {
     _degree = 16;
-    _param  = Alloc_ckks_parameter();
-    Init_ckks_parameters_with_prime_size(_param, _degree, HE_STD_NOT_SET, 8, 33,
-                                         30, 0);
-    _keygen    = Alloc_ckks_key_generator(_param, NULL, 0);
-    _relin_key = Get_relin_key(_keygen);
-    _encoder   = Alloc_ckks_encoder(_param);
-    _encryptor = Alloc_ckks_encryptor(_param, Get_pk(_keygen), Get_sk(_keygen));
-    _decryptor = Alloc_ckks_decryptor(_param, Get_sk(_keygen));
-    _evaluator = Alloc_ckks_evaluator(_param, _encoder, _decryptor, _keygen);
+    Set_context_params(_degree, 8, 33, 30);
+    Prepare_context();
+
+    // TODO: should be removed after refactor CKKS APIs
+    _param     = (CKKS_PARAMETER*)Param();
+    _keygen    = (CKKS_KEY_GENERATOR*)Keygen();
+    _evaluator = (CKKS_EVALUATOR*)Eval();
+    _encoder   = (CKKS_ENCODER*)Encoder();
+    _decryptor = (CKKS_DECRYPTOR*)Decryptor();
+    _encryptor = (CKKS_ENCRYPTOR*)Encryptor();
   }
 
-  void TearDown() override {
-    Free_ckks_parameters(_param);
-    Free_ckks_key_generator(_keygen);
-    Free_ckks_encoder(_encoder);
-    Free_ckks_encryptor(_encryptor);
-    Free_ckks_decryptor(_decryptor);
-    Free_ckks_evaluator(_evaluator);
-  }
+  void TearDown() override { Finalize_context(); }
 
   size_t Get_degree() { return _degree; }
   size_t Get_depth() { return Get_mult_depth(_param); }
@@ -56,6 +52,8 @@ protected:
   void   Run_test_rescale(VALUE_LIST* msg);
   void   Run_test_downscale(VALUE_LIST* vec1, VALUE_LIST* vec2);
   void   Run_test_mul_const(VALUE_LIST* msg1, double val);
+  void   Run_test_mul_const_out_of_range(VALUE_LIST* msg1, double val,
+                                         uint32_t init_level);
   void   Run_test_add_const(VALUE_LIST* msg1, double val, size_t level);
 
 private:
@@ -162,7 +160,7 @@ void TEST_EVALUATOR::Run_test_mul_ciphertext(VALUE_LIST* msg1, VALUE_LIST* msg2,
   }
   Encrypt_msg(ciph1, _encryptor, plain1);
   Encrypt_msg(ciph2, _encryptor, plain2);
-  Mul_ciphertext(ciph_prod, ciph1, ciph2, _relin_key, _evaluator);
+  Mul_ciphertext(ciph_prod, ciph1, ciph2, _evaluator);
   CIPHERTEXT* rescale_prod = Alloc_ciphertext();
   Rescale_ciphertext(rescale_prod, ciph_prod, _evaluator);
 
@@ -238,7 +236,7 @@ void TEST_EVALUATOR::Run_test_mul_const(VALUE_LIST* msg1, double val) {
         DCMPLX_VALUE_AT(msg1, i) * DCMPLX_VALUE_AT(msg1, i) * val;
   }
   Encrypt_msg(ciph1, _encryptor, plain1);
-  Mul_ciphertext(ciph1, ciph1, ciph1, _relin_key, _evaluator);
+  Mul_ciphertext(ciph1, ciph1, ciph1, _evaluator);
 
   Mul_const(ciph_prod, ciph1, val, _evaluator);
 
@@ -253,6 +251,52 @@ void TEST_EVALUATOR::Run_test_mul_const(VALUE_LIST* msg1, double val) {
   Free_plaintext(plain1);
   Free_plaintext(plain2);
   Free_ciphertext(ciph1);
+  Free_ciphertext(ciph_prod);
+  Free_plaintext(decrypted_prod);
+  Free_value_list(decoded_prod);
+  Free_value_list(plain_prod);
+}
+
+void TEST_EVALUATOR::Run_test_mul_const_out_of_range(VALUE_LIST* msg,
+                                                     double      val,
+                                                     uint32_t    init_level) {
+  size_t len = LIST_LEN(msg);
+
+  PLAINTEXT*  plain          = Alloc_plaintext();
+  CIPHERTEXT* ciph           = Alloc_ciphertext();
+  CIPHERTEXT* ciph_prod      = Alloc_ciphertext();
+  PLAINTEXT*  decrypted_prod = Alloc_plaintext();
+  VALUE_LIST* decoded_prod   = Alloc_value_list(DCMPLX_TYPE, len);
+  VALUE_LIST* plain_prod     = Alloc_value_list(DCMPLX_TYPE, len);
+
+  ENCODE_AT_LEVEL(plain, _encoder, msg, init_level);
+  for (size_t i = 0; i < len; i++) {
+    DCMPLX_VALUE_AT(plain_prod, i) = DCMPLX_VALUE_AT(msg, i) * val;
+  }
+  Encrypt_msg(ciph, _encryptor, plain);
+  Mul_const(ciph_prod, ciph, val, _evaluator);
+
+  Decrypt(decrypted_prod, _decryptor, ciph_prod, NULL);
+  Decode(decoded_prod, _encoder, decrypted_prod);
+
+  // validate value approx equal
+  double input  = DCMPLX_VALUE_AT(plain_prod, 0).real();
+  double output = DCMPLX_VALUE_AT(decoded_prod, 0).real();
+  EXPECT_TRUE((input - output) > 0.001)
+      << "Expected " << input << " - " << output << " to be greater than 0.001";
+
+  // validate value range
+  uint32_t    slots       = Get_plain_slots(decrypted_prod);
+  VALUE_LIST* transformed = Alloc_value_list(DCMPLX_TYPE, slots);
+  bool        within_range =
+      Transform_msg_within_range(transformed, _encoder, plain_prod,
+                                 Poly_level(Get_plain_poly(decrypted_prod)),
+                                 Get_plain_scaling_factor(decrypted_prod));
+  EXPECT_FALSE(within_range);
+  Free_value_list(transformed);
+
+  Free_plaintext(plain);
+  Free_ciphertext(ciph);
   Free_ciphertext(ciph_prod);
   Free_plaintext(decrypted_prod);
   Free_value_list(decoded_prod);
@@ -280,7 +324,7 @@ void TEST_EVALUATOR::Run_test_add_const(VALUE_LIST* msg1, double val,
   }
   Encrypt_msg(ciph1, _encryptor, plain1);
 
-  Mul_ciphertext(ciph1, ciph1, ciph1, _relin_key, _evaluator);
+  Mul_ciphertext(ciph1, ciph1, ciph1, _evaluator);
   Add_const(ciph_prod, ciph1, val, _evaluator);
 
   Decrypt(decrypted_prod, _decryptor, ciph_prod, NULL);
@@ -330,7 +374,7 @@ void TEST_EVALUATOR::Run_test_rescale(VALUE_LIST* msg) {
   Encrypt_msg(ciph, _encryptor, plain);
   // x^2
   // level(ciph) = 4
-  Mul_ciphertext(x2_ciph, ciph, ciph, _relin_key, _evaluator);
+  Mul_ciphertext(x2_ciph, ciph, ciph, _evaluator);
   Rescale_ciphertext(x2_ciph, x2_ciph, _evaluator);
   // PI * x
   ENCODE(pi_plain, _encoder, pi_value);
@@ -338,7 +382,7 @@ void TEST_EVALUATOR::Run_test_rescale(VALUE_LIST* msg) {
   Rescale_ciphertext(pi_x_ciph, pi_x_ciph, _evaluator);
   // PI * x^3 = PI * x * x^2
   // x2_ciph(level) = 3, pi_x_ciph(level) = 3
-  Mul_ciphertext(rescale_prod, x2_ciph, pi_x_ciph, _relin_key, _evaluator);
+  Mul_ciphertext(rescale_prod, x2_ciph, pi_x_ciph, _evaluator);
   Rescale_ciphertext(rescale_prod, rescale_prod, _evaluator);
   // 0.4 * x
   ENCODE(const1, _encoder, const1_value);
@@ -350,7 +394,7 @@ void TEST_EVALUATOR::Run_test_rescale(VALUE_LIST* msg) {
   // PI*x^3 + 0.4x + 1
   ENCODE(const2, _encoder, const2_value);
   // consts(level) = 4; rescale_prod(level) = 1
-  Save_poly_level(Get_plain_poly(const2), Get_poly_level(Get_c0(rescale_prod)));
+  Save_poly_level(Get_plain_poly(const2), Poly_level(Get_c0(rescale_prod)));
   Add_plaintext(rescale_prod, rescale_prod, const2, _evaluator);
 
   Decrypt(decrypted_prod, _decryptor, rescale_prod, NULL);
@@ -409,14 +453,14 @@ void TEST_EVALUATOR::Run_test_downscale(VALUE_LIST* vec1, VALUE_LIST* vec2) {
   Encrypt_msg(x, _encryptor, plain1);
   Encrypt_msg(y, _encryptor, plain2);
   // z = x^2 + y^2 (scale = 2^50)
-  Mul_ciphertext(x2, x, x, _relin_key, _evaluator);
-  Mul_ciphertext(y2, y, y, _relin_key, _evaluator);
+  Mul_ciphertext(x2, x, x, _evaluator);
+  Mul_ciphertext(y2, y, y, _evaluator);
   Add_ciphertext(z, x2, y2, _evaluator);
   // downscale z to waterline(2^25)
   Downscale_ciphertext(z, z, waterline, _evaluator);
   // z^3 = z^2 * z (scale = 2^75)
-  Mul_ciphertext(z2, z, z, _relin_key, _evaluator);
-  Mul_ciphertext(z3, z2, z, _relin_key, _evaluator);
+  Mul_ciphertext(z2, z, z, _evaluator);
+  Mul_ciphertext(z3, z2, z, _evaluator);
 
   Decrypt(decrypted_prod, _decryptor, z3, NULL);
   Decode(decoded_prod, _encoder, decrypted_prod);
@@ -489,6 +533,15 @@ TEST_F(TEST_EVALUATOR, test_mul_const) {
   Free_value_list(vec1);
 }
 
+TEST_F(TEST_EVALUATOR, test_mul_const_out_of_range) {
+  VALUE_LIST* vec         = Alloc_value_list(DCMPLX_TYPE, 1);
+  DCMPLX_VALUE_AT(vec, 0) = 33;
+  // encode vec at level=2 is all right, but after multiply it with val=1,
+  // it will abort due to out of range, since the scale will be squared.
+  Run_test_mul_const_out_of_range(vec, 1 /* const val */, 2 /* level */);
+  Free_value_list(vec);
+}
+
 TEST_F(TEST_EVALUATOR, test_add_const) {
   size_t      len  = Get_degree() / 2;
   VALUE_LIST* vec1 = Alloc_value_list(DCMPLX_TYPE, len);
@@ -528,25 +581,16 @@ class TEST_EVALUATOR_EXTRA : public ::testing::Test {
 protected:
   void SetUp() override {
     _degree = 16;
-    _param  = Alloc_ckks_parameter();
-    Init_ckks_parameters_with_prime_size(_param, _degree, HE_STD_NOT_SET, 3, 60,
-                                         20, 0);
-    _keygen    = Alloc_ckks_key_generator(_param, NULL, 0);
-    _relin_key = Get_relin_key(_keygen);
-    _encoder   = Alloc_ckks_encoder(_param);
-    _encryptor = Alloc_ckks_encryptor(_param, Get_pk(_keygen), Get_sk(_keygen));
-    _decryptor = Alloc_ckks_decryptor(_param, Get_sk(_keygen));
-    _evaluator = Alloc_ckks_evaluator(_param, _encoder, _decryptor, _keygen);
+    Set_context_params(_degree, 3, 60, 20);
+    Prepare_context();
+    // TODO: should be removed after refactor CKKS APIs
+    _evaluator = (CKKS_EVALUATOR*)Eval();
+    _encoder   = (CKKS_ENCODER*)Encoder();
+    _decryptor = (CKKS_DECRYPTOR*)Decryptor();
+    _encryptor = (CKKS_ENCRYPTOR*)Encryptor();
   }
 
-  void TearDown() override {
-    Free_ckks_parameters(_param);
-    Free_ckks_key_generator(_keygen);
-    Free_ckks_encoder(_encoder);
-    Free_ckks_encryptor(_encryptor);
-    Free_ckks_decryptor(_decryptor);
-    Free_ckks_evaluator(_evaluator);
-  }
+  void   TearDown() override { Finalize_context(); }
   size_t Get_degree() { return _degree; }
   void   Run_test_mul_const(VALUE_LIST* msg1, double val,
                             uint32_t encode_sf_degree) {
@@ -584,14 +628,11 @@ protected:
   }
 
 private:
-  size_t              _degree;
-  CKKS_ENCODER*       _encoder;
-  CKKS_ENCRYPTOR*     _encryptor;
-  CKKS_EVALUATOR*     _evaluator;
-  CKKS_DECRYPTOR*     _decryptor;
-  CKKS_PARAMETER*     _param;
-  CKKS_KEY_GENERATOR* _keygen;
-  SWITCH_KEY*         _relin_key;
+  size_t          _degree;
+  CKKS_ENCODER*   _encoder;
+  CKKS_ENCRYPTOR* _encryptor;
+  CKKS_EVALUATOR* _evaluator;
+  CKKS_DECRYPTOR* _decryptor;
 };
 
 TEST_F(TEST_EVALUATOR_EXTRA, test_mul_const_01) {

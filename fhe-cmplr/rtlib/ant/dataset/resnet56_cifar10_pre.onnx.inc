@@ -3458,7 +3458,7 @@ bool Main_graph() {
   memset(&_preg_268435898, 0, sizeof(_preg_268435898));
   memset(&_preg_268435899, 0, sizeof(_preg_268435899));
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n1);
+  memset(&result_n1, 0, sizeof(result_n1));
   _preg_268435707 = Rotate(input, -4096);
   Init_ciph_same_scale(&_pgen_tmp_0, &input, &_preg_268435707);
   _preg_268435708 = Rotate(input, -8192);
@@ -3499,7 +3499,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n1._c1_poly);
   Free_poly_data(&input_dup_n1._c0_poly);
   for (index_cin_n1 = 0; index_cin_n1 < 4; index_cin_n1 = index_cin_n1 + 1) {
-    Zero_ciph(&result_cin_n1);
+    memset(&result_cin_n1, 0, sizeof(result_cin_n1));
     for (index_khw2_n1 = 0; index_khw2_n1 < 9; index_khw2_n1 = index_khw2_n1 + 1) {
       _rescale_tmp_65 = input_roll_n1[index_khw2_n1];
       Pt_from_msg(&_pgen_tmp_2, index_khw2_n1 + (index_cin_n1 * 9) + 0 /* cst_131_0 */, 16384, Sc_degree(&_rescale_tmp_65), Level(&_rescale_tmp_65));
@@ -3593,7 +3593,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435457, &_pgen_tmp_7, 15);
   Free_poly_data(&_pgen_tmp_7._c1_poly);
   Free_poly_data(&_pgen_tmp_7._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_9, &_cst_547, 1, 1, Level(&_preg_268435457));
+  Encode_float(&_pgen_tmp_9, &_cst_547, 1, 1, Level(&_preg_268435457));
   Init_ciph_up_scale_plain(&_pgen_tmp_8, &_preg_268435457, &_pgen_tmp_9);
   {
     _pgen_modulus = Q_modulus();
@@ -3619,7 +3619,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435458._c1_poly);
   Free_poly_data(&_preg_268435458._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n2);
+  memset(&result_n2, 0, sizeof(result_n2));
   Copy_ciph(&input_dup_n2, &_preg_268435459);
   for (index_khw1_n2 = 0; index_khw1_n2 < 9; index_khw1_n2 = index_khw1_n2 + 1) {
     _preg_268435713 = Rotate(input_dup_n2, _cst_139[index_khw1_n2]);
@@ -3630,7 +3630,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n2._c1_poly);
   Free_poly_data(&input_dup_n2._c0_poly);
   for (index_cin_n2 = 0; index_cin_n2 < 16; index_cin_n2 = index_cin_n2 + 1) {
-    Zero_ciph(&result_cin_n2);
+    memset(&result_cin_n2, 0, sizeof(result_cin_n2));
     for (index_khw2_n2 = 0; index_khw2_n2 < 9; index_khw2_n2 = index_khw2_n2 + 1) {
       _rescale_tmp_173 = input_roll_n2[index_khw2_n2];
       Pt_from_msg(&_pgen_tmp_11, index_khw2_n2 + (index_cin_n2 * 9) + 38 /* cst_137_0 */, 16384, Sc_degree(&_rescale_tmp_173), Level(&_rescale_tmp_173));
@@ -3724,7 +3724,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435461, &_pgen_tmp_16, 15);
   Free_poly_data(&_pgen_tmp_16._c1_poly);
   Free_poly_data(&_pgen_tmp_16._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_18, &_cst_548, 1, 1, Level(&_preg_268435461));
+  Encode_float(&_pgen_tmp_18, &_cst_548, 1, 1, Level(&_preg_268435461));
   Init_ciph_up_scale_plain(&_pgen_tmp_17, &_preg_268435461, &_pgen_tmp_18);
   {
     _pgen_modulus = Q_modulus();
@@ -3750,7 +3750,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435462._c1_poly);
   Free_poly_data(&_preg_268435462._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n3);
+  memset(&result_n3, 0, sizeof(result_n3));
   Copy_ciph(&input_dup_n3, &_preg_268435463);
   Free_poly_data(&_preg_268435463._c1_poly);
   Free_poly_data(&_preg_268435463._c0_poly);
@@ -3763,7 +3763,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n3._c1_poly);
   Free_poly_data(&input_dup_n3._c0_poly);
   for (index_cin_n3 = 0; index_cin_n3 < 16; index_cin_n3 = index_cin_n3 + 1) {
-    Zero_ciph(&result_cin_n3);
+    memset(&result_cin_n3, 0, sizeof(result_cin_n3));
     for (index_khw2_n3 = 0; index_khw2_n3 < 9; index_khw2_n3 = index_khw2_n3 + 1) {
       _rescale_tmp_281 = input_roll_n3[index_khw2_n3];
       Pt_from_msg(&_pgen_tmp_20, index_khw2_n3 + (index_cin_n3 * 9) + 184 /* cst_143_0 */, 16384, Sc_degree(&_rescale_tmp_281), Level(&_rescale_tmp_281));
@@ -3873,7 +3873,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435466, &_preg_268435465, 15);
   Free_poly_data(&_preg_268435465._c1_poly);
   Free_poly_data(&_preg_268435465._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_27, &_cst_549, 1, 1, Level(&_preg_268435466));
+  Encode_float(&_pgen_tmp_27, &_cst_549, 1, 1, Level(&_preg_268435466));
   Init_ciph_up_scale_plain(&_pgen_tmp_26, &_preg_268435466, &_pgen_tmp_27);
   {
     _pgen_modulus = Q_modulus();
@@ -3899,7 +3899,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435467._c1_poly);
   Free_poly_data(&_preg_268435467._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n4);
+  memset(&result_n4, 0, sizeof(result_n4));
   Copy_ciph(&input_dup_n4, &_preg_268435468);
   for (index_khw1_n4 = 0; index_khw1_n4 < 9; index_khw1_n4 = index_khw1_n4 + 1) {
     _preg_268435719 = Rotate(input_dup_n4, _cst_152[index_khw1_n4]);
@@ -3910,7 +3910,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n4._c1_poly);
   Free_poly_data(&input_dup_n4._c0_poly);
   for (index_cin_n4 = 0; index_cin_n4 < 16; index_cin_n4 = index_cin_n4 + 1) {
-    Zero_ciph(&result_cin_n4);
+    memset(&result_cin_n4, 0, sizeof(result_cin_n4));
     for (index_khw2_n4 = 0; index_khw2_n4 < 9; index_khw2_n4 = index_khw2_n4 + 1) {
       _rescale_tmp_395 = input_roll_n4[index_khw2_n4];
       Pt_from_msg(&_pgen_tmp_29, index_khw2_n4 + (index_cin_n4 * 9) + 330 /* cst_150_0 */, 16384, Sc_degree(&_rescale_tmp_395), Level(&_rescale_tmp_395));
@@ -4004,7 +4004,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435470, &_pgen_tmp_34, 15);
   Free_poly_data(&_pgen_tmp_34._c1_poly);
   Free_poly_data(&_pgen_tmp_34._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_36, &_cst_550, 1, 1, Level(&_preg_268435470));
+  Encode_float(&_pgen_tmp_36, &_cst_550, 1, 1, Level(&_preg_268435470));
   Init_ciph_up_scale_plain(&_pgen_tmp_35, &_preg_268435470, &_pgen_tmp_36);
   {
     _pgen_modulus = Q_modulus();
@@ -4030,7 +4030,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435471._c1_poly);
   Free_poly_data(&_preg_268435471._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n5);
+  memset(&result_n5, 0, sizeof(result_n5));
   Copy_ciph(&input_dup_n5, &_preg_268435472);
   Free_poly_data(&_preg_268435472._c1_poly);
   Free_poly_data(&_preg_268435472._c0_poly);
@@ -4043,7 +4043,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n5._c1_poly);
   Free_poly_data(&input_dup_n5._c0_poly);
   for (index_cin_n5 = 0; index_cin_n5 < 16; index_cin_n5 = index_cin_n5 + 1) {
-    Zero_ciph(&result_cin_n5);
+    memset(&result_cin_n5, 0, sizeof(result_cin_n5));
     for (index_khw2_n5 = 0; index_khw2_n5 < 9; index_khw2_n5 = index_khw2_n5 + 1) {
       _rescale_tmp_503 = input_roll_n5[index_khw2_n5];
       Pt_from_msg(&_pgen_tmp_38, index_khw2_n5 + (index_cin_n5 * 9) + 476 /* cst_156_0 */, 16384, Sc_degree(&_rescale_tmp_503), Level(&_rescale_tmp_503));
@@ -4153,7 +4153,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435475, &_preg_268435474, 15);
   Free_poly_data(&_preg_268435474._c1_poly);
   Free_poly_data(&_preg_268435474._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_45, &_cst_551, 1, 1, Level(&_preg_268435475));
+  Encode_float(&_pgen_tmp_45, &_cst_551, 1, 1, Level(&_preg_268435475));
   Init_ciph_up_scale_plain(&_pgen_tmp_44, &_preg_268435475, &_pgen_tmp_45);
   {
     _pgen_modulus = Q_modulus();
@@ -4179,7 +4179,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435476._c1_poly);
   Free_poly_data(&_preg_268435476._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n6);
+  memset(&result_n6, 0, sizeof(result_n6));
   Copy_ciph(&input_dup_n6, &_preg_268435477);
   for (index_khw1_n6 = 0; index_khw1_n6 < 9; index_khw1_n6 = index_khw1_n6 + 1) {
     _preg_268435725 = Rotate(input_dup_n6, _cst_165[index_khw1_n6]);
@@ -4190,7 +4190,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n6._c1_poly);
   Free_poly_data(&input_dup_n6._c0_poly);
   for (index_cin_n6 = 0; index_cin_n6 < 16; index_cin_n6 = index_cin_n6 + 1) {
-    Zero_ciph(&result_cin_n6);
+    memset(&result_cin_n6, 0, sizeof(result_cin_n6));
     for (index_khw2_n6 = 0; index_khw2_n6 < 9; index_khw2_n6 = index_khw2_n6 + 1) {
       _rescale_tmp_617 = input_roll_n6[index_khw2_n6];
       Pt_from_msg(&_pgen_tmp_47, index_khw2_n6 + (index_cin_n6 * 9) + 622 /* cst_163_0 */, 16384, Sc_degree(&_rescale_tmp_617), Level(&_rescale_tmp_617));
@@ -4284,7 +4284,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435479, &_pgen_tmp_52, 15);
   Free_poly_data(&_pgen_tmp_52._c1_poly);
   Free_poly_data(&_pgen_tmp_52._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_54, &_cst_552, 1, 1, Level(&_preg_268435479));
+  Encode_float(&_pgen_tmp_54, &_cst_552, 1, 1, Level(&_preg_268435479));
   Init_ciph_up_scale_plain(&_pgen_tmp_53, &_preg_268435479, &_pgen_tmp_54);
   {
     _pgen_modulus = Q_modulus();
@@ -4310,7 +4310,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435480._c1_poly);
   Free_poly_data(&_preg_268435480._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n7);
+  memset(&result_n7, 0, sizeof(result_n7));
   Copy_ciph(&input_dup_n7, &_preg_268435481);
   Free_poly_data(&_preg_268435481._c1_poly);
   Free_poly_data(&_preg_268435481._c0_poly);
@@ -4323,7 +4323,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n7._c1_poly);
   Free_poly_data(&input_dup_n7._c0_poly);
   for (index_cin_n7 = 0; index_cin_n7 < 16; index_cin_n7 = index_cin_n7 + 1) {
-    Zero_ciph(&result_cin_n7);
+    memset(&result_cin_n7, 0, sizeof(result_cin_n7));
     for (index_khw2_n7 = 0; index_khw2_n7 < 9; index_khw2_n7 = index_khw2_n7 + 1) {
       _rescale_tmp_725 = input_roll_n7[index_khw2_n7];
       Pt_from_msg(&_pgen_tmp_56, index_khw2_n7 + (index_cin_n7 * 9) + 768 /* cst_169_0 */, 16384, Sc_degree(&_rescale_tmp_725), Level(&_rescale_tmp_725));
@@ -4433,7 +4433,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435484, &_preg_268435483, 15);
   Free_poly_data(&_preg_268435483._c1_poly);
   Free_poly_data(&_preg_268435483._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_63, &_cst_553, 1, 1, Level(&_preg_268435484));
+  Encode_float(&_pgen_tmp_63, &_cst_553, 1, 1, Level(&_preg_268435484));
   Init_ciph_up_scale_plain(&_pgen_tmp_62, &_preg_268435484, &_pgen_tmp_63);
   {
     _pgen_modulus = Q_modulus();
@@ -4459,7 +4459,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435485._c1_poly);
   Free_poly_data(&_preg_268435485._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n8);
+  memset(&result_n8, 0, sizeof(result_n8));
   Copy_ciph(&input_dup_n8, &_preg_268435486);
   for (index_khw1_n8 = 0; index_khw1_n8 < 9; index_khw1_n8 = index_khw1_n8 + 1) {
     _preg_268435731 = Rotate(input_dup_n8, _cst_178[index_khw1_n8]);
@@ -4470,7 +4470,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n8._c1_poly);
   Free_poly_data(&input_dup_n8._c0_poly);
   for (index_cin_n8 = 0; index_cin_n8 < 16; index_cin_n8 = index_cin_n8 + 1) {
-    Zero_ciph(&result_cin_n8);
+    memset(&result_cin_n8, 0, sizeof(result_cin_n8));
     for (index_khw2_n8 = 0; index_khw2_n8 < 9; index_khw2_n8 = index_khw2_n8 + 1) {
       _rescale_tmp_839 = input_roll_n8[index_khw2_n8];
       Pt_from_msg(&_pgen_tmp_65, index_khw2_n8 + (index_cin_n8 * 9) + 914 /* cst_176_0 */, 16384, Sc_degree(&_rescale_tmp_839), Level(&_rescale_tmp_839));
@@ -4564,7 +4564,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435488, &_pgen_tmp_70, 15);
   Free_poly_data(&_pgen_tmp_70._c1_poly);
   Free_poly_data(&_pgen_tmp_70._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_72, &_cst_554, 1, 1, Level(&_preg_268435488));
+  Encode_float(&_pgen_tmp_72, &_cst_554, 1, 1, Level(&_preg_268435488));
   Init_ciph_up_scale_plain(&_pgen_tmp_71, &_preg_268435488, &_pgen_tmp_72);
   {
     _pgen_modulus = Q_modulus();
@@ -4590,7 +4590,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435489._c1_poly);
   Free_poly_data(&_preg_268435489._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n9);
+  memset(&result_n9, 0, sizeof(result_n9));
   Copy_ciph(&input_dup_n9, &_preg_268435490);
   Free_poly_data(&_preg_268435490._c1_poly);
   Free_poly_data(&_preg_268435490._c0_poly);
@@ -4603,7 +4603,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n9._c1_poly);
   Free_poly_data(&input_dup_n9._c0_poly);
   for (index_cin_n9 = 0; index_cin_n9 < 16; index_cin_n9 = index_cin_n9 + 1) {
-    Zero_ciph(&result_cin_n9);
+    memset(&result_cin_n9, 0, sizeof(result_cin_n9));
     for (index_khw2_n9 = 0; index_khw2_n9 < 9; index_khw2_n9 = index_khw2_n9 + 1) {
       _rescale_tmp_947 = input_roll_n9[index_khw2_n9];
       Pt_from_msg(&_pgen_tmp_74, index_khw2_n9 + (index_cin_n9 * 9) + 1060 /* cst_182_0 */, 16384, Sc_degree(&_rescale_tmp_947), Level(&_rescale_tmp_947));
@@ -4713,7 +4713,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435493, &_preg_268435492, 15);
   Free_poly_data(&_preg_268435492._c1_poly);
   Free_poly_data(&_preg_268435492._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_81, &_cst_555, 1, 1, Level(&_preg_268435493));
+  Encode_float(&_pgen_tmp_81, &_cst_555, 1, 1, Level(&_preg_268435493));
   Init_ciph_up_scale_plain(&_pgen_tmp_80, &_preg_268435493, &_pgen_tmp_81);
   {
     _pgen_modulus = Q_modulus();
@@ -4739,7 +4739,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435494._c1_poly);
   Free_poly_data(&_preg_268435494._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n10);
+  memset(&result_n10, 0, sizeof(result_n10));
   Copy_ciph(&input_dup_n10, &_preg_268435495);
   for (index_khw1_n10 = 0; index_khw1_n10 < 9; index_khw1_n10 = index_khw1_n10 + 1) {
     _preg_268435737 = Rotate(input_dup_n10, _cst_191[index_khw1_n10]);
@@ -4750,7 +4750,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n10._c1_poly);
   Free_poly_data(&input_dup_n10._c0_poly);
   for (index_cin_n10 = 0; index_cin_n10 < 16; index_cin_n10 = index_cin_n10 + 1) {
-    Zero_ciph(&result_cin_n10);
+    memset(&result_cin_n10, 0, sizeof(result_cin_n10));
     for (index_khw2_n10 = 0; index_khw2_n10 < 9; index_khw2_n10 = index_khw2_n10 + 1) {
       _rescale_tmp_1061 = input_roll_n10[index_khw2_n10];
       Pt_from_msg(&_pgen_tmp_83, index_khw2_n10 + (index_cin_n10 * 9) + 1206 /* cst_189_0 */, 16384, Sc_degree(&_rescale_tmp_1061), Level(&_rescale_tmp_1061));
@@ -4844,7 +4844,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435497, &_pgen_tmp_88, 15);
   Free_poly_data(&_pgen_tmp_88._c1_poly);
   Free_poly_data(&_pgen_tmp_88._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_90, &_cst_556, 1, 1, Level(&_preg_268435497));
+  Encode_float(&_pgen_tmp_90, &_cst_556, 1, 1, Level(&_preg_268435497));
   Init_ciph_up_scale_plain(&_pgen_tmp_89, &_preg_268435497, &_pgen_tmp_90);
   {
     _pgen_modulus = Q_modulus();
@@ -4870,7 +4870,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435498._c1_poly);
   Free_poly_data(&_preg_268435498._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n11);
+  memset(&result_n11, 0, sizeof(result_n11));
   Copy_ciph(&input_dup_n11, &_preg_268435499);
   Free_poly_data(&_preg_268435499._c1_poly);
   Free_poly_data(&_preg_268435499._c0_poly);
@@ -4883,7 +4883,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n11._c1_poly);
   Free_poly_data(&input_dup_n11._c0_poly);
   for (index_cin_n11 = 0; index_cin_n11 < 16; index_cin_n11 = index_cin_n11 + 1) {
-    Zero_ciph(&result_cin_n11);
+    memset(&result_cin_n11, 0, sizeof(result_cin_n11));
     for (index_khw2_n11 = 0; index_khw2_n11 < 9; index_khw2_n11 = index_khw2_n11 + 1) {
       _rescale_tmp_1169 = input_roll_n11[index_khw2_n11];
       Pt_from_msg(&_pgen_tmp_92, index_khw2_n11 + (index_cin_n11 * 9) + 1352 /* cst_195_0 */, 16384, Sc_degree(&_rescale_tmp_1169), Level(&_rescale_tmp_1169));
@@ -4993,7 +4993,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435502, &_preg_268435501, 15);
   Free_poly_data(&_preg_268435501._c1_poly);
   Free_poly_data(&_preg_268435501._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_99, &_cst_557, 1, 1, Level(&_preg_268435502));
+  Encode_float(&_pgen_tmp_99, &_cst_557, 1, 1, Level(&_preg_268435502));
   Init_ciph_up_scale_plain(&_pgen_tmp_98, &_preg_268435502, &_pgen_tmp_99);
   {
     _pgen_modulus = Q_modulus();
@@ -5019,7 +5019,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435503._c1_poly);
   Free_poly_data(&_preg_268435503._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n12);
+  memset(&result_n12, 0, sizeof(result_n12));
   Copy_ciph(&input_dup_n12, &_preg_268435504);
   for (index_khw1_n12 = 0; index_khw1_n12 < 9; index_khw1_n12 = index_khw1_n12 + 1) {
     _preg_268435743 = Rotate(input_dup_n12, _cst_204[index_khw1_n12]);
@@ -5030,7 +5030,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n12._c1_poly);
   Free_poly_data(&input_dup_n12._c0_poly);
   for (index_cin_n12 = 0; index_cin_n12 < 16; index_cin_n12 = index_cin_n12 + 1) {
-    Zero_ciph(&result_cin_n12);
+    memset(&result_cin_n12, 0, sizeof(result_cin_n12));
     for (index_khw2_n12 = 0; index_khw2_n12 < 9; index_khw2_n12 = index_khw2_n12 + 1) {
       _rescale_tmp_1283 = input_roll_n12[index_khw2_n12];
       Pt_from_msg(&_pgen_tmp_101, index_khw2_n12 + (index_cin_n12 * 9) + 1498 /* cst_202_0 */, 16384, Sc_degree(&_rescale_tmp_1283), Level(&_rescale_tmp_1283));
@@ -5124,7 +5124,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435506, &_pgen_tmp_106, 15);
   Free_poly_data(&_pgen_tmp_106._c1_poly);
   Free_poly_data(&_pgen_tmp_106._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_108, &_cst_558, 1, 1, Level(&_preg_268435506));
+  Encode_float(&_pgen_tmp_108, &_cst_558, 1, 1, Level(&_preg_268435506));
   Init_ciph_up_scale_plain(&_pgen_tmp_107, &_preg_268435506, &_pgen_tmp_108);
   {
     _pgen_modulus = Q_modulus();
@@ -5150,7 +5150,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435507._c1_poly);
   Free_poly_data(&_preg_268435507._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n13);
+  memset(&result_n13, 0, sizeof(result_n13));
   Copy_ciph(&input_dup_n13, &_preg_268435508);
   Free_poly_data(&_preg_268435508._c1_poly);
   Free_poly_data(&_preg_268435508._c0_poly);
@@ -5163,7 +5163,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n13._c1_poly);
   Free_poly_data(&input_dup_n13._c0_poly);
   for (index_cin_n13 = 0; index_cin_n13 < 16; index_cin_n13 = index_cin_n13 + 1) {
-    Zero_ciph(&result_cin_n13);
+    memset(&result_cin_n13, 0, sizeof(result_cin_n13));
     for (index_khw2_n13 = 0; index_khw2_n13 < 9; index_khw2_n13 = index_khw2_n13 + 1) {
       _rescale_tmp_1391 = input_roll_n13[index_khw2_n13];
       Pt_from_msg(&_pgen_tmp_110, index_khw2_n13 + (index_cin_n13 * 9) + 1644 /* cst_208_0 */, 16384, Sc_degree(&_rescale_tmp_1391), Level(&_rescale_tmp_1391));
@@ -5273,7 +5273,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435511, &_preg_268435510, 15);
   Free_poly_data(&_preg_268435510._c1_poly);
   Free_poly_data(&_preg_268435510._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_117, &_cst_559, 1, 1, Level(&_preg_268435511));
+  Encode_float(&_pgen_tmp_117, &_cst_559, 1, 1, Level(&_preg_268435511));
   Init_ciph_up_scale_plain(&_pgen_tmp_116, &_preg_268435511, &_pgen_tmp_117);
   {
     _pgen_modulus = Q_modulus();
@@ -5299,7 +5299,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435512._c1_poly);
   Free_poly_data(&_preg_268435512._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n14);
+  memset(&result_n14, 0, sizeof(result_n14));
   Copy_ciph(&input_dup_n14, &_preg_268435513);
   for (index_khw1_n14 = 0; index_khw1_n14 < 9; index_khw1_n14 = index_khw1_n14 + 1) {
     _preg_268435749 = Rotate(input_dup_n14, _cst_217[index_khw1_n14]);
@@ -5310,7 +5310,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n14._c1_poly);
   Free_poly_data(&input_dup_n14._c0_poly);
   for (index_cin_n14 = 0; index_cin_n14 < 16; index_cin_n14 = index_cin_n14 + 1) {
-    Zero_ciph(&result_cin_n14);
+    memset(&result_cin_n14, 0, sizeof(result_cin_n14));
     for (index_khw2_n14 = 0; index_khw2_n14 < 9; index_khw2_n14 = index_khw2_n14 + 1) {
       _rescale_tmp_1505 = input_roll_n14[index_khw2_n14];
       Pt_from_msg(&_pgen_tmp_119, index_khw2_n14 + (index_cin_n14 * 9) + 1790 /* cst_215_0 */, 16384, Sc_degree(&_rescale_tmp_1505), Level(&_rescale_tmp_1505));
@@ -5404,7 +5404,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435515, &_pgen_tmp_124, 15);
   Free_poly_data(&_pgen_tmp_124._c1_poly);
   Free_poly_data(&_pgen_tmp_124._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_126, &_cst_560, 1, 1, Level(&_preg_268435515));
+  Encode_float(&_pgen_tmp_126, &_cst_560, 1, 1, Level(&_preg_268435515));
   Init_ciph_up_scale_plain(&_pgen_tmp_125, &_preg_268435515, &_pgen_tmp_126);
   {
     _pgen_modulus = Q_modulus();
@@ -5430,7 +5430,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435516._c1_poly);
   Free_poly_data(&_preg_268435516._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n15);
+  memset(&result_n15, 0, sizeof(result_n15));
   Copy_ciph(&input_dup_n15, &_preg_268435517);
   Free_poly_data(&_preg_268435517._c1_poly);
   Free_poly_data(&_preg_268435517._c0_poly);
@@ -5443,7 +5443,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n15._c1_poly);
   Free_poly_data(&input_dup_n15._c0_poly);
   for (index_cin_n15 = 0; index_cin_n15 < 16; index_cin_n15 = index_cin_n15 + 1) {
-    Zero_ciph(&result_cin_n15);
+    memset(&result_cin_n15, 0, sizeof(result_cin_n15));
     for (index_khw2_n15 = 0; index_khw2_n15 < 9; index_khw2_n15 = index_khw2_n15 + 1) {
       _rescale_tmp_1613 = input_roll_n15[index_khw2_n15];
       Pt_from_msg(&_pgen_tmp_128, index_khw2_n15 + (index_cin_n15 * 9) + 1936 /* cst_221_0 */, 16384, Sc_degree(&_rescale_tmp_1613), Level(&_rescale_tmp_1613));
@@ -5553,7 +5553,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435520, &_preg_268435519, 15);
   Free_poly_data(&_preg_268435519._c1_poly);
   Free_poly_data(&_preg_268435519._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_135, &_cst_561, 1, 1, Level(&_preg_268435520));
+  Encode_float(&_pgen_tmp_135, &_cst_561, 1, 1, Level(&_preg_268435520));
   Init_ciph_up_scale_plain(&_pgen_tmp_134, &_preg_268435520, &_pgen_tmp_135);
   {
     _pgen_modulus = Q_modulus();
@@ -5579,7 +5579,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435521._c1_poly);
   Free_poly_data(&_preg_268435521._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n16);
+  memset(&result_n16, 0, sizeof(result_n16));
   Copy_ciph(&input_dup_n16, &_preg_268435522);
   for (index_khw1_n16 = 0; index_khw1_n16 < 9; index_khw1_n16 = index_khw1_n16 + 1) {
     _preg_268435755 = Rotate(input_dup_n16, _cst_230[index_khw1_n16]);
@@ -5590,7 +5590,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n16._c1_poly);
   Free_poly_data(&input_dup_n16._c0_poly);
   for (index_cin_n16 = 0; index_cin_n16 < 16; index_cin_n16 = index_cin_n16 + 1) {
-    Zero_ciph(&result_cin_n16);
+    memset(&result_cin_n16, 0, sizeof(result_cin_n16));
     for (index_khw2_n16 = 0; index_khw2_n16 < 9; index_khw2_n16 = index_khw2_n16 + 1) {
       _rescale_tmp_1727 = input_roll_n16[index_khw2_n16];
       Pt_from_msg(&_pgen_tmp_137, index_khw2_n16 + (index_cin_n16 * 9) + 2082 /* cst_228_0 */, 16384, Sc_degree(&_rescale_tmp_1727), Level(&_rescale_tmp_1727));
@@ -5684,7 +5684,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435524, &_pgen_tmp_142, 15);
   Free_poly_data(&_pgen_tmp_142._c1_poly);
   Free_poly_data(&_pgen_tmp_142._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_144, &_cst_562, 1, 1, Level(&_preg_268435524));
+  Encode_float(&_pgen_tmp_144, &_cst_562, 1, 1, Level(&_preg_268435524));
   Init_ciph_up_scale_plain(&_pgen_tmp_143, &_preg_268435524, &_pgen_tmp_144);
   {
     _pgen_modulus = Q_modulus();
@@ -5710,7 +5710,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435525._c1_poly);
   Free_poly_data(&_preg_268435525._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n17);
+  memset(&result_n17, 0, sizeof(result_n17));
   Copy_ciph(&input_dup_n17, &_preg_268435526);
   Free_poly_data(&_preg_268435526._c1_poly);
   Free_poly_data(&_preg_268435526._c0_poly);
@@ -5723,7 +5723,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n17._c1_poly);
   Free_poly_data(&input_dup_n17._c0_poly);
   for (index_cin_n17 = 0; index_cin_n17 < 16; index_cin_n17 = index_cin_n17 + 1) {
-    Zero_ciph(&result_cin_n17);
+    memset(&result_cin_n17, 0, sizeof(result_cin_n17));
     for (index_khw2_n17 = 0; index_khw2_n17 < 9; index_khw2_n17 = index_khw2_n17 + 1) {
       _rescale_tmp_1835 = input_roll_n17[index_khw2_n17];
       Pt_from_msg(&_pgen_tmp_146, index_khw2_n17 + (index_cin_n17 * 9) + 2228 /* cst_234_0 */, 16384, Sc_degree(&_rescale_tmp_1835), Level(&_rescale_tmp_1835));
@@ -5833,7 +5833,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435529, &_preg_268435528, 15);
   Free_poly_data(&_preg_268435528._c1_poly);
   Free_poly_data(&_preg_268435528._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_153, &_cst_563, 1, 1, Level(&_preg_268435529));
+  Encode_float(&_pgen_tmp_153, &_cst_563, 1, 1, Level(&_preg_268435529));
   Init_ciph_up_scale_plain(&_pgen_tmp_152, &_preg_268435529, &_pgen_tmp_153);
   {
     _pgen_modulus = Q_modulus();
@@ -5859,7 +5859,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435530._c1_poly);
   Free_poly_data(&_preg_268435530._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n18);
+  memset(&result_n18, 0, sizeof(result_n18));
   Copy_ciph(&input_dup_n18, &_preg_268435531);
   for (index_khw1_n18 = 0; index_khw1_n18 < 9; index_khw1_n18 = index_khw1_n18 + 1) {
     _preg_268435761 = Rotate(input_dup_n18, _cst_243[index_khw1_n18]);
@@ -5870,7 +5870,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n18._c1_poly);
   Free_poly_data(&input_dup_n18._c0_poly);
   for (index_cin_n18 = 0; index_cin_n18 < 16; index_cin_n18 = index_cin_n18 + 1) {
-    Zero_ciph(&result_cin_n18);
+    memset(&result_cin_n18, 0, sizeof(result_cin_n18));
     for (index_khw2_n18 = 0; index_khw2_n18 < 9; index_khw2_n18 = index_khw2_n18 + 1) {
       _rescale_tmp_1949 = input_roll_n18[index_khw2_n18];
       Pt_from_msg(&_pgen_tmp_155, index_khw2_n18 + (index_cin_n18 * 9) + 2374 /* cst_241_0 */, 16384, Sc_degree(&_rescale_tmp_1949), Level(&_rescale_tmp_1949));
@@ -5964,7 +5964,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435533, &_pgen_tmp_160, 15);
   Free_poly_data(&_pgen_tmp_160._c1_poly);
   Free_poly_data(&_pgen_tmp_160._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_162, &_cst_564, 1, 1, Level(&_preg_268435533));
+  Encode_float(&_pgen_tmp_162, &_cst_564, 1, 1, Level(&_preg_268435533));
   Init_ciph_up_scale_plain(&_pgen_tmp_161, &_preg_268435533, &_pgen_tmp_162);
   {
     _pgen_modulus = Q_modulus();
@@ -5990,7 +5990,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435534._c1_poly);
   Free_poly_data(&_preg_268435534._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n19);
+  memset(&result_n19, 0, sizeof(result_n19));
   Copy_ciph(&input_dup_n19, &_preg_268435535);
   Free_poly_data(&_preg_268435535._c1_poly);
   Free_poly_data(&_preg_268435535._c0_poly);
@@ -6003,7 +6003,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n19._c1_poly);
   Free_poly_data(&input_dup_n19._c0_poly);
   for (index_cin_n19 = 0; index_cin_n19 < 16; index_cin_n19 = index_cin_n19 + 1) {
-    Zero_ciph(&result_cin_n19);
+    memset(&result_cin_n19, 0, sizeof(result_cin_n19));
     for (index_khw2_n19 = 0; index_khw2_n19 < 9; index_khw2_n19 = index_khw2_n19 + 1) {
       _rescale_tmp_2057 = input_roll_n19[index_khw2_n19];
       Pt_from_msg(&_pgen_tmp_164, index_khw2_n19 + (index_cin_n19 * 9) + 2520 /* cst_247_0 */, 16384, Sc_degree(&_rescale_tmp_2057), Level(&_rescale_tmp_2057));
@@ -6113,7 +6113,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435538, &_preg_268435537, 18);
   Free_poly_data(&_preg_268435537._c1_poly);
   Free_poly_data(&_preg_268435537._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_171, &_cst_565, 1, 1, Level(&_preg_268435538));
+  Encode_float(&_pgen_tmp_171, &_cst_565, 1, 1, Level(&_preg_268435538));
   Init_ciph_up_scale_plain(&_pgen_tmp_170, &_preg_268435538, &_pgen_tmp_171);
   {
     _pgen_modulus = Q_modulus();
@@ -6139,7 +6139,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435539._c1_poly);
   Free_poly_data(&_preg_268435539._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n20);
+  memset(&result_n20, 0, sizeof(result_n20));
   _preg_268435767 = Rotate(_preg_268435540, -16384);
   Init_ciph_same_scale(&input_dup_n20, &_preg_268435540, &_preg_268435767);
   {
@@ -6162,7 +6162,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n20._c1_poly);
   Free_poly_data(&input_dup_n20._c0_poly);
   for (index_cin_n20 = 0; index_cin_n20 < 16; index_cin_n20 = index_cin_n20 + 1) {
-    Zero_ciph(&result_cin_n20);
+    memset(&result_cin_n20, 0, sizeof(result_cin_n20));
     for (index_khw2_n20 = 0; index_khw2_n20 < 9; index_khw2_n20 = index_khw2_n20 + 1) {
       _rescale_tmp_2175 = input_roll_n20[index_khw2_n20];
       Pt_from_msg(&_pgen_tmp_173, index_khw2_n20 + (index_cin_n20 * 9) + 2666 /* cst_254_0 */, 32768, Sc_degree(&_rescale_tmp_2175), Level(&_rescale_tmp_2175));
@@ -6232,7 +6232,7 @@ bool Main_graph() {
   Copy_ciph(&orig_result20, &result_n20);
   Free_poly_data(&result_n20._c1_poly);
   Free_poly_data(&result_n20._c0_poly);
-  Zero_ciph(&comb_row_result21);
+  memset(&comb_row_result21, 0, sizeof(comb_row_result21));
   for (combine_row_index_n21 = 0; combine_row_index_n21 < 16; combine_row_index_n21 = combine_row_index_n21 + 1) {
     _preg_268435770 = Rotate(orig_result20, combine_row_index_n21 * 1);
     Copy_ciph(&_ckks_gen_tmp_2237, &_preg_268435770);
@@ -6265,7 +6265,7 @@ bool Main_graph() {
   Free_poly_data(&_rescale_tmp_7099._c0_poly);
   Free_poly_data(&_pgen_tmp_178._c1_poly);
   Free_poly_data(&_pgen_tmp_178._c0_poly);
-  Zero_ciph(&comb_rc_result21);
+  memset(&comb_rc_result21, 0, sizeof(comb_rc_result21));
   for (combine_rc_index_n21 = 0; combine_rc_index_n21 < 16; combine_rc_index_n21 = combine_rc_index_n21 + 1) {
     _preg_268435771 = Rotate(comb_row_result21, combine_rc_index_n21 * 48);
     Copy_ciph(&_ckks_gen_tmp_2268, &_preg_268435771);
@@ -6298,7 +6298,7 @@ bool Main_graph() {
   Free_poly_data(&_rescale_tmp_7105._c0_poly);
   Free_poly_data(&_pgen_tmp_180._c1_poly);
   Free_poly_data(&_pgen_tmp_180._c0_poly);
-  Zero_ciph(&final_result21);
+  memset(&final_result21, 0, sizeof(final_result21));
   for (combine_cc_index_n21 = 0; combine_cc_index_n21 < 32; combine_cc_index_n21 = combine_cc_index_n21 + 1) {
     _preg_268435772 = Rotate(comb_rc_result21, combine_cc_index_n21 * 768);
     Copy_ciph(&_ckks_gen_tmp_2299, &_preg_268435772);
@@ -6343,7 +6343,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435542, &_pgen_tmp_183, 15);
   Free_poly_data(&_pgen_tmp_183._c1_poly);
   Free_poly_data(&_pgen_tmp_183._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_185, &_cst_566, 1, 1, Level(&_preg_268435542));
+  Encode_float(&_pgen_tmp_185, &_cst_566, 1, 1, Level(&_preg_268435542));
   Init_ciph_up_scale_plain(&_pgen_tmp_184, &_preg_268435542, &_pgen_tmp_185);
   {
     _pgen_modulus = Q_modulus();
@@ -6369,7 +6369,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435543._c1_poly);
   Free_poly_data(&_preg_268435543._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n22);
+  memset(&result_n22, 0, sizeof(result_n22));
   Copy_ciph(&input_dup_n22, &_preg_268435544);
   Free_poly_data(&_preg_268435544._c1_poly);
   Free_poly_data(&_preg_268435544._c0_poly);
@@ -6382,7 +6382,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n22._c1_poly);
   Free_poly_data(&input_dup_n22._c0_poly);
   for (index_cin_n22 = 0; index_cin_n22 < 32; index_cin_n22 = index_cin_n22 + 1) {
-    Zero_ciph(&result_cin_n22);
+    memset(&result_cin_n22, 0, sizeof(result_cin_n22));
     for (index_khw2_n22 = 0; index_khw2_n22 < 9; index_khw2_n22 = index_khw2_n22 + 1) {
       _rescale_tmp_2374 = input_roll_n22[index_khw2_n22];
       Pt_from_msg(&_pgen_tmp_187, index_khw2_n22 + (index_cin_n22 * 9) + 2876 /* cst_263_0 */, 8192, Sc_degree(&_rescale_tmp_2374), Level(&_rescale_tmp_2374));
@@ -6469,7 +6469,7 @@ bool Main_graph() {
   Free_poly_data(&result_n22._c0_poly);
   Tm_taken("Tensor::conv");
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n23);
+  memset(&result_n23, 0, sizeof(result_n23));
   _preg_268435776 = Rotate(_preg_268435540, -16384);
   Init_ciph_same_scale(&input_dup_n23, &_preg_268435540, &_preg_268435776);
   {
@@ -6494,7 +6494,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n23._c1_poly);
   Free_poly_data(&input_dup_n23._c0_poly);
   for (index_cin_n23 = 0; index_cin_n23 < 16; index_cin_n23 = index_cin_n23 + 1) {
-    Zero_ciph(&result_cin_n23);
+    memset(&result_cin_n23, 0, sizeof(result_cin_n23));
     for (index_khw2_n23 = 0; index_khw2_n23 < 1; index_khw2_n23 = index_khw2_n23 + 1) {
       _rescale_tmp_2476 = input_roll_n23[index_khw2_n23];
       Pt_from_msg(&_pgen_tmp_192, index_khw2_n23 + (index_cin_n23 * 1) + 3166 /* cst_269_0 */, 32768, Sc_degree(&_rescale_tmp_2476), Level(&_rescale_tmp_2476));
@@ -6564,7 +6564,7 @@ bool Main_graph() {
   Copy_ciph(&orig_result23, &result_n23);
   Free_poly_data(&result_n23._c1_poly);
   Free_poly_data(&result_n23._c0_poly);
-  Zero_ciph(&comb_row_result24);
+  memset(&comb_row_result24, 0, sizeof(comb_row_result24));
   for (combine_row_index_n24 = 0; combine_row_index_n24 < 16; combine_row_index_n24 = combine_row_index_n24 + 1) {
     _preg_268435779 = Rotate(orig_result23, combine_row_index_n24 * 1);
     Copy_ciph(&_ckks_gen_tmp_2538, &_preg_268435779);
@@ -6597,7 +6597,7 @@ bool Main_graph() {
   Free_poly_data(&_rescale_tmp_7141._c0_poly);
   Free_poly_data(&_pgen_tmp_197._c1_poly);
   Free_poly_data(&_pgen_tmp_197._c0_poly);
-  Zero_ciph(&comb_rc_result24);
+  memset(&comb_rc_result24, 0, sizeof(comb_rc_result24));
   for (combine_rc_index_n24 = 0; combine_rc_index_n24 < 16; combine_rc_index_n24 = combine_rc_index_n24 + 1) {
     _preg_268435780 = Rotate(comb_row_result24, combine_rc_index_n24 * 48);
     Copy_ciph(&_ckks_gen_tmp_2569, &_preg_268435780);
@@ -6630,7 +6630,7 @@ bool Main_graph() {
   Free_poly_data(&_rescale_tmp_7147._c0_poly);
   Free_poly_data(&_pgen_tmp_199._c1_poly);
   Free_poly_data(&_pgen_tmp_199._c0_poly);
-  Zero_ciph(&final_result24);
+  memset(&final_result24, 0, sizeof(final_result24));
   for (combine_cc_index_n24 = 0; combine_cc_index_n24 < 32; combine_cc_index_n24 = combine_cc_index_n24 + 1) {
     _preg_268435781 = Rotate(comb_rc_result24, combine_cc_index_n24 * 768);
     Copy_ciph(&_ckks_gen_tmp_2600, &_preg_268435781);
@@ -6691,7 +6691,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435548, &_pgen_tmp_202, 15);
   Free_poly_data(&_pgen_tmp_202._c1_poly);
   Free_poly_data(&_pgen_tmp_202._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_204, &_cst_567, 1, 1, Level(&_preg_268435548));
+  Encode_float(&_pgen_tmp_204, &_cst_567, 1, 1, Level(&_preg_268435548));
   Init_ciph_up_scale_plain(&_pgen_tmp_203, &_preg_268435548, &_pgen_tmp_204);
   {
     _pgen_modulus = Q_modulus();
@@ -6717,7 +6717,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435549._c1_poly);
   Free_poly_data(&_preg_268435549._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n25);
+  memset(&result_n25, 0, sizeof(result_n25));
   Copy_ciph(&input_dup_n25, &_preg_268435550);
   for (index_khw1_n25 = 0; index_khw1_n25 < 9; index_khw1_n25 = index_khw1_n25 + 1) {
     _preg_268435782 = Rotate(input_dup_n25, _cst_281[index_khw1_n25]);
@@ -6728,7 +6728,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n25._c1_poly);
   Free_poly_data(&input_dup_n25._c0_poly);
   for (index_cin_n25 = 0; index_cin_n25 < 32; index_cin_n25 = index_cin_n25 + 1) {
-    Zero_ciph(&result_cin_n25);
+    memset(&result_cin_n25, 0, sizeof(result_cin_n25));
     for (index_khw2_n25 = 0; index_khw2_n25 < 9; index_khw2_n25 = index_khw2_n25 + 1) {
       _rescale_tmp_2681 = input_roll_n25[index_khw2_n25];
       Pt_from_msg(&_pgen_tmp_206, index_khw2_n25 + (index_cin_n25 * 9) + 3248 /* cst_279_0 */, 8192, Sc_degree(&_rescale_tmp_2681), Level(&_rescale_tmp_2681));
@@ -6822,7 +6822,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435552, &_pgen_tmp_211, 15);
   Free_poly_data(&_pgen_tmp_211._c1_poly);
   Free_poly_data(&_pgen_tmp_211._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_213, &_cst_568, 1, 1, Level(&_preg_268435552));
+  Encode_float(&_pgen_tmp_213, &_cst_568, 1, 1, Level(&_preg_268435552));
   Init_ciph_up_scale_plain(&_pgen_tmp_212, &_preg_268435552, &_pgen_tmp_213);
   {
     _pgen_modulus = Q_modulus();
@@ -6848,7 +6848,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435553._c1_poly);
   Free_poly_data(&_preg_268435553._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n26);
+  memset(&result_n26, 0, sizeof(result_n26));
   Copy_ciph(&input_dup_n26, &_preg_268435554);
   Free_poly_data(&_preg_268435554._c1_poly);
   Free_poly_data(&_preg_268435554._c0_poly);
@@ -6861,7 +6861,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n26._c1_poly);
   Free_poly_data(&input_dup_n26._c0_poly);
   for (index_cin_n26 = 0; index_cin_n26 < 32; index_cin_n26 = index_cin_n26 + 1) {
-    Zero_ciph(&result_cin_n26);
+    memset(&result_cin_n26, 0, sizeof(result_cin_n26));
     for (index_khw2_n26 = 0; index_khw2_n26 < 9; index_khw2_n26 = index_khw2_n26 + 1) {
       _rescale_tmp_2789 = input_roll_n26[index_khw2_n26];
       Pt_from_msg(&_pgen_tmp_215, index_khw2_n26 + (index_cin_n26 * 9) + 3538 /* cst_285_0 */, 8192, Sc_degree(&_rescale_tmp_2789), Level(&_rescale_tmp_2789));
@@ -6971,7 +6971,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435557, &_preg_268435556, 15);
   Free_poly_data(&_preg_268435556._c1_poly);
   Free_poly_data(&_preg_268435556._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_222, &_cst_569, 1, 1, Level(&_preg_268435557));
+  Encode_float(&_pgen_tmp_222, &_cst_569, 1, 1, Level(&_preg_268435557));
   Init_ciph_up_scale_plain(&_pgen_tmp_221, &_preg_268435557, &_pgen_tmp_222);
   {
     _pgen_modulus = Q_modulus();
@@ -6997,7 +6997,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435558._c1_poly);
   Free_poly_data(&_preg_268435558._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n27);
+  memset(&result_n27, 0, sizeof(result_n27));
   Copy_ciph(&input_dup_n27, &_preg_268435559);
   for (index_khw1_n27 = 0; index_khw1_n27 < 9; index_khw1_n27 = index_khw1_n27 + 1) {
     _preg_268435788 = Rotate(input_dup_n27, _cst_294[index_khw1_n27]);
@@ -7008,7 +7008,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n27._c1_poly);
   Free_poly_data(&input_dup_n27._c0_poly);
   for (index_cin_n27 = 0; index_cin_n27 < 32; index_cin_n27 = index_cin_n27 + 1) {
-    Zero_ciph(&result_cin_n27);
+    memset(&result_cin_n27, 0, sizeof(result_cin_n27));
     for (index_khw2_n27 = 0; index_khw2_n27 < 9; index_khw2_n27 = index_khw2_n27 + 1) {
       _rescale_tmp_2903 = input_roll_n27[index_khw2_n27];
       Pt_from_msg(&_pgen_tmp_224, index_khw2_n27 + (index_cin_n27 * 9) + 3828 /* cst_292_0 */, 8192, Sc_degree(&_rescale_tmp_2903), Level(&_rescale_tmp_2903));
@@ -7102,7 +7102,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435561, &_pgen_tmp_229, 15);
   Free_poly_data(&_pgen_tmp_229._c1_poly);
   Free_poly_data(&_pgen_tmp_229._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_231, &_cst_570, 1, 1, Level(&_preg_268435561));
+  Encode_float(&_pgen_tmp_231, &_cst_570, 1, 1, Level(&_preg_268435561));
   Init_ciph_up_scale_plain(&_pgen_tmp_230, &_preg_268435561, &_pgen_tmp_231);
   {
     _pgen_modulus = Q_modulus();
@@ -7128,7 +7128,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435562._c1_poly);
   Free_poly_data(&_preg_268435562._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n28);
+  memset(&result_n28, 0, sizeof(result_n28));
   Copy_ciph(&input_dup_n28, &_preg_268435563);
   Free_poly_data(&_preg_268435563._c1_poly);
   Free_poly_data(&_preg_268435563._c0_poly);
@@ -7141,7 +7141,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n28._c1_poly);
   Free_poly_data(&input_dup_n28._c0_poly);
   for (index_cin_n28 = 0; index_cin_n28 < 32; index_cin_n28 = index_cin_n28 + 1) {
-    Zero_ciph(&result_cin_n28);
+    memset(&result_cin_n28, 0, sizeof(result_cin_n28));
     for (index_khw2_n28 = 0; index_khw2_n28 < 9; index_khw2_n28 = index_khw2_n28 + 1) {
       _rescale_tmp_3011 = input_roll_n28[index_khw2_n28];
       Pt_from_msg(&_pgen_tmp_233, index_khw2_n28 + (index_cin_n28 * 9) + 4118 /* cst_298_0 */, 8192, Sc_degree(&_rescale_tmp_3011), Level(&_rescale_tmp_3011));
@@ -7251,7 +7251,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435566, &_preg_268435565, 15);
   Free_poly_data(&_preg_268435565._c1_poly);
   Free_poly_data(&_preg_268435565._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_240, &_cst_571, 1, 1, Level(&_preg_268435566));
+  Encode_float(&_pgen_tmp_240, &_cst_571, 1, 1, Level(&_preg_268435566));
   Init_ciph_up_scale_plain(&_pgen_tmp_239, &_preg_268435566, &_pgen_tmp_240);
   {
     _pgen_modulus = Q_modulus();
@@ -7277,7 +7277,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435567._c1_poly);
   Free_poly_data(&_preg_268435567._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n29);
+  memset(&result_n29, 0, sizeof(result_n29));
   Copy_ciph(&input_dup_n29, &_preg_268435568);
   for (index_khw1_n29 = 0; index_khw1_n29 < 9; index_khw1_n29 = index_khw1_n29 + 1) {
     _preg_268435794 = Rotate(input_dup_n29, _cst_307[index_khw1_n29]);
@@ -7288,7 +7288,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n29._c1_poly);
   Free_poly_data(&input_dup_n29._c0_poly);
   for (index_cin_n29 = 0; index_cin_n29 < 32; index_cin_n29 = index_cin_n29 + 1) {
-    Zero_ciph(&result_cin_n29);
+    memset(&result_cin_n29, 0, sizeof(result_cin_n29));
     for (index_khw2_n29 = 0; index_khw2_n29 < 9; index_khw2_n29 = index_khw2_n29 + 1) {
       _rescale_tmp_3125 = input_roll_n29[index_khw2_n29];
       Pt_from_msg(&_pgen_tmp_242, index_khw2_n29 + (index_cin_n29 * 9) + 4408 /* cst_305_0 */, 8192, Sc_degree(&_rescale_tmp_3125), Level(&_rescale_tmp_3125));
@@ -7382,7 +7382,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435570, &_pgen_tmp_247, 15);
   Free_poly_data(&_pgen_tmp_247._c1_poly);
   Free_poly_data(&_pgen_tmp_247._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_249, &_cst_572, 1, 1, Level(&_preg_268435570));
+  Encode_float(&_pgen_tmp_249, &_cst_572, 1, 1, Level(&_preg_268435570));
   Init_ciph_up_scale_plain(&_pgen_tmp_248, &_preg_268435570, &_pgen_tmp_249);
   {
     _pgen_modulus = Q_modulus();
@@ -7408,7 +7408,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435571._c1_poly);
   Free_poly_data(&_preg_268435571._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n30);
+  memset(&result_n30, 0, sizeof(result_n30));
   Copy_ciph(&input_dup_n30, &_preg_268435572);
   Free_poly_data(&_preg_268435572._c1_poly);
   Free_poly_data(&_preg_268435572._c0_poly);
@@ -7421,7 +7421,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n30._c1_poly);
   Free_poly_data(&input_dup_n30._c0_poly);
   for (index_cin_n30 = 0; index_cin_n30 < 32; index_cin_n30 = index_cin_n30 + 1) {
-    Zero_ciph(&result_cin_n30);
+    memset(&result_cin_n30, 0, sizeof(result_cin_n30));
     for (index_khw2_n30 = 0; index_khw2_n30 < 9; index_khw2_n30 = index_khw2_n30 + 1) {
       _rescale_tmp_3233 = input_roll_n30[index_khw2_n30];
       Pt_from_msg(&_pgen_tmp_251, index_khw2_n30 + (index_cin_n30 * 9) + 4698 /* cst_311_0 */, 8192, Sc_degree(&_rescale_tmp_3233), Level(&_rescale_tmp_3233));
@@ -7531,7 +7531,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435575, &_preg_268435574, 15);
   Free_poly_data(&_preg_268435574._c1_poly);
   Free_poly_data(&_preg_268435574._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_258, &_cst_573, 1, 1, Level(&_preg_268435575));
+  Encode_float(&_pgen_tmp_258, &_cst_573, 1, 1, Level(&_preg_268435575));
   Init_ciph_up_scale_plain(&_pgen_tmp_257, &_preg_268435575, &_pgen_tmp_258);
   {
     _pgen_modulus = Q_modulus();
@@ -7557,7 +7557,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435576._c1_poly);
   Free_poly_data(&_preg_268435576._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n31);
+  memset(&result_n31, 0, sizeof(result_n31));
   Copy_ciph(&input_dup_n31, &_preg_268435577);
   for (index_khw1_n31 = 0; index_khw1_n31 < 9; index_khw1_n31 = index_khw1_n31 + 1) {
     _preg_268435800 = Rotate(input_dup_n31, _cst_320[index_khw1_n31]);
@@ -7568,7 +7568,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n31._c1_poly);
   Free_poly_data(&input_dup_n31._c0_poly);
   for (index_cin_n31 = 0; index_cin_n31 < 32; index_cin_n31 = index_cin_n31 + 1) {
-    Zero_ciph(&result_cin_n31);
+    memset(&result_cin_n31, 0, sizeof(result_cin_n31));
     for (index_khw2_n31 = 0; index_khw2_n31 < 9; index_khw2_n31 = index_khw2_n31 + 1) {
       _rescale_tmp_3347 = input_roll_n31[index_khw2_n31];
       Pt_from_msg(&_pgen_tmp_260, index_khw2_n31 + (index_cin_n31 * 9) + 4988 /* cst_318_0 */, 8192, Sc_degree(&_rescale_tmp_3347), Level(&_rescale_tmp_3347));
@@ -7662,7 +7662,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435579, &_pgen_tmp_265, 15);
   Free_poly_data(&_pgen_tmp_265._c1_poly);
   Free_poly_data(&_pgen_tmp_265._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_267, &_cst_574, 1, 1, Level(&_preg_268435579));
+  Encode_float(&_pgen_tmp_267, &_cst_574, 1, 1, Level(&_preg_268435579));
   Init_ciph_up_scale_plain(&_pgen_tmp_266, &_preg_268435579, &_pgen_tmp_267);
   {
     _pgen_modulus = Q_modulus();
@@ -7688,7 +7688,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435580._c1_poly);
   Free_poly_data(&_preg_268435580._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n32);
+  memset(&result_n32, 0, sizeof(result_n32));
   Copy_ciph(&input_dup_n32, &_preg_268435581);
   Free_poly_data(&_preg_268435581._c1_poly);
   Free_poly_data(&_preg_268435581._c0_poly);
@@ -7701,7 +7701,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n32._c1_poly);
   Free_poly_data(&input_dup_n32._c0_poly);
   for (index_cin_n32 = 0; index_cin_n32 < 32; index_cin_n32 = index_cin_n32 + 1) {
-    Zero_ciph(&result_cin_n32);
+    memset(&result_cin_n32, 0, sizeof(result_cin_n32));
     for (index_khw2_n32 = 0; index_khw2_n32 < 9; index_khw2_n32 = index_khw2_n32 + 1) {
       _rescale_tmp_3455 = input_roll_n32[index_khw2_n32];
       Pt_from_msg(&_pgen_tmp_269, index_khw2_n32 + (index_cin_n32 * 9) + 5278 /* cst_324_0 */, 8192, Sc_degree(&_rescale_tmp_3455), Level(&_rescale_tmp_3455));
@@ -7811,7 +7811,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435584, &_preg_268435583, 15);
   Free_poly_data(&_preg_268435583._c1_poly);
   Free_poly_data(&_preg_268435583._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_276, &_cst_575, 1, 1, Level(&_preg_268435584));
+  Encode_float(&_pgen_tmp_276, &_cst_575, 1, 1, Level(&_preg_268435584));
   Init_ciph_up_scale_plain(&_pgen_tmp_275, &_preg_268435584, &_pgen_tmp_276);
   {
     _pgen_modulus = Q_modulus();
@@ -7837,7 +7837,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435585._c1_poly);
   Free_poly_data(&_preg_268435585._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n33);
+  memset(&result_n33, 0, sizeof(result_n33));
   Copy_ciph(&input_dup_n33, &_preg_268435586);
   for (index_khw1_n33 = 0; index_khw1_n33 < 9; index_khw1_n33 = index_khw1_n33 + 1) {
     _preg_268435806 = Rotate(input_dup_n33, _cst_333[index_khw1_n33]);
@@ -7848,7 +7848,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n33._c1_poly);
   Free_poly_data(&input_dup_n33._c0_poly);
   for (index_cin_n33 = 0; index_cin_n33 < 32; index_cin_n33 = index_cin_n33 + 1) {
-    Zero_ciph(&result_cin_n33);
+    memset(&result_cin_n33, 0, sizeof(result_cin_n33));
     for (index_khw2_n33 = 0; index_khw2_n33 < 9; index_khw2_n33 = index_khw2_n33 + 1) {
       _rescale_tmp_3569 = input_roll_n33[index_khw2_n33];
       Pt_from_msg(&_pgen_tmp_278, index_khw2_n33 + (index_cin_n33 * 9) + 5568 /* cst_331_0 */, 8192, Sc_degree(&_rescale_tmp_3569), Level(&_rescale_tmp_3569));
@@ -7942,7 +7942,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435588, &_pgen_tmp_283, 15);
   Free_poly_data(&_pgen_tmp_283._c1_poly);
   Free_poly_data(&_pgen_tmp_283._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_285, &_cst_576, 1, 1, Level(&_preg_268435588));
+  Encode_float(&_pgen_tmp_285, &_cst_576, 1, 1, Level(&_preg_268435588));
   Init_ciph_up_scale_plain(&_pgen_tmp_284, &_preg_268435588, &_pgen_tmp_285);
   {
     _pgen_modulus = Q_modulus();
@@ -7968,7 +7968,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435589._c1_poly);
   Free_poly_data(&_preg_268435589._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n34);
+  memset(&result_n34, 0, sizeof(result_n34));
   Copy_ciph(&input_dup_n34, &_preg_268435590);
   Free_poly_data(&_preg_268435590._c1_poly);
   Free_poly_data(&_preg_268435590._c0_poly);
@@ -7981,7 +7981,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n34._c1_poly);
   Free_poly_data(&input_dup_n34._c0_poly);
   for (index_cin_n34 = 0; index_cin_n34 < 32; index_cin_n34 = index_cin_n34 + 1) {
-    Zero_ciph(&result_cin_n34);
+    memset(&result_cin_n34, 0, sizeof(result_cin_n34));
     for (index_khw2_n34 = 0; index_khw2_n34 < 9; index_khw2_n34 = index_khw2_n34 + 1) {
       _rescale_tmp_3677 = input_roll_n34[index_khw2_n34];
       Pt_from_msg(&_pgen_tmp_287, index_khw2_n34 + (index_cin_n34 * 9) + 5858 /* cst_337_0 */, 8192, Sc_degree(&_rescale_tmp_3677), Level(&_rescale_tmp_3677));
@@ -8091,7 +8091,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435593, &_preg_268435592, 15);
   Free_poly_data(&_preg_268435592._c1_poly);
   Free_poly_data(&_preg_268435592._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_294, &_cst_577, 1, 1, Level(&_preg_268435593));
+  Encode_float(&_pgen_tmp_294, &_cst_577, 1, 1, Level(&_preg_268435593));
   Init_ciph_up_scale_plain(&_pgen_tmp_293, &_preg_268435593, &_pgen_tmp_294);
   {
     _pgen_modulus = Q_modulus();
@@ -8117,7 +8117,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435594._c1_poly);
   Free_poly_data(&_preg_268435594._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n35);
+  memset(&result_n35, 0, sizeof(result_n35));
   Copy_ciph(&input_dup_n35, &_preg_268435595);
   for (index_khw1_n35 = 0; index_khw1_n35 < 9; index_khw1_n35 = index_khw1_n35 + 1) {
     _preg_268435812 = Rotate(input_dup_n35, _cst_346[index_khw1_n35]);
@@ -8128,7 +8128,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n35._c1_poly);
   Free_poly_data(&input_dup_n35._c0_poly);
   for (index_cin_n35 = 0; index_cin_n35 < 32; index_cin_n35 = index_cin_n35 + 1) {
-    Zero_ciph(&result_cin_n35);
+    memset(&result_cin_n35, 0, sizeof(result_cin_n35));
     for (index_khw2_n35 = 0; index_khw2_n35 < 9; index_khw2_n35 = index_khw2_n35 + 1) {
       _rescale_tmp_3791 = input_roll_n35[index_khw2_n35];
       Pt_from_msg(&_pgen_tmp_296, index_khw2_n35 + (index_cin_n35 * 9) + 6148 /* cst_344_0 */, 8192, Sc_degree(&_rescale_tmp_3791), Level(&_rescale_tmp_3791));
@@ -8222,7 +8222,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435597, &_pgen_tmp_301, 15);
   Free_poly_data(&_pgen_tmp_301._c1_poly);
   Free_poly_data(&_pgen_tmp_301._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_303, &_cst_578, 1, 1, Level(&_preg_268435597));
+  Encode_float(&_pgen_tmp_303, &_cst_578, 1, 1, Level(&_preg_268435597));
   Init_ciph_up_scale_plain(&_pgen_tmp_302, &_preg_268435597, &_pgen_tmp_303);
   {
     _pgen_modulus = Q_modulus();
@@ -8248,7 +8248,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435598._c1_poly);
   Free_poly_data(&_preg_268435598._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n36);
+  memset(&result_n36, 0, sizeof(result_n36));
   Copy_ciph(&input_dup_n36, &_preg_268435599);
   Free_poly_data(&_preg_268435599._c1_poly);
   Free_poly_data(&_preg_268435599._c0_poly);
@@ -8261,7 +8261,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n36._c1_poly);
   Free_poly_data(&input_dup_n36._c0_poly);
   for (index_cin_n36 = 0; index_cin_n36 < 32; index_cin_n36 = index_cin_n36 + 1) {
-    Zero_ciph(&result_cin_n36);
+    memset(&result_cin_n36, 0, sizeof(result_cin_n36));
     for (index_khw2_n36 = 0; index_khw2_n36 < 9; index_khw2_n36 = index_khw2_n36 + 1) {
       _rescale_tmp_3899 = input_roll_n36[index_khw2_n36];
       Pt_from_msg(&_pgen_tmp_305, index_khw2_n36 + (index_cin_n36 * 9) + 6438 /* cst_350_0 */, 8192, Sc_degree(&_rescale_tmp_3899), Level(&_rescale_tmp_3899));
@@ -8371,7 +8371,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435602, &_preg_268435601, 15);
   Free_poly_data(&_preg_268435601._c1_poly);
   Free_poly_data(&_preg_268435601._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_312, &_cst_579, 1, 1, Level(&_preg_268435602));
+  Encode_float(&_pgen_tmp_312, &_cst_579, 1, 1, Level(&_preg_268435602));
   Init_ciph_up_scale_plain(&_pgen_tmp_311, &_preg_268435602, &_pgen_tmp_312);
   {
     _pgen_modulus = Q_modulus();
@@ -8397,7 +8397,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435603._c1_poly);
   Free_poly_data(&_preg_268435603._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n37);
+  memset(&result_n37, 0, sizeof(result_n37));
   Copy_ciph(&input_dup_n37, &_preg_268435604);
   for (index_khw1_n37 = 0; index_khw1_n37 < 9; index_khw1_n37 = index_khw1_n37 + 1) {
     _preg_268435818 = Rotate(input_dup_n37, _cst_359[index_khw1_n37]);
@@ -8408,7 +8408,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n37._c1_poly);
   Free_poly_data(&input_dup_n37._c0_poly);
   for (index_cin_n37 = 0; index_cin_n37 < 32; index_cin_n37 = index_cin_n37 + 1) {
-    Zero_ciph(&result_cin_n37);
+    memset(&result_cin_n37, 0, sizeof(result_cin_n37));
     for (index_khw2_n37 = 0; index_khw2_n37 < 9; index_khw2_n37 = index_khw2_n37 + 1) {
       _rescale_tmp_4013 = input_roll_n37[index_khw2_n37];
       Pt_from_msg(&_pgen_tmp_314, index_khw2_n37 + (index_cin_n37 * 9) + 6728 /* cst_357_0 */, 8192, Sc_degree(&_rescale_tmp_4013), Level(&_rescale_tmp_4013));
@@ -8502,7 +8502,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435606, &_pgen_tmp_319, 15);
   Free_poly_data(&_pgen_tmp_319._c1_poly);
   Free_poly_data(&_pgen_tmp_319._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_321, &_cst_580, 1, 1, Level(&_preg_268435606));
+  Encode_float(&_pgen_tmp_321, &_cst_580, 1, 1, Level(&_preg_268435606));
   Init_ciph_up_scale_plain(&_pgen_tmp_320, &_preg_268435606, &_pgen_tmp_321);
   {
     _pgen_modulus = Q_modulus();
@@ -8528,7 +8528,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435607._c1_poly);
   Free_poly_data(&_preg_268435607._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n38);
+  memset(&result_n38, 0, sizeof(result_n38));
   Copy_ciph(&input_dup_n38, &_preg_268435608);
   Free_poly_data(&_preg_268435608._c1_poly);
   Free_poly_data(&_preg_268435608._c0_poly);
@@ -8541,7 +8541,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n38._c1_poly);
   Free_poly_data(&input_dup_n38._c0_poly);
   for (index_cin_n38 = 0; index_cin_n38 < 32; index_cin_n38 = index_cin_n38 + 1) {
-    Zero_ciph(&result_cin_n38);
+    memset(&result_cin_n38, 0, sizeof(result_cin_n38));
     for (index_khw2_n38 = 0; index_khw2_n38 < 9; index_khw2_n38 = index_khw2_n38 + 1) {
       _rescale_tmp_4121 = input_roll_n38[index_khw2_n38];
       Pt_from_msg(&_pgen_tmp_323, index_khw2_n38 + (index_cin_n38 * 9) + 7018 /* cst_363_0 */, 8192, Sc_degree(&_rescale_tmp_4121), Level(&_rescale_tmp_4121));
@@ -8651,7 +8651,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435611, &_preg_268435610, 15);
   Free_poly_data(&_preg_268435610._c1_poly);
   Free_poly_data(&_preg_268435610._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_330, &_cst_581, 1, 1, Level(&_preg_268435611));
+  Encode_float(&_pgen_tmp_330, &_cst_581, 1, 1, Level(&_preg_268435611));
   Init_ciph_up_scale_plain(&_pgen_tmp_329, &_preg_268435611, &_pgen_tmp_330);
   {
     _pgen_modulus = Q_modulus();
@@ -8677,7 +8677,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435612._c1_poly);
   Free_poly_data(&_preg_268435612._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n39);
+  memset(&result_n39, 0, sizeof(result_n39));
   Copy_ciph(&input_dup_n39, &_preg_268435613);
   for (index_khw1_n39 = 0; index_khw1_n39 < 9; index_khw1_n39 = index_khw1_n39 + 1) {
     _preg_268435824 = Rotate(input_dup_n39, _cst_372[index_khw1_n39]);
@@ -8688,7 +8688,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n39._c1_poly);
   Free_poly_data(&input_dup_n39._c0_poly);
   for (index_cin_n39 = 0; index_cin_n39 < 32; index_cin_n39 = index_cin_n39 + 1) {
-    Zero_ciph(&result_cin_n39);
+    memset(&result_cin_n39, 0, sizeof(result_cin_n39));
     for (index_khw2_n39 = 0; index_khw2_n39 < 9; index_khw2_n39 = index_khw2_n39 + 1) {
       _rescale_tmp_4235 = input_roll_n39[index_khw2_n39];
       Pt_from_msg(&_pgen_tmp_332, index_khw2_n39 + (index_cin_n39 * 9) + 7308 /* cst_370_0 */, 8192, Sc_degree(&_rescale_tmp_4235), Level(&_rescale_tmp_4235));
@@ -8782,7 +8782,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435615, &_pgen_tmp_337, 15);
   Free_poly_data(&_pgen_tmp_337._c1_poly);
   Free_poly_data(&_pgen_tmp_337._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_339, &_cst_582, 1, 1, Level(&_preg_268435615));
+  Encode_float(&_pgen_tmp_339, &_cst_582, 1, 1, Level(&_preg_268435615));
   Init_ciph_up_scale_plain(&_pgen_tmp_338, &_preg_268435615, &_pgen_tmp_339);
   {
     _pgen_modulus = Q_modulus();
@@ -8808,7 +8808,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435616._c1_poly);
   Free_poly_data(&_preg_268435616._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n40);
+  memset(&result_n40, 0, sizeof(result_n40));
   Copy_ciph(&input_dup_n40, &_preg_268435617);
   Free_poly_data(&_preg_268435617._c1_poly);
   Free_poly_data(&_preg_268435617._c0_poly);
@@ -8821,7 +8821,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n40._c1_poly);
   Free_poly_data(&input_dup_n40._c0_poly);
   for (index_cin_n40 = 0; index_cin_n40 < 32; index_cin_n40 = index_cin_n40 + 1) {
-    Zero_ciph(&result_cin_n40);
+    memset(&result_cin_n40, 0, sizeof(result_cin_n40));
     for (index_khw2_n40 = 0; index_khw2_n40 < 9; index_khw2_n40 = index_khw2_n40 + 1) {
       _rescale_tmp_4343 = input_roll_n40[index_khw2_n40];
       Pt_from_msg(&_pgen_tmp_341, index_khw2_n40 + (index_cin_n40 * 9) + 7598 /* cst_376_0 */, 8192, Sc_degree(&_rescale_tmp_4343), Level(&_rescale_tmp_4343));
@@ -8931,7 +8931,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435620, &_preg_268435619, 18);
   Free_poly_data(&_preg_268435619._c1_poly);
   Free_poly_data(&_preg_268435619._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_348, &_cst_583, 1, 1, Level(&_preg_268435620));
+  Encode_float(&_pgen_tmp_348, &_cst_583, 1, 1, Level(&_preg_268435620));
   Init_ciph_up_scale_plain(&_pgen_tmp_347, &_preg_268435620, &_pgen_tmp_348);
   {
     _pgen_modulus = Q_modulus();
@@ -8957,7 +8957,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435621._c1_poly);
   Free_poly_data(&_preg_268435621._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n41);
+  memset(&result_n41, 0, sizeof(result_n41));
   _preg_268435830 = Rotate(_preg_268435622, -8192);
   Init_ciph_same_scale(&input_dup_n41, &_preg_268435622, &_preg_268435830);
   {
@@ -8980,7 +8980,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n41._c1_poly);
   Free_poly_data(&input_dup_n41._c0_poly);
   for (index_cin_n41 = 0; index_cin_n41 < 32; index_cin_n41 = index_cin_n41 + 1) {
-    Zero_ciph(&result_cin_n41);
+    memset(&result_cin_n41, 0, sizeof(result_cin_n41));
     for (index_khw2_n41 = 0; index_khw2_n41 < 9; index_khw2_n41 = index_khw2_n41 + 1) {
       _rescale_tmp_4461 = input_roll_n41[index_khw2_n41];
       Pt_from_msg(&_pgen_tmp_350, index_khw2_n41 + (index_cin_n41 * 9) + 7888 /* cst_383_0 */, 16384, Sc_degree(&_rescale_tmp_4461), Level(&_rescale_tmp_4461));
@@ -9065,7 +9065,7 @@ bool Main_graph() {
   Copy_ciph(&orig_result41, &result_n41);
   Free_poly_data(&result_n41._c1_poly);
   Free_poly_data(&result_n41._c0_poly);
-  Zero_ciph(&comb_row_result42);
+  memset(&comb_row_result42, 0, sizeof(comb_row_result42));
   for (combine_row_index_n42 = 0; combine_row_index_n42 < 8; combine_row_index_n42 = combine_row_index_n42 + 1) {
     _preg_268435834 = Rotate(orig_result41, combine_row_index_n42 * 1);
     Copy_ciph(&_ckks_gen_tmp_4527, &_preg_268435834);
@@ -9098,7 +9098,7 @@ bool Main_graph() {
   Free_poly_data(&_rescale_tmp_7380._c0_poly);
   Free_poly_data(&_pgen_tmp_356._c1_poly);
   Free_poly_data(&_pgen_tmp_356._c0_poly);
-  Zero_ciph(&comb_rc_result42);
+  memset(&comb_rc_result42, 0, sizeof(comb_rc_result42));
   for (combine_rc_index_n42 = 0; combine_rc_index_n42 < 8; combine_rc_index_n42 = combine_rc_index_n42 + 1) {
     _preg_268435835 = Rotate(comb_row_result42, combine_rc_index_n42 * 24);
     Copy_ciph(&_ckks_gen_tmp_4558, &_preg_268435835);
@@ -9131,7 +9131,7 @@ bool Main_graph() {
   Free_poly_data(&_rescale_tmp_7386._c0_poly);
   Free_poly_data(&_pgen_tmp_358._c1_poly);
   Free_poly_data(&_pgen_tmp_358._c0_poly);
-  Zero_ciph(&final_result42);
+  memset(&final_result42, 0, sizeof(final_result42));
   for (combine_cc_index_n42 = 0; combine_cc_index_n42 < 64; combine_cc_index_n42 = combine_cc_index_n42 + 1) {
     _preg_268435836 = Rotate(comb_rc_result42, combine_cc_index_n42 * 192);
     Copy_ciph(&_ckks_gen_tmp_4589, &_preg_268435836);
@@ -9176,7 +9176,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435624, &_pgen_tmp_361, 15);
   Free_poly_data(&_pgen_tmp_361._c1_poly);
   Free_poly_data(&_pgen_tmp_361._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_363, &_cst_584, 1, 1, Level(&_preg_268435624));
+  Encode_float(&_pgen_tmp_363, &_cst_584, 1, 1, Level(&_preg_268435624));
   Init_ciph_up_scale_plain(&_pgen_tmp_362, &_preg_268435624, &_pgen_tmp_363);
   {
     _pgen_modulus = Q_modulus();
@@ -9202,7 +9202,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435625._c1_poly);
   Free_poly_data(&_preg_268435625._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n43);
+  memset(&result_n43, 0, sizeof(result_n43));
   Copy_ciph(&input_dup_n43, &_preg_268435626);
   Free_poly_data(&_preg_268435626._c1_poly);
   Free_poly_data(&_preg_268435626._c0_poly);
@@ -9215,7 +9215,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n43._c1_poly);
   Free_poly_data(&input_dup_n43._c0_poly);
   for (index_cin_n43 = 0; index_cin_n43 < 64; index_cin_n43 = index_cin_n43 + 1) {
-    Zero_ciph(&result_cin_n43);
+    memset(&result_cin_n43, 0, sizeof(result_cin_n43));
     for (index_khw2_n43 = 0; index_khw2_n43 < 9; index_khw2_n43 = index_khw2_n43 + 1) {
       _rescale_tmp_4664 = input_roll_n43[index_khw2_n43];
       Pt_from_msg(&_pgen_tmp_365, index_khw2_n43 + (index_cin_n43 * 9) + 8258 /* cst_392_0 */, 4096, Sc_degree(&_rescale_tmp_4664), Level(&_rescale_tmp_4664));
@@ -9302,7 +9302,7 @@ bool Main_graph() {
   Free_poly_data(&result_n43._c0_poly);
   Tm_taken("Tensor::conv");
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n44);
+  memset(&result_n44, 0, sizeof(result_n44));
   _preg_268435840 = Rotate(_preg_268435622, -8192);
   Init_ciph_same_scale(&input_dup_n44, &_preg_268435622, &_preg_268435840);
   {
@@ -9327,7 +9327,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n44._c1_poly);
   Free_poly_data(&input_dup_n44._c0_poly);
   for (index_cin_n44 = 0; index_cin_n44 < 32; index_cin_n44 = index_cin_n44 + 1) {
-    Zero_ciph(&result_cin_n44);
+    memset(&result_cin_n44, 0, sizeof(result_cin_n44));
     for (index_khw2_n44 = 0; index_khw2_n44 < 1; index_khw2_n44 = index_khw2_n44 + 1) {
       _rescale_tmp_4766 = input_roll_n44[index_khw2_n44];
       Pt_from_msg(&_pgen_tmp_370, index_khw2_n44 + (index_cin_n44 * 1) + 8836 /* cst_398_0 */, 16384, Sc_degree(&_rescale_tmp_4766), Level(&_rescale_tmp_4766));
@@ -9412,7 +9412,7 @@ bool Main_graph() {
   Copy_ciph(&orig_result44, &result_n44);
   Free_poly_data(&result_n44._c1_poly);
   Free_poly_data(&result_n44._c0_poly);
-  Zero_ciph(&comb_row_result45);
+  memset(&comb_row_result45, 0, sizeof(comb_row_result45));
   for (combine_row_index_n45 = 0; combine_row_index_n45 < 8; combine_row_index_n45 = combine_row_index_n45 + 1) {
     _preg_268435844 = Rotate(orig_result44, combine_row_index_n45 * 1);
     Copy_ciph(&_ckks_gen_tmp_4832, &_preg_268435844);
@@ -9445,7 +9445,7 @@ bool Main_graph() {
   Free_poly_data(&_rescale_tmp_7422._c0_poly);
   Free_poly_data(&_pgen_tmp_376._c1_poly);
   Free_poly_data(&_pgen_tmp_376._c0_poly);
-  Zero_ciph(&comb_rc_result45);
+  memset(&comb_rc_result45, 0, sizeof(comb_rc_result45));
   for (combine_rc_index_n45 = 0; combine_rc_index_n45 < 8; combine_rc_index_n45 = combine_rc_index_n45 + 1) {
     _preg_268435845 = Rotate(comb_row_result45, combine_rc_index_n45 * 24);
     Copy_ciph(&_ckks_gen_tmp_4863, &_preg_268435845);
@@ -9478,7 +9478,7 @@ bool Main_graph() {
   Free_poly_data(&_rescale_tmp_7428._c0_poly);
   Free_poly_data(&_pgen_tmp_378._c1_poly);
   Free_poly_data(&_pgen_tmp_378._c0_poly);
-  Zero_ciph(&final_result45);
+  memset(&final_result45, 0, sizeof(final_result45));
   for (combine_cc_index_n45 = 0; combine_cc_index_n45 < 64; combine_cc_index_n45 = combine_cc_index_n45 + 1) {
     _preg_268435846 = Rotate(comb_rc_result45, combine_cc_index_n45 * 192);
     Copy_ciph(&_ckks_gen_tmp_4894, &_preg_268435846);
@@ -9539,7 +9539,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435630, &_pgen_tmp_381, 15);
   Free_poly_data(&_pgen_tmp_381._c1_poly);
   Free_poly_data(&_pgen_tmp_381._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_383, &_cst_585, 1, 1, Level(&_preg_268435630));
+  Encode_float(&_pgen_tmp_383, &_cst_585, 1, 1, Level(&_preg_268435630));
   Init_ciph_up_scale_plain(&_pgen_tmp_382, &_preg_268435630, &_pgen_tmp_383);
   {
     _pgen_modulus = Q_modulus();
@@ -9565,7 +9565,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435631._c1_poly);
   Free_poly_data(&_preg_268435631._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n46);
+  memset(&result_n46, 0, sizeof(result_n46));
   Copy_ciph(&input_dup_n46, &_preg_268435632);
   for (index_khw1_n46 = 0; index_khw1_n46 < 9; index_khw1_n46 = index_khw1_n46 + 1) {
     _preg_268435847 = Rotate(input_dup_n46, _cst_410[index_khw1_n46]);
@@ -9576,7 +9576,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n46._c1_poly);
   Free_poly_data(&input_dup_n46._c0_poly);
   for (index_cin_n46 = 0; index_cin_n46 < 64; index_cin_n46 = index_cin_n46 + 1) {
-    Zero_ciph(&result_cin_n46);
+    memset(&result_cin_n46, 0, sizeof(result_cin_n46));
     for (index_khw2_n46 = 0; index_khw2_n46 < 9; index_khw2_n46 = index_khw2_n46 + 1) {
       _rescale_tmp_4975 = input_roll_n46[index_khw2_n46];
       Pt_from_msg(&_pgen_tmp_385, index_khw2_n46 + (index_cin_n46 * 9) + 8950 /* cst_408_0 */, 4096, Sc_degree(&_rescale_tmp_4975), Level(&_rescale_tmp_4975));
@@ -9670,7 +9670,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435634, &_pgen_tmp_390, 15);
   Free_poly_data(&_pgen_tmp_390._c1_poly);
   Free_poly_data(&_pgen_tmp_390._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_392, &_cst_586, 1, 1, Level(&_preg_268435634));
+  Encode_float(&_pgen_tmp_392, &_cst_586, 1, 1, Level(&_preg_268435634));
   Init_ciph_up_scale_plain(&_pgen_tmp_391, &_preg_268435634, &_pgen_tmp_392);
   {
     _pgen_modulus = Q_modulus();
@@ -9696,7 +9696,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435635._c1_poly);
   Free_poly_data(&_preg_268435635._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n47);
+  memset(&result_n47, 0, sizeof(result_n47));
   Copy_ciph(&input_dup_n47, &_preg_268435636);
   Free_poly_data(&_preg_268435636._c1_poly);
   Free_poly_data(&_preg_268435636._c0_poly);
@@ -9709,7 +9709,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n47._c1_poly);
   Free_poly_data(&input_dup_n47._c0_poly);
   for (index_cin_n47 = 0; index_cin_n47 < 64; index_cin_n47 = index_cin_n47 + 1) {
-    Zero_ciph(&result_cin_n47);
+    memset(&result_cin_n47, 0, sizeof(result_cin_n47));
     for (index_khw2_n47 = 0; index_khw2_n47 < 9; index_khw2_n47 = index_khw2_n47 + 1) {
       _rescale_tmp_5083 = input_roll_n47[index_khw2_n47];
       Pt_from_msg(&_pgen_tmp_394, index_khw2_n47 + (index_cin_n47 * 9) + 9528 /* cst_414_0 */, 4096, Sc_degree(&_rescale_tmp_5083), Level(&_rescale_tmp_5083));
@@ -9819,7 +9819,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435639, &_preg_268435638, 15);
   Free_poly_data(&_preg_268435638._c1_poly);
   Free_poly_data(&_preg_268435638._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_401, &_cst_587, 1, 1, Level(&_preg_268435639));
+  Encode_float(&_pgen_tmp_401, &_cst_587, 1, 1, Level(&_preg_268435639));
   Init_ciph_up_scale_plain(&_pgen_tmp_400, &_preg_268435639, &_pgen_tmp_401);
   {
     _pgen_modulus = Q_modulus();
@@ -9845,7 +9845,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435640._c1_poly);
   Free_poly_data(&_preg_268435640._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n48);
+  memset(&result_n48, 0, sizeof(result_n48));
   Copy_ciph(&input_dup_n48, &_preg_268435641);
   for (index_khw1_n48 = 0; index_khw1_n48 < 9; index_khw1_n48 = index_khw1_n48 + 1) {
     _preg_268435853 = Rotate(input_dup_n48, _cst_423[index_khw1_n48]);
@@ -9856,7 +9856,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n48._c1_poly);
   Free_poly_data(&input_dup_n48._c0_poly);
   for (index_cin_n48 = 0; index_cin_n48 < 64; index_cin_n48 = index_cin_n48 + 1) {
-    Zero_ciph(&result_cin_n48);
+    memset(&result_cin_n48, 0, sizeof(result_cin_n48));
     for (index_khw2_n48 = 0; index_khw2_n48 < 9; index_khw2_n48 = index_khw2_n48 + 1) {
       _rescale_tmp_5197 = input_roll_n48[index_khw2_n48];
       Pt_from_msg(&_pgen_tmp_403, index_khw2_n48 + (index_cin_n48 * 9) + 10106 /* cst_421_0 */, 4096, Sc_degree(&_rescale_tmp_5197), Level(&_rescale_tmp_5197));
@@ -9950,7 +9950,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435643, &_pgen_tmp_408, 15);
   Free_poly_data(&_pgen_tmp_408._c1_poly);
   Free_poly_data(&_pgen_tmp_408._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_410, &_cst_588, 1, 1, Level(&_preg_268435643));
+  Encode_float(&_pgen_tmp_410, &_cst_588, 1, 1, Level(&_preg_268435643));
   Init_ciph_up_scale_plain(&_pgen_tmp_409, &_preg_268435643, &_pgen_tmp_410);
   {
     _pgen_modulus = Q_modulus();
@@ -9976,7 +9976,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435644._c1_poly);
   Free_poly_data(&_preg_268435644._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n49);
+  memset(&result_n49, 0, sizeof(result_n49));
   Copy_ciph(&input_dup_n49, &_preg_268435645);
   Free_poly_data(&_preg_268435645._c1_poly);
   Free_poly_data(&_preg_268435645._c0_poly);
@@ -9989,7 +9989,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n49._c1_poly);
   Free_poly_data(&input_dup_n49._c0_poly);
   for (index_cin_n49 = 0; index_cin_n49 < 64; index_cin_n49 = index_cin_n49 + 1) {
-    Zero_ciph(&result_cin_n49);
+    memset(&result_cin_n49, 0, sizeof(result_cin_n49));
     for (index_khw2_n49 = 0; index_khw2_n49 < 9; index_khw2_n49 = index_khw2_n49 + 1) {
       _rescale_tmp_5305 = input_roll_n49[index_khw2_n49];
       Pt_from_msg(&_pgen_tmp_412, index_khw2_n49 + (index_cin_n49 * 9) + 10684 /* cst_427_0 */, 4096, Sc_degree(&_rescale_tmp_5305), Level(&_rescale_tmp_5305));
@@ -10099,7 +10099,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435648, &_preg_268435647, 15);
   Free_poly_data(&_preg_268435647._c1_poly);
   Free_poly_data(&_preg_268435647._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_419, &_cst_589, 1, 1, Level(&_preg_268435648));
+  Encode_float(&_pgen_tmp_419, &_cst_589, 1, 1, Level(&_preg_268435648));
   Init_ciph_up_scale_plain(&_pgen_tmp_418, &_preg_268435648, &_pgen_tmp_419);
   {
     _pgen_modulus = Q_modulus();
@@ -10125,7 +10125,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435649._c1_poly);
   Free_poly_data(&_preg_268435649._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n50);
+  memset(&result_n50, 0, sizeof(result_n50));
   Copy_ciph(&input_dup_n50, &_preg_268435650);
   for (index_khw1_n50 = 0; index_khw1_n50 < 9; index_khw1_n50 = index_khw1_n50 + 1) {
     _preg_268435859 = Rotate(input_dup_n50, _cst_436[index_khw1_n50]);
@@ -10136,7 +10136,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n50._c1_poly);
   Free_poly_data(&input_dup_n50._c0_poly);
   for (index_cin_n50 = 0; index_cin_n50 < 64; index_cin_n50 = index_cin_n50 + 1) {
-    Zero_ciph(&result_cin_n50);
+    memset(&result_cin_n50, 0, sizeof(result_cin_n50));
     for (index_khw2_n50 = 0; index_khw2_n50 < 9; index_khw2_n50 = index_khw2_n50 + 1) {
       _rescale_tmp_5419 = input_roll_n50[index_khw2_n50];
       Pt_from_msg(&_pgen_tmp_421, index_khw2_n50 + (index_cin_n50 * 9) + 11262 /* cst_434_0 */, 4096, Sc_degree(&_rescale_tmp_5419), Level(&_rescale_tmp_5419));
@@ -10230,7 +10230,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435652, &_pgen_tmp_426, 15);
   Free_poly_data(&_pgen_tmp_426._c1_poly);
   Free_poly_data(&_pgen_tmp_426._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_428, &_cst_590, 1, 1, Level(&_preg_268435652));
+  Encode_float(&_pgen_tmp_428, &_cst_590, 1, 1, Level(&_preg_268435652));
   Init_ciph_up_scale_plain(&_pgen_tmp_427, &_preg_268435652, &_pgen_tmp_428);
   {
     _pgen_modulus = Q_modulus();
@@ -10256,7 +10256,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435653._c1_poly);
   Free_poly_data(&_preg_268435653._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n51);
+  memset(&result_n51, 0, sizeof(result_n51));
   Copy_ciph(&input_dup_n51, &_preg_268435654);
   Free_poly_data(&_preg_268435654._c1_poly);
   Free_poly_data(&_preg_268435654._c0_poly);
@@ -10269,7 +10269,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n51._c1_poly);
   Free_poly_data(&input_dup_n51._c0_poly);
   for (index_cin_n51 = 0; index_cin_n51 < 64; index_cin_n51 = index_cin_n51 + 1) {
-    Zero_ciph(&result_cin_n51);
+    memset(&result_cin_n51, 0, sizeof(result_cin_n51));
     for (index_khw2_n51 = 0; index_khw2_n51 < 9; index_khw2_n51 = index_khw2_n51 + 1) {
       _rescale_tmp_5527 = input_roll_n51[index_khw2_n51];
       Pt_from_msg(&_pgen_tmp_430, index_khw2_n51 + (index_cin_n51 * 9) + 11840 /* cst_440_0 */, 4096, Sc_degree(&_rescale_tmp_5527), Level(&_rescale_tmp_5527));
@@ -10379,7 +10379,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435657, &_preg_268435656, 15);
   Free_poly_data(&_preg_268435656._c1_poly);
   Free_poly_data(&_preg_268435656._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_437, &_cst_591, 1, 1, Level(&_preg_268435657));
+  Encode_float(&_pgen_tmp_437, &_cst_591, 1, 1, Level(&_preg_268435657));
   Init_ciph_up_scale_plain(&_pgen_tmp_436, &_preg_268435657, &_pgen_tmp_437);
   {
     _pgen_modulus = Q_modulus();
@@ -10405,7 +10405,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435658._c1_poly);
   Free_poly_data(&_preg_268435658._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n52);
+  memset(&result_n52, 0, sizeof(result_n52));
   Copy_ciph(&input_dup_n52, &_preg_268435659);
   for (index_khw1_n52 = 0; index_khw1_n52 < 9; index_khw1_n52 = index_khw1_n52 + 1) {
     _preg_268435865 = Rotate(input_dup_n52, _cst_449[index_khw1_n52]);
@@ -10416,7 +10416,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n52._c1_poly);
   Free_poly_data(&input_dup_n52._c0_poly);
   for (index_cin_n52 = 0; index_cin_n52 < 64; index_cin_n52 = index_cin_n52 + 1) {
-    Zero_ciph(&result_cin_n52);
+    memset(&result_cin_n52, 0, sizeof(result_cin_n52));
     for (index_khw2_n52 = 0; index_khw2_n52 < 9; index_khw2_n52 = index_khw2_n52 + 1) {
       _rescale_tmp_5641 = input_roll_n52[index_khw2_n52];
       Pt_from_msg(&_pgen_tmp_439, index_khw2_n52 + (index_cin_n52 * 9) + 12418 /* cst_447_0 */, 4096, Sc_degree(&_rescale_tmp_5641), Level(&_rescale_tmp_5641));
@@ -10510,7 +10510,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435661, &_pgen_tmp_444, 15);
   Free_poly_data(&_pgen_tmp_444._c1_poly);
   Free_poly_data(&_pgen_tmp_444._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_446, &_cst_592, 1, 1, Level(&_preg_268435661));
+  Encode_float(&_pgen_tmp_446, &_cst_592, 1, 1, Level(&_preg_268435661));
   Init_ciph_up_scale_plain(&_pgen_tmp_445, &_preg_268435661, &_pgen_tmp_446);
   {
     _pgen_modulus = Q_modulus();
@@ -10536,7 +10536,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435662._c1_poly);
   Free_poly_data(&_preg_268435662._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n53);
+  memset(&result_n53, 0, sizeof(result_n53));
   Copy_ciph(&input_dup_n53, &_preg_268435663);
   Free_poly_data(&_preg_268435663._c1_poly);
   Free_poly_data(&_preg_268435663._c0_poly);
@@ -10549,7 +10549,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n53._c1_poly);
   Free_poly_data(&input_dup_n53._c0_poly);
   for (index_cin_n53 = 0; index_cin_n53 < 64; index_cin_n53 = index_cin_n53 + 1) {
-    Zero_ciph(&result_cin_n53);
+    memset(&result_cin_n53, 0, sizeof(result_cin_n53));
     for (index_khw2_n53 = 0; index_khw2_n53 < 9; index_khw2_n53 = index_khw2_n53 + 1) {
       _rescale_tmp_5749 = input_roll_n53[index_khw2_n53];
       Pt_from_msg(&_pgen_tmp_448, index_khw2_n53 + (index_cin_n53 * 9) + 12996 /* cst_453_0 */, 4096, Sc_degree(&_rescale_tmp_5749), Level(&_rescale_tmp_5749));
@@ -10659,7 +10659,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435666, &_preg_268435665, 15);
   Free_poly_data(&_preg_268435665._c1_poly);
   Free_poly_data(&_preg_268435665._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_455, &_cst_593, 1, 1, Level(&_preg_268435666));
+  Encode_float(&_pgen_tmp_455, &_cst_593, 1, 1, Level(&_preg_268435666));
   Init_ciph_up_scale_plain(&_pgen_tmp_454, &_preg_268435666, &_pgen_tmp_455);
   {
     _pgen_modulus = Q_modulus();
@@ -10685,7 +10685,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435667._c1_poly);
   Free_poly_data(&_preg_268435667._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n54);
+  memset(&result_n54, 0, sizeof(result_n54));
   Copy_ciph(&input_dup_n54, &_preg_268435668);
   for (index_khw1_n54 = 0; index_khw1_n54 < 9; index_khw1_n54 = index_khw1_n54 + 1) {
     _preg_268435871 = Rotate(input_dup_n54, _cst_462[index_khw1_n54]);
@@ -10696,7 +10696,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n54._c1_poly);
   Free_poly_data(&input_dup_n54._c0_poly);
   for (index_cin_n54 = 0; index_cin_n54 < 64; index_cin_n54 = index_cin_n54 + 1) {
-    Zero_ciph(&result_cin_n54);
+    memset(&result_cin_n54, 0, sizeof(result_cin_n54));
     for (index_khw2_n54 = 0; index_khw2_n54 < 9; index_khw2_n54 = index_khw2_n54 + 1) {
       _rescale_tmp_5863 = input_roll_n54[index_khw2_n54];
       Pt_from_msg(&_pgen_tmp_457, index_khw2_n54 + (index_cin_n54 * 9) + 13574 /* cst_460_0 */, 4096, Sc_degree(&_rescale_tmp_5863), Level(&_rescale_tmp_5863));
@@ -10790,7 +10790,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435670, &_pgen_tmp_462, 15);
   Free_poly_data(&_pgen_tmp_462._c1_poly);
   Free_poly_data(&_pgen_tmp_462._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_464, &_cst_594, 1, 1, Level(&_preg_268435670));
+  Encode_float(&_pgen_tmp_464, &_cst_594, 1, 1, Level(&_preg_268435670));
   Init_ciph_up_scale_plain(&_pgen_tmp_463, &_preg_268435670, &_pgen_tmp_464);
   {
     _pgen_modulus = Q_modulus();
@@ -10816,7 +10816,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435671._c1_poly);
   Free_poly_data(&_preg_268435671._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n55);
+  memset(&result_n55, 0, sizeof(result_n55));
   Copy_ciph(&input_dup_n55, &_preg_268435672);
   Free_poly_data(&_preg_268435672._c1_poly);
   Free_poly_data(&_preg_268435672._c0_poly);
@@ -10829,7 +10829,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n55._c1_poly);
   Free_poly_data(&input_dup_n55._c0_poly);
   for (index_cin_n55 = 0; index_cin_n55 < 64; index_cin_n55 = index_cin_n55 + 1) {
-    Zero_ciph(&result_cin_n55);
+    memset(&result_cin_n55, 0, sizeof(result_cin_n55));
     for (index_khw2_n55 = 0; index_khw2_n55 < 9; index_khw2_n55 = index_khw2_n55 + 1) {
       _rescale_tmp_5971 = input_roll_n55[index_khw2_n55];
       Pt_from_msg(&_pgen_tmp_466, index_khw2_n55 + (index_cin_n55 * 9) + 14152 /* cst_466_0 */, 4096, Sc_degree(&_rescale_tmp_5971), Level(&_rescale_tmp_5971));
@@ -10939,7 +10939,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435675, &_preg_268435674, 15);
   Free_poly_data(&_preg_268435674._c1_poly);
   Free_poly_data(&_preg_268435674._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_473, &_cst_595, 1, 1, Level(&_preg_268435675));
+  Encode_float(&_pgen_tmp_473, &_cst_595, 1, 1, Level(&_preg_268435675));
   Init_ciph_up_scale_plain(&_pgen_tmp_472, &_preg_268435675, &_pgen_tmp_473);
   {
     _pgen_modulus = Q_modulus();
@@ -10965,7 +10965,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435676._c1_poly);
   Free_poly_data(&_preg_268435676._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n56);
+  memset(&result_n56, 0, sizeof(result_n56));
   Copy_ciph(&input_dup_n56, &_preg_268435677);
   for (index_khw1_n56 = 0; index_khw1_n56 < 9; index_khw1_n56 = index_khw1_n56 + 1) {
     _preg_268435877 = Rotate(input_dup_n56, _cst_475[index_khw1_n56]);
@@ -10976,7 +10976,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n56._c1_poly);
   Free_poly_data(&input_dup_n56._c0_poly);
   for (index_cin_n56 = 0; index_cin_n56 < 64; index_cin_n56 = index_cin_n56 + 1) {
-    Zero_ciph(&result_cin_n56);
+    memset(&result_cin_n56, 0, sizeof(result_cin_n56));
     for (index_khw2_n56 = 0; index_khw2_n56 < 9; index_khw2_n56 = index_khw2_n56 + 1) {
       _rescale_tmp_6085 = input_roll_n56[index_khw2_n56];
       Pt_from_msg(&_pgen_tmp_475, index_khw2_n56 + (index_cin_n56 * 9) + 14730 /* cst_473_0 */, 4096, Sc_degree(&_rescale_tmp_6085), Level(&_rescale_tmp_6085));
@@ -11070,7 +11070,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435679, &_pgen_tmp_480, 15);
   Free_poly_data(&_pgen_tmp_480._c1_poly);
   Free_poly_data(&_pgen_tmp_480._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_482, &_cst_596, 1, 1, Level(&_preg_268435679));
+  Encode_float(&_pgen_tmp_482, &_cst_596, 1, 1, Level(&_preg_268435679));
   Init_ciph_up_scale_plain(&_pgen_tmp_481, &_preg_268435679, &_pgen_tmp_482);
   {
     _pgen_modulus = Q_modulus();
@@ -11096,7 +11096,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435680._c1_poly);
   Free_poly_data(&_preg_268435680._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n57);
+  memset(&result_n57, 0, sizeof(result_n57));
   Copy_ciph(&input_dup_n57, &_preg_268435681);
   Free_poly_data(&_preg_268435681._c1_poly);
   Free_poly_data(&_preg_268435681._c0_poly);
@@ -11109,7 +11109,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n57._c1_poly);
   Free_poly_data(&input_dup_n57._c0_poly);
   for (index_cin_n57 = 0; index_cin_n57 < 64; index_cin_n57 = index_cin_n57 + 1) {
-    Zero_ciph(&result_cin_n57);
+    memset(&result_cin_n57, 0, sizeof(result_cin_n57));
     for (index_khw2_n57 = 0; index_khw2_n57 < 9; index_khw2_n57 = index_khw2_n57 + 1) {
       _rescale_tmp_6193 = input_roll_n57[index_khw2_n57];
       Pt_from_msg(&_pgen_tmp_484, index_khw2_n57 + (index_cin_n57 * 9) + 15308 /* cst_479_0 */, 4096, Sc_degree(&_rescale_tmp_6193), Level(&_rescale_tmp_6193));
@@ -11219,7 +11219,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435684, &_preg_268435683, 15);
   Free_poly_data(&_preg_268435683._c1_poly);
   Free_poly_data(&_preg_268435683._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_491, &_cst_597, 1, 1, Level(&_preg_268435684));
+  Encode_float(&_pgen_tmp_491, &_cst_597, 1, 1, Level(&_preg_268435684));
   Init_ciph_up_scale_plain(&_pgen_tmp_490, &_preg_268435684, &_pgen_tmp_491);
   {
     _pgen_modulus = Q_modulus();
@@ -11245,7 +11245,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435685._c1_poly);
   Free_poly_data(&_preg_268435685._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n58);
+  memset(&result_n58, 0, sizeof(result_n58));
   Copy_ciph(&input_dup_n58, &_preg_268435686);
   for (index_khw1_n58 = 0; index_khw1_n58 < 9; index_khw1_n58 = index_khw1_n58 + 1) {
     _preg_268435883 = Rotate(input_dup_n58, _cst_488[index_khw1_n58]);
@@ -11256,7 +11256,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n58._c1_poly);
   Free_poly_data(&input_dup_n58._c0_poly);
   for (index_cin_n58 = 0; index_cin_n58 < 64; index_cin_n58 = index_cin_n58 + 1) {
-    Zero_ciph(&result_cin_n58);
+    memset(&result_cin_n58, 0, sizeof(result_cin_n58));
     for (index_khw2_n58 = 0; index_khw2_n58 < 9; index_khw2_n58 = index_khw2_n58 + 1) {
       _rescale_tmp_6307 = input_roll_n58[index_khw2_n58];
       Pt_from_msg(&_pgen_tmp_493, index_khw2_n58 + (index_cin_n58 * 9) + 15886 /* cst_486_0 */, 4096, Sc_degree(&_rescale_tmp_6307), Level(&_rescale_tmp_6307));
@@ -11350,7 +11350,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435688, &_pgen_tmp_498, 15);
   Free_poly_data(&_pgen_tmp_498._c1_poly);
   Free_poly_data(&_pgen_tmp_498._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_500, &_cst_598, 1, 1, Level(&_preg_268435688));
+  Encode_float(&_pgen_tmp_500, &_cst_598, 1, 1, Level(&_preg_268435688));
   Init_ciph_up_scale_plain(&_pgen_tmp_499, &_preg_268435688, &_pgen_tmp_500);
   {
     _pgen_modulus = Q_modulus();
@@ -11376,7 +11376,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435689._c1_poly);
   Free_poly_data(&_preg_268435689._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n59);
+  memset(&result_n59, 0, sizeof(result_n59));
   Copy_ciph(&input_dup_n59, &_preg_268435690);
   Free_poly_data(&_preg_268435690._c1_poly);
   Free_poly_data(&_preg_268435690._c0_poly);
@@ -11389,7 +11389,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n59._c1_poly);
   Free_poly_data(&input_dup_n59._c0_poly);
   for (index_cin_n59 = 0; index_cin_n59 < 64; index_cin_n59 = index_cin_n59 + 1) {
-    Zero_ciph(&result_cin_n59);
+    memset(&result_cin_n59, 0, sizeof(result_cin_n59));
     for (index_khw2_n59 = 0; index_khw2_n59 < 9; index_khw2_n59 = index_khw2_n59 + 1) {
       _rescale_tmp_6415 = input_roll_n59[index_khw2_n59];
       Pt_from_msg(&_pgen_tmp_502, index_khw2_n59 + (index_cin_n59 * 9) + 16464 /* cst_492_0 */, 4096, Sc_degree(&_rescale_tmp_6415), Level(&_rescale_tmp_6415));
@@ -11499,7 +11499,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435693, &_preg_268435692, 15);
   Free_poly_data(&_preg_268435692._c1_poly);
   Free_poly_data(&_preg_268435692._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_509, &_cst_599, 1, 1, Level(&_preg_268435693));
+  Encode_float(&_pgen_tmp_509, &_cst_599, 1, 1, Level(&_preg_268435693));
   Init_ciph_up_scale_plain(&_pgen_tmp_508, &_preg_268435693, &_pgen_tmp_509);
   {
     _pgen_modulus = Q_modulus();
@@ -11525,7 +11525,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435694._c1_poly);
   Free_poly_data(&_preg_268435694._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n60);
+  memset(&result_n60, 0, sizeof(result_n60));
   Copy_ciph(&input_dup_n60, &_preg_268435695);
   for (index_khw1_n60 = 0; index_khw1_n60 < 9; index_khw1_n60 = index_khw1_n60 + 1) {
     _preg_268435889 = Rotate(input_dup_n60, _cst_501[index_khw1_n60]);
@@ -11536,7 +11536,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n60._c1_poly);
   Free_poly_data(&input_dup_n60._c0_poly);
   for (index_cin_n60 = 0; index_cin_n60 < 64; index_cin_n60 = index_cin_n60 + 1) {
-    Zero_ciph(&result_cin_n60);
+    memset(&result_cin_n60, 0, sizeof(result_cin_n60));
     for (index_khw2_n60 = 0; index_khw2_n60 < 9; index_khw2_n60 = index_khw2_n60 + 1) {
       _rescale_tmp_6529 = input_roll_n60[index_khw2_n60];
       Pt_from_msg(&_pgen_tmp_511, index_khw2_n60 + (index_cin_n60 * 9) + 17042 /* cst_499_0 */, 4096, Sc_degree(&_rescale_tmp_6529), Level(&_rescale_tmp_6529));
@@ -11630,7 +11630,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435697, &_pgen_tmp_516, 15);
   Free_poly_data(&_pgen_tmp_516._c1_poly);
   Free_poly_data(&_pgen_tmp_516._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_518, &_cst_600, 1, 1, Level(&_preg_268435697));
+  Encode_float(&_pgen_tmp_518, &_cst_600, 1, 1, Level(&_preg_268435697));
   Init_ciph_up_scale_plain(&_pgen_tmp_517, &_preg_268435697, &_pgen_tmp_518);
   {
     _pgen_modulus = Q_modulus();
@@ -11656,7 +11656,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435698._c1_poly);
   Free_poly_data(&_preg_268435698._c0_poly);
   Tm_start("Tensor::conv");
-  Zero_ciph(&result_n61);
+  memset(&result_n61, 0, sizeof(result_n61));
   Copy_ciph(&input_dup_n61, &_preg_268435699);
   Free_poly_data(&_preg_268435699._c1_poly);
   Free_poly_data(&_preg_268435699._c0_poly);
@@ -11669,7 +11669,7 @@ bool Main_graph() {
   Free_poly_data(&input_dup_n61._c1_poly);
   Free_poly_data(&input_dup_n61._c0_poly);
   for (index_cin_n61 = 0; index_cin_n61 < 64; index_cin_n61 = index_cin_n61 + 1) {
-    Zero_ciph(&result_cin_n61);
+    memset(&result_cin_n61, 0, sizeof(result_cin_n61));
     for (index_khw2_n61 = 0; index_khw2_n61 < 9; index_khw2_n61 = index_khw2_n61 + 1) {
       _rescale_tmp_6637 = input_roll_n61[index_khw2_n61];
       Pt_from_msg(&_pgen_tmp_520, index_khw2_n61 + (index_cin_n61 * 9) + 17620 /* cst_505_0 */, 4096, Sc_degree(&_rescale_tmp_6637), Level(&_rescale_tmp_6637));
@@ -11779,7 +11779,7 @@ bool Main_graph() {
   Bootstrap(&_preg_268435702, &_preg_268435701, 17);
   Free_poly_data(&_preg_268435701._c1_poly);
   Free_poly_data(&_preg_268435701._c0_poly);
-  Encode_plain_from_float(&_pgen_tmp_527, &_cst_601, 1, 1, Level(&_preg_268435702));
+  Encode_float(&_pgen_tmp_527, &_cst_601, 1, 1, Level(&_preg_268435702));
   Init_ciph_up_scale_plain(&_pgen_tmp_526, &_preg_268435702, &_pgen_tmp_527);
   {
     _pgen_modulus = Q_modulus();
@@ -11879,7 +11879,7 @@ bool Main_graph() {
   Free_poly_data(&_preg_268435705._c0_poly);
   Tm_taken("Tensor::flatten");
   Tm_start("Tensor::gemm");
-  Zero_ciph(&tmp_result_n62);
+  memset(&tmp_result_n62, 0, sizeof(tmp_result_n62));
   _preg_268435897 = Rotate(_preg_268435706, -70);
   Init_ciph_same_scale(&input_dup_n62, &_preg_268435706, &_preg_268435897);
   {
@@ -11984,8 +11984,9 @@ int Get_input_count() {
 }
 
 DATA_SCHEME* Get_encode_scheme(int idx) {
+  static MAP_DESC desc_0[] = {{NORMAL, 0, 0, 0, 0}};
   static DATA_SCHEME scheme_0 = {
-    "input", {0, 0, 0, 0}, 1, {NORMAL, 0, 0, 0, 0}
+    "input", {0, 0, 0, 0}, 1, desc_0
   };
   static DATA_SCHEME* scheme[] = { &scheme_0 };
   return scheme[idx];
@@ -11996,8 +11997,9 @@ int Get_output_count() {
 }
 
 DATA_SCHEME* Get_decode_scheme(int idx) {
+  static MAP_DESC desc[] = {{NORMAL, 0, 0, 0, 0}};
   static DATA_SCHEME scheme = {
-    "output", {0, 0, 0, 0}, 1, {NORMAL, 0, 0, 0, 0}
+    "output", {0, 0, 0, 0}, 1, desc
   };
   return &scheme;
 }
@@ -12518,7 +12520,7 @@ CIPHERTEXT App_relu(CIPHERTEXT input_ct0, CIPHERTEXT input_ct1) {
   Free_poly_data(&_preg_268435456._c1_poly);
   Free_poly_data(&_preg_268435456._c0_poly);
   Init_ciph_same_scale(&_pgen_tmp_3, &_relu_tmp7, &_relu_tmp7);
-  Encode_plain_from_float(&_pgen_tmp_4, &_cst_517, 1, Sc_degree(&_pgen_tmp_3), Level(&_pgen_tmp_3));
+  Encode_float(&_pgen_tmp_4, &_cst_517, 1, Sc_degree(&_pgen_tmp_3), Level(&_pgen_tmp_3));
   Init_ciph_same_scale_plain(&_relu_tmp13, &_pgen_tmp_3, &_pgen_tmp_4);
   {
     _pgen_modulus = Q_modulus();
@@ -12571,7 +12573,7 @@ CIPHERTEXT App_relu(CIPHERTEXT input_ct0, CIPHERTEXT input_ct1) {
   Free_poly_data(&_preg_268435457._c1_poly);
   Free_poly_data(&_preg_268435457._c0_poly);
   Init_ciph_same_scale(&_pgen_tmp_10, &_relu_tmp17, &_relu_tmp17);
-  Encode_plain_from_float(&_pgen_tmp_11, &_cst_518, 1, Sc_degree(&_pgen_tmp_10), Level(&_pgen_tmp_10));
+  Encode_float(&_pgen_tmp_11, &_cst_518, 1, Sc_degree(&_pgen_tmp_10), Level(&_pgen_tmp_10));
   Init_ciph_same_scale_plain(&_relu_tmp23, &_pgen_tmp_10, &_pgen_tmp_11);
   {
     _pgen_modulus = Q_modulus();
@@ -12597,7 +12599,7 @@ CIPHERTEXT App_relu(CIPHERTEXT input_ct0, CIPHERTEXT input_ct1) {
   Init_ciph_down_scale(&_pgen_tmp_16, &_relu_tmp13);
   Rescale(&_pgen_tmp_16._c0_poly, &_relu_tmp13._c0_poly);
   Rescale(&_pgen_tmp_16._c1_poly, &_relu_tmp13._c1_poly);
-  Encode_plain_from_double(&_pgen_tmp_18, &_cst_519, 1, 1, Level(&input_ct1));
+  Encode_double(&_pgen_tmp_18, &_cst_519, 1, 1, Level(&input_ct1));
   Init_ciph_up_scale_plain(&_pgen_tmp_17, &input_ct1, &_pgen_tmp_18);
   {
     _pgen_modulus = Q_modulus();
@@ -12639,7 +12641,7 @@ CIPHERTEXT App_relu(CIPHERTEXT input_ct0, CIPHERTEXT input_ct1) {
   Free_poly_data(&_pgen_tmp_15._c2_poly);
   Free_poly_data(&_pgen_tmp_15._c1_poly);
   Free_poly_data(&_pgen_tmp_15._c0_poly);
-  Encode_plain_from_double(&_pgen_tmp_22, &_cst_520, 1, 1, Level(&input_ct1));
+  Encode_double(&_pgen_tmp_22, &_cst_520, 1, 1, Level(&input_ct1));
   Init_ciph_up_scale_plain(&_pgen_tmp_23, &input_ct1, &_pgen_tmp_22);
   Init_ciph_same_scale(&_pgen_tmp_14, &_preg_268435458, &_pgen_tmp_23);
   {
@@ -12693,7 +12695,7 @@ CIPHERTEXT App_relu(CIPHERTEXT input_ct0, CIPHERTEXT input_ct1) {
   Rescale(&_pgen_tmp_28._c1_poly, &_relu_tmp13._c1_poly);
   Free_poly_data(&_relu_tmp13._c1_poly);
   Free_poly_data(&_relu_tmp13._c0_poly);
-  Encode_plain_from_double(&_pgen_tmp_30, &_cst_521, 1, 1, Level(&input_ct1));
+  Encode_double(&_pgen_tmp_30, &_cst_521, 1, 1, Level(&input_ct1));
   Init_ciph_up_scale_plain(&_pgen_tmp_29, &input_ct1, &_pgen_tmp_30);
   {
     _pgen_modulus = Q_modulus();
@@ -12735,7 +12737,7 @@ CIPHERTEXT App_relu(CIPHERTEXT input_ct0, CIPHERTEXT input_ct1) {
   Free_poly_data(&_pgen_tmp_27._c2_poly);
   Free_poly_data(&_pgen_tmp_27._c1_poly);
   Free_poly_data(&_pgen_tmp_27._c0_poly);
-  Encode_plain_from_double(&_pgen_tmp_34, &_cst_522, 1, 1, Level(&input_ct1));
+  Encode_double(&_pgen_tmp_34, &_cst_522, 1, 1, Level(&input_ct1));
   Init_ciph_up_scale_plain(&_pgen_tmp_35, &input_ct1, &_pgen_tmp_34);
   Init_ciph_same_scale(&_pgen_tmp_36, &_preg_268435460, &_pgen_tmp_35);
   Init_ciph_same_scale(&_relu_tmp45, &_preg_268435459, &_pgen_tmp_36);
@@ -12796,7 +12798,7 @@ CIPHERTEXT App_relu(CIPHERTEXT input_ct0, CIPHERTEXT input_ct1) {
   Free_poly_data(&_preg_268435461._c1_poly);
   Free_poly_data(&_preg_268435461._c0_poly);
   Init_ciph_same_scale(&_pgen_tmp_42, &_relu_tmp49, &_relu_tmp49);
-  Encode_plain_from_float(&_pgen_tmp_43, &_cst_523, 1, Sc_degree(&_pgen_tmp_42), Level(&_pgen_tmp_42));
+  Encode_float(&_pgen_tmp_43, &_cst_523, 1, Sc_degree(&_pgen_tmp_42), Level(&_pgen_tmp_42));
   Init_ciph_same_scale_plain(&_relu_tmp55, &_pgen_tmp_42, &_pgen_tmp_43);
   {
     _pgen_modulus = Q_modulus();
@@ -12852,7 +12854,7 @@ CIPHERTEXT App_relu(CIPHERTEXT input_ct0, CIPHERTEXT input_ct1) {
   Init_ciph_down_scale(&_pgen_tmp_50, &_relu_tmp45);
   Rescale(&_pgen_tmp_50._c0_poly, &_relu_tmp45._c0_poly);
   Rescale(&_pgen_tmp_50._c1_poly, &_relu_tmp45._c1_poly);
-  Encode_plain_from_float(&_pgen_tmp_51, &_cst_524, 1, 1, Level(&_pgen_tmp_50));
+  Encode_float(&_pgen_tmp_51, &_cst_524, 1, 1, Level(&_pgen_tmp_50));
   Init_ciph_up_scale_plain(&_pgen_tmp_52, &_pgen_tmp_50, &_pgen_tmp_51);
   Init_ciph_same_scale(&_relu_tmp67, &_pgen_tmp_49, &_pgen_tmp_52);
   {
@@ -12912,7 +12914,7 @@ CIPHERTEXT App_relu(CIPHERTEXT input_ct0, CIPHERTEXT input_ct1) {
   Free_poly_data(&_preg_268435463._c1_poly);
   Free_poly_data(&_preg_268435463._c0_poly);
   Init_ciph_same_scale(&_pgen_tmp_58, &_relu_tmp71, &_relu_tmp71);
-  Encode_plain_from_float(&_pgen_tmp_59, &_cst_525, 1, Sc_degree(&_pgen_tmp_58), Level(&_pgen_tmp_58));
+  Encode_float(&_pgen_tmp_59, &_cst_525, 1, Sc_degree(&_pgen_tmp_58), Level(&_pgen_tmp_58));
   Init_ciph_same_scale_plain(&_relu_tmp77, &_pgen_tmp_58, &_pgen_tmp_59);
   {
     _pgen_modulus = Q_modulus();
@@ -12965,7 +12967,7 @@ CIPHERTEXT App_relu(CIPHERTEXT input_ct0, CIPHERTEXT input_ct1) {
   Free_poly_data(&_preg_268435464._c1_poly);
   Free_poly_data(&_preg_268435464._c0_poly);
   Init_ciph_same_scale(&_pgen_tmp_65, &_relu_tmp81, &_relu_tmp81);
-  Encode_plain_from_float(&_pgen_tmp_66, &_cst_526, 1, Sc_degree(&_pgen_tmp_65), Level(&_pgen_tmp_65));
+  Encode_float(&_pgen_tmp_66, &_cst_526, 1, Sc_degree(&_pgen_tmp_65), Level(&_pgen_tmp_65));
   Init_ciph_same_scale_plain(&_relu_tmp87, &_pgen_tmp_65, &_pgen_tmp_66);
   {
     _pgen_modulus = Q_modulus();
@@ -12999,7 +13001,7 @@ CIPHERTEXT App_relu(CIPHERTEXT input_ct0, CIPHERTEXT input_ct1) {
   Init_ciph_down_scale(&_pgen_tmp_76, &_relu_tmp45);
   Rescale(&_pgen_tmp_76._c0_poly, &_relu_tmp45._c0_poly);
   Rescale(&_pgen_tmp_76._c1_poly, &_relu_tmp45._c1_poly);
-  Encode_plain_from_double(&_pgen_tmp_77, &_cst_527, 1, 1, Level(&_pgen_tmp_76));
+  Encode_double(&_pgen_tmp_77, &_cst_527, 1, 1, Level(&_pgen_tmp_76));
   Init_ciph_up_scale_plain(&_pgen_tmp_75, &_pgen_tmp_76, &_pgen_tmp_77);
   {
     _pgen_modulus = Q_modulus();
@@ -13046,7 +13048,7 @@ CIPHERTEXT App_relu(CIPHERTEXT input_ct0, CIPHERTEXT input_ct1) {
   Init_ciph_down_scale(&_pgen_tmp_81, &_relu_tmp45);
   Rescale(&_pgen_tmp_81._c0_poly, &_relu_tmp45._c0_poly);
   Rescale(&_pgen_tmp_81._c1_poly, &_relu_tmp45._c1_poly);
-  Encode_plain_from_double(&_pgen_tmp_82, &_cst_528, 1, 1, Level(&_pgen_tmp_81));
+  Encode_double(&_pgen_tmp_82, &_cst_528, 1, 1, Level(&_pgen_tmp_81));
   Init_ciph_up_scale_plain(&_pgen_tmp_83, &_pgen_tmp_81, &_pgen_tmp_82);
   Init_ciph_same_scale(&_pgen_tmp_72, &_preg_268435465, &_pgen_tmp_83);
   {
@@ -13100,12 +13102,12 @@ CIPHERTEXT App_relu(CIPHERTEXT input_ct0, CIPHERTEXT input_ct1) {
   Init_ciph_down_scale(&_pgen_tmp_87, &_relu_tmp67);
   Rescale(&_pgen_tmp_87._c0_poly, &_relu_tmp67._c0_poly);
   Rescale(&_pgen_tmp_87._c1_poly, &_relu_tmp67._c1_poly);
-  Encode_plain_from_double(&_pgen_tmp_88, &_cst_530, 1, 1, Level(&_pgen_tmp_87));
+  Encode_double(&_pgen_tmp_88, &_cst_530, 1, 1, Level(&_pgen_tmp_87));
   Init_ciph_up_scale_plain(&_pgen_tmp_89, &_pgen_tmp_87, &_pgen_tmp_88);
   Init_ciph_down_scale(&_pgen_tmp_90, &_relu_tmp45);
   Rescale(&_pgen_tmp_90._c0_poly, &_relu_tmp45._c0_poly);
   Rescale(&_pgen_tmp_90._c1_poly, &_relu_tmp45._c1_poly);
-  Encode_plain_from_double(&_pgen_tmp_91, &_cst_529, 1, 1, Level(&_pgen_tmp_90));
+  Encode_double(&_pgen_tmp_91, &_cst_529, 1, 1, Level(&_pgen_tmp_90));
   Init_ciph_up_scale_plain(&_pgen_tmp_92, &_pgen_tmp_90, &_pgen_tmp_91);
   Init_ciph_same_scale(&_pgen_tmp_93, &_pgen_tmp_89, &_pgen_tmp_92);
   Init_ciph_same_scale(&_pgen_tmp_69, &_preg_268435466, &_pgen_tmp_93);
@@ -13176,12 +13178,12 @@ CIPHERTEXT App_relu(CIPHERTEXT input_ct0, CIPHERTEXT input_ct1) {
   Init_ciph_down_scale(&_pgen_tmp_100, &_relu_tmp67);
   Rescale(&_pgen_tmp_100._c0_poly, &_relu_tmp67._c0_poly);
   Rescale(&_pgen_tmp_100._c1_poly, &_relu_tmp67._c1_poly);
-  Encode_plain_from_double(&_pgen_tmp_101, &_cst_532, 1, 1, Level(&_pgen_tmp_100));
+  Encode_double(&_pgen_tmp_101, &_cst_532, 1, 1, Level(&_pgen_tmp_100));
   Init_ciph_up_scale_plain(&_pgen_tmp_102, &_pgen_tmp_100, &_pgen_tmp_101);
   Init_ciph_down_scale(&_pgen_tmp_103, &_relu_tmp45);
   Rescale(&_pgen_tmp_103._c0_poly, &_relu_tmp45._c0_poly);
   Rescale(&_pgen_tmp_103._c1_poly, &_relu_tmp45._c1_poly);
-  Encode_plain_from_double(&_pgen_tmp_104, &_cst_531, 1, 1, Level(&_pgen_tmp_103));
+  Encode_double(&_pgen_tmp_104, &_cst_531, 1, 1, Level(&_pgen_tmp_103));
   Init_ciph_up_scale_plain(&_pgen_tmp_105, &_pgen_tmp_103, &_pgen_tmp_104);
   Init_ciph_same_scale(&_pgen_tmp_99, &_pgen_tmp_102, &_pgen_tmp_105);
   {
@@ -13242,14 +13244,14 @@ CIPHERTEXT App_relu(CIPHERTEXT input_ct0, CIPHERTEXT input_ct1) {
   Rescale(&_pgen_tmp_109._c1_poly, &_relu_tmp67._c1_poly);
   Free_poly_data(&_relu_tmp67._c1_poly);
   Free_poly_data(&_relu_tmp67._c0_poly);
-  Encode_plain_from_double(&_pgen_tmp_110, &_cst_534, 1, 1, Level(&_pgen_tmp_109));
+  Encode_double(&_pgen_tmp_110, &_cst_534, 1, 1, Level(&_pgen_tmp_109));
   Init_ciph_up_scale_plain(&_pgen_tmp_111, &_pgen_tmp_109, &_pgen_tmp_110);
   Init_ciph_down_scale(&_pgen_tmp_112, &_relu_tmp45);
   Rescale(&_pgen_tmp_112._c0_poly, &_relu_tmp45._c0_poly);
   Rescale(&_pgen_tmp_112._c1_poly, &_relu_tmp45._c1_poly);
   Free_poly_data(&_relu_tmp45._c1_poly);
   Free_poly_data(&_relu_tmp45._c0_poly);
-  Encode_plain_from_double(&_pgen_tmp_113, &_cst_533, 1, 1, Level(&_pgen_tmp_112));
+  Encode_double(&_pgen_tmp_113, &_cst_533, 1, 1, Level(&_pgen_tmp_112));
   Init_ciph_up_scale_plain(&_pgen_tmp_114, &_pgen_tmp_112, &_pgen_tmp_113);
   Init_ciph_same_scale(&_pgen_tmp_115, &_pgen_tmp_111, &_pgen_tmp_114);
   Init_ciph_same_scale(&_pgen_tmp_116, &_preg_268435468, &_pgen_tmp_115);
@@ -13324,7 +13326,7 @@ CIPHERTEXT App_relu(CIPHERTEXT input_ct0, CIPHERTEXT input_ct1) {
   Free_poly_data(&_preg_268435469._c1_poly);
   Free_poly_data(&_preg_268435469._c0_poly);
   Init_ciph_same_scale(&_pgen_tmp_122, &_relu_tmp131, &_relu_tmp131);
-  Encode_plain_from_float(&_pgen_tmp_123, &_cst_535, 1, Sc_degree(&_pgen_tmp_122), Level(&_pgen_tmp_122));
+  Encode_float(&_pgen_tmp_123, &_cst_535, 1, Sc_degree(&_pgen_tmp_122), Level(&_pgen_tmp_122));
   Init_ciph_same_scale_plain(&_relu_tmp137, &_pgen_tmp_122, &_pgen_tmp_123);
   {
     _pgen_modulus = Q_modulus();
@@ -13380,7 +13382,7 @@ CIPHERTEXT App_relu(CIPHERTEXT input_ct0, CIPHERTEXT input_ct1) {
   Init_ciph_down_scale(&_pgen_tmp_130, &_relu_tmp127);
   Rescale(&_pgen_tmp_130._c0_poly, &_relu_tmp127._c0_poly);
   Rescale(&_pgen_tmp_130._c1_poly, &_relu_tmp127._c1_poly);
-  Encode_plain_from_float(&_pgen_tmp_131, &_cst_536, 1, 1, Level(&_pgen_tmp_130));
+  Encode_float(&_pgen_tmp_131, &_cst_536, 1, 1, Level(&_pgen_tmp_130));
   Init_ciph_up_scale_plain(&_pgen_tmp_132, &_pgen_tmp_130, &_pgen_tmp_131);
   Init_ciph_same_scale(&_relu_tmp149, &_pgen_tmp_129, &_pgen_tmp_132);
   {
@@ -13442,7 +13444,7 @@ CIPHERTEXT App_relu(CIPHERTEXT input_ct0, CIPHERTEXT input_ct1) {
   Free_poly_data(&_preg_268435471._c1_poly);
   Free_poly_data(&_preg_268435471._c0_poly);
   Init_ciph_same_scale(&_pgen_tmp_138, &_relu_tmp153, &_relu_tmp153);
-  Encode_plain_from_float(&_pgen_tmp_139, &_cst_537, 1, Sc_degree(&_pgen_tmp_138), Level(&_pgen_tmp_138));
+  Encode_float(&_pgen_tmp_139, &_cst_537, 1, Sc_degree(&_pgen_tmp_138), Level(&_pgen_tmp_138));
   Init_ciph_same_scale_plain(&_relu_tmp159, &_pgen_tmp_138, &_pgen_tmp_139);
   {
     _pgen_modulus = Q_modulus();
@@ -13495,7 +13497,7 @@ CIPHERTEXT App_relu(CIPHERTEXT input_ct0, CIPHERTEXT input_ct1) {
   Free_poly_data(&_preg_268435472._c1_poly);
   Free_poly_data(&_preg_268435472._c0_poly);
   Init_ciph_same_scale(&_pgen_tmp_145, &_relu_tmp163, &_relu_tmp163);
-  Encode_plain_from_float(&_pgen_tmp_146, &_cst_538, 1, Sc_degree(&_pgen_tmp_145), Level(&_pgen_tmp_145));
+  Encode_float(&_pgen_tmp_146, &_cst_538, 1, Sc_degree(&_pgen_tmp_145), Level(&_pgen_tmp_145));
   Init_ciph_same_scale_plain(&_relu_tmp169, &_pgen_tmp_145, &_pgen_tmp_146);
   {
     _pgen_modulus = Q_modulus();
@@ -13524,7 +13526,7 @@ CIPHERTEXT App_relu(CIPHERTEXT input_ct0, CIPHERTEXT input_ct1) {
   Init_ciph_down_scale(&_pgen_tmp_153, &_relu_tmp127);
   Rescale(&_pgen_tmp_153._c0_poly, &_relu_tmp127._c0_poly);
   Rescale(&_pgen_tmp_153._c1_poly, &_relu_tmp127._c1_poly);
-  Encode_plain_from_double(&_pgen_tmp_155, &_cst_539, 1, 1, Level(&input_ct0));
+  Encode_double(&_pgen_tmp_155, &_cst_539, 1, 1, Level(&input_ct0));
   Init_ciph_up_scale_plain(&_pgen_tmp_154, &input_ct0, &_pgen_tmp_155);
   {
     _pgen_modulus = Q_modulus();
@@ -13599,7 +13601,7 @@ CIPHERTEXT App_relu(CIPHERTEXT input_ct0, CIPHERTEXT input_ct1) {
   Init_ciph_down_scale(&_pgen_tmp_163, &_relu_tmp149);
   Rescale(&_pgen_tmp_163._c0_poly, &_relu_tmp149._c0_poly);
   Rescale(&_pgen_tmp_163._c1_poly, &_relu_tmp149._c1_poly);
-  Encode_plain_from_double(&_pgen_tmp_165, &_cst_541, 1, 1, Level(&input_ct0));
+  Encode_double(&_pgen_tmp_165, &_cst_541, 1, 1, Level(&input_ct0));
   Init_ciph_up_scale_plain(&_pgen_tmp_164, &input_ct0, &_pgen_tmp_165);
   {
     _pgen_modulus = Q_modulus();
@@ -13644,7 +13646,7 @@ CIPHERTEXT App_relu(CIPHERTEXT input_ct0, CIPHERTEXT input_ct1) {
   Init_ciph_down_scale(&_pgen_tmp_170, &_relu_tmp127);
   Rescale(&_pgen_tmp_170._c0_poly, &_relu_tmp127._c0_poly);
   Rescale(&_pgen_tmp_170._c1_poly, &_relu_tmp127._c1_poly);
-  Encode_plain_from_double(&_pgen_tmp_172, &_cst_540, 1, 1, Level(&input_ct0));
+  Encode_double(&_pgen_tmp_172, &_cst_540, 1, 1, Level(&input_ct0));
   Init_ciph_up_scale_plain(&_pgen_tmp_171, &input_ct0, &_pgen_tmp_172);
   {
     _pgen_modulus = Q_modulus();
@@ -13745,7 +13747,7 @@ CIPHERTEXT App_relu(CIPHERTEXT input_ct0, CIPHERTEXT input_ct1) {
   Init_ciph_down_scale(&_pgen_tmp_184, &_relu_tmp149);
   Rescale(&_pgen_tmp_184._c0_poly, &_relu_tmp149._c0_poly);
   Rescale(&_pgen_tmp_184._c1_poly, &_relu_tmp149._c1_poly);
-  Encode_plain_from_double(&_pgen_tmp_186, &_cst_543, 1, 1, Level(&input_ct0));
+  Encode_double(&_pgen_tmp_186, &_cst_543, 1, 1, Level(&input_ct0));
   Init_ciph_up_scale_plain(&_pgen_tmp_185, &input_ct0, &_pgen_tmp_186);
   {
     _pgen_modulus = Q_modulus();
@@ -13790,7 +13792,7 @@ CIPHERTEXT App_relu(CIPHERTEXT input_ct0, CIPHERTEXT input_ct1) {
   Init_ciph_down_scale(&_pgen_tmp_191, &_relu_tmp127);
   Rescale(&_pgen_tmp_191._c0_poly, &_relu_tmp127._c0_poly);
   Rescale(&_pgen_tmp_191._c1_poly, &_relu_tmp127._c1_poly);
-  Encode_plain_from_double(&_pgen_tmp_193, &_cst_542, 1, 1, Level(&input_ct0));
+  Encode_double(&_pgen_tmp_193, &_cst_542, 1, 1, Level(&input_ct0));
   Init_ciph_up_scale_plain(&_pgen_tmp_192, &input_ct0, &_pgen_tmp_193);
   {
     _pgen_modulus = Q_modulus();
@@ -13881,7 +13883,7 @@ CIPHERTEXT App_relu(CIPHERTEXT input_ct0, CIPHERTEXT input_ct1) {
   Rescale(&_pgen_tmp_201._c1_poly, &_relu_tmp149._c1_poly);
   Free_poly_data(&_relu_tmp149._c1_poly);
   Free_poly_data(&_relu_tmp149._c0_poly);
-  Encode_plain_from_double(&_pgen_tmp_203, &_cst_545, 1, 1, Level(&input_ct0));
+  Encode_double(&_pgen_tmp_203, &_cst_545, 1, 1, Level(&input_ct0));
   Init_ciph_up_scale_plain(&_pgen_tmp_202, &input_ct0, &_pgen_tmp_203);
   {
     _pgen_modulus = Q_modulus();
@@ -13928,7 +13930,7 @@ CIPHERTEXT App_relu(CIPHERTEXT input_ct0, CIPHERTEXT input_ct1) {
   Rescale(&_pgen_tmp_208._c1_poly, &_relu_tmp127._c1_poly);
   Free_poly_data(&_relu_tmp127._c1_poly);
   Free_poly_data(&_relu_tmp127._c0_poly);
-  Encode_plain_from_double(&_pgen_tmp_210, &_cst_544, 1, 1, Level(&input_ct0));
+  Encode_double(&_pgen_tmp_210, &_cst_544, 1, 1, Level(&input_ct0));
   Init_ciph_up_scale_plain(&_pgen_tmp_209, &input_ct0, &_pgen_tmp_210);
   {
     _pgen_modulus = Q_modulus();
@@ -13998,7 +14000,7 @@ CIPHERTEXT App_relu(CIPHERTEXT input_ct0, CIPHERTEXT input_ct1) {
     Free_poly_data(&_preg_268435477._c1_poly);
     Free_poly_data(&_preg_268435477._c0_poly);
   }
-  Encode_plain_from_float(&_pgen_tmp_216, &_cst_546, 1, 1, Level(&input_ct0));
+  Encode_float(&_pgen_tmp_216, &_cst_546, 1, 1, Level(&input_ct0));
   Init_ciph_up_scale_plain(&_pgen_tmp_217, &input_ct0, &_pgen_tmp_216);
   Init_ciph_same_scale(&_relu_tmp223, &_relu_tmp217, &_pgen_tmp_217);
   {
@@ -14203,7 +14205,7 @@ CIPHERTEXT Relinearize(CIPHERTEXT3 ciph3) {
 
 CKKS_PARAMS* Get_context_params() {
   static CKKS_PARAMS parm = {
-    LIB_ANT, 65536, 0, 33, 51, 50, 3, 192, 197, 
+    LIB_ANT, 65536, 0, 33, 0, 51, 46, 3, 192, 197,
     { -16384, -12288, -8192, -4096, -70, -33, -32, -31,
       -17, -16, -15, -9, -8, -7, -1, 0,
       1, 2, 3, 4, 5, 6, 7, 8,

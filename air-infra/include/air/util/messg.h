@@ -19,29 +19,22 @@
 
 #include "air/util/error.h"
 #include "air/util/srcdbg.h"
-#include "err_msg.inc.h"
+
+//! Note: It is generated automatically at compile time
+#include "air/util/err_msg.h"
 
 namespace air {
 
 namespace util {
 
-/**
- * @brief trace file handles
- *
- */
+//! @brief trace file handles
 class TFILE {
 public:
-  /**
-   * @brief Construct a new TFILE object, trace on cout
-   *
-   */
+  //! @brief Construct a new TFILE object, trace on cout
   TFILE(void) { _tfbuf = _tfile.basic_ios<char>::rdbuf(std::cout.rdbuf()); }
 
-  /**
-   * @brief Construct a new TFILE object
-   *
-   * @param file type cosnt char*
-   */
+  //! @brief Construct a new TFILE object
+  //! @param file type cosnt char*
   TFILE(const char* file) {
     if (file == NULL) {
       _tfbuf = _tfile.basic_ios<char>::rdbuf(std::cout.rdbuf());
@@ -57,11 +50,8 @@ public:
     }
   };
 
-  /**
-   * @brief Construct a new TFILE object
-   *
-   * @param file type const std::string
-   */
+  //! @brief Construct a new TFILE object
+  //! @param file type const std::string
   TFILE(const std::string& file) {
     if (file.empty()) {
       _tfbuf = _tfile.basic_ios<char>::rdbuf(std::cout.rdbuf());
@@ -77,11 +67,8 @@ public:
     }
   }
 
-  /**
-   * @brief Open a new file for tracing
-   *
-   * @param file trace file name
-   */
+  //! @brief Open a new file for tracing
+  //! @param file trace file name
   void Open(const char* file) {
     if (_tfbuf) {
       _tfile.basic_ios<char>::rdbuf(_tfbuf);
@@ -92,32 +79,22 @@ public:
     }
   }
 
-  /**
-   * @brief Destroy the TFILE object; close Trace_file()
-   *
-   */
+  //! @brief Destroy the TFILE object; close Trace_file()
   ~TFILE(void) {
     if (_tfile.is_open()) {
       _tfile.close();
     }
   };
 
-  /**
-   * @brief Check if trace file is open
-   *
-   * @param void
-   */
+  //! @brief Check if trace file is open
+  //! @param void
   bool Is_open(void) { return _tfile.is_open(); }
 
-  /**
-   * @brief Access private member _tfile
-   *
-   * @return ofstream& ofstream handle
-   */
+  //! @brief Access private member _tfile
+  //! @return ofstream& ofstream handle
   std::ofstream& Tfile(void) { return _tfile; }
 
 private:
-  // TFILE(void);                   // REQUIRED UNDEFINED UNWANTED methods
   TFILE(const TFILE&);             // REQUIRED UNDEFINED UNWANTED methods
   TFILE& operator=(const TFILE&);  // REQUIRED UNDEFINED UNWANTED methods
 

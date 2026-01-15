@@ -48,6 +48,20 @@ public:
     return !_pass_mgr.Pass_enable<PASS_ID::POLY>();
   }
 
+  void Disable_poly2c_pass() {
+    _pass_mgr.Set_pass_enable<PASS_ID::POLY2C>(false);
+  }
+
+  template <typename PASS, int PASS_ID>
+  PASS& Get_pass() {
+    return _pass_mgr.template Get_pass<PASS, PASS_ID>();
+  }
+
+  template <typename PASS, int PASS_ID>
+  const PASS& Get_pass() const {
+    return _pass_mgr.template Get_pass<PASS, PASS_ID>();
+  }
+
 private:
   FHE_PASS_MANAGER     _pass_mgr;
   fhe::core::LOWER_CTX _lower_ctx;

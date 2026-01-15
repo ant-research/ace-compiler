@@ -5,7 +5,7 @@
 
     Global options
     ```
-    -DCMAKE_BUILD_TYPE=Debug|Release    # default Release
+    -DCMAKE_BUILD_TYPE=Debug|Release    # default Debug
     -DBUILD_STATIC=ON|OFF               # default ON
     -DBUILD_SHARED=ON|OFF               # default OFF   TODO: implement later
     -DBUILD_UNITTEST=ON|OFF             # default ON
@@ -16,8 +16,7 @@
     Current repo options
     ```
     -DNN_CODE_CHECK=ON|OFF              # default ON    NOTE: if want close code check, Manually set to OFF
-    -DNN_WITH_SRC="air-infra"           #
-    -DNN_BUILD_ONNX=ON|OFF              # default ON    TODO: Don't set OFF, mybe delete later
+    -DNN_WITH_SRC="air-infra"           # default OFF   NOTE: Need to install the air-infra.tar.gz package
     -DNN_BUILD_TEST=ON|OFF              # default ON
     -DNN_BUILD_EXAMPLE=ON|OFF           # default ON
     -DNN_INSTALL_APP=ON|OFF             # default ON

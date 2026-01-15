@@ -169,7 +169,7 @@ void CONSTANT::Set_val(uint64_t val) {
   _const->Set_integer_val(val);
 }
 
-void CONSTANT::Set_val(STR_ID str) {
+void CONSTANT::Set_val(LITERAL_ID str) {
   AIR_ASSERT(Kind() == CONSTANT_KIND::STR_ARRAY);
   _const->Set_str_array_val(str);
 }
@@ -211,9 +211,9 @@ size_t CONSTANT::Array_byte_len() const {
   return _const->Array_length();
 }
 
-STR_PTR CONSTANT::Str_val() const {
+LITERAL_PTR CONSTANT::Str_val() const {
   AIR_ASSERT(Kind() == CONSTANT_KIND::STR_ARRAY);
-  return _glob->String(_const->Str_array_val());
+  return _glob->Literal(_const->Str_array_val());
 }
 
 FILE_ID CONSTANT::Ext_file_id() const {

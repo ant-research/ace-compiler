@@ -47,6 +47,19 @@ public:
     ctx << ")";
   }
 
+  //! @brief Emit a Alloc_polys call to RTlib
+  template <typename RETV, typename VISITOR>
+  void Handle_alloc_n(VISITOR* visitor, air::base::NODE_PTR node) {
+    IR2C_CTX& ctx = visitor->Context();
+    ctx << "Alloc_polys(";
+    visitor->template Visit<RETV>(node->Child(0));
+    ctx << ", degree, ";
+    visitor->template Visit<RETV>(node->Child(2));
+    ctx << ",";
+    visitor->template Visit<RETV>(node->Child(3));
+    ctx << ")";
+  }
+
   //! @brief Emit a Free_poly call to RTlib
   template <typename RETV, typename VISITOR>
   void Handle_free(VISITOR* visitor, air::base::NODE_PTR node) {
@@ -59,11 +72,11 @@ public:
     }
     if (elem_cnt > 0) {
       ctx << "Free_ciph_poly(";
-    } else if (node->Child(0)->Opcode() == air::core::OPC_LDF ||
-               node->Child(0)->Opcode() == air::core::OPC_LDPF) {
-      ctx << "Free_poly_data(";
+    } else if (ctx.Is_poly_ptr_ptr(node->Child(0)->Rtype())) {
+      ctx << "Free_polys(";
     } else {
-      ctx << "Free_poly(";
+      AIR_ASSERT(ctx.Is_rns_poly_type(node->Child(0)->Rtype_id()));
+      ctx << "Free_data(";
     }
     visitor->template Visit<RETV>(node->Child(0));
     if (elem_cnt > 0) {
@@ -121,7 +134,13 @@ public:
   template <typename RETV, typename VISITOR>
   void Handle_pk0_at(VISITOR* visitor, air::base::NODE_PTR node) {
     IR2C_CTX& ctx = visitor->Context();
-    ctx << "Pk0_at(";
+    ctx << "Set_pk0(";
+    air::base::NODE_PTR parent = ctx.Parent(1);
+    if (parent != air::base::Null_ptr) {
+      ctx << "&";
+      Emit_sym(ctx, parent);
+      ctx << ", ";
+    }
     visitor->template Visit<RETV>(node->Child(0));
     ctx << ", ";
     visitor->template Visit<RETV>(node->Child(1));
@@ -132,7 +151,13 @@ public:
   template <typename RETV, typename VISITOR>
   void Handle_pk1_at(VISITOR* visitor, air::base::NODE_PTR node) {
     IR2C_CTX& ctx = visitor->Context();
-    ctx << "Pk1_at(";
+    ctx << "Set_pk1(";
+    air::base::NODE_PTR parent = ctx.Parent(1);
+    if (parent != air::base::Null_ptr) {
+      ctx << "&";
+      Emit_sym(ctx, parent);
+      ctx << ", ";
+    }
     visitor->template Visit<RETV>(node->Child(0));
     ctx << ", ";
     visitor->template Visit<RETV>(node->Child(1));
@@ -151,6 +176,76 @@ public:
     visitor->Context() << "Q_modulus()";
   }
 
+  template <typename RETV, typename VISITOR>
+  void Handle_extend(VISITOR* visitor, air::base::NODE_PTR node) {
+    IR2C_CTX& ctx = visitor->Context();
+    ctx << "Extend(";
+    air::base::NODE_PTR parent = ctx.Parent(1);
+    if (parent != air::base::Null_ptr) {
+      ctx << "&";
+      Emit_sym(ctx, parent);
+      ctx << ", ";
+    }
+    visitor->template Visit<RETV>(node->Child(0));
+    ctx << ")";
+  }
+
+  template <typename RETV, typename VISITOR>
+  void Handle_precomp(VISITOR* visitor, air::base::NODE_PTR node) {
+    IR2C_CTX& ctx = visitor->Context();
+    ctx << "Precomp(";
+    air::base::NODE_PTR parent = ctx.Parent(1);
+    if (parent != air::base::Null_ptr) {
+      Emit_sym(ctx, parent);
+      ctx << ", ";
+    }
+    ctx << "Num_decomp(";
+    visitor->template Visit<RETV>(node->Child(0));
+    ctx << "),";
+    visitor->template Visit<RETV>(node->Child(0));
+    ctx << ")";
+  }
+
+  template <typename RETV, typename VISITOR>
+  void Handle_swk_c0(VISITOR* visitor, air::base::NODE_PTR node) {
+    IR2C_CTX&           ctx    = visitor->Context();
+    air::base::NODE_PTR parent = ctx.Parent(1);
+    AIR_ASSERT(parent != air::base::Null_ptr && parent->Is_st());
+    air::base::TYPE_PTR ty = parent->Access_type();
+    AIR_ASSERT(ty->Is_array() && ctx.Lower_ctx().Is_rns_poly_type(
+                                     ty->Cast_to_arr()->Elem_type_id()));
+
+    ctx << "Swk_c0(";
+    Emit_sym(ctx, parent);
+    ctx << ", ";
+    ctx << ty->Cast_to_arr()->Elem_count();
+    ctx << ", ";
+    visitor->template Visit<RETV>(node->Child(0));
+    ctx << ", ";
+    visitor->template Visit<RETV>(node->Child(1));
+    ctx << ")";
+  }
+
+  template <typename RETV, typename VISITOR>
+  void Handle_swk_c1(VISITOR* visitor, air::base::NODE_PTR node) {
+    IR2C_CTX&           ctx    = visitor->Context();
+    air::base::NODE_PTR parent = ctx.Parent(1);
+    AIR_ASSERT(parent != air::base::Null_ptr && parent->Is_st());
+    air::base::TYPE_PTR ty = parent->Access_type();
+    AIR_ASSERT(ty->Is_array() && ctx.Lower_ctx().Is_rns_poly_type(
+                                     ty->Cast_to_arr()->Elem_type_id()));
+
+    ctx << "Swk_c1(";
+    Emit_sym(ctx, parent);
+    ctx << ", ";
+    ctx << ty->Cast_to_arr()->Elem_count();
+    ctx << ", ";
+    visitor->template Visit<RETV>(node->Child(0));
+    ctx << ", ";
+    visitor->template Visit<RETV>(node->Child(1));
+    ctx << ")";
+  }
+
   //! @brief Emit a Get_rotation_key call to RTlib
   template <typename RETV, typename VISITOR>
   void Handle_swk(VISITOR* visitor, air::base::NODE_PTR node) {
@@ -159,6 +254,52 @@ public:
     visitor->template Visit<RETV>(node->Child(0));
     ctx << ", ";
     visitor->template Visit<RETV>(node->Child(1));
+    ctx << ")";
+  }
+
+  template <typename RETV, typename VISITOR>
+  void Handle_dot_prod(VISITOR* visitor, air::base::NODE_PTR node) {
+    IR2C_CTX& ctx = visitor->Context();
+    ctx << "Dot_prod(";
+    air::base::NODE_PTR parent = ctx.Parent(1);
+    if (parent != air::base::Null_ptr && parent->Is_preg_op()) {
+      ctx << "&";
+      ctx.Emit_preg_id(parent->Preg_id());
+      ctx << ", ";
+    }
+    visitor->template Visit<RETV>(node->Child(0));
+    ctx << ", ";
+    visitor->template Visit<RETV>(node->Child(1));
+    ctx << ", ";
+    visitor->template Visit<RETV>(node->Child(2));
+    ctx << ")";
+  }
+
+  template <typename RETV, typename VISITOR>
+  void Handle_mod_down(VISITOR* visitor, air::base::NODE_PTR node) {
+    IR2C_CTX& ctx = visitor->Context();
+    ctx << "Mod_down(";
+    air::base::NODE_PTR parent = ctx.Parent(1);
+    if (parent != air::base::Null_ptr) {
+      ctx << "&";
+      Emit_sym(ctx, parent);
+      ctx << ", ";
+    }
+    visitor->template Visit<RETV>(node->Child(0));
+    ctx << ")";
+  }
+
+  template <typename RETV, typename VISITOR>
+  void Handle_mod_down_rescale(VISITOR* visitor, air::base::NODE_PTR node) {
+    IR2C_CTX& ctx = visitor->Context();
+    ctx << "Mod_down_rescale(";
+    air::base::NODE_PTR parent = ctx.Parent(1);
+    if (parent != air::base::Null_ptr) {
+      ctx << "&";
+      Emit_sym(ctx, parent);
+      ctx << ", ";
+    }
+    visitor->template Visit<RETV>(node->Child(0));
     ctx << ")";
   }
 
@@ -217,16 +358,77 @@ public:
   template <typename RETV, typename VISITOR>
   void Handle_init_ciph_down_scale(VISITOR* visitor, air::base::NODE_PTR node) {
     IR2C_CTX& ctx = visitor->Context();
-    AIR_ASSERT(ctx.Is_cipher_type(node->Child(0)->Rtype_id()) &&
-               ctx.Is_cipher_type(node->Child(1)->Rtype_id()));
-    ctx << "Init_ciph_down_scale";
+
+    if (ctx.Is_cipher_type(node->Child(0)->Rtype_id())) {
+      AIR_ASSERT(ctx.Is_cipher_type(node->Child(1)->Rtype_id()));
+      ctx << "Init_ciph_down_scale";
+    } else if (ctx.Is_cipher3_type(node->Child(0)->Rtype_id())) {
+      AIR_ASSERT(ctx.Is_cipher3_type(node->Child(1)->Rtype_id()));
+      ctx << "Init_ciph3_down_scale";
+    } else {
+      AIR_ASSERT_MSG(false, "Not supported cipher type");
+    }
+
     Gen_init_ciph_param(visitor, node, true);
+  }
+
+  template <typename RETV, typename VISITOR>
+  void Handle_init_poly_by_opnd(VISITOR* visitor, air::base::NODE_PTR node) {
+    IR2C_CTX& ctx = visitor->Context();
+    AIR_ASSERT(ctx.Is_rns_poly_type(node->Child(0)->Rtype_id()) &&
+               ctx.Is_rns_poly_type(node->Child(1)->Rtype_id()));
+    ctx << "Init_poly_by_opnd(";
+    visitor->template Visit<RETV>(node->Child(0));
+    ctx << ", ";
+    visitor->template Visit<RETV>(node->Child(1));
+    ctx << ", ";
+    visitor->template Visit<RETV>(node->Child(2));
+    ctx << ", ";
+    visitor->template Visit<RETV>(node->Child(3));
+    ctx << ")";
+  }
+
+  template <typename RETV, typename VISITOR>
+  void Handle_init_poly(VISITOR* visitor, air::base::NODE_PTR node) {
+    IR2C_CTX& ctx = visitor->Context();
+    AIR_ASSERT(ctx.Is_rns_poly_type(node->Child(0)->Rtype_id()));
+    ctx << "Init_poly_by_size(";
+    visitor->template Visit<RETV>(node->Child(0));
+    ctx << ", ";
+    visitor->template Visit<RETV>(node->Child(1));
+    ctx << ", ";
+    visitor->template Visit<RETV>(node->Child(2));
+    ctx << ")";
   }
 
   //! @brief Handle rescale
   template <typename RETV, typename VISITOR>
   void Handle_rescale(VISITOR* visitor, air::base::NODE_PTR node) {
-    visitor->template Visit<void>(node->Child(0));
+    IR2C_CTX& ctx = visitor->Context();
+    ctx << "Rescale(";
+    air::base::NODE_PTR parent = ctx.Parent(1);
+    if (parent != air::base::Null_ptr) {
+      ctx << "&";
+      Emit_sym(ctx, parent);
+      ctx << ", ";
+    }
+    visitor->template Visit<RETV>(node->Child(0));
+    ctx << ")";
+  }
+
+  //! @brief Handle modswitch
+  template <typename RETV, typename VISITOR>
+  void Handle_modswitch(VISITOR* visitor, air::base::NODE_PTR node) {
+    IR2C_CTX& ctx = visitor->Context();
+    ctx << "Modswitch(";
+    air::base::NODE_PTR parent = ctx.Parent(1);
+    if (parent != air::base::Null_ptr) {
+      ctx << "&";
+      Emit_sym(ctx, parent);
+      ctx << ", ";
+    }
+    visitor->template Visit<RETV>(node->Child(0));
+    ctx << ")";
   }
 
   //! @brief Emit a Handle_init_ciph_same_scale to call RTlib
@@ -236,10 +438,17 @@ public:
     const char* fname     = nullptr;
     bool        two_param = false;
     if (ctx.Is_cipher3_type(node->Child(0)->Rtype_id())) {
-      AIR_ASSERT(ctx.Is_cipher3_type(node->Child(1)->Rtype_id()));
-      AIR_ASSERT(ctx.Is_cipher3_type(node->Child(2)->Rtype_id()));
-      fname     = "Init_ciph3_same_scale_ciph3";
-      two_param = false;
+      if (ctx.Is_cipher3_type(node->Child(2)->Rtype_id())) {
+        AIR_ASSERT(ctx.Is_cipher3_type(node->Child(1)->Rtype_id()));
+        fname     = "Init_ciph3_same_scale_ciph3";
+        two_param = false;
+      } else {
+        // cipher3 with cipher or plain for Child(2)
+        fname     = (ctx.Is_plain_type(node->Child(2)->Rtype_id())
+                         ? "Init_ciph3_same_scale_plain"
+                         : "Init_ciph3_same_scale");
+        two_param = false;
+      }
     } else if (ctx.Is_cipher3_type(node->Child(1)->Rtype_id())) {
       AIR_ASSERT(ctx.Is_cipher_type(node->Child(0)->Rtype_id()));
       fname     = "Init_ciph_same_scale_ciph3";
@@ -374,14 +583,35 @@ private:
                            bool two_param) {
     IR2C_CTX& ctx = visitor->Context();
     ctx << "(";
+    if (node->Child(0)->Opcode() == air::core::OPC_ILD) {
+      ctx << "&";
+    }
     visitor->template Visit<void>(node->Child(0));
     ctx << ", ";
+
+    if (node->Child(1)->Opcode() == air::core::OPC_ILD) {
+      ctx << "&";
+    }
     visitor->template Visit<void>(node->Child(1));
     if (!two_param) {
       ctx << ", ";
       visitor->template Visit<void>(node->Child(2));
     }
     ctx << ")";
+  }
+
+  void Emit_sym(IR2C_CTX& ctx, air::base::NODE_PTR node) {
+    if (node->Is_preg_op()) {
+      ctx.Emit_preg_id(node->Preg_id());
+    } else if (node->Has_sym()) {
+      ctx.Emit_var(node);
+    } else {
+      AIR_ASSERT_MSG(false, "unknown node");
+    }
+    if (node->Has_fld()) {
+      ctx << ".";
+      ctx.Emit_field(node);
+    }
   }
 
 };  // IR2C_HANDLER

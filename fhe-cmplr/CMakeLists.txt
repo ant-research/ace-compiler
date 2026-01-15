@@ -1,184 +1,184 @@
+#=============================================================================
+#
+# Copyright (c) Ant Group Co., Ltd
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+#
+#=============================================================================
+
 cmake_minimum_required(VERSION 3.13)
 
-project (fhe-cmplr C CXX)
+project(fhe-cmplr C CXX)
 
-set (FHE_CMPLR_VERSION_MAJOR 0)
-set (FHE_CMPLR_VERSION_MINOR 0)
-set (FHE_CMPLR_VERSION_PATCH 1)
-set (FHE_CMPLR_VERSION ${FHE_CMPLR_VERSION_MAJOR}.${FHE_CMPLR_VERSION_MINOR}.${FHE_CMPLR_VERSION_PATCH})
+set(FHE_CMPLR_VERSION_MAJOR 0)
+set(FHE_CMPLR_VERSION_MINOR 0)
+set(FHE_CMPLR_VERSION_PATCH 1)
+set(FHE_CMPLR_VERSION ${FHE_CMPLR_VERSION_MAJOR}.${FHE_CMPLR_VERSION_MINOR}.${FHE_CMPLR_VERSION_PATCH})
 
-set (CMAKE_CXX_STANDARD 17)
-set (CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD 17)
+set(CXX_STANDARD_REQUIRED ON)
+
+include(cmake/function_option.cmake)
+include(cmake/function_library.cmake)
+# include(cmake/function_extralib.cmake)
+include(cmake/function_rtlibrary.cmake)
+
+# Add path for custom CMake modules.
+list(APPEND CMAKE_MODULE_PATH
+  "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
 
 #--------------------------------------------------------------------
 # Build options
 #--------------------------------------------------------------------
-# -DCMAKE_BUILD_TYPE=Debug/Release
-if (CMAKE_BUILD_TYPE)
-  set (RELEASE_TYPES Debug Release)
-  list (FIND RELEASE_TYPES ${CMAKE_BUILD_TYPE} INDEX_FOUND)
-  if (${INDEX_FOUND} EQUAL -1)
-    message (FATAL_ERROR "CMAKE_BUILD_TYPE must be one of Debug, Release")
-  endif ()
-else ()
-    # if no build type is chosen, default to Debug mode
-	set (CMAKE_BUILD_TYPE Debug CACHE STRING
-		"Choose the type of build, options are: None, Debug, Release." FORCE)
-endif ()
+option(BUILD_STATIC        "Control whether to build the static libraries"     ON)
+option(BUILD_SHARED        "Control whether to build the shared libraries"    OFF)
+option(BUILD_UNITTEST      "Control whether to build the unittest"             ON)
+option(BUILD_BENCH         "Control whether to build the benmark"              ON)
+option(BUILD_DOC           "Control whether to build API documentation"       OFF)
+option(FHE_CODE_CHECK      "Control whether to check coding style"             ON)
+option(FHE_BUILD_TEST      "Control whether to build the tests"                ON)
+option(FHE_BUILD_EXAMPLE   "Control whether to build the examples"             ON)
+option(FHE_INSTALL_APP     "Control whether to install the APPs"               ON)
+option(FHE_ENABLE_SEAL     "Control whether to build with SEAL libraries"      ON)
+option(FHE_ENABLE_SEAL_BTS "Control whether to build with SEAL_BTS libraries" OFF)
+option(FHE_ENABLE_OPENFHE  "Control whether to build with OPENFHE libraries"   ON)
+option(FHE_ENABLE_CUDA     "Control whether to build with CUDA libraries"     OFF)
+option(BUILD_WITH_OPENMP   "Control whether to build with OpenMP libraries"   OFF)
+option(EXTERNAL_URL_SSH    "Control choose external URL for repository"       OFF)
 
-string (TIMESTAMP BUILD_TIMESTAMP "%Y-%m-%d %H:%M:%S")
+set(FHE_WITH_SRC "" CACHE STRING "The default compilation depends")
 
-option (BUILD_STATIC        "Set to ON to build static versions of the library"             ON)
-option (BUILD_SHARED        "Set to OFF to disable build shared versions of the library"   OFF)
-option (BUILD_UNITTEST      "Set to ON to disable build third-party unittest default"       ON)
-option (BUILD_BENCH         "Set to ON to build third-party benmark default"                ON)
-option (BUILD_DOC           "Set to OFF to disable Build documentation default"            OFF)
-option (FHE_CODE_CHECK      "Set to ON to check C/C++ code style default"                   ON)
-option (FHE_WITH_SRC        "Set to ON to build with fhe-cmplr default"                     ON)
-option (FHE_BUILD_TEST      "Set to ON to build test example default"                       ON)
-option (FHE_BUILD_EXAMPLE   "Set to ON to build test example default"                       ON)
-option (FHE_INSTALL_APP     "Set to ON to build install package default"                    ON)
-option (BUILD_WITH_OPENMP   "Set to ON to enable build with OpenMP"                        OFF)
-option (BUILD_WITH_SEAL     "Set to ON to enable build to support SEAL"                    OFF)
-option (BUILD_WITH_OPENFHE  "Set to ON to enable build to support OpenFHE"                 OFF)
+if(NOT DEFINED FHE_SEED_MODE)
+  set(FHE_SEED_MODE "prng" CACHE STRINGS "Default seed mode")
+endif()
+
+if(NOT DEFINED FHE_SUPPORT_HPU)
+  set(FHE_SUPPORT_HPU OFF CACHE BOOL "Default not supported HPU features")
+endif()
+
+# Set target fhe_depend for pre-build
+add_custom_target(fhe_depend)
+
+# Check option : -DFHE_WITH_SRC
+if(NOT "${FHE_WITH_SRC}" STREQUAL "")
+  build_fhe_with_src("${FHE_WITH_SRC}")
+  read_package_config("$ENV{PACKAGE_BASE_DIR}")
+  add_dependencies(fhe_depend ${NN_LIBS})
+else()
+  # find fhe-cmplr depend libraries
+  find_package(ant-ace REQUIRED)
+  find_nn_lib()
+  set_package_env(${PACKAGE_BASE_DIR} ${PACKAGE_CONF_DIR} ${PACKAGE_DEVTOOLS_DIR})
+endif()
+
+# Check Package information
+check_package_info("${PACKAGE_NAME}")
+
+# Check commit : BUILD_GIT_COMMIT
+string(TIMESTAMP BUILD_TIMESTAMP "%Y-%m-%d %H:%M:%S")
+check_code_revision("${PROJECT_NAME}" BUILD_GIT_COMMIT)
+
+# Check option : -DCMAKE_BUILD_TYPE
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Set the default type of build" FORCE)
+else()
+  check_build_type(${CMAKE_BUILD_TYPE})
+endif()
 
 ### Print options
-message (STATUS "CMAKE_CURRENT_SOURCE_DIR     : ${CMAKE_CURRENT_SOURCE_DIR}")
-message (STATUS "CMAKE_BUILD_TYPE             : ${CMAKE_BUILD_TYPE}")
-message (STATUS "BUILD_STATIC                 : ${BUILD_STATIC}")
-message (STATUS "BUILD_SHARED                 : ${BUILD_SHARED}")
-message (STATUS "BUILD_UNITTEST               : ${BUILD_UNITTEST}")
-message (STATUS "BUILD_BENCH                  : ${BUILD_BENCH}")
-message (STATUS "BUILD_DOC                    : ${BUILD_DOC}")
-message (STATUS "FHE_CODE_CHECK               : ${FHE_CODE_CHECK}")
-message (STATUS "FHE_WITH_SRC                 : ${FHE_WITH_SRC}")
-message (STATUS "FHE_BUILD_TEST               : ${FHE_BUILD_TEST}")
-message (STATUS "FHE_BUILD_EXAMPLE            : ${FHE_BUILD_EXAMPLE}")
-message (STATUS "FHE_INSTALL_APP              : ${FHE_INSTALL_APP}")
-message (STATUS "BUILD_TIMESTAMP              : ${BUILD_TIMESTAMP}")
-message (STATUS "BUILD_WITH_OPENMP            : ${BUILD_WITH_OPENMP}")
-message (STATUS "BUILD_WITH_SEAL              : ${BUILD_WITH_SEAL}")
-message (STATUS "BUILD_WITH_OPENFHE           : ${BUILD_WITH_OPENFHE}")
+message(STATUS "PROJECT_SOURCE_DIR            : ${PROJECT_SOURCE_DIR}")
+message(STATUS "CMAKE_BUILD_TYPE              : ${CMAKE_BUILD_TYPE}")
+message(STATUS "BUILD_STATIC                  : ${BUILD_STATIC}")
+message(STATUS "BUILD_SHARED                  : ${BUILD_SHARED}")
+message(STATUS "BUILD_UNITTEST                : ${BUILD_UNITTEST}")
+message(STATUS "BUILD_BENCH                   : ${BUILD_BENCH}")
+message(STATUS "BUILD_DOC                     : ${BUILD_DOC}")
+message(STATUS "FHE_CODE_CHECK                : ${FHE_CODE_CHECK}")
+message(STATUS "FHE_WITH_SRC                  : ${FHE_WITH_SRC}")
+message(STATUS "FHE_BUILD_TEST                : ${FHE_BUILD_TEST}")
+message(STATUS "FHE_BUILD_EXAMPLE             : ${FHE_BUILD_EXAMPLE}")
+message(STATUS "FHE_ENABLE_SEAL               : ${FHE_ENABLE_SEAL}")
+message(STATUS "FHE_ENABLE_SEAL_BTS           : ${FHE_ENABLE_SEAL_BTS}")
+message(STATUS "FHE_ENABLE_OPENFHE            : ${FHE_ENABLE_OPENFHE}")
+message(STATUS "FHE_ENABLE_PHANTOM            : ${FHE_ENABLE_PHANTOM}")
+message(STATUS "FHE_INSTALL_APP               : ${FHE_INSTALL_APP}")
+message(STATUS "BUILD_WITH_OPENMP             : ${BUILD_WITH_OPENMP}")
+message(STATUS "BUILD_TIMESTAMP               : ${BUILD_TIMESTAMP}")
+message(STATUS "BUILD_GIT_COMMIT              : ${BUILD_GIT_COMMIT}")
 
 #--------------------------------------------------------------------
 # Logic: Configure
 #--------------------------------------------------------------------
-# for build with src/libs
-# -DFHE_WITH_SRC="air-infra;nn-addon"
-set (NN_ADDON_PROJECTS "")
-if (FHE_WITH_SRC)
-  string (FIND "${FHE_WITH_SRC}" "air-infra" CONF_AIR_INFRA)
-  string (FIND "${FHE_WITH_SRC}" "nn-addon" CONF_NN_ADDON)
-  if (${CONF_AIR_INFRA} GREATER "-1")
-    set (NN_WITH_SRC "air-infra" CACHE BOOL "Enable build air-infra with src." FORCE)
-    set (AIR_INFRA_PROJECTS ${CMAKE_SOURCE_DIR}/../air-infra)
-    include_directories (${AIR_INFRA_PROJECTS}/include)
-    include_directories (${CMAKE_BINARY_DIR}/include)
-  endif ()
-  if (${CONF_NN_ADDON} GREATER "-1")
-    set (NN_ADDON_PROJECTS ${CMAKE_SOURCE_DIR}/../nn-addon)
-    if (IS_DIRECTORY ${NN_ADDON_PROJECTS})
-      add_subdirectory (${NN_ADDON_PROJECTS} nn-addon)
-      include_directories (${NN_ADDON_PROJECTS}/include)
-    else ()
-        message (FATAL_ERROR "MUST MANUALLY CLONE REPO 'NN_ADDON_PROJECTS'=${NN_ADDON_PROJECTS}")
-    endif ()
-  endif ()
-else ()
-  find_library (libvar AIRutil)
-  if (${libvar} STREQUAL "libvar-NOTFOUND")
-    message (FATAL_ERROR "required AIRutil library but not found!")
-  else ()
-    message (STATUS "AIRutil library found in ${libvar}")
-  endif ()
-  find_library (libvar  NNutil)
-  if (${libvar} STREQUAL "libvar-NOTFOUND")
-    message (FATAL_ERROR "required NNutil library but not found!")
-  else ()
-    message (STATUS "NNutil library found in ${libvar}")
-  endif ()
-endif ()
+# for check commit message
+install_hooks($ENV{PACKAGE_DEVTOOLS_DIR}/hooks)
 
 # for check coding style
-if (FHE_CODE_CHECK)
-  include (cmake/external_regex.cmake)
-endif ()
+if(FHE_CODE_CHECK)
+  # codes from other parties are excluded from coding style checks
+  set(CODEING_STYLE_EXCLUDES "third-party")
+  # exclude unittest source from coding style check if not build
+  if(NOT BUILD_UNITTEST)
+    set(CODEING_STYLE_EXCLUDES ${CODEING_STYLE_EXCLUDES} "unittest")
+  endif()
+  # exclude benchmark source from coding style check if not build
+  if(NOT BUILD_BENCH)
+    set(CODEING_STYLE_EXCLUDES ${CODEING_STYLE_EXCLUDES} "benchmark")
+  endif()
+  # exclude test source from coding style check if not build
+  if(NOT FHE_BUILD_TEST)
+    set(CODEING_STYLE_EXCLUDES ${CODEING_STYLE_EXCLUDES} "test")
+  endif()
 
-if (BUILD_WITH_OPENMP)
-  find_package(OpenMP)
-	# OpenMP_CXX_FOUND was added in cmake 3.9.x so we are also checking
-  # the OpenMP_FOUND flag
-	if (OpenMP_CXX_FOUND OR OpenMP_FOUND)
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-    set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
-	else()
-		message(SEND_ERROR "** ERROR ** OpenMP is not installed")
-	endif()
-
-	if (OpenMP_C_FOUND OR OpenMP_FOUND)
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-	endif()
-else()
-	# Disable unknown #pragma omp warning
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-pragmas")
-  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unknown-pragmas")
+  set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+  set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES})
+  check_coding_style("$ENV{PACKAGE_DEVTOOLS_DIR}" "${CODEING_STYLE_EXCLUDES}")
 endif()
 
 #--------------------------------------------------------------------
 # Logic: Target
 #--------------------------------------------------------------------
-# build fhe
-add_custom_target (allfhe)
+# add glob include list
+add_inc_list("${PROJECT_SOURCE_DIR}/include;${CMAKE_BINARY_DIR}/include;${PROJECT_SOURCE_DIR}/rtlib/include")
+include_directories("${PACKAGE_INC_DIR}")
 
-# find depend libs for protobuf, gmp, m
-include (cmake/external_extralib.cmake)
+# for target libraries
+set_fhe_lib()
 
-if (BUILD_STATIC)
-  set (AIR_LIBS ${AIR_LIBS} PUBLIC AIRdriver PUBLIC AIRopt PUBLIC AIRcg PUBLIC AIRcore PUBLIC AIRbase PUBLIC AIRutil)
-  set (NN_LIBS ${NN_LIBS} PUBLIC NNdriver PUBLIC NNvector PUBLIC NNonnx2air PUBLIC NNopt PUBLIC NNonnx PUBLIC NNcore PUBLIC NNutil)
-  set (NN_LIBS ${NN_LIBS} ${AIR_LIBS})
-  set (FHE_LIBS ${FHE_LIBS} PUBLIC FHEdriver PUBLIC FHEpoly PUBLIC FHEckks PUBLIC FHEsihe PUBLIC FHEcg PUBLIC FHEopt PUBLIC FHEcore PUBLIC FHEutil)
-  set (FHE_LIBS ${FHE_LIBS} ${NN_LIBS})
-  set (FHE_LIBS ${FHE_LIBS} PUBLIC FHErt_ant_encode FHErt_common ${MATH_LIBS})
-  add_dependencies (allfhe FHEdriver FHEpoly FHEckks FHEsihe FHEcg FHEopt FHEcore FHEutil)
+# add glob depends for allfhe
+add_custom_target(allfhe DEPENDS fhe_depend)
+
+if(FHE_BUILD_TEST)
+  enable_testing()
 endif()
 
-# build depend libs for test
-include (cmake/external_testdep.cmake)
-
-if (FHE_BUILD_TEST)
-  enable_testing()
-endif ()
+# for build fhe runtime library support linux
+include(fhe_rtlib)
 
 # build component
-add_subdirectory (util)
-add_subdirectory (core)
-add_subdirectory (opt)
-add_subdirectory (cg)
-add_subdirectory (sihe)
-add_subdirectory (ckks)
-add_subdirectory (poly)
+add_subdirectory(util)
+add_subdirectory(core)
+add_subdirectory(opt)
+add_subdirectory(cg)
+add_subdirectory(sihe)
+add_subdirectory(ckks)
+add_subdirectory(poly)
 
 # build executable
-add_subdirectory (driver)
-
-# build runtime lib
-add_subdirectory (rtlib)
+add_subdirectory(driver)
 
 # build benchmark
-if (BUILD_BENCH)
-  add_subdirectory (benchmark)
-endif ()
+if(BUILD_BENCH)
+  add_subdirectory(benchmark)
+endif()
 
 # build e2e test
-if (FHE_BUILD_TEST)
-  add_subdirectory (test)
-endif ()
+if(FHE_BUILD_TEST)
+  add_subdirectory(test)
+endif()
 
 # build doc
-if (BUILD_DOC)
-  include (cmake/external_doxgen.cmake)
-endif ()
+if(BUILD_DOC)
+  build_app_doc(FHE_INSTALL_APP ${PROJECT_NAME})
+endif()
 
 #--------------------------------------------------------------------
 # Logic: Package
@@ -186,5 +186,36 @@ endif ()
 # install header file
 install(DIRECTORY include/ DESTINATION include)
 
-# install testcase dict for cti
-install(FILES ${PROJECT_SOURCE_DIR}/test/data_avhc_fhe.yml DESTINATION test)
+# ${PROJECT_SOURCE_DIR}/cmake/function_extralib.cmake
+
+install(FILES
+    ${PROJECT_SOURCE_DIR}/cmake/function_library.cmake
+    ${PROJECT_SOURCE_DIR}/cmake/function_rtlibrary.cmake
+    DESTINATION share/${PACKAGE_NAME}/cmake/${PROJECT_NAME}
+)
+
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_Version.cmake"
+    VERSION ${FHE_CMPLR_VERSION}
+    COMPATIBILITY AnyNewerVersion
+)
+
+set(COMPONENT_CONFIG_FILE "${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}Config.cmake")
+set(PACKAGE_CONFIG_FILE "$ENV{PACKAGE_CONF_DIR}/${PACKAGE_NAME}Config.cmake")
+
+configure_file(
+    "${CMAKE_CURRENT_LIST_DIR}/package.cmake.in"
+    "${COMPONENT_CONFIG_FILE}"
+    @ONLY
+)
+
+install(CODE "
+  file(READ ${COMPONENT_CONFIG_FILE} CMAKE_CONTENTS)
+  file(APPEND ${PACKAGE_CONFIG_FILE} \"\${CMAKE_CONTENTS}\")
+")
+
+install(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_Version.cmake"
+    DESTINATION share/${PACKAGE_NAME}
+)

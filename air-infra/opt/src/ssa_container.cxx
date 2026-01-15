@@ -8,6 +8,7 @@
 
 #include "air/opt/ssa_container.h"
 
+#include "air/base/st_decl.h"
 #include "air/opt/ssa_node_list.h"
 
 namespace air {
@@ -53,11 +54,11 @@ SSA_CONTAINER::~SSA_CONTAINER() {
   _phi_tab->~SSA_PHI_TAB();
 }
 
-SSA_SYM_PTR SSA_CONTAINER::New_sym(SSA_SYM_KIND kind, uint32_t var,
-                                   uint32_t id) {
+SSA_SYM_PTR SSA_CONTAINER::New_sym(SSA_SYM_KIND kind, uint32_t var, uint32_t id,
+                                   base::TYPE_ID type_id) {
   SSA_SYM_DATA_PTR sym_data = _sym_tab->Allocate<SSA_SYM_DATA>();
   sym_data->_attr._kind     = (uint32_t)kind;
-  sym_data->_type           = air::base::TYPE_ID();
+  sym_data->_type           = type_id;
   sym_data->_parent         = air::opt::SSA_SYM_ID();
   sym_data->_sibling        = air::opt::SSA_SYM_ID();
   sym_data->_child          = air::opt::SSA_SYM_ID();
@@ -92,6 +93,7 @@ CHI_NODE_PTR SSA_CONTAINER::New_chi(SSA_SYM_ID sym) {
   chi_data->_sym             = sym;
   chi_data->_res             = air::opt::SSA_VER_ID();
   chi_data->_opnd            = air::opt::SSA_VER_ID();
+  chi_data->_def_stmt        = base::STMT_ID();
   return CHI_NODE_PTR(CHI_NODE(this, chi_data));
 }
 
@@ -104,10 +106,32 @@ PHI_NODE_PTR SSA_CONTAINER::New_phi(SSA_SYM_ID sym, uint32_t size) {
   phi_data->_size       = size;
   phi_data->_sym        = sym;
   phi_data->_res        = air::opt::SSA_VER_ID();
+  phi_data->_def_stmt   = base::STMT_ID();
   for (uint32_t i = 0; i < size; ++i) {
     phi_data->_opnd[i] = air::opt::SSA_VER_ID();
   }
   return PHI_NODE_PTR(PHI_NODE(this, phi_data));
+}
+
+uint32_t SSA_CONTAINER::Vsym_index(air::base::NODE_PTR node) {
+  AIR_ASSERT(node->Opcode() == air::core::OPC_ARRAY);
+  air::base::NODE_PTR addr = node->Child(0);
+  AIR_ASSERT(addr->Opcode() == air::core::OPC_LDA);
+  AIR_ASSERT(addr->Rtype()->Is_ptr());
+  AIR_ASSERT(addr->Rtype()->Cast_to_ptr()->Domain_type()->Is_array());
+  air::base::TYPE_PTR  type  = addr->Rtype()->Cast_to_ptr()->Domain_type();
+  std::vector<int64_t> shape = type->Cast_to_arr()->Shape();
+  AIR_ASSERT(shape.size() == node->Num_child() - 1);
+  shape.push_back(1);  // push a 1-D to end of shape to simplify code below
+  uint32_t index = 0;
+  for (int i = 1; i < shape.size(); ++i) {
+    if (node->Child(i)->Opcode() != air::core::OPC_INTCONST) {
+      // not a constant subscript. assume access whole array
+      return SSA_SYM::NO_INDEX;
+    }
+    index += shape[i] * node->Child(i)->Intconst();
+  }
+  return index;
 }
 
 void SSA_CONTAINER::Print(SSA_SYM_ID sym, std::ostream& os,
@@ -124,6 +148,14 @@ void SSA_CONTAINER::Print_ver(SSA_VER_ID ver, std::ostream& os,
                               uint32_t indent) const {
   if (ver != air::base::Null_id) {
     Print(ver, os, indent);
+  } else {
+    os << "-nil-";
+  }
+}
+
+void SSA_CONTAINER::Print_version(SSA_VER_ID ver, std::ostream& os) const {
+  if (ver != air::base::Null_id) {
+    Ver(ver)->Print_ver(os);
   } else {
     os << "-nil-";
   }
@@ -219,6 +251,8 @@ void SSA_CONTAINER::Print_tree(air::base::NODE_ID node) const {
   Print_tree(node, std::cout, 0);
   std::cout << std::endl;
 }
+
+void SSA_CONTAINER::Print() const { Print(std::cout); }
 
 }  // namespace opt
 

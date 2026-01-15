@@ -137,19 +137,20 @@ public:
    * @return char* Pointer to allocated memory, or nullptr if not enough
    * available memory in this block
    */
-  char* Allocate(uint32_t n) {
+  char* Allocate(uint32_t n, size_t align = sizeof(uintptr_t)) {
 #ifdef MPOOL_DEBUG
     // allocate 4 extra uint32 to save size and magic for debug
     n += 4 * sizeof(uint32_t);
 #endif
-    // aligned to at least 8-byte
-    n = Align(n, sizeof(uintptr_t));
+    // no align: align = 1
+    // aligned : align = 2, 4, 8, ...
+    n = Align(n, align);
     if (n > _head._avail) {
       // not enough, return nullptr
       return nullptr;
     }
     char* buf = (char*)this + BLK_SIZE - _head._avail;
-    AIR_ASSERT(Is_aligned(buf, sizeof(uintptr_t)));
+    // AIR_ASSERT(Is_aligned(buf, align));
     _head._avail -= n;
 #ifdef MPOOL_DEBUG
     uint32_t* pint32 = (uint32_t*)buf;

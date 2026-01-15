@@ -43,6 +43,7 @@ GLOB_SCOPE* Sihe_driver(GLOB_SCOPE* glob, core::LOWER_CTX* lower_ctx,
     FUNC_SCOPE* func = &(*it);
     (void)vec2sihe_lower.Lower_vec_func(func);
   }
+  delete glob;
   return new_glob;
 }
 

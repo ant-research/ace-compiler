@@ -7,9 +7,13 @@
 //=============================================================================
 
 #include "air/base/container.h"
+#include "air/base/container_decl.h"
 #include "air/base/meta_info.h"
 #include "air/base/opcode.h"
+#include "air/base/spos.h"
 #include "air/base/st.h"
+#include "air/base/st_decl.h"
+#include "air/base/st_enum.h"
 #include "air/core/opcode.h"
 #include "gtest/gtest.h"
 
@@ -52,10 +56,10 @@ protected:
     ADDR_DATUM_PTR formal_y = _fs_add->Formal(1);
     ADDR_DATUM_PTR var_z    = _fs_add->New_var(int_type, "z", spos);
     // x + y
-    NODE_PTR node_x = cntr_add->New_ld(formal_x, spos);
-    NODE_PTR node_y = cntr_add->New_ld(formal_y, spos);
-    NODE_PTR node_add =
-        cntr_add->New_bin_arith(air::core::OPC_ADD, node_x, node_y, spos);
+    NODE_PTR node_x   = cntr_add->New_ld(formal_x, spos);
+    NODE_PTR node_y   = cntr_add->New_ld(formal_y, spos);
+    NODE_PTR node_add = cntr_add->New_bin_arith(air::core::OPC_ADD, int_type,
+                                                node_x, node_y, spos);
     // z = x + y;
     STMT_PTR stmt_st = cntr_add->New_st(node_add, var_z, spos);
     cntr_add->Stmt_list().Append(stmt_st);
@@ -118,6 +122,9 @@ protected:
   }
 
   void TearDown() override { delete _glob; }
+  void Run_test_ctor_dtor();
+  void Run_test_stmt_list_prepend();
+  void Run_test_stmt_list_append();
   void Run_test_func_add_def();
   void Run_test_func_main_def();
   void Run_test_stmt_attr();
@@ -126,6 +133,8 @@ protected:
   void Run_test_verify_func_add();
   void Run_test_verify_func_main();
   void Run_test_verify_fail();
+  void Run_test_func_entry_node();
+  void Run_test_func_no_ret();
 
   GLOB_SCOPE* _glob;
   FUNC_SCOPE* _fs_add;
@@ -133,9 +142,331 @@ protected:
   STMT_PTR    _call_stmt;
 };
 
+void TEST_CONTAINER::Run_test_ctor_dtor() {
+  CONTAINER* cntr = new CONTAINER(_fs_add, true);
+  delete cntr;
+  cntr = CONTAINER::New(_fs_add, true);
+  cntr->Delete();
+}
+
+void TEST_CONTAINER::Run_test_stmt_list_prepend() {
+  CONTAINER* cntr_add = &_fs_add->Container();
+  SPOS       spos(0, 2, 1, 0);
+  STMT_LIST  ori_slist = cntr_add->Stmt_list();
+  STMT_LIST  new_slist(cntr_add->New_stmt_block(spos));
+
+  // case 1: prepend empty list to none empty one
+  STMT_ID     first   = ori_slist.Begin_stmt_id();
+  std::string tgt_exp = ori_slist.To_str();
+  std::string src_exp = new_slist.To_str();
+  STMT_ID     stmt    = ori_slist.Prepend(new_slist)->Id();
+  std::string tgt_res = ori_slist.To_str();
+  std::string src_res = new_slist.To_str();
+  EXPECT_TRUE(first == stmt);
+  EXPECT_EQ(tgt_res, tgt_exp);
+  EXPECT_EQ(src_res, src_exp);
+
+  // case 2: prepend none empty list to empty one
+  stmt = new_slist.Prepend(ori_slist)->Id();
+  tgt_exp =
+      "block ID(0xc) LINE(2:1:0)\n"
+      "  st \"z\" VAR[0x10000002] ID(0x8) LINE(1:1:0)\n"
+      "    add RTYPE[0x2](int32_t)\n"
+      "      ld \"x\" FML[0x10000000] RTYPE[0x2](int32_t)\n"
+      "      ld \"y\" FML[0x10000001] RTYPE[0x2](int32_t)\n"
+      "  retv ID(0xa) LINE(1:1:0)\n"
+      "    ld \"z\" VAR[0x10000002] RTYPE[0x2](int32_t)\n"
+      "end_block ID(0xc)\n";
+  src_exp =
+      "block ID(0x4) LINE(1:1:0)\n"
+      "end_block ID(0x4)\n";
+  tgt_res = new_slist.Block_node()->To_str();
+  src_res = ori_slist.Block_node()->To_str();
+  EXPECT_TRUE(first == stmt);
+  EXPECT_EQ(tgt_res, tgt_exp);
+  EXPECT_EQ(src_res, src_exp);
+  for (STMT_PTR st = new_slist.Begin_stmt(); st != new_slist.End_stmt();
+       st          = st->Next()) {
+    EXPECT_TRUE(st->Parent_node_id() == new_slist.Block_node()->Id());
+    EXPECT_TRUE(st->Next()->Prev_id() == st->Id());
+  }
+
+  // case 3: prepend none empty list to none empty one
+  SPOS      spos1(0, 3, 1, 0);
+  NODE_PTR  new_blk1 = cntr_add->New_stmt_block(spos1);
+  STMT_LIST stmt_list1(new_blk1);
+  TYPE_PTR  int_type = _glob->Prim_type(PRIMITIVE_TYPE::INT_S32);
+  // x = x + 1
+  NODE_PTR node_x   = cntr_add->New_ld(_fs_add->Formal(0), spos1);
+  NODE_PTR node_1   = cntr_add->New_intconst(int_type, 1, spos1);
+  NODE_PTR node_add = cntr_add->New_bin_arith(air::core::OPC_ADD, int_type,
+                                              node_x, node_1, spos1);
+  STMT_PTR stmt_st  = cntr_add->New_st(node_add, node_x->Addr_datum(), spos1);
+  stmt_list1.Append(stmt_st);
+  // y = y - 1
+  SPOS     spos2(0, 4, 1, 0);
+  NODE_PTR node_y   = cntr_add->New_ld(_fs_add->Formal(1), spos2);
+  node_1            = cntr_add->New_intconst(int_type, 1, spos2);
+  NODE_PTR node_sub = cntr_add->New_bin_arith(air::core::OPC_SUB, int_type,
+                                              node_y, node_1, spos2);
+  stmt_st           = cntr_add->New_st(node_sub, node_y->Addr_datum(), spos2);
+  stmt_list1.Append(stmt_st);
+  src_exp =
+      "block ID(0xe) LINE(3:1:0)\n"
+      "  st \"x\" FML[0x10000000] ID(0x12) LINE(3:1:0)\n"
+      "    add RTYPE[0x2](int32_t)\n"
+      "      ld \"x\" FML[0x10000000] RTYPE[0x2](int32_t)\n"
+      "      intconst #0x1 RTYPE[0x2](int32_t)\n"
+      "  st \"y\" FML[0x10000001] ID(0x16) LINE(4:1:0)\n"
+      "    sub RTYPE[0x2](int32_t)\n"
+      "      ld \"y\" FML[0x10000001] RTYPE[0x2](int32_t)\n"
+      "      intconst #0x1 RTYPE[0x2](int32_t)\n"
+      "end_block ID(0xe)\n";
+  src_res = new_blk1->To_str();
+  EXPECT_EQ(src_res, src_exp);
+
+  first = stmt_list1.Begin_stmt_id();
+  stmt  = new_slist.Prepend(stmt_list1)->Id();
+  tgt_exp =
+      "block ID(0xc) LINE(2:1:0)\n"
+      "  st \"x\" FML[0x10000000] ID(0x12) LINE(3:1:0)\n"
+      "    add RTYPE[0x2](int32_t)\n"
+      "      ld \"x\" FML[0x10000000] RTYPE[0x2](int32_t)\n"
+      "      intconst #0x1 RTYPE[0x2](int32_t)\n"
+      "  st \"y\" FML[0x10000001] ID(0x16) LINE(4:1:0)\n"
+      "    sub RTYPE[0x2](int32_t)\n"
+      "      ld \"y\" FML[0x10000001] RTYPE[0x2](int32_t)\n"
+      "      intconst #0x1 RTYPE[0x2](int32_t)\n"
+      "  st \"z\" VAR[0x10000002] ID(0x8) LINE(1:1:0)\n"
+      "    add RTYPE[0x2](int32_t)\n"
+      "      ld \"x\" FML[0x10000000] RTYPE[0x2](int32_t)\n"
+      "      ld \"y\" FML[0x10000001] RTYPE[0x2](int32_t)\n"
+      "  retv ID(0xa) LINE(1:1:0)\n"
+      "    ld \"z\" VAR[0x10000002] RTYPE[0x2](int32_t)\n"
+      "end_block ID(0xc)\n";
+  src_exp =
+      "block ID(0xe) LINE(3:1:0)\n"
+      "end_block ID(0xe)\n";
+  tgt_res = new_slist.Block_node()->To_str();
+  src_res = stmt_list1.Block_node()->To_str();
+  EXPECT_TRUE(first == stmt);
+  EXPECT_EQ(tgt_res, tgt_exp);
+  EXPECT_EQ(src_res, src_exp);
+  for (STMT_PTR st = new_slist.Begin_stmt(); st != new_slist.End_stmt();
+       st          = st->Next()) {
+    EXPECT_TRUE(st->Parent_node_id() == new_slist.Block_node()->Id());
+    EXPECT_TRUE(st->Next()->Prev_id() == st->Id());
+  }
+}
+
+void TEST_CONTAINER::Run_test_stmt_list_append() {
+  CONTAINER* cntr_add = &_fs_add->Container();
+  SPOS       spos(0, 2, 1, 0);
+  STMT_LIST  ori_slist = cntr_add->Stmt_list();
+  STMT_LIST  new_slist(cntr_add->New_stmt_block(spos));
+
+  // case 1: append empty list to none empty one
+  STMT_ID     first   = ori_slist.Begin_stmt_id();
+  std::string tgt_exp = ori_slist.To_str();
+  std::string src_exp = new_slist.To_str();
+  STMT_ID     stmt    = ori_slist.Append(new_slist)->Id();
+  std::string tgt_res = ori_slist.To_str();
+  std::string src_res = new_slist.To_str();
+  EXPECT_TRUE(first == stmt);
+  EXPECT_EQ(tgt_res, tgt_exp);
+  EXPECT_EQ(src_res, src_exp);
+
+  // case 2: append none empty list to empty one
+  stmt = new_slist.Append(ori_slist)->Id();
+  tgt_exp =
+      "block ID(0xc) LINE(2:1:0)\n"
+      "  st \"z\" VAR[0x10000002] ID(0x8) LINE(1:1:0)\n"
+      "    add RTYPE[0x2](int32_t)\n"
+      "      ld \"x\" FML[0x10000000] RTYPE[0x2](int32_t)\n"
+      "      ld \"y\" FML[0x10000001] RTYPE[0x2](int32_t)\n"
+      "  retv ID(0xa) LINE(1:1:0)\n"
+      "    ld \"z\" VAR[0x10000002] RTYPE[0x2](int32_t)\n"
+      "end_block ID(0xc)\n";
+  src_exp =
+      "block ID(0x4) LINE(1:1:0)\n"
+      "end_block ID(0x4)\n";
+  tgt_res = new_slist.Block_node()->To_str();
+  src_res = ori_slist.Block_node()->To_str();
+  EXPECT_TRUE(first == stmt);
+  EXPECT_EQ(tgt_res, tgt_exp);
+  EXPECT_EQ(src_res, src_exp);
+  for (STMT_PTR st = new_slist.Begin_stmt(); st != new_slist.End_stmt();
+       st          = st->Next()) {
+    EXPECT_TRUE(st->Parent_node_id() == new_slist.Block_node()->Id());
+    EXPECT_TRUE(st->Next()->Prev_id() == st->Id());
+  }
+
+  // case 3: append none empty list to none empty one
+  SPOS      spos1(0, 3, 1, 0);
+  NODE_PTR  new_blk1 = cntr_add->New_stmt_block(spos1);
+  STMT_LIST stmt_list1(new_blk1);
+  TYPE_PTR  int_type = _glob->Prim_type(PRIMITIVE_TYPE::INT_S32);
+  // x = x + 1
+  ADDR_DATUM_PTR ad_x   = _fs_add->Formal(0);
+  NODE_PTR       node_x = cntr_add->New_ld(ad_x, spos1);
+  NODE_PTR       node_1 = cntr_add->New_intconst(int_type, 1, spos1);
+  NODE_PTR node_add     = cntr_add->New_bin_arith(air::core::OPC_ADD, int_type,
+                                                  node_x, node_1, spos1);
+  STMT_PTR stmt_st      = cntr_add->New_st(node_add, ad_x, spos1);
+  stmt_list1.Append(stmt_st);
+  // y = y - 1
+  SPOS           spos2(0, 4, 1, 0);
+  ADDR_DATUM_PTR ad_y   = _fs_add->Formal(1);
+  NODE_PTR       node_y = cntr_add->New_ld(ad_y, spos2);
+  node_1                = cntr_add->New_intconst(int_type, 1, spos2);
+  NODE_PTR node_sub     = cntr_add->New_bin_arith(air::core::OPC_SUB, int_type,
+                                                  node_y, node_1, spos2);
+  stmt_st               = cntr_add->New_st(node_sub, ad_y, spos2);
+  stmt_list1.Append(stmt_st);
+  src_exp =
+      "block ID(0xe) LINE(3:1:0)\n"
+      "  st \"x\" FML[0x10000000] ID(0x12) LINE(3:1:0)\n"
+      "    add RTYPE[0x2](int32_t)\n"
+      "      ld \"x\" FML[0x10000000] RTYPE[0x2](int32_t)\n"
+      "      intconst #0x1 RTYPE[0x2](int32_t)\n"
+      "  st \"y\" FML[0x10000001] ID(0x16) LINE(4:1:0)\n"
+      "    sub RTYPE[0x2](int32_t)\n"
+      "      ld \"y\" FML[0x10000001] RTYPE[0x2](int32_t)\n"
+      "      intconst #0x1 RTYPE[0x2](int32_t)\n"
+      "end_block ID(0xe)\n";
+  src_res = new_blk1->To_str();
+  EXPECT_EQ(src_res, src_exp);
+
+  stmt = new_slist.Append(stmt_list1)->Id();
+  tgt_exp =
+      "block ID(0xc) LINE(2:1:0)\n"
+      "  st \"z\" VAR[0x10000002] ID(0x8) LINE(1:1:0)\n"
+      "    add RTYPE[0x2](int32_t)\n"
+      "      ld \"x\" FML[0x10000000] RTYPE[0x2](int32_t)\n"
+      "      ld \"y\" FML[0x10000001] RTYPE[0x2](int32_t)\n"
+      "  retv ID(0xa) LINE(1:1:0)\n"
+      "    ld \"z\" VAR[0x10000002] RTYPE[0x2](int32_t)\n"
+      "  st \"x\" FML[0x10000000] ID(0x12) LINE(3:1:0)\n"
+      "    add RTYPE[0x2](int32_t)\n"
+      "      ld \"x\" FML[0x10000000] RTYPE[0x2](int32_t)\n"
+      "      intconst #0x1 RTYPE[0x2](int32_t)\n"
+      "  st \"y\" FML[0x10000001] ID(0x16) LINE(4:1:0)\n"
+      "    sub RTYPE[0x2](int32_t)\n"
+      "      ld \"y\" FML[0x10000001] RTYPE[0x2](int32_t)\n"
+      "      intconst #0x1 RTYPE[0x2](int32_t)\n"
+      "end_block ID(0xc)\n";
+  src_exp =
+      "block ID(0xe) LINE(3:1:0)\n"
+      "end_block ID(0xe)\n";
+  tgt_res = new_slist.Block_node()->To_str();
+  src_res = stmt_list1.Block_node()->To_str();
+  EXPECT_TRUE(first == stmt);
+  EXPECT_EQ(tgt_res, tgt_exp);
+  EXPECT_EQ(src_res, src_exp);
+  for (STMT_PTR st = new_slist.Begin_stmt(); st != new_slist.End_stmt();
+       st          = st->Next()) {
+    EXPECT_TRUE(st->Parent_node_id() == new_slist.Block_node()->Id());
+    EXPECT_TRUE(st->Next()->Prev_id() == st->Id());
+  }
+
+  // case 4: nested loop
+  SPOS     spos3(0, 5, 1, 0);
+  NODE_PTR init = cntr_add->New_intconst(int_type, 0, spos3);
+  NODE_PTR comp = cntr_add->New_bin_arith(
+      air::core::OPC_LT, int_type, cntr_add->New_ld(ad_x, spos3),
+      cntr_add->New_intconst(int_type, 10, spos3), spos3);
+  NODE_PTR incr = cntr_add->New_bin_arith(
+      air::core::OPC_ADD, int_type, cntr_add->New_ld(ad_x, spos3),
+      cntr_add->New_intconst(int_type, 1, spos3), spos3);
+  NODE_PTR loop_body = cntr_add->New_stmt_block(spos3);
+  STMT_PTR outer_lst =
+      cntr_add->New_do_loop(ad_x, init, comp, incr, loop_body, spos3);
+  ori_slist.Append(outer_lst);
+  STMT_LIST outer_loop_slist(loop_body);
+
+  SPOS spos4(0, 6, 1, 0);
+  init = cntr_add->New_intconst(int_type, 0, spos4);
+  comp = cntr_add->New_bin_arith(
+      air::core::OPC_LT, int_type, cntr_add->New_ld(ad_y, spos4),
+      cntr_add->New_intconst(int_type, 20, spos4), spos4);
+  incr = cntr_add->New_bin_arith(
+      air::core::OPC_ADD, int_type, cntr_add->New_ld(ad_y, spos4),
+      cntr_add->New_intconst(int_type, 2, spos4), spos4);
+  loop_body = cntr_add->New_stmt_block(spos4);
+  STMT_LIST inner_loop_slist(loop_body);
+  STMT_PTR  inner_lst =
+      cntr_add->New_do_loop(ad_y, init, comp, incr, loop_body, spos4);
+  stmt_st = cntr_add->New_st(
+      cntr_add->New_bin_arith(air::core::OPC_ADD, int_type,
+                              cntr_add->New_ld(ad_x, spos4),
+                              cntr_add->New_ld(ad_y, spos4), spos4),
+      ad_y, spos4);
+  inner_loop_slist.Append(stmt_st);
+  outer_loop_slist.Append(inner_lst);
+  stmt_st = cntr_add->New_st(
+      cntr_add->New_bin_arith(air::core::OPC_SUB, int_type,
+                              cntr_add->New_ld(ad_x, spos4),
+                              cntr_add->New_ld(ad_y, spos4), spos4),
+      ad_x, spos4);
+  outer_loop_slist.Append(stmt_st);
+  SPOS spos5(0, 7, 1, 0);
+  stmt_st = cntr_add->New_retv(cntr_add->New_ld(ad_x, spos5), spos5);
+  ori_slist.Append(stmt_st);
+  tgt_exp =
+      "block ID(0x4) LINE(1:1:0)\n"
+      "  do_loop ID(0x20) LINE(5:1:0)\n"
+      "    intconst #0 RTYPE[0x2](int32_t)\n"
+      "    lt RTYPE[0x2](int32_t)\n"
+      "      ld \"x\" FML[0x10000000] RTYPE[0x2](int32_t)\n"
+      "      intconst #0xa RTYPE[0x2](int32_t)\n"
+      "    add RTYPE[0x2](int32_t)\n"
+      "      ld \"x\" FML[0x10000000] RTYPE[0x2](int32_t)\n"
+      "      intconst #0x1 RTYPE[0x2](int32_t)\n"
+      "    block ID(0x1f) LINE(5:1:0)\n"
+      "      do_loop ID(0x2a) LINE(6:1:0)\n"
+      "        intconst #0 RTYPE[0x2](int32_t)\n"
+      "        lt RTYPE[0x2](int32_t)\n"
+      "          ld \"y\" FML[0x10000001] RTYPE[0x2](int32_t)\n"
+      "          intconst #0x14 RTYPE[0x2](int32_t)\n"
+      "        add RTYPE[0x2](int32_t)\n"
+      "          ld \"y\" FML[0x10000001] RTYPE[0x2](int32_t)\n"
+      "          intconst #0x2 RTYPE[0x2](int32_t)\n"
+      "        block ID(0x29) LINE(6:1:0)\n"
+      "          st \"y\" FML[0x10000001] ID(0x2e) LINE(6:1:0)\n"
+      "            add RTYPE[0x2](int32_t)\n"
+      "              ld \"x\" FML[0x10000000] RTYPE[0x2](int32_t)\n"
+      "              ld \"y\" FML[0x10000001] RTYPE[0x2](int32_t)\n"
+      "        end_block ID(0x29)\n"
+      "      st \"x\" FML[0x10000000] ID(0x32) LINE(6:1:0)\n"
+      "        sub RTYPE[0x2](int32_t)\n"
+      "          ld \"x\" FML[0x10000000] RTYPE[0x2](int32_t)\n"
+      "          ld \"y\" FML[0x10000001] RTYPE[0x2](int32_t)\n"
+      "    end_block ID(0x1f)\n"
+      "  retv ID(0x34) LINE(7:1:0)\n"
+      "    ld \"x\" FML[0x10000000] RTYPE[0x2](int32_t)\n"
+      "end_block ID(0x4)\n";
+  tgt_res = ori_slist.Block_node()->To_str();
+  EXPECT_EQ(tgt_res, tgt_exp);
+  for (STMT_PTR st = ori_slist.Begin_stmt(); st != ori_slist.End_stmt();
+       st          = st->Next()) {
+    EXPECT_TRUE(st->Enclosing_stmt_id() == _fs_add->Entry_stmt_id());
+  }
+  for (STMT_PTR st                           = outer_loop_slist.Begin_stmt();
+       st != outer_loop_slist.End_stmt(); st = st->Next()) {
+    EXPECT_TRUE(st->Enclosing_stmt_id() == outer_lst->Id());
+  }
+  for (STMT_PTR st                           = inner_loop_slist.Begin_stmt();
+       st != inner_loop_slist.End_stmt(); st = st->Next()) {
+    EXPECT_TRUE(st->Enclosing_stmt_id() == inner_lst->Id());
+  }
+  EXPECT_TRUE(cntr_add->Verify());
+}
+
 void TEST_CONTAINER::Run_test_func_add_def() {
   std::string expected(
       "FUN[0] \"My_add\"\n"
+      "  FML[0x10000000] \"x\", TYP[0x2](primitive,\"int32_t\")\n"
+      "  FML[0x10000001] \"y\", TYP[0x2](primitive,\"int32_t\")\n"
       "  VAR[0x10000002] \"z\"\n"
       "    scope_level[0x1], TYP[0x2](primitive,\"int32_t\")\n"
       "\n"
@@ -157,6 +488,8 @@ void TEST_CONTAINER::Run_test_func_add_def() {
 void TEST_CONTAINER::Run_test_func_main_def() {
   std::string expected(
       "FUN[0x2] \"main\"\n"
+      "  FML[0x10000000] \"argc\", TYP[0x2](primitive,\"int32_t\")\n"
+      "  FML[0x10000001] \"argv\", TYP[0x14](pointer,\"_noname\")\n"
       "  VAR[0x10000002] \"a\"\n"
       "    scope_level[0x1], TYP[0x2](primitive,\"int32_t\")\n"
       "  VAR[0x10000003] \"b\"\n"
@@ -271,55 +604,65 @@ void TEST_CONTAINER::Run_test_clone() {
 void TEST_CONTAINER::Run_test_opcode() {
   std::string expected(
       "Domain 0: CORE\n"
-      "  invalid           EXPR   kids: 0   \n"
-      "  end_stmt_list     CFLOW  kids: 0   END_BB,STMT\n"
-      "  void              STMT   kids: 0   \n"
-      "  block             CFLOW  kids: 0   SCF\n"
-      "  add               EXPR   kids: 2   EXPR\n"
-      "  sub               EXPR   kids: 2   EXPR\n"
-      "  mul               EXPR   kids: 2   EXPR\n"
-      "  shl               EXPR   kids: 2   EXPR\n"
-      "  ashr              EXPR   kids: 2   EXPR\n"
-      "  lshr              EXPR   kids: 2   EXPR\n"
-      "  eq                EXPR   kids: 2   EXPR,COMPARE\n"
-      "  ne                EXPR   kids: 2   EXPR,COMPARE\n"
-      "  lt                EXPR   kids: 2   EXPR,COMPARE\n"
-      "  le                EXPR   kids: 2   EXPR,COMPARE\n"
-      "  gt                EXPR   kids: 2   EXPR,COMPARE\n"
-      "  ge                EXPR   kids: 2   EXPR,COMPARE\n"
-      "  ld                LDST   kids: 0   EXPR,LOAD,SYM,ATTR,ACC_TYPE\n"
-      "  ild               LDST   kids: 1   EXPR,LOAD,ATTR,ACC_TYPE\n"
-      "  ldf               LDST   kids: 0   EXPR,LOAD,SYM,FIELD_ID,ACC_TYPE\n"
-      "  ldo               LDST   kids: 0   EXPR,LOAD,SYM,OFFSET,ACC_TYPE\n"
-      "  ldp               LDST   kids: 0   EXPR,LOAD,ATTR,ACC_TYPE,PREG\n"
-      "  ldpf              LDST   kids: 0   EXPR,LOAD,FIELD_ID,ACC_TYPE,PREG\n"
-      "  ldc               EXPR   kids: 0   EXPR,CONST_ID\n"
-      "  lda               EXPR   kids: 0   EXPR,SYM\n"
-      "  ldca              EXPR   kids: 0   EXPR,CONST_ID\n"
-      "  func_entry        ENTRY  kids: 1   EX_CHILD,EX_FIELD,SCF\n"
-      "  idname            EXPR   kids: 0   EXPR,SYM,ATTR\n"
-      "  st                LDST   kids: 1   STMT,STORE,SYM,ATTR,ACC_TYPE\n"
-      "  ist               LDST   kids: 2   STMT,STORE,ATTR,ACC_TYPE\n"
-      "  stf               LDST   kids: 1   STMT,STORE,SYM,FIELD_ID,ACC_TYPE\n"
-      "  sto               LDST   kids: 1   STMT,STORE,SYM,OFFSET,ACC_TYPE\n"
-      "  stp               LDST   kids: 1   STMT,STORE,ATTR,ACC_TYPE,PREG\n"
-      "  stpf              LDST   kids: 1   STMT,STORE,FIELD_ID,ACC_TYPE,PREG\n"
-      "  entry             ENTRY  kids: 0   SCF\n"
-      "  ret               STMT   kids: 0   STMT\n"
-      "  retv              STMT   kids: 1   STMT\n"
-      "  pragma            PRAGMA kids: 0   LEAF,STMT,SYM,VALUE\n"
-      "  call              CALL   kids: 0   "
+      "  invalid          kids: 0   \n"
+      "  end_stmt_list    kids: 0   END_BB,STMT\n"
+      "  void             kids: 0   EXPR\n"
+      "  block            kids: 0   SCF,EXPR\n"
+      "  add              kids: 2   EXPR\n"
+      "  sub              kids: 2   EXPR\n"
+      "  mul              kids: 2   EXPR\n"
+      "  shl              kids: 2   EXPR\n"
+      "  ashr             kids: 2   EXPR\n"
+      "  lshr             kids: 2   EXPR\n"
+      "  eq               kids: 2   EXPR,COMPARE\n"
+      "  ne               kids: 2   EXPR,COMPARE\n"
+      "  lt               kids: 2   EXPR,COMPARE\n"
+      "  le               kids: 2   EXPR,COMPARE\n"
+      "  gt               kids: 2   EXPR,COMPARE\n"
+      "  ge               kids: 2   EXPR,COMPARE\n"
+      "  ld               kids: 0   LEAF,EXPR,LOAD,SYM,ATTR,ACC_TYPE\n"
+      "  ild              kids: 1   EXPR,LOAD,ATTR,ACC_TYPE\n"
+      "  ldf              kids: 0   LEAF,EXPR,LOAD,SYM,FIELD_ID,ATTR,ACC_TYPE\n"
+      "  ldo              kids: 0   LEAF,EXPR,LOAD,SYM,OFFSET,ACC_TYPE\n"
+      "  ldp              kids: 0   LEAF,EXPR,LOAD,ATTR,ACC_TYPE,PREG\n"
+      "  ldpf             kids: 0   "
+      "LEAF,EXPR,LOAD,FIELD_ID,ATTR,ACC_TYPE,PREG\n"
+      "  ldc              kids: 0   LEAF,EXPR,CONST_ID\n"
+      "  lda              kids: 0   LEAF,EXPR,SYM\n"
+      "  ldca             kids: 0   LEAF,EXPR,CONST_ID\n"
+      "  func_entry       kids: 1   EX_CHILD,EX_FIELD,SCF,STMT\n"
+      "  idname           kids: 0   LEAF,EXPR,SYM,ATTR\n"
+      "  st               kids: 1   STMT,STORE,SYM,ATTR,ACC_TYPE\n"
+      "  ist              kids: 2   STMT,STORE,ATTR,ACC_TYPE\n"
+      "  stf              kids: 1   STMT,STORE,SYM,FIELD_ID,ATTR,ACC_TYPE\n"
+      "  sto              kids: 1   STMT,STORE,SYM,OFFSET,ACC_TYPE\n"
+      "  stp              kids: 1   STMT,STORE,ATTR,ACC_TYPE,PREG\n"
+      "  stpf             kids: 1   STMT,STORE,FIELD_ID,ATTR,ACC_TYPE,PREG\n"
+      "  entry            kids: 0   SCF,STMT\n"
+      "  ret              kids: 0   LEAF,STMT\n"
+      "  retv             kids: 1   STMT,ATTR\n"
+      "  pragma           kids: 0   LEAF,STMT\n"
+      "  call             kids: 0   "
       "EX_CHILD,EX_FIELD,RET_VAR,STMT,CALL,FLAGS,ATTR\n"
-      "  do_loop           CFLOW  kids: 4   SCF\n"
-      "  intconst          EXPR   kids: 0   EXPR\n"
-      "  zero              EXPR   kids: 0   EXPR\n"
-      "  one               EXPR   kids: 0   EXPR\n"
-      "  if                CFLOW  kids: 3   SCF\n"
-      "  array             EXPR   kids: 1   EX_CHILD,EXPR\n"
-      "  validate          STMT   kids: 4   STMT,LIB_CALL\n"
-      "  tm_start          STMT   kids: 0   STMT,CONST_ID,LIB_CALL\n"
-      "  tm_taken          STMT   kids: 0   STMT,CONST_ID,LIB_CALL\n"
-      "  dump_var          STMT   kids: 3   STMT,LIB_CALL\n\n");
+      "  do_loop          kids: 4   SCF,STMT\n"
+      "  intconst         kids: 0   LEAF,EXPR\n"
+      "  zero             kids: 0   LEAF,EXPR,ATTR\n"
+      "  one              kids: 0   LEAF,EXPR,ATTR\n"
+      "  if               kids: 3   SCF,STMT\n"
+      "  array            kids: 1   EX_CHILD,EXPR\n"
+      "  validate         kids: 4   STMT,LIB_CALL\n"
+      "  dump_var         kids: 3   STMT,LIB_CALL\n"
+      "  intrn_call       kids: 0   EX_CHILD,RET_VAR,STMT,FLAGS,ATTR\n"
+      "  intrn_op         kids: 0   EX_CHILD,EXPR,FLAGS,ATTR\n"
+      "  comment          kids: 0   STMT\n"
+      "  and              kids: 2   EXPR\n"
+      "  or               kids: 2   EXPR\n"
+      "  band             kids: 2   EXPR\n"
+      "  bor              kids: 2   EXPR\n"
+      "  bnot             kids: 1   EXPR\n"
+      "  floordiv         kids: 2   EXPR\n"
+      "  mod              kids: 2   EXPR\n"
+      "\n");
   std::stringbuf buf;
   std::ostream   os(&buf);
   META_INFO::Print(os);
@@ -342,6 +685,68 @@ void TEST_CONTAINER::Run_test_verify_fail() {
   EXPECT_FALSE(bad_fs->Container().Verify());
 }
 
+void TEST_CONTAINER::Run_test_func_entry_node() {
+  // 1. create a new binary input function
+  const char* func_name  = "Bin_func";
+  STR_PTR     name       = _glob->New_str(func_name);
+  FUNC_PTR    func       = _glob->New_func(name, SPOS());
+  FUNC_SCOPE* func_scope = &_glob->New_func_scope(func);
+  CONTAINER*  cntr       = &func_scope->Container();
+
+  // 2. create entry symbol
+  SIGNATURE_TYPE_PTR sig = _glob->New_sig_type();
+  sig->Set_complete();
+  ENTRY_PTR entry = _glob->New_entry_point(sig, func, func_name, SPOS());
+  func->Add_entry_point(entry->Id());
+
+  // 3. create entry node
+  TYPE_PTR       f32        = _glob->Prim_type(PRIMITIVE_TYPE::FLOAT_32);
+  STMT_PTR       entry_stmt = cntr->New_func_entry(SPOS(), 2);
+  ADDR_DATUM_PTR formal0    = func_scope->New_formal(f32->Id(), "x", SPOS());
+  NODE_PTR       idname0    = cntr->New_idname(formal0, SPOS());
+  ADDR_DATUM_PTR formal1    = func_scope->New_formal(f32->Id(), "y", SPOS());
+  NODE_PTR       idname1    = cntr->New_idname(formal1, SPOS());
+  entry_stmt->Node()->Set_child(0, idname0);
+  entry_stmt->Node()->Set_child(1, idname1);
+
+  // 4. verify entry node
+  ASSERT_TRUE(cntr->Verify_node(entry_stmt->Node()));
+  std::string result = entry_stmt->To_str();
+  std::string expected(
+      "func_entry \"Bin_func\" ENT[0x5] ID(0) LINE(0:0:0)\n"
+      "  idname \"x\" FML[0x10000000] RTYPE[0x8](float32_t)\n"
+      "  idname \"y\" FML[0x10000001] RTYPE[0x8](float32_t)\n"
+      "  block ID(0x2) LINE(0:0:0)\n"
+      "  end_block ID(0x2)\n");
+  EXPECT_EQ(result, expected);
+}
+
+void TEST_CONTAINER::Run_test_func_no_ret() {
+  STR_PTR  name = _glob->New_str("No_ret");
+  FUNC_PTR func = _glob->New_func(name, SPOS());
+  func->Set_parent(_glob->Comp_env_id());
+  SIGNATURE_TYPE_PTR sig   = _glob->New_sig_type();
+  TYPE_PTR           rtype = _glob->Prim_type(PRIMITIVE_TYPE::VOID);
+  PREG_PTR           retv  = _fs_add->New_preg(rtype);
+  _glob->New_ret_param(rtype, sig);
+  sig->Set_complete();
+  ENTRY_PTR  entry = _glob->New_entry_point(sig, func, name, SPOS());
+  CONTAINER* cntr  = &_fs_add->Container();
+  STMT_PTR   stmt  = cntr->New_call(entry, retv, 0, SPOS());
+
+  EXPECT_FALSE(stmt->Node()->Entry()->Has_retv());
+  EXPECT_TRUE(retv->Id() == stmt->Node()->Ret_preg_id());
+
+  stmt = cntr->New_call(entry, PREG_PTR(), 0, SPOS());
+  EXPECT_FALSE(stmt->Node()->Entry()->Has_retv());
+
+  stmt = cntr->New_call(entry, Null_ptr, 0, SPOS());
+  EXPECT_FALSE(stmt->Node()->Entry()->Has_retv());
+}
+
+TEST_F(TEST_CONTAINER, ctor_dtor) { Run_test_ctor_dtor(); }
+TEST_F(TEST_CONTAINER, stmt_list_prepend) { Run_test_stmt_list_prepend(); }
+TEST_F(TEST_CONTAINER, stmt_list_append) { Run_test_stmt_list_append(); }
 TEST_F(TEST_CONTAINER, func_add_def) { Run_test_func_add_def(); }
 TEST_F(TEST_CONTAINER, func_main_def) { Run_test_func_main_def(); }
 TEST_F(TEST_CONTAINER, stmt_attr) { Run_test_stmt_attr(); }
@@ -350,3 +755,5 @@ TEST_F(TEST_CONTAINER, opcode) { Run_test_opcode(); }
 TEST_F(TEST_CONTAINER, verify_func_add) { Run_test_verify_func_add(); }
 TEST_F(TEST_CONTAINER, verify_func_main) { Run_test_verify_func_main(); }
 TEST_F(TEST_CONTAINER, verify_fail) { Run_test_verify_fail(); }
+TEST_F(TEST_CONTAINER, func_entry_node) { Run_test_func_entry_node(); }
+TEST_F(TEST_CONTAINER, func_no_ret) { Run_test_func_no_ret(); }

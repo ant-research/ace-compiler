@@ -43,8 +43,6 @@ public:
 
       AIR_TRACE(_tfile, "[%s][%s][%s] : phase_time = %s / %s(%s)", driver,
                 phase, pass, delta, total, unit);
-      printf("[%s][%s][%s] : phase_time = %.6f / %.6f(%s)\n", driver.c_str(),
-             phase.c_str(), pass.c_str(), delta, total, unit.c_str());
     }
   }
 

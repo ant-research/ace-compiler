@@ -8,6 +8,8 @@
 
 #include "air/util/option.h"
 
+#include <stdint.h>
+
 #include <filesystem>
 #include <iostream>
 #include <unordered_set>
@@ -47,7 +49,7 @@ void OPTION_MGR::Print(ostream& os, uint32_t indent) {
         case K_INT64:
         case K_UINT64:
         case K_DOUBLE:
-          value_prompt = "<value>";
+          value_prompt = "<val>";
           break;
         default:
           break;
@@ -76,41 +78,41 @@ void OPTION_MGR::Print(ostream& os, uint32_t indent) {
     }
   }
 
-  value_prompt                    = "<value>";
+  value_prompt                    = "<val>";
   vector<OPTION_GRP*> grp_options = this->Group_option();
   for (auto grp_option : grp_options) {
     OPTION_DESC_HANDLE* od_handle = grp_option->Options();
 
     string group_prefix = "";
     os << endl << grp_option->Name() << " group OPTIONS: " << endl;
-    os << "(currently when using mutiple group options, only -"
-       << grp_option->Name() << grp_option->Separator() << "option_name1"
-       << grp_option->Separator() << "option_name2="
-       << "<value> format is supported. Below is the supported option "
-          "names:)"
+    os << "(Usage: -" << grp_option->Name() << grp_option->Separator()
+       << "option_name1" << grp_option->Separator() << "option_name2=<val> ...)"
        << endl;
 
     for (auto i = 0; i < od_handle->Size(); i++) {
       string name  = od_handle->Option(i)->Name();
       string aname = od_handle->Option(i)->Abbrev_name();
-      if (!name.empty()) {
-        display_info = name;
-        if (od_handle->Option(i)->Val_maker() == V_EQUAL) {
-          display_info = name + EQUAL_SIGN + value_prompt;
-        }
-      }
       if (!aname.empty()) {
-        string abbrev_case = aname;
+        display_info = aname;
         if (od_handle->Option(i)->Val_maker() == V_EQUAL) {
-          abbrev_case += EQUAL_SIGN + value_prompt;
+          display_info = aname + EQUAL_SIGN + value_prompt;
+        }
+      } else {
+        AIR_ASSERT(!name.empty());
+        display_info = name;
+      }
+      if (!name.empty()) {
+        string full_name = name;
+        if (od_handle->Option(i)->Val_maker() == V_EQUAL) {
+          full_name += EQUAL_SIGN + value_prompt;
         }
         if (!display_info.empty()) {
-          display_info += "(" + abbrev_case + ")";
+          display_info += "(" + full_name + ")";
         } else {
-          display_info += abbrev_case;
+          display_info += full_name;
         }
       }
-      os << string(indent * INDENT_SPACE, ' ') << left << setw(30)
+      os << string(indent * INDENT_SPACE, ' ') << left << setw(45)
          << display_info << od_handle->Option(i)->Description() << endl;
     }
   }
@@ -211,10 +213,15 @@ string OPTION_MGR::Get_option_value(const string& cml_option,
   switch (op_desc->Val_maker()) {
     case V_NONE: {
       size_t name_size = 0;
-      if (match_with_name) {
-        name_size = strlen(op_desc->Name());
+      // opt level(O0, O1, O2) processing:
+      if (Is_likely_opt_level_option(cml_option)) {
+        name_size = 1;
       } else {
-        name_size = strlen(op_desc->Abbrev_name());
+        if (match_with_name) {
+          name_size = strlen(op_desc->Name());
+        } else {
+          name_size = strlen(op_desc->Abbrev_name());
+        }
       }
       // cml_option_name = cml_option.substr(0, name_size);
       cml_option_value =
@@ -315,7 +322,27 @@ bool OPTION_MGR::Option_match_and_update(
         AIR_ASSERT(
             (strcmp(cml_option.c_str(), matched_op_desc->Name()) == 0) ||
             (strcmp(cml_option.c_str(), matched_op_desc->Abbrev_name()) == 0));
-        *((bool*)matched_op_desc->_option_var) = true;
+        if (Is_likely_opt_level_option(cml_option)) {
+          string cml_option_value =
+              Get_option_value(cml_option, matched_op_desc, match_with_name);
+          if (cml_option_value.empty()) {
+            AIR_DEBUG("%s option is incorrect", cml_option);
+            CMPLR_USR_MSG(U_CODE::Incorrect_Option, cml_option.c_str());
+            return false;
+          }
+
+          // Here make an assumption that the character following -O must be a
+          // single-digit value. It may be modified based on subsequent needs.
+          pair<uint64_t, bool> result =
+              String_to_integer<uint64_t>(cml_option_value.c_str(), &strtoull);
+          if (!result.second) {
+            CMPLR_USR_MSG(U_CODE::Incorrect_Option, cml_option.c_str());
+            return false;
+          }
+          *((uint64_t*)matched_op_desc->_option_var) = result.first;
+        } else {
+          *((bool*)matched_op_desc->_option_var) = true;
+        }
         break;
       }
       case K_STR: {
@@ -506,7 +533,7 @@ R_CODE OPTION_MGR::Parse_options(int argc, char** options) {
       int colon_pos = option.find(COLON_SIGN);
       if (colon_pos != string::npos) {
         AIR_DEBUG("processing group option");
-        string_view cml_grp_name = option.substr(0, colon_pos);
+        string cml_grp_name = option.substr(0, colon_pos);
         OPTION_GRP* option_grp   = Group_name_match(cml_grp_name);
         if (option_grp == nullptr) {
           CMPLR_USR_MSG(U_CODE::Incorrect_Option, option.c_str());
@@ -550,16 +577,20 @@ R_CODE OPTION_MGR::Parse_options(int argc, char** options) {
       }
       _ifile                 = options[i];
       filesystem::path fname = filesystem::path(_ifile).filename();
-      _ofile                 = fname.replace_extension(BFILE_SUFFIX).string();
-      _tfile                 = fname.replace_extension(TFILE_SUFFIX).string();
-      _pfile                 = fname.replace_extension(PFILE_SUFFIX).string();
+      _fname                 = fname.replace_extension("").string();
       AIR_DEBUG(Ifile());
-      AIR_DEBUG(Ofile());
-      AIR_DEBUG(Tfile());
-      AIR_DEBUG(Pfile());
+      AIR_DEBUG(Tfile(""));
+      AIR_DEBUG(Pfile(""));
     }
   }
   return R_CODE::NORMAL;
+}
+
+bool OPTION_MGR::Is_likely_opt_level_option(const string& option) {
+  if ((option[0] == 'O') && (option.size() == 2)) {
+    return true;
+  }
+  return false;
 }
 
 }  // namespace util

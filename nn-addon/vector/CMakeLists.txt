@@ -1,3 +1,10 @@
+#=============================================================================
+#
+# Copyright (c) Ant Group Co., Ltd
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+#
+#=============================================================================
+
 file (GLOB_RECURSE NNVECTOR_SRC_FILES CONFIGURE_DEPENDS src/*.cxx)
 
 set (NNVECTOR_INCLUDE_DIRS "")
@@ -6,15 +13,27 @@ list (APPEND NNVECTOR_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/include")
 include_directories (${NNVECTOR_INCLUDE_DIRS})
 set (NNVECTOR_INCLUDE_DIRS "${NNVECTOR_INCLUDE_DIRS}" CACHE INTERNAL "")
 
-add_library (nnvector_obj OBJECT ${NNVECTOR_SRC_FILES})
+# generate type ruls for vector
+set(VECTOR_TYPE_DIR "${CMAKE_BINARY_DIR}/include/nn")
+gen_type_checkers (${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_LIST_DIR}/src/vector_type.py" ${VECTOR_TYPE_DIR})
+include_directories (${VECTOR_TYPE_DIR})
 
+add_library (nnvector_obj OBJECT ${NNVECTOR_SRC_FILES} ${VECTOR_TYPE_DIR}/vector_type.cxx)
+add_dependencies(nnvector_obj nn_depend)
 set_property (TARGET nnvector_obj PROPERTY POSITION_INDEPENDENT_CODE 1)
 
 if (BUILD_STATIC)
 	add_library (NNvector STATIC $<TARGET_OBJECTS:nnvector_obj>)
+	target_link_libraries (NNvector ${EXTRA_LIBS})
 	set_property (TARGET NNvector PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 	install (TARGETS NNvector EXPORT NNTargets DESTINATION lib)
 endif ()
+
+# generate vector options
+set(VOPTION_OUTPUT_DIR "${CMAKE_BINARY_DIR}/include/nn/vector")
+set(VOPTION_INPUT_DIR "config")
+gen_option(${PYTHON_EXECUTABLE} voption ${VOPTION_OUTPUT_DIR} ${VOPTION_INPUT_DIR})
+add_dependencies(nn_depend voption)
 
 add_custom_target (nnvector_all)
 
@@ -23,39 +42,11 @@ if (BUILD_STATIC)
 	add_dependencies (nnvector_all NNvector)
 endif()
 
-set (NNVECTOR_UTAPP "")
-if (BUILD_UNITTEST)
-	file (GLOB NNVECTOR_UNITTEST_SRC_FILES CONFIGURE_DEPENDS unittest/*.cxx)
-	set (NNVECTOR_UNITTEST_SRC_FILES ${NNVECTOR_UNITTEST_SRC_FILES})
-	add_executable (ut_nnvector ${NNVECTOR_UNITTEST_SRC_FILES} ${UNITTESTMAIN})
-	set_property (TARGET ut_nnvector PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/unittest)
-	target_link_libraries (ut_nnvector ${NN_UTLIBS})
-	set (NNVECTOR_UTAPP ${NNVECTOR_UTAPP} ut_nnvector)
-
-	add_dependencies (nnvector_all ut_nnvector)
-
-	add_custom_command (OUTPUT run_nnvector_utapp WORKING_DIRECTORY ${CMAKE_BINARY_DIR} COMMAND ${CMAKE_BINARY_DIR}/unittest/ut_nnvector)
-	add_custom_target (test_nnvector_ut DEPENDS ut_nnvector run_nnvector_utapp)
-	add_test (NAME ut_nnvector COMMAND ${CMAKE_BINARY_DIR}/unittest/ut_nnvector)
+if (NN_BUILD_TEST)
+	build_app_test (NN_INSTALL_APP "${NN_LIBS}")
 endif()
 
-set (NNVECTOR_TESTAPP "")
-if (NN_BUILD_TEST)
-	file (GLOB NNVECTOR_TESTAPP_SRC_FILES CONFIGURE_DEPENDS test/*.cxx)
-	foreach (app ${NNVECTOR_TESTAPP_SRC_FILES})
-		get_filename_component (exe ${app} NAME_WE)
-		add_executable (${exe} ${app})
-		set_property (TARGET ${exe} PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test)
-		set (NNVECTOR_TESTAPP ${NNVECTOR_TESTAPP} ${exe})
-		target_link_libraries (${exe} ${NN_LIBS} protobuf::libprotobuf)
-		add_test (NAME ${exe} COMMAND ${CMAKE_BINARY_DIR}/test/${exe})
-	endforeach ()
-
-	add_custom_target (nnvector_test)
-	add_dependencies (nnvector_test ${NNVECTOR_TESTAPP})
-	add_dependencies (nnvector_all nnvector_test)
-endif ()
-
+# Leave it here for now. Need to change example or ctest
 set (NNVECTOR_EGAPP "")
 if (NN_BUILD_EXAMPLE)
 	file (GLOB NNVECTOR_EXAMPLE_SRC_FILES CONFIGURE_DEPENDS example/*.cxx)
@@ -64,7 +55,8 @@ if (NN_BUILD_EXAMPLE)
 		add_executable (${exe} ${app})
 		set_property (TARGET ${exe} PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/example)
 		set (NNVECTOR_EGAPP ${NNVECTOR_EGAPP} ${exe})
-		target_link_libraries (${exe} ${NN_LIBS} ${EXTRA_LIBS})
+		target_link_libraries (${exe} ${NN_LIBS})
+		target_link_options (${exe} PRIVATE -Wl,--export-dynamic)
 		# add_test (NAME ${exe} COMMAND ${CMAKE_BINARY_DIR}/example/${exe})
 	endforeach ()
 
@@ -74,8 +66,9 @@ if (NN_BUILD_EXAMPLE)
 endif ()
 
 if (NN_INSTALL_APP)
-	install (TARGETS ${NNVECTOR_UTAPP} RUNTIME DESTINATION unittest)
-	install (TARGETS ${NNVECTOR_BMAPP} RUNTIME DESTINATION bench)
-	install (TARGETS ${NNVECTOR_TESTAPP} RUNTIME DESTINATION test)
 	install (TARGETS ${NNVECTOR_EGAPP} RUNTIME DESTINATION example)
 endif ()
+
+if (BUILD_UNITTEST)
+	build_app_unittest (NN_INSTALL_APP "${NN_UTLIBS}" "ut_nnvector")
+endif()

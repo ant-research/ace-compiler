@@ -1,3 +1,10 @@
+#=============================================================================
+#
+# Copyright (c) Ant Group Co., Ltd
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+#
+#=============================================================================
+
 file (GLOB_RECURSE LLAMA_SRC_FILES CONFIGURE_DEPENDS src/*.cxx)
 
 set (LLAMA_INCLUDE_DIRS "")
@@ -7,7 +14,7 @@ include_directories (${LLAMA_INCLUDE_DIRS})
 set (LLAMA_INCLUDE_DIRS "${LLAMA_INCLUDE_DIRS}" CACHE INTERNAL "")
 
 add_library (llama_obj OBJECT ${LLAMA_SRC_FILES})
-
+add_dependencies(llama_obj nn_depend)
 set_property (TARGET llama_obj PROPERTY POSITION_INDEPENDENT_CODE 1)
 
 if (BUILD_STATIC)
@@ -23,59 +30,14 @@ if (BUILD_STATIC)
 	add_dependencies (nnllama_all NNllama)
 endif()
 
-set (LLAMA_UTAPP "")
-if (BUILD_UNITTEST)
-	file (GLOB LLAMA_UNITTEST_SRC_FILES CONFIGURE_DEPENDS unittest/*.cxx)
-	set (LLAMA_UNITTEST_SRC_FILES ${LLAMA_UNITTEST_SRC_FILES})
-	add_executable (ut_nnllama ${LLAMA_UNITTEST_SRC_FILES} ${UNITTESTMAIN})
-	set_property (TARGET ut_nnllama PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/unittest)
-	target_link_libraries (ut_nnllama ${LLAMA_LIBS} ${NN_UTLIBS})
-	set (LLAMA_UTAPP ${LLAMA_UTAPP} ut_nnllama)
-
-	add_dependencies (nnllama_all ut_nnllama)
-
-	add_custom_command (OUTPUT run_nnllama_utapp WORKING_DIRECTORY ${CMAKE_BINARY_DIR} COMMAND ${CMAKE_BINARY_DIR}/unittest/ut_nnllama)
-	add_custom_target (test_nnllama_ut DEPENDS ut_nnllama run_nnllama_utapp)
-	add_test (NAME ut_nnllama COMMAND ${CMAKE_BINARY_DIR}/unittest/ut_nnllama)
+if (NN_BUILD_TEST)
+	build_app_test (NN_INSTALL_APP "${NN_LIBS}")
 endif()
 
-set (LLAMA_TESTAPP "")
-if (NN_BUILD_TEST)
-	file (GLOB LLAMA_TESTAPP_SRC_FILES CONFIGURE_DEPENDS test/*.cxx)
-	foreach (app ${LLAMA_TESTAPP_SRC_FILES})
-		get_filename_component (exe ${app} NAME_WE)
-		add_executable (${exe} ${app})
-		set_property (TARGET ${exe} PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test)
-		set (LLAMA_TESTAPP ${LLAMA_TESTAPP} ${exe})
-		target_link_libraries (${exe} ${LLAMA_LIBS} ${AIR_LIBS})
-		add_test (NAME ${exe} COMMAND ${CMAKE_BINARY_DIR}/test/${exe})
-	endforeach ()
-
-	add_custom_target (nnllama_test)
-	add_dependencies (nnllama_test ${LLAMA_TESTAPP})
-	add_dependencies (nnllama_all nnllama_test)
-endif ()
-
-set (LLAMA_EGAPP "")
 if (NN_BUILD_EXAMPLE)
-	file (GLOB LLAMA_EXAMPLE_SRC_FILES CONFIGURE_DEPENDS example/*.cxx)
-	foreach (app ${LLAMA_EXAMPLE_SRC_FILES})
-		get_filename_component (exe ${app} NAME_WE)
-		add_executable (${exe} ${app})
-		set_property (TARGET ${exe} PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/example)
-		set (LLAMA_EGAPP ${LLAMA_EGAPP} ${exe})
-		target_link_libraries (${exe} ${LLAMA_LIBS} ${AIR_LIBS})
-		# add_test (NAME ${exe} COMMAND ${CMAKE_BINARY_DIR}/example/${exe})
-	endforeach ()
-
-	add_custom_target (nnllama_example)
-	add_dependencies (nnllama_example ${LLAMA_EGAPP})
-	add_dependencies (nnllama_all nnllama_example)
+	build_app_example (NN_INSTALL_APP "${NN_LIBS}")
 endif ()
 
-if (NN_INSTALL_APP)
-	install (TARGETS ${LLAMA_UTAPP} RUNTIME DESTINATION unittest)
-	install (TARGETS ${LLAMA_BMAPP} RUNTIME DESTINATION bench)
-	install (TARGETS ${LLAMA_TESTAPP} RUNTIME DESTINATION test)
-	install (TARGETS ${LLAMA_EGAPP} RUNTIME DESTINATION example)
-endif ()
+if (BUILD_UNITTEST)
+	build_app_unittest (NN_INSTALL_APP "${NN_UTLIBS}" "ut_nnllama")
+endif()

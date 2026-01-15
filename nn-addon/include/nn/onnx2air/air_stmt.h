@@ -33,7 +33,8 @@ namespace onnx2air {
   DEF_OPERATOR(MaxPool, max_pool)                      \
   DEF_OPERATOR(Mul, mul)                               \
   DEF_OPERATOR(Relu, relu)                             \
-  DEF_OPERATOR(Reshape, reshape)
+  DEF_OPERATOR(Reshape, reshape)                       \
+  DEF_OPERATOR(Concat, concat)
 
 class AIRGEN;
 /**
@@ -50,10 +51,18 @@ public:
   bool     Get_node_input_tensors(onnx::NodeProto*       node,
                                   std::vector<NODE_PTR>& inputs);
   NODE_PTR Create_node(std::string OP_name, std::vector<NODE_PTR>& input,
-                       FUNC_SCOPE* func_scope);
+                       TYPE_PTR rtype, FUNC_SCOPE* func_scope);
   void     Resolve(onnx::NodeProto* node, std::vector<NODE_PTR>& inputs,
                    TYPE_PTR& base_ty, std::vector<int>& res);
   std::vector<int> Resolve_util(TYPE_PTR elem_ty, TYPE_PTR& base_ty);
+
+  // The function Get_dimension_for_array returns the dimension size for
+  // the given array type.
+  std::vector<int> Get_tensor_shape(ARRAY_TYPE_PTR& aty);
+  // The function Resovlve_broadcast_size returns the result tensor shape after
+  // the broadcast case is taken into account.
+  std::vector<int> Resovlve_broadcast_size(ARRAY_TYPE_PTR& aty,
+                                           ARRAY_TYPE_PTR& bty);
 
   CONSTANT_PTR       Parse_attribute_tensor(onnx::NodeProto*            node,
                                             const onnx::AttributeProto& a);
@@ -123,7 +132,8 @@ private:
   // expand the ONNX_OPERATOR macro to generate declarations
 #define DEF_OPERATOR(NAME, name)                                             \
   void Create_node_for_##name(CONTAINER* cntr, std::vector<NODE_PTR>& input, \
-                              const SPOS& spos, NODE_PTR& op_node);          \
+                              const SPOS& spos, TYPE_PTR rtype,              \
+                              NODE_PTR& op_node);                            \
   void Parse_attributes_for_##name(onnx::NodeProto* node);                   \
   void Resolve_for_##name(onnx::NodeProto*       node,                       \
                           std::vector<NODE_PTR>& inputs, TYPE_PTR& base_ty,  \
@@ -143,7 +153,7 @@ private:
   typedef void (AIRSTMTGEN::*ONX_OPERATION_UPDATE_ATTRS)(NODE_PTR node);
   typedef void (AIRSTMTGEN::*ONX_OPERATION_CREATE_NODE)(
       CONTAINER* cntr, std::vector<NODE_PTR>& input, const SPOS& spos,
-      NODE_PTR& op_node);
+      TYPE_PTR rtype, NODE_PTR& op_node);
   struct ONNX_FUNC_POINTERS {
     ONX_OPERATION_CREATE_NODE  _create_node;
     ONX_OPERATION_PARSE        _parse_attrs;

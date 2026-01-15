@@ -12,6 +12,8 @@
 #include <array>
 
 #include "air/base/container.h"
+#include "air/base/meta_info.h"
+#include "air/base/st.h"
 #include "air/core/opcode.h"
 
 namespace air {
@@ -55,43 +57,15 @@ public:
     PREG_PTR   preg = cntr->Parent_func_scope()->New_preg(node->Rtype());
     STMT_PTR   stp  = cntr->New_stp(node, preg, spos);
     visitor->Context().Prepend(stp);
-    return cntr->New_ldp(preg, spos);
-  }
-};
-
-//! @brief Utility for TIMING
-template <typename CONTEXT>
-class TIMING_UTIL : TRANSFORM_UTIL {
-public:
-  TIMING_UTIL(CONTEXT& ctx, const SPOS& spos, const char* msg, bool prepend)
-      : _ctx(ctx), _spos(spos), _prepend(prepend) {
-    if (_ctx.Rt_timing()) {
-      // Prepend TM_START before node
-      _msg = _ctx.Glob_scope()->New_const(CONSTANT_KIND::STR_ARRAY, msg,
-                                          strlen(msg));
-      STMT_PTR tm_start = _ctx.Container()->New_tm_start(_msg, _spos);
-      _ctx.Prepend(tm_start);
+    NODE_PTR ldp = cntr->New_ldp(preg, spos);
+    // copy attribute from node to stp and ldp
+    if (air::base::META_INFO::Has_prop<air::base::OPR_PROP::ATTR>(
+            node->Opcode())) {
+      stp->Node()->Copy_attr(node);
+      ldp->Copy_attr(node);
     }
+    return ldp;
   }
-
-  ~TIMING_UTIL() {
-    if (_ctx.Rt_timing()) {
-      // Append TM_TAKEN after node
-      AIR_ASSERT(_msg != Null_ptr);
-      STMT_PTR tm_taken = _ctx.Container()->New_tm_taken(_msg, _spos);
-      if (_prepend) {
-        _ctx.Prepend(tm_taken);
-      } else {
-        _ctx.Append(tm_taken);
-      }
-    }
-  }
-
-private:
-  CONTEXT&     _ctx;
-  const SPOS&  _spos;
-  CONSTANT_PTR _msg;
-  bool         _prepend;
 };
 
 //! @brief Utiltiy for VALIDATE

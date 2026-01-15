@@ -40,18 +40,48 @@ public:
     return RETV();
   }
 
+  //! @brief Handle comment for IR2C
+  template <typename RETV, typename VISITOR>
+  RETV Handle_comment(VISITOR* visitor, air::base::NODE_PTR node) {
+    air::base::IR2C_CTX& ctx = visitor->Context();
+    ctx << "// " << node->Comment() << "\n";
+    return RETV();
+  }
+
+  //! @brief Handle pragma for IR2C
+  template <typename RETV, typename VISITOR>
+  RETV Handle_pragma(VISITOR* visitor, air::base::NODE_PTR node) {
+    air::base::IR2C_CTX& ctx = visitor->Context();
+    ctx << "// pragma: " << node->Pragma_id() << ", " << node->Pragma_arg0()
+        << ", " << node->Pragma_arg1() << "\n";
+  }
+
+  //! @brief Handle FUNC_ENTRY for IR2C
+  template <typename RETV, typename VISITOR>
+  RETV Handle_func_entry(VISITOR* visitor, air::base::NODE_PTR node) {
+    air::base::IR2C_CTX&   ctx    = visitor->Context();
+    air::base::FUNC_SCOPE* fscope = node->Func_scope();
+    ctx.Emit_func_def(fscope);
+    ctx.Begin_func_body(node);
+    ctx.Emit_local_var(fscope);
+    visitor->template Visit<RETV>(node->Last_child());
+    ctx.End_func_body(node);
+    ctx << "\n";
+    return RETV();
+  }
+
   //! @brief Handle DO_LOOP for IR2C
   template <typename RETV, typename VISITOR>
   RETV Handle_do_loop(VISITOR* visitor, air::base::NODE_PTR node) {
     air::base::IR2C_CTX& ctx = visitor->Context();
     ctx << "for (";
-    ctx.Emit_sym(node->Iv());
+    ctx.Emit_var(node->Iv());
     ctx << " = ";
     visitor->template Visit<RETV>(node->Child(0));
     ctx << "; ";
     visitor->template Visit<RETV>(node->Child(1));
     ctx << "; ";
-    ctx.Emit_sym(node->Iv());
+    ctx.Emit_var(node->Iv());
     ctx << " = ";
     visitor->template Visit<RETV>(node->Child(2));
     ctx << ") ";
@@ -59,69 +89,159 @@ public:
     return RETV();
   }
 
-  //! @brief Handle ADD for IR2C
   template <typename RETV, typename VISITOR>
-  RETV Handle_add(VISITOR* visitor, air::base::NODE_PTR node) {
+  RETV Handle_if(VISITOR* visitor, air::base::NODE_PTR node) {
+    air::base::IR2C_CTX& ctx = visitor->Context();
+    ctx << "if (";
+    visitor->template Visit<RETV>(node->Child(0));  // condition
+    ctx << ") ";
+    visitor->template Visit<RETV>(node->Child(1));  // then block
+    if (node->Num_child() > 2 && node->Child(2) != air::base::Null_ptr) {
+      ctx << " else ";
+      visitor->template Visit<RETV>(node->Child(2));  // else block
+    }
+    return RETV();
+  }
+
+  //! @brief Handle binary operator for IR2C
+  template <typename RETV, typename VISITOR>
+  RETV Handle_binop(VISITOR* visitor, air::base::NODE_PTR node,
+                    const char* op_str) {
     air::base::IR2C_CTX& ctx    = visitor->Context();
     air::base::NODE_PTR  parent = visitor->Parent(1);
     ctx.Begin_expr(node, parent);
     visitor->template Visit<RETV>(node->Child(0));
-    ctx << " + ";
+    ctx << op_str;
     visitor->template Visit<RETV>(node->Child(1));
     ctx.End_expr(node, parent);
     return RETV();
+  }
+
+  //! @brief Handle unary operator for IR2C
+  template <typename RETV, typename VISITOR>
+  RETV Handle_unaop(VISITOR* visitor, air::base::NODE_PTR node,
+                    const char* op_str) {
+    air::base::IR2C_CTX& ctx    = visitor->Context();
+    air::base::NODE_PTR  parent = visitor->Parent(1);
+    ctx.Begin_expr(node, parent);
+    ctx << op_str;
+    visitor->template Visit<RETV>(node->Child(0));
+    ctx.End_expr(node, parent);
+    return RETV();
+  }
+
+  //! @brief Handle ADD for IR2C
+  template <typename RETV, typename VISITOR>
+  RETV Handle_add(VISITOR* visitor, air::base::NODE_PTR node) {
+    return Handle_binop<RETV>(visitor, node, " + ");
   }
 
   //! @brief Handle SUB for IR2C
   template <typename RETV, typename VISITOR>
   RETV Handle_sub(VISITOR* visitor, air::base::NODE_PTR node) {
-    air::base::IR2C_CTX& ctx    = visitor->Context();
-    air::base::NODE_PTR  parent = visitor->Parent(1);
-    ctx.Begin_expr(node, parent);
-    visitor->template Visit<RETV>(node->Child(0));
-    ctx << " - ";
-    visitor->template Visit<RETV>(node->Child(1));
-    ctx.End_expr(node, parent);
-    return RETV();
+    return Handle_binop<RETV>(visitor, node, " - ");
   }
 
   //! @brief Handle MUL for IR2C
   template <typename RETV, typename VISITOR>
   RETV Handle_mul(VISITOR* visitor, air::base::NODE_PTR node) {
-    air::base::IR2C_CTX& ctx    = visitor->Context();
-    air::base::NODE_PTR  parent = visitor->Parent(1);
-    ctx.Begin_expr(node, parent);
-    visitor->template Visit<RETV>(node->Child(0));
-    ctx << " * ";
-    visitor->template Visit<RETV>(node->Child(1));
-    ctx.End_expr(node, parent);
-    return RETV();
+    return Handle_binop<RETV>(visitor, node, " * ");
   }
 
   //! @brief Handle SHL for IR2C
   template <typename RETV, typename VISITOR>
   RETV Handle_shl(VISITOR* visitor, air::base::NODE_PTR node) {
-    air::base::IR2C_CTX& ctx    = visitor->Context();
-    air::base::NODE_PTR  parent = visitor->Parent(1);
-    ctx.Begin_expr(node, parent);
-    visitor->template Visit<RETV>(node->Child(0));
-    ctx << " << ";
-    visitor->template Visit<RETV>(node->Child(1));
-    ctx.End_expr(node, parent);
-    return RETV();
+    return Handle_binop<RETV>(visitor, node, " << ");
   }
 
   //! @brief Handle LT for IR2C
   template <typename RETV, typename VISITOR>
   RETV Handle_lt(VISITOR* visitor, air::base::NODE_PTR node) {
-    air::base::IR2C_CTX& ctx    = visitor->Context();
-    air::base::NODE_PTR  parent = visitor->Parent(1);
-    ctx.Begin_expr(node, parent);
-    visitor->template Visit<RETV>(node->Child(0));
-    ctx << " < ";
-    visitor->template Visit<RETV>(node->Child(1));
-    ctx.End_expr(node, parent);
-    return RETV();
+    return Handle_binop<RETV>(visitor, node, " < ");
+  }
+
+  //! @brief Handle LE for IR2C
+  template <typename RETV, typename VISITOR>
+  RETV Handle_le(VISITOR* visitor, air::base::NODE_PTR node) {
+    return Handle_binop<RETV>(visitor, node, " <= ");
+  }
+
+  //! @brief Handle GT for IR2C
+  template <typename RETV, typename VISITOR>
+  RETV Handle_gt(VISITOR* visitor, air::base::NODE_PTR node) {
+    return Handle_binop<RETV>(visitor, node, " > ");
+  }
+
+  //! @brief Handle GE for IR2C
+  template <typename RETV, typename VISITOR>
+  RETV Handle_ge(VISITOR* visitor, air::base::NODE_PTR node) {
+    return Handle_binop<RETV>(visitor, node, " >= ");
+  }
+
+  //! @brief Handle EQ for IR2C
+  template <typename RETV, typename VISITOR>
+  RETV Handle_eq(VISITOR* visitor, air::base::NODE_PTR node) {
+    return Handle_binop<RETV>(visitor, node, " == ");
+  }
+
+  //! @brief Handle NE for IR2C
+  template <typename RETV, typename VISITOR>
+  RETV Handle_ne(VISITOR* visitor, air::base::NODE_PTR node) {
+    return Handle_binop<RETV>(visitor, node, " != ");
+  }
+
+  //! @brief Handle BAND (bitwise AND) for IR2C
+  template <typename RETV, typename VISITOR>
+  RETV Handle_band(VISITOR* visitor, air::base::NODE_PTR node) {
+    return Handle_binop<RETV>(visitor, node, " & ");
+  }
+
+  //! @brief Handle BOR (bitwise OR) for IR2C
+  template <typename RETV, typename VISITOR>
+  RETV Handle_bor(VISITOR* visitor, air::base::NODE_PTR node) {
+    return Handle_binop<RETV>(visitor, node, " | ");
+  }
+
+  //! @brief Handle LAND (logical AND) for IR2C
+  template <typename RETV, typename VISITOR>
+  RETV Handle_land(VISITOR* visitor, air::base::NODE_PTR node) {
+    return Handle_binop<RETV>(visitor, node, " && ");
+  }
+
+  //! @brief Handle LOR (logical OR) for IR2C
+  template <typename RETV, typename VISITOR>
+  RETV Handle_lor(VISITOR* visitor, air::base::NODE_PTR node) {
+    return Handle_binop<RETV>(visitor, node, " || ");
+  }
+
+  //! @brief Handle LNOT (logical NOT) for IR2C
+  template <typename RETV, typename VISITOR>
+  RETV Handle_lnot(VISITOR* visitor, air::base::NODE_PTR node) {
+    return Handle_unaop<RETV>(visitor, node, "!");
+  }
+
+  //! @brief Handle BNOT (bitwise NOT) for IR2C
+  template <typename RETV, typename VISITOR>
+  RETV Handle_bnot(VISITOR* visitor, air::base::NODE_PTR node) {
+    return Handle_unaop<RETV>(visitor, node, "~");
+  }
+
+  //! @brief Handle MOD for IR2C
+  template <typename RETV, typename VISITOR>
+  RETV Handle_mod(VISITOR* visitor, air::base::NODE_PTR node) {
+    return Handle_binop<RETV>(visitor, node, " % ");
+  }
+
+  //! @brief Handle DIV for IR2C
+  template <typename RETV, typename VISITOR>
+  RETV Handle_div(VISITOR* visitor, air::base::NODE_PTR node) {
+    return Handle_binop<RETV>(visitor, node, " / ");
+  }
+
+  //! @brief Handle FLOORDIV for IR2C (integer division)
+  template <typename RETV, typename VISITOR>
+  RETV Handle_floordiv(VISITOR* visitor, air::base::NODE_PTR node) {
+    return Handle_binop<RETV>(visitor, node, " / ");
   }
 
   //! @brief handle LDCA for IR2C
@@ -223,19 +343,12 @@ public:
   template <typename RETV, typename VISITOR>
   RETV Handle_call(VISITOR* visitor, air::base::NODE_PTR node) {
     air::base::IR2C_CTX& ctx = visitor->Context();
-    if (node->Has_ret_var()) {
+    if (node->Has_ret_var() && node->Ret_preg_id() != air::base::Null_ptr) {
       ctx.Emit_preg_id(node->Ret_preg_id());
       ctx << " = ";
     }
     ctx.Emit_sym(node->Entry());
-    ctx << "(";
-    for (uint32_t i = 0; i < node->Num_child(); ++i) {
-      if (i > 0) {
-        ctx << ", ";
-      }
-      visitor->template Visit<RETV>(node->Child(i));
-    }
-    ctx << ")";
+    Emit_param_list<RETV>(visitor, node);
     return RETV();
   }
 
@@ -289,6 +402,41 @@ public:
   RETV Handle_ret(VISITOR* visitor, air::base::NODE_PTR node) {
     visitor->Context() << "return";
     return RETV();
+  }
+
+  //! @brief Handle INTRN_CALL for IR2C
+  template <typename RETV, typename VISITOR>
+  RETV Handle_intrn_call(VISITOR* visitor, air::base::NODE_PTR node) {
+    air::base::IR2C_CTX& ctx = visitor->Context();
+    if (node->Has_ret_var() && node->Ret_preg_id() != air::base::Null_ptr) {
+      ctx.Emit_preg_id(node->Ret_preg_id());
+      ctx << " = ";
+    }
+    ctx << node->Intrn_name();
+    Emit_param_list<RETV>(visitor, node);
+    return RETV();
+  }
+
+  //! @brief Handle INTRN_OP for IR2C
+  template <typename RETV, typename VISITOR>
+  RETV Handle_intrn_op(VISITOR* visitor, air::base::NODE_PTR node) {
+    visitor->Context() << node->Intrn_name();
+    Emit_param_list<RETV>(visitor, node);
+    return RETV();
+  }
+
+private:
+  template <typename RETV, typename VISITOR>
+  void Emit_param_list(VISITOR* visitor, air::base::NODE_PTR node) {
+    air::base::IR2C_CTX& ctx = visitor->Context();
+    ctx << "(";
+    for (uint32_t i = 0; i < node->Num_child(); ++i) {
+      if (i > 0) {
+        ctx << ", ";
+      }
+      visitor->template Visit<RETV>(node->Child(i));
+    }
+    ctx << ")";
   }
 };
 

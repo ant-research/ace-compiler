@@ -14,8 +14,8 @@
 #include "air/base/st.h"
 #include "nn/core/opcode.h"
 #include "nn/onnx2air/air_gen.h"
+#include "nn/onnx2air/onnx_pb.h"
 #include "nn/util/copy_prop.h"
-#include "onnx.pb.h"
 
 using namespace air::base;
 using namespace air::core;

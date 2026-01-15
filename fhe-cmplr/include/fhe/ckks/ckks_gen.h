@@ -35,7 +35,8 @@ public:
 
   NODE_PTR Gen_rescale(NODE_PTR child) {
     AIR_ASSERT(child->Container() == _cntr);
-    AIR_ASSERT(_lower_ctx->Is_cipher_type(child->Rtype_id()));
+    AIR_ASSERT(_lower_ctx->Is_cipher_type(child->Rtype_id()) ||
+               _lower_ctx->Is_cipher3_type(child->Rtype_id()));
     OPCODE   rescale_op(CKKS_DOMAIN::ID, CKKS_OPERATOR::RESCALE);
     NODE_PTR rescale_node =
         _cntr->New_cust_node(rescale_op, child->Rtype(), child->Spos(), 0);
@@ -43,10 +44,11 @@ public:
     return rescale_node;
   }
 
-  NODE_PTR Gen_mod_switch(NODE_PTR child) {
+  NODE_PTR Gen_modswitch(NODE_PTR child) {
     AIR_ASSERT(child->Container() == _cntr);
-    AIR_ASSERT(_lower_ctx->Is_cipher_type(child->Rtype_id()));
-    OPCODE   ms_op(CKKS_DOMAIN::ID, CKKS_OPERATOR::MOD_SWITCH);
+    AIR_ASSERT(_lower_ctx->Is_cipher_type(child->Rtype_id()) ||
+               _lower_ctx->Is_cipher3_type(child->Rtype_id()));
+    OPCODE   ms_op(CKKS_DOMAIN::ID, CKKS_OPERATOR::MODSWITCH);
     NODE_PTR ms_node =
         _cntr->New_cust_node(ms_op, child->Rtype(), child->Spos(), 0);
     ms_node->Set_child(0, child);
@@ -57,9 +59,9 @@ public:
     AIR_ASSERT(child->Container() == _cntr);
     AIR_ASSERT(_lower_ctx->Is_cipher_type(child->Rtype_id()));
     OPCODE   level_op(CKKS_DOMAIN::ID, CKKS_OPERATOR::LEVEL);
-    TYPE_PTR u32_type = _glob_scope->Prim_type(PRIMITIVE_TYPE::INT_U32);
+    TYPE_PTR level_type = _lower_ctx->Get_level_type(_glob_scope);
     NODE_PTR level_node =
-        _cntr->New_cust_node(level_op, u32_type, child->Spos(), 0);
+        _cntr->New_cust_node(level_op, level_type, child->Spos(), 0);
     level_node->Set_child(0, child);
     return level_node;
   }
@@ -75,6 +77,8 @@ public:
   }
 
   void Register_ckks_types();
+
+  CONTAINER* Cntr() { return _cntr; }
 
 private:
   // REQUIRED UNDEFINED UNWANTED methods

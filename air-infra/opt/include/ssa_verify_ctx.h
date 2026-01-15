@@ -95,18 +95,7 @@ public:
   }
 
   void Handle_mu(base::NODE_ID node) {
-    MU_NODE_PTR mu     = _ssa_cont->Mu_node(_ssa_cont->Node_mu(node));
-    SSA_SYM_ID  sym_id = mu->Sym_id();
-    // 1. VERIFY - symbol on mu is not out of range
-    AIR_ASSERT(sym_id.Value() < _stack.Size());
-    SSA_VER_ID mu_ver_id  = mu->Opnd_id();
-    SSA_SYM_ID ver_sym_id = _ssa_cont->Ver(mu_ver_id)->Sym_id();
-    // 2. VERIFY - symbol on node matches symbol in version
-    AIR_ASSERT(sym_id == ver_sym_id);
-    SSA_VER_ID ver_id = _stack.Top_ver_id(sym_id);
-    // 3. VERIFY - version of mu matchs with rename top
-    AIR_ASSERT(ver_id != base::Null_id);
-    AIR_ASSERT(ver_id == mu_ver_id);
+    AIR_ASSERT(_ssa_cont->Node_mu(node) == air::base::Null_id);
   }
 
 public:
@@ -115,7 +104,7 @@ public:
     AIR_ASSERT(SSA_CONTAINER::Has_phi(node));
 
     auto rename = [](PHI_NODE_PTR phi, const SSA_CONTAINER* cont,
-                     VERSION_STACK& stk) {
+                     VERSION_STACK& stk, base::STMT_ID def_stmt) {
       SSA_SYM_ID sym = phi->Sym_id();
       AIR_ASSERT(sym.Value() < stk.Size());
       AIR_ASSERT(phi->Result_id() != air::base::Null_id);
@@ -126,13 +115,14 @@ public:
       AIR_ASSERT(ver->Version() != SSA_VER::NO_VER);
       // VERIFY - version's def_phi matches with phi
       AIR_ASSERT(ver->Kind() == VER_DEF_KIND::PHI &&
-                 ver->Def_phi_id() == phi->Id());
+                 ver->Def_phi_id() == phi->Id() &&
+                 phi->Def_stmt_id() == def_stmt);
       stk.Push_ver(ver);
     };
 
     PHI_NODE_ID id = _ssa_cont->Node_phi(node->Id());
     PHI_LIST    list(_ssa_cont, id);
-    list.For_each(rename, _ssa_cont, _stack);
+    list.For_each(rename, _ssa_cont, _stack, node->Stmt()->Id());
   }
 
   //! @brief Rename PHI_NODE operand
@@ -165,7 +155,7 @@ public:
   void Rename_chi_list(air::base::NODE_PTR node) {
     AIR_ASSERT(SSA_CONTAINER::Has_chi(node));
     auto rename = [](CHI_NODE_PTR chi, const SSA_CONTAINER* cont,
-                     VERSION_STACK& stk, base::STMT_ID stmt) {
+                     VERSION_STACK& stk, base::STMT_ID def_stmt) {
       SSA_SYM_ID sym = chi->Sym_id();
       AIR_ASSERT(sym.Value() < stk.Size());
       // 1. verify chi opnd
@@ -185,7 +175,8 @@ public:
       AIR_ASSERT(res_ver->Version() != SSA_VER::NO_VER);
       // VERIFY - version's def_phi matches with phi
       AIR_ASSERT(res_ver->Kind() == VER_DEF_KIND::CHI &&
-                 res_ver->Def_chi_id() == chi->Id());
+                 res_ver->Def_chi_id() == chi->Id() &&
+                 chi->Def_stmt_id() == def_stmt);
       stk.Push_ver(res_ver);
 
       // 3. TODO: check define stmt of chi
@@ -196,9 +187,30 @@ public:
     list.For_each(rename, _ssa_cont, _stack, node->Stmt()->Id());
   }
 
+  //! @brief Verify MU_LIST
+  void Rename_mu_list(air::base::NODE_PTR node) {
+    AIR_ASSERT(SSA_CONTAINER::Has_mu(node));
+    auto rename = [](MU_NODE_PTR mu, const SSA_CONTAINER* cont,
+                     VERSION_STACK& stk) {
+      SSA_SYM_ID sym = mu->Sym_id();
+      AIR_ASSERT(sym.Value() < stk.Size());
+      AIR_ASSERT(mu->Opnd_id() != air::base::Null_id);
+      SSA_VER_PTR ver = cont->Ver(mu->Opnd_id());
+      // VERIFY - symbol on node matches symbol in version
+      AIR_ASSERT(ver->Sym_id() == sym);
+      // VERIFY - version matches with rename top
+      AIR_ASSERT(ver->Id() == stk.Top_ver_id(sym));
+    };
+
+    MU_NODE_ID id = _ssa_cont->Node_mu(node->Id());
+    MU_LIST    list(_ssa_cont, id);
+    list.For_each(rename, _ssa_cont, _stack);
+  }
+
 private:
   void Verify_symtab() const {
-    // TODO: verify symbols with same AIR ADDR_DATUM/PREG are on the same chain
+    // TODO: verify symbols with same AIR ADDR_DATUM/PREG are on the same
+    // chain
   }
 
 private:

@@ -9,8 +9,10 @@
 #include <limits.h>
 
 #include "fhe/core/ctx_param_ana.h"
-#include "gen_ckks_ir.h"
+#include "fhe/poly/poly2c_driver.h"
+#include "fhe/test/gen_ckks_ir.h"
 #include "gen_expect_data.h"
+#include "nn/core/attr.h"
 
 using namespace air::base;
 using namespace air::util;
@@ -29,19 +31,24 @@ int main(int argc, char** argv) {
   CKKS_IR_GEN          ir_gen(fhe_ctx);
   Create_ckks_ir(ir_gen);
 
-  CONTAINER* cntr = ir_gen.Container();
+  CONTAINER* cntr = ir_gen.Main_container();
 
-  fhe::poly::POLY_DRIVER poly_driver;
-  fhe::poly::POLY_CONFIG poly_config;
+  air::driver::DRIVER_CTX driver_ctx;
+  fhe::poly::POLY_DRIVER  poly_driver;
+  fhe::poly::POLY_CONFIG  poly_config;
+
+  poly_config.Pre_process_options();
   // inline rotate IR
-  poly_config.Set_inline_rotate(true);
+  poly_config._inline_rotate = true;
 
-  GLOB_SCOPE* glob = poly_driver.Run(poly_config, cntr->Glob_scope(), fhe_ctx);
+  GLOB_SCOPE* glob =
+      poly_driver.Run(poly_config, cntr->Glob_scope(), fhe_ctx, &driver_ctx);
 
   std::ofstream            of("test_rotate_03.inc");
   fhe::poly::POLY2C_CONFIG p2c_config;
   fhe::poly::POLY2C_DRIVER poly2c(of, fhe_ctx, p2c_config);
-  poly2c.Run(glob);
+  POLY2C_VISITOR           visitor(poly2c.Ctx());
+  poly2c.Run(glob, visitor);
   Gen_expected(of);
   std::cout << "Output: test_rotate_03.inc" << std::endl;
   return 0;
@@ -49,7 +56,7 @@ int main(int argc, char** argv) {
 
 // output = rotate(rescale(mul(input, Float_data)), 2)
 void Create_ckks_ir(CKKS_IR_GEN& ir_gen) {
-  CONTAINER* cntr = ir_gen.Container();
+  CONTAINER* cntr = ir_gen.Main_container();
   STMT_LIST  sl   = cntr->Stmt_list();
   SPOS       spos = ir_gen.Spos();
 
@@ -62,11 +69,11 @@ void Create_ckks_ir(CKKS_IR_GEN& ir_gen) {
   NODE_PTR mul_node =
       cntr->New_bin_arith(air::base::OPCODE(fhe::ckks::CKKS_DOMAIN::ID,
                                             fhe::ckks::CKKS_OPERATOR::MUL),
-                          n_input, f_node, spos);
+                          n_input->Rtype(), n_input, f_node, spos);
   NODE_PTR rescale_node =
       cntr->New_una_arith(air::base::OPCODE(fhe::ckks::CKKS_DOMAIN::ID,
                                             fhe::ckks::CKKS_OPERATOR::RESCALE),
-                          mul_node, spos);
+                          mul_node->Rtype(), mul_node, spos);
 
   int32_t  rot_idx = 2;
   NODE_PTR int2    = cntr->New_intconst(
@@ -74,8 +81,8 @@ void Create_ckks_ir(CKKS_IR_GEN& ir_gen) {
   NODE_PTR rotate_node =
       cntr->New_bin_arith(air::base::OPCODE(fhe::ckks::CKKS_DOMAIN::ID,
                                             fhe::ckks::CKKS_OPERATOR::ROTATE),
-                          rescale_node, int2, spos);
-  rotate_node->Set_attr("nums", &rot_idx, 1);
+                          rescale_node->Rtype(), rescale_node, int2, spos);
+  rotate_node->Set_attr(nn::core::ATTR::RNUM, &rot_idx, 1);
 
   STMT_PTR rotate_stmt = cntr->New_st(rotate_node, ir_gen.Output_var(), spos);
   sl.Append(rotate_stmt);

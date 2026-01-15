@@ -21,6 +21,8 @@
 #include "air/util/debug.h"
 #include "fhe/core/lower_ctx.h"
 #include "fhe/sihe/sihe_gen.h"
+#include "nn/core/attr.h"
+#include "nn/core/opcode.h"
 #include "nn/vector/null_handler.h"
 #include "nn/vector/vector_gen.h"
 
@@ -168,9 +170,20 @@ RETV VECTOR2SIHE_IMPL::Handle_add(VISITOR* visitor, NODE_PTR node) {
 
 template <typename RETV, typename VISITOR>
 RETV VECTOR2SIHE_IMPL::Handle_mul(VISITOR* visitor, NODE_PTR node) {
+  // 1. handle mul of mask
+  const uint32_t* mask_attr = node->Attr<uint32_t>(nn::core::ATTR::MASK);
+  if (mask_attr != nullptr && *mask_attr > 0) {
+    if (node->Child(0)->Opcode() == nn::core::OPC_RELU) {
+      return visitor->template Visit<RETV>(node->Child(0));
+    } else if (node->Child(1)->Opcode() == nn::core::OPC_RELU) {
+      return visitor->template Visit<RETV>(node->Child(1));
+    }
+  }
+  // 2. handle general mul
   VALIDATE_UTIL<NUM_CHILD::TWO> util(visitor->Context().Container(), false);
   OPCODE                        v_op(SIHE_DOMAIN::ID, SIHE_OPERATOR::MUL_MSG);
   util.template Initialize<RETV>(visitor, node, v_op);
+
   OPCODE   mul_op(SIHE_DOMAIN::ID, SIHE_OPERATOR::MUL);
   NODE_PTR ret = Lower_bin_arith_node(visitor->Context(), node, mul_op,
                                       util.Child(0), util.Child(1));

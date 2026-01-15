@@ -104,7 +104,7 @@ public:
                                           NN_CORE_HANDLER>;
     CP_VISITOR visitor(trav_ctx, {core_handler, nn_core_handler});
     NODE_PTR   func_body = Func_scope()->Container().Stmt_list().Block_node();
-    visitor.template Visit<air::core::HANDLER_RETV>(func_body);
+    visitor.template Visit<air::base::HANDLER_RETV>(func_body);
   }
 
 private:

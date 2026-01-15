@@ -44,6 +44,7 @@ public:
         ctx.Get_sihe_addr_datum(vec_formal->Id(), *func_scope);
     AIR_ASSERT(fhe_formal != ADDR_DATUM_PTR());
     NODE_PTR fhe_idname = cntr->New_idname(fhe_formal, idname->Spos());
+    fhe_idname->Copy_attr(idname);
     return RETV(fhe_idname);
   }
 
@@ -96,6 +97,9 @@ public:
     if (!new_ldc->Rtype()->Is_array()) {
       return new_ldc;
     }
+    if (ctx.Parent(1)->Opcode() == air::core::OPC_INTRN_OP) {
+      return new_ldc;
+    }
     AIR_ASSERT(ldc_node->Rtype()->Is_array());
     ARRAY_TYPE_PTR arr_type = ldc_node->Rtype()->Cast_to_arr();
     uint64_t       len      = arr_type->Elem_count();
@@ -122,7 +126,8 @@ public:
     // set var init with OPCODE::ZERO as ciphertext
     if (new_child->Domain() == air::core::CORE &&
         new_child->Operator() == air::core::OPCODE::ZERO) {
-      rhs_type = ctx.Lower_ctx().Get_cipher_type(&func_scope->Glob_scope());
+      rhs_type = ctx.Lower_ctx().Convert_to_cipher_type(
+          &func_scope->Glob_scope(), rhs_type);
     }
 
     // 2. gen new addr_datum in FHE domain function scope

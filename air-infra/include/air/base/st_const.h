@@ -114,7 +114,7 @@ public:
   ELEM_CONST_ITER End_elem_const() const;
 
   // CONSTANT_KIND::STR_ARRAY
-  STR_PTR Str_val() const;
+  LITERAL_PTR Str_val() const;
 
   // CONSTANT_KIND::STRUCT
   void             Add_fld_const(CONST_FIELD_PTR fld, CONST_CONSTANT_PTR val);
@@ -175,7 +175,7 @@ private:
   // For CONSTANT_KIND::FIELD_PTR
   void Set_val(CONSTANT_ID record, FIELD_ID fld);
   // For CONSTANT_KIND::STR_ARRAY
-  void Set_val(STR_ID str);
+  void Set_val(LITERAL_ID str);
   // For CONSTANT_KIND::ENTRY_FUNC_DESC
   void Set_val(ENTRY_ID entry);
   // For CONSTANT_KIND::THUNK_FUNC_DESC

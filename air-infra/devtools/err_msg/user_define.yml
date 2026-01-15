@@ -111,3 +111,33 @@ errMsgDef:
           - ERRT_DESC: NONE
           - ERRT_DESC: NONE
           - ERRT_DESC: NONE
+      - type: U_CODE
+        key: IR_Verify_Error
+        msg: "IR verification failed in function %s"
+        errLevel: ERRFATAL
+        inStrVarDef:
+          - ERRT_DESC: STRING
+          - ERRT_DESC: NONE
+          - ERRT_DESC: NONE
+          - ERRT_DESC: NONE
+          - ERRT_DESC: NONE
+      - type: U_CODE
+        key: Output_File_Open_Err
+        msg: "Output file open error"
+        errLevel: ERR
+        inStrVarDef:
+          - ERRT_DESC: STRING
+          - ERRT_DESC: NONE
+          - ERRT_DESC: NONE
+          - ERRT_DESC: NONE
+          - ERRT_DESC: NONE
+      - type: U_CODE
+        key: Output_File_Open_Err_Fatal
+        msg: "Output file open error, Exit()"
+        errLevel: ERRFATAL
+        inStrVarDef:
+          - ERRT_DESC: STRING
+          - ERRT_DESC: NONE
+          - ERRT_DESC: NONE
+          - ERRT_DESC: NONE
+          - ERRT_DESC: NONE

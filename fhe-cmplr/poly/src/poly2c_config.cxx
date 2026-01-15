@@ -17,17 +17,15 @@ namespace poly {
 static POLY2C_CONFIG Poly2c_config;
 
 static OPTION_DESC Poly2c_option[] = {
-    DECLARE_COMMON_CONFIG(poly2c, Poly2c_config),
-    {"lib", "",                      "FHE library used by generated code: ant, seal, openfhe",
-                             &Poly2c_config._prov_str,  air::util::K_STR,  0, V_EQUAL},
-    {"df",  "data_file",             "Store weight data in a seperated file",
-                             &Poly2c_config._data_file, air::util::K_STR,  0, V_EQUAL},
-    {"cte", "compile-time encoding",
-                             "Encode weight data into plaintext at compile-time",
-                             &Poly2c_config._ct_encode, air::util::K_NONE, 0, V_NONE },
+    DECLARE_COMMON_CONFIG(Poly2c_config),
+    {"lib", "",
+                     "FHE library used by generated code: ant, seal, openfhe, phantom, "
+     "hyperfhe",                                                                                &Poly2c_config._prov_str, air::util::K_STR,  0, V_EQUAL},
+    {"df",  "data_file", "Store weight data in a seperated file",
+                     &Poly2c_config._data_file,                                                                           air::util::K_STR,  0, V_EQUAL},
     {"fp",  "free_poly",
-                             "Insert Free_poly right after the last use of the poly or poly in cipher",
-                             &Poly2c_config._free_poly, air::util::K_NONE, 0, V_NONE },
+                     "Insert Free_poly right after the last use of the poly or poly in cipher",
+                     &Poly2c_config._free_poly,                                                                           air::util::K_NONE, 0, V_NONE },
 };
 
 static OPTION_DESC_HANDLE Poly2c_option_handle = {

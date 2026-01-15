@@ -8,19 +8,22 @@
 
 #include <chrono>
 
+#include "ckks/bootstrap.h"
+#include "ckks/ciphertext.h"
+#include "ckks/decryptor.h"
+#include "ckks/encoder.h"
+#include "ckks/encryptor.h"
+#include "ckks/evaluator.h"
+#include "ckks/key_gen.h"
+#include "ckks/param.h"
+#include "ckks/plaintext.h"
+#include "common/rt_api.h"
 #include "common/rt_config.h"
+#include "context/ckks_context.h"
 #include "gtest/gtest.h"
 #include "helper.h"
-#include "util/ciphertext.h"
-#include "util/ckks_bootstrap_context.h"
-#include "util/ckks_decryptor.h"
-#include "util/ckks_encoder.h"
-#include "util/ckks_encryptor.h"
-#include "util/ckks_evaluator.h"
-#include "util/ckks_key_generator.h"
-#include "util/ckks_parameters.h"
-#include "util/matrix_operations.h"
-#include "util/plaintext.h"
+#include "poly/rns_poly.h"
+#include "util/matrix_operation.h"
 #include "util/random_sample.h"
 
 using namespace std;
@@ -36,44 +39,30 @@ protected:
     size_t q0_bits  = UT_GLOB_ENV::Get_env(Q0_BITS);
     size_t sf_bits  = UT_GLOB_ENV::Get_env(SF_BITS);
     _num_iterations = UT_GLOB_ENV::Get_env(ITERATION);
-    _param          = Alloc_ckks_parameter();
-    Set_num_q_parts(_param, parts);
-    Init_ckks_parameters_with_prime_size(_param, _degree, HE_STD_NOT_SET, num_q,
-                                         q0_bits, sf_bits, 0);
-    _keygen    = Alloc_ckks_key_generator(_param, NULL, 0);
-    _encoder   = Alloc_ckks_encoder(_param);
-    _encryptor = Alloc_ckks_encryptor(_param, Get_pk(_keygen), Get_sk(_keygen));
-    _decryptor = Alloc_ckks_decryptor(_param, Get_sk(_keygen));
-    _evaluator = Alloc_ckks_evaluator(_param, _encoder, _decryptor, _keygen);
-    _relin_key = _keygen->_relin_key;
+    Set_context_params(_degree, num_q, q0_bits, sf_bits, parts);
+    Prepare_context();
 
-    cout << "Degree = " << _degree << " log(q0) = " << _param->_first_mod_size
-         << " log(scaling_factor) = " << log2(Get_param_sc(_param))
-         << " num_q = " << _param->_num_primes
-         << " num_p = " << _param->_num_p_primes
-         << " q_part = " << _param->_num_q_parts << endl;
+    // TODO: should be removed after refactor CKKS APIs
+    _param     = (CKKS_PARAMETER*)Param();
+    _keygen    = (CKKS_KEY_GENERATOR*)Keygen();
+    _evaluator = (CKKS_EVALUATOR*)Eval();
+    _encoder   = (CKKS_ENCODER*)Encoder();
+    _decryptor = (CKKS_DECRYPTOR*)Decryptor();
+    _encryptor = (CKKS_ENCRYPTOR*)Encryptor();
   }
 
-  void TearDown() override {
-    Free_ckks_evaluator(_evaluator);
-    Free_ckks_decryptor(_decryptor);
-    Free_ckks_encryptor(_encryptor);
-    Free_ckks_encoder(_encoder);
-    Free_ckks_key_generator(_keygen);
-    Free_ckks_parameters(_param);
-  }
+  void TearDown() override { Finalize_context(); }
 
   void Report_time(string title, microseconds time, size_t num_iteration);
 
   size_t              Get_degree() { return _degree; }
   size_t              Get_num_iter() { return _num_iterations; }
-  CRT_CONTEXT*        Get_crt() { return _param->_crt_context; }
+  size_t              Get_depth() { return _param->_multiply_depth; }
   CKKS_ENCODER*       Get_encoder() { return _encoder; }
   CKKS_ENCRYPTOR*     Get_encryptor() { return _encryptor; }
   CKKS_KEY_GENERATOR* Get_keygen() { return _keygen; }
   CKKS_EVALUATOR*     Get_eval() { return _evaluator; }
   CKKS_DECRYPTOR*     Get_decryptor() { return _decryptor; }
-  SWITCH_KEY*         Get_relin_key() { return _keygen->_relin_key; }
 
   microseconds Run_ksw_modup_hoist_base(VALUE_LIST* vec1, int32_t num_rots);
   microseconds Run_ksw_modup_hoist_opt(VALUE_LIST* vec1, int32_t num_rots);
@@ -99,7 +88,6 @@ private:
   CKKS_EVALUATOR*     _evaluator;
   CKKS_PARAMETER*     _param;
   CKKS_KEY_GENERATOR* _keygen;
-  SWITCH_KEY*         _relin_key;
   size_t              _num_iterations;
 };
 
@@ -141,10 +129,8 @@ microseconds TEST_KSW_OPT::Run_ksw_modup_hoist_base(VALUE_LIST* vec,
   // out_ciph += \sigma rotate(ciph, idx)
   auto start = chrono::system_clock::now();
   FOR_ALL_ELEM(rot_lists, idx) {
-    int32_t     rot_idx  = (int32_t)Get_i64_value_at(rot_lists, idx);
-    uint32_t    auto_idx = Get_precomp_auto_idx(Get_keygen(), rot_idx);
-    SWITCH_KEY* rot_key  = Get_auto_key(Get_keygen(), auto_idx);
-    Eval_fast_rotate(rot_ciph, ciph, rot_idx, rot_key, Get_eval());
+    int32_t rot_idx = (int32_t)Get_i64_value_at(rot_lists, idx);
+    Eval_fast_rotate(rot_ciph, ciph, rot_idx, Get_eval());
     Add_ciphertext(out_ciph, rot_ciph, out_ciph, Get_eval());
   }
   auto end = chrono::system_clock::now();
@@ -201,12 +187,10 @@ microseconds TEST_KSW_OPT::Run_ksw_modup_hoist_opt(VALUE_LIST* vec,
 
   // out_ciph += \sigma rotate(ciph, idx)
   auto        start       = chrono::system_clock::now();
-  VALUE_LIST* precomputed = Switch_key_precompute(Get_c1(ciph), Get_crt());
+  VALUE_LIST* precomputed = Alloc_precomp(Get_c1(ciph));
   FOR_ALL_ELEM(rot_lists, idx) {
-    int32_t     rot_idx  = (int32_t)Get_i64_value_at(rot_lists, idx);
-    uint32_t    auto_idx = Get_precomp_auto_idx(Get_keygen(), rot_idx);
-    SWITCH_KEY* rot_key  = Get_auto_key(Get_keygen(), auto_idx);
-    Fast_rotate(rot_ciph, ciph, rot_idx, rot_key, Get_eval(), precomputed);
+    int32_t rot_idx = (int32_t)Get_i64_value_at(rot_lists, idx);
+    Fast_rotate(rot_ciph, ciph, rot_idx, Get_eval(), precomputed);
     Add_ciphertext(out_ciph, rot_ciph, out_ciph, Get_eval());
   }
   auto end = chrono::system_clock::now();
@@ -223,7 +207,7 @@ microseconds TEST_KSW_OPT::Run_ksw_modup_hoist_opt(VALUE_LIST* vec,
   Decode(decoded_vec, Get_encoder(), out_plain);
   Check_complex_vector_approx_eq(expect_vec, decoded_vec, 0.005);
 
-  Free_switch_key_precomputed(precomputed);
+  Free_precomp(precomputed);
   Free_value_list(rot_lists);
   Free_value_list(decoded_vec);
   Free_value_list(expect_vec);
@@ -272,11 +256,9 @@ microseconds TEST_KSW_OPT::Run_ksw_moddown_hoist_base(int32_t hoist_cnt) {
   // out_ciph += \sigma rotate(ciph_i, idx)
   auto start = chrono::system_clock::now();
   FOR_ALL_ELEM(rot_lists, idx) {
-    int32_t     rot_idx  = (int32_t)Get_i64_value_at(rot_lists, idx);
-    uint32_t    auto_idx = Get_precomp_auto_idx(Get_keygen(), rot_idx);
-    SWITCH_KEY* rot_key  = Get_auto_key(Get_keygen(), auto_idx);
+    int32_t rot_idx = (int32_t)Get_i64_value_at(rot_lists, idx);
     Eval_fast_rotate(rot_ciph, (CIPHERTEXT*)Get_ptr_value_at(cipher_lists, idx),
-                     rot_idx, rot_key, Get_eval());
+                     rot_idx, Get_eval());
     Add_ciphertext(out_ciph, rot_ciph, out_ciph, Get_eval());
   }
 
@@ -348,29 +330,25 @@ microseconds TEST_KSW_OPT::Run_ksw_moddown_hoist_opt(int32_t hoist_cnt) {
   // out_ciph += \sigma rotate(ciph_i, idx)
   auto start = chrono::system_clock::now();
   FOR_ALL_ELEM(rot_lists, idx) {
-    int32_t     rot_idx  = (int32_t)Get_i64_value_at(rot_lists, idx);
-    uint32_t    auto_idx = Get_precomp_auto_idx(Get_keygen(), rot_idx);
-    SWITCH_KEY* rot_key  = Get_auto_key(Get_keygen(), auto_idx);
-    CIPHERTEXT* ciph_i   = (CIPHERTEXT*)Get_ptr_value_at(cipher_lists, idx);
-
-    VALUE_LIST* precomputed = Switch_key_precompute(Get_c1(ciph_i), Get_crt());
-    Fast_rotate_ext(rot_ciph, ciph_i, rot_idx, rot_key, _evaluator, precomputed,
-                    true);
+    int32_t     rot_idx     = (int32_t)Get_i64_value_at(rot_lists, idx);
+    CIPHERTEXT* ciph_i      = (CIPHERTEXT*)Get_ptr_value_at(cipher_lists, idx);
+    VALUE_LIST* precomputed = Alloc_precomp(Get_c1(ciph_i));
+    Fast_rotate_ext(rot_ciph, ciph_i, rot_idx, _evaluator, precomputed, true);
     if (idx == 0) {
       Init_ciphertext_from_ciph(sum_ciph, rot_ciph, rot_ciph->_scaling_factor,
                                 rot_ciph->_sf_degree);
     }
     // add at QP modulus
     Add_ciphertext(sum_ciph, sum_ciph, rot_ciph, Get_eval());
-    Free_switch_key_precomputed(precomputed);
+    Free_precomp(precomputed);
   }
 
   // moddown hoisted
   CIPHERTEXT* ciph = (CIPHERTEXT*)Get_ptr_value_at(cipher_lists, 0);
   Init_ciphertext_from_ciph(out_ciph, ciph, ciph->_scaling_factor,
                             ciph->_sf_degree);
-  Reduce_rns_base(Get_c0(out_ciph), Get_c0(sum_ciph), Get_crt());
-  Reduce_rns_base(Get_c1(out_ciph), Get_c1(sum_ciph), Get_crt());
+  Mod_down(Get_c0(out_ciph), Get_c0(sum_ciph));
+  Mod_down(Get_c1(out_ciph), Get_c1(sum_ciph));
 
   auto end = chrono::system_clock::now();
 
@@ -425,7 +403,7 @@ microseconds TEST_KSW_OPT::Run_ksw_moddown_rescale_base(VALUE_LIST* vec1,
   Encrypt_msg(ciph2, Get_encryptor(), plain2);
 
   auto start = chrono::system_clock::now();
-  Mul_ciphertext(mul_ciph, ciph1, ciph2, Get_relin_key(), Get_eval());
+  Mul_ciphertext(mul_ciph, ciph1, ciph2, Get_eval());
   Rescale_ciphertext(out_ciph, mul_ciph, Get_eval());
   auto end = chrono::system_clock::now();
 
@@ -464,28 +442,28 @@ microseconds TEST_KSW_OPT::Run_ksw_moddown_rescale_opt(VALUE_LIST* vec1,
   VALUE_LIST*  decoded_vec     = Alloc_value_list(DCMPLX_TYPE, len);
   VALUE_LIST*  expect_vec      = Alloc_value_list(DCMPLX_TYPE, len);
 
-  ENCODE(plain1, Get_encoder(), vec1);
-  ENCODE(plain2, Get_encoder(), vec2);
+  ENCODE_AT_LEVEL(plain1, Get_encoder(), vec1, Get_depth());
+  ENCODE_AT_LEVEL(plain2, Get_encoder(), vec2, Get_depth());
   Encrypt_msg(ciph1, Get_encryptor(), plain1);
   Encrypt_msg(ciph2, Get_encryptor(), plain2);
 
   auto start = chrono::system_clock::now();
   Mul_ciphertext3(mul_ciph3, ciph1, ciph2, Get_eval());
-  Relinearize_ciph3_ext(mul_ciph, mul_ciph3, Get_relin_key(), Get_eval());
+  Relinearize_ciph3_ext(mul_ciph, mul_ciph3, Get_eval());
 
   // Mod_down
-  Conv_ntt2poly_inplace(Get_c0(mul_ciph), Get_crt());
-  Conv_ntt2poly_inplace(Get_c1(mul_ciph), Get_crt());
+  Conv_ntt2poly_inplace(Get_c0(mul_ciph));
+  Conv_ntt2poly_inplace(Get_c1(mul_ciph));
   Init_ciphertext_from_ciph(mul_ciph_reduce, ciph1,
                             Get_ciph3_sfactor(mul_ciph3),
                             Get_ciph3_sf_degree(mul_ciph3));
-  Reduce_rns_base(Get_c0(mul_ciph_reduce), Get_c0(mul_ciph), Get_crt());
-  Reduce_rns_base(Get_c1(mul_ciph_reduce), Get_c1(mul_ciph), Get_crt());
+  Mod_down(Get_c0(mul_ciph_reduce), Get_c0(mul_ciph));
+  Mod_down(Get_c1(mul_ciph_reduce), Get_c1(mul_ciph));
 
   // Rescale
   Rescale_ciphertext(out_ciph, mul_ciph_reduce, Get_eval());
-  Conv_poly2ntt_inplace(Get_c0(out_ciph), Get_crt());
-  Conv_poly2ntt_inplace(Get_c1(out_ciph), Get_crt());
+  Conv_poly2ntt_inplace(Get_c0(out_ciph));
+  Conv_poly2ntt_inplace(Get_c1(out_ciph));
   auto end = chrono::system_clock::now();
 
   for (size_t i = 0; i < len; i++) {
@@ -530,10 +508,6 @@ microseconds TEST_KSW_OPT::Run_ksw_moddown_rescale_modup_base(VALUE_LIST* vec1,
   // create rotation keys
   Insert_rot_map(Get_keygen(), rot1);
   Insert_rot_map(Get_keygen(), rot2);
-  uint32_t    auto_idx1 = Get_precomp_auto_idx(Get_keygen(), rot1);
-  uint32_t    auto_idx2 = Get_precomp_auto_idx(Get_keygen(), rot2);
-  SWITCH_KEY* rot_key1  = Get_auto_key(Get_keygen(), auto_idx1);
-  SWITCH_KEY* rot_key2  = Get_auto_key(Get_keygen(), auto_idx2);
 
   // encode & encrypt msg
   ENCODE(plain1, Get_encoder(), vec1);
@@ -542,10 +516,10 @@ microseconds TEST_KSW_OPT::Run_ksw_moddown_rescale_modup_base(VALUE_LIST* vec1,
 
   // Rotate(Rescale(Rotate(vec1, rot1) * plain2), rot2)
   auto start = chrono::system_clock::now();
-  Eval_fast_rotate(rot_ciph, ciph, rot1, rot_key1, Get_eval());
+  Eval_fast_rotate(rot_ciph, ciph, rot1, Get_eval());
   Mul_plaintext(mul_ciph, rot_ciph, plain2, Get_eval());
   Rescale_ciphertext(rescale_ciph, mul_ciph, Get_eval());
-  Eval_fast_rotate(out_ciph, rescale_ciph, rot2, rot_key2, Get_eval());
+  Eval_fast_rotate(out_ciph, rescale_ciph, rot2, Get_eval());
   auto end = chrono::system_clock::now();
 
   // check results
@@ -597,36 +571,32 @@ microseconds TEST_KSW_OPT::Run_ksw_moddown_rescale_modup_opt(VALUE_LIST* vec1,
   // create rotation keys
   Insert_rot_map(Get_keygen(), rot1);
   Insert_rot_map(Get_keygen(), rot2);
-  uint32_t    auto_idx1 = Get_precomp_auto_idx(Get_keygen(), rot1);
-  uint32_t    auto_idx2 = Get_precomp_auto_idx(Get_keygen(), rot2);
-  SWITCH_KEY* rot_key1  = Get_auto_key(Get_keygen(), auto_idx1);
-  SWITCH_KEY* rot_key2  = Get_auto_key(Get_keygen(), auto_idx2);
 
   // encode & encrypt msg
   ENCODE(plain1, Get_encoder(), vec1);
   Encrypt_msg(ciph, Get_encryptor(), plain1);
   Encode_ext_at_level(plain2, Get_encoder(), vec2, Get_ciph_level(ciph),
-                      Get_ciph_slots(ciph), Get_crt_num_p(Get_crt()));
+                      Get_ciph_slots(ciph), Get_p_cnt());
 
   // Rotate(Rescale(Rotate(vec1, rot1) * plain2), rot2)
   auto        start       = chrono::system_clock::now();
-  VALUE_LIST* precomputed = Switch_key_precompute(Get_c1(ciph), Get_crt());
-  Fast_rotate_ext(rot_ciph, ciph, rot1, rot_key1, Get_eval(), precomputed,
-                  true);
+  VALUE_LIST* precomputed = Alloc_precomp(Get_c1(ciph));
+  Fast_rotate_ext(rot_ciph, ciph, rot1, Get_eval(), precomputed, true);
   Mul_plaintext(mul_ciph, rot_ciph, plain2, Get_eval());
 
   // Mod_down
-  // Conv_ntt2poly_inplace(Get_c0(mul_ciph), Get_crt());
-  Conv_ntt2poly_inplace(Get_c1(mul_ciph), Get_crt());
+  // Conv_ntt2poly_inplace(Get_c0(mul_ciph));
+  Conv_ntt2poly_inplace(Get_c1(mul_ciph));
   Init_ciphertext_from_ciph(mul_ciph_reduce, ciph, Get_ciph_sfactor(mul_ciph),
                             Get_ciph_sf_degree(mul_ciph));
-  Reduce_rns_base(Get_c0(mul_ciph_reduce), Get_c0(mul_ciph), Get_crt());
-  Reduce_rns_base(Get_c1(mul_ciph_reduce), Get_c1(mul_ciph), Get_crt());
+  Mod_down(Get_c0(mul_ciph_reduce), Get_c0(mul_ciph));
+  Mod_down(Get_c1(mul_ciph_reduce), Get_c1(mul_ciph));
   Rescale_ciphertext(rescale_ciph, mul_ciph_reduce, Get_eval());
+  // conv rescal_ciph back to ntt form
+  Conv_poly2ntt_inplace(Get_c1(rescale_ciph));
 
-  VALUE_LIST* precomputed2 =
-      Switch_key_precompute(Get_c1(rescale_ciph), Get_crt());
-  Fast_rotate(out_ciph, rescale_ciph, rot2, rot_key2, Get_eval(), precomputed2);
+  VALUE_LIST* precomputed2 = Alloc_precomp(Get_c1(rescale_ciph));
+  Fast_rotate(out_ciph, rescale_ciph, rot2, Get_eval(), precomputed2);
   auto end = chrono::system_clock::now();
 
   // check results
@@ -643,8 +613,8 @@ microseconds TEST_KSW_OPT::Run_ksw_moddown_rescale_modup_opt(VALUE_LIST* vec1,
   Decode(decoded_vec, Get_encoder(), out_plain);
   Check_complex_vector_approx_eq(expect_vec, decoded_vec, 0.005);
 
-  Free_switch_key_precomputed(precomputed);
-  Free_switch_key_precomputed(precomputed2);
+  Free_precomp(precomputed);
+  Free_precomp(precomputed2);
   Free_value_list(decoded_vec);
   Free_value_list(expect_vec);
   Free_value_list(vec3);
@@ -678,6 +648,7 @@ TEST_F(TEST_KSW_OPT, Run_ksw_modup_hoist_base) {
 
     Report_time(title, rot_time, Get_num_iter());
   }
+  Free_value_list(msg);
 }
 
 TEST_F(TEST_KSW_OPT, Run_ksw_modup_hoist_opt) {
@@ -695,6 +666,7 @@ TEST_F(TEST_KSW_OPT, Run_ksw_modup_hoist_opt) {
 
     Report_time(title, rot_time, Get_num_iter());
   }
+  Free_value_list(msg);
 }
 
 TEST_F(TEST_KSW_OPT, Run_ksw_moddown_hoist_base) {
@@ -731,6 +703,8 @@ TEST_F(TEST_KSW_OPT, Run_ksw_moddown_rescale_base) {
 
   microseconds tot_time = Run_ksw_moddown_rescale_base(vec1, vec2);
   Report_time(prefix, tot_time, Get_num_iter());
+  Free_value_list(vec1);
+  Free_value_list(vec2);
 }
 
 TEST_F(TEST_KSW_OPT, Run_ksw_moddown_rescale_opt) {
@@ -743,6 +717,8 @@ TEST_F(TEST_KSW_OPT, Run_ksw_moddown_rescale_opt) {
 
   microseconds tot_time = Run_ksw_moddown_rescale_opt(vec1, vec2);
   Report_time(prefix, tot_time, Get_num_iter());
+  Free_value_list(vec1);
+  Free_value_list(vec2);
 }
 
 TEST_F(TEST_KSW_OPT, Run_ksw_moddown_rescale_modup_base) {
@@ -755,6 +731,8 @@ TEST_F(TEST_KSW_OPT, Run_ksw_moddown_rescale_modup_base) {
 
   microseconds tot_time = Run_ksw_moddown_rescale_modup_base(vec1, vec2, 2, 3);
   Report_time(prefix, tot_time, Get_num_iter());
+  Free_value_list(vec1);
+  Free_value_list(vec2);
 }
 
 TEST_F(TEST_KSW_OPT, Run_ksw_moddown_rescale_modup_opt) {
@@ -767,4 +745,6 @@ TEST_F(TEST_KSW_OPT, Run_ksw_moddown_rescale_modup_opt) {
 
   microseconds tot_time = Run_ksw_moddown_rescale_modup_opt(vec1, vec2, 2, 3);
   Report_time(prefix, tot_time, Get_num_iter());
+  Free_value_list(vec1);
+  Free_value_list(vec2);
 }

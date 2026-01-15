@@ -10,7 +10,7 @@
 #define AIR_FUNC_H
 
 #include "nn/onnx2air/onnx2air_decl.h"
-#include "onnx.pb.h"
+#include "nn/onnx2air/onnx_pb.h"
 
 namespace nn {
 namespace onnx2air {

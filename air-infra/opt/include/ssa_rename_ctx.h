@@ -71,12 +71,8 @@ public:
   }
 
   void Handle_mu(base::NODE_ID node) {
-    MU_NODE_PTR mu     = _ssa_cont->Mu_node(_ssa_cont->Node_mu(node));
-    SSA_SYM_ID  sym_id = mu->Sym_id();
-    AIR_ASSERT(sym_id.Value() < _stack.Size());
-    SSA_VER_ID ver_id = _stack.Top_ver_id(sym_id);
-    AIR_ASSERT(ver_id != base::Null_id);
-    mu->Set_opnd(ver_id);
+    // there should be no MU_NODE on ild
+    AIR_ASSERT(_ssa_cont->Node_mu(node) == air::base::Null_id);
   }
 
 public:
@@ -84,20 +80,22 @@ public:
   void Rename_phi_list(air::base::NODE_PTR node) {
     AIR_ASSERT(SSA_CONTAINER::Has_phi(node));
 
-    auto rename = [](PHI_NODE_PTR phi, SSA_CONTAINER* cont,
-                     VERSION_STACK& stk) {
+    auto rename = [](PHI_NODE_PTR phi, SSA_CONTAINER* cont, VERSION_STACK& stk,
+                     base::STMT_ID def_stmt) {
       SSA_SYM_ID sym = phi->Sym_id();
       AIR_ASSERT(sym.Value() < stk.Size());
       SSA_VER_PTR ver = cont->New_ver(VER_DEF_KIND::PHI, sym);
       ver->Set_version(stk.Next_version(sym));
       ver->Set_def_phi(phi->Id());
+      phi->Set_def_stmt(def_stmt);
       phi->Set_result(ver->Id());
       stk.Push_ver(ver);
     };
 
-    PHI_NODE_ID id = _ssa_cont->Node_phi(node->Id());
-    PHI_LIST    list(_ssa_cont, id);
-    list.For_each(rename, _ssa_cont, _stack);
+    base::STMT_ID def_stmt = node->Stmt()->Id();
+    PHI_NODE_ID   id       = _ssa_cont->Node_phi(node->Id());
+    PHI_LIST      list(_ssa_cont, id);
+    list.For_each(rename, _ssa_cont, _stack, def_stmt);
   }
 
   //! @brief Rename PHI_NODE operand
@@ -123,8 +121,8 @@ public:
   //! @brief Rename CHI_NODE list
   void Rename_chi_list(air::base::NODE_PTR node) {
     AIR_ASSERT(SSA_CONTAINER::Has_chi(node));
-    auto rename = [](CHI_NODE_PTR chi, SSA_CONTAINER* cont,
-                     VERSION_STACK& stk) {
+    auto rename = [](CHI_NODE_PTR chi, SSA_CONTAINER* cont, VERSION_STACK& stk,
+                     base::STMT_ID def_stmt) {
       SSA_SYM_ID sym = chi->Sym_id();
       AIR_ASSERT(sym.Value() < stk.Size());
       // 1. rename opnd
@@ -136,12 +134,30 @@ public:
       SSA_VER_PTR ver = cont->New_ver(VER_DEF_KIND::CHI, sym);
       ver->Set_version(stk.Next_version(sym));
       ver->Set_def_chi(chi->Id());
+      chi->Set_def_stmt(def_stmt);
       chi->Set_result(ver->Id());
       stk.Push_ver(ver);
     };
 
-    CHI_NODE_ID chi_id = _ssa_cont->Node_chi(node->Id());
-    CHI_LIST    list(_ssa_cont, chi_id);
+    base::STMT_ID def_stmt = node->Stmt()->Id();
+    CHI_NODE_ID   chi_id   = _ssa_cont->Node_chi(node->Id());
+    CHI_LIST      list(_ssa_cont, chi_id);
+    list.For_each(rename, _ssa_cont, _stack, def_stmt);
+  }
+
+  //! @brief Rename MU_NODE list
+  void Rename_mu_list(air::base::NODE_PTR node) {
+    AIR_ASSERT(SSA_CONTAINER::Has_mu(node));
+    auto rename = [](MU_NODE_PTR mu, SSA_CONTAINER* cont, VERSION_STACK& stk) {
+      SSA_SYM_ID sym = mu->Sym_id();
+      AIR_ASSERT(sym.Value() < stk.Size());
+      SSA_VER_ID opnd_ver = stk.Top_ver_id(sym);
+      AIR_ASSERT(opnd_ver != air::base::Null_id);
+      mu->Set_opnd(opnd_ver);
+    };
+
+    MU_NODE_ID mu_id = _ssa_cont->Node_mu(node->Id());
+    MU_LIST    list(_ssa_cont, mu_id);
     list.For_each(rename, _ssa_cont, _stack);
   }
 

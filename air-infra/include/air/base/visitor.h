@@ -54,6 +54,11 @@ public:
   //! @param nth index of parent node. 0 is current node. 1 is parent node, ...
   NODE_PTR Parent(size_t nth) const { return _ctx.Parent(nth); }
 
+  //! @brief Get nth parent loop.
+  //! @param nth index of parent loop. 0 is nearest loop. 1 is parent loop of
+  //! nesrest loop, ...
+  NODE_PTR Parent_loop(size_t nth) const { return _ctx.Parent_loop(nth); }
+
   //! @brief Get parent stmt
   STMT_PTR Parent_stmt() const { return _ctx.Parent_stmt(); }
 

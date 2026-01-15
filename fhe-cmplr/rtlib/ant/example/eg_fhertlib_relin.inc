@@ -155,21 +155,23 @@ bool Main_graph() {
   return true;
 }
 CKKS_PARAMS* Get_context_params() {
-  static CKKS_PARAMS parm = {LIB_ANT, 16, 0, 1, 33, 30, 0, 0, 0, {}};
+  static CKKS_PARAMS parm = {LIB_ANT, 16, 0, 1, 0, 33, 30, 0, 0, 0, {}};
   return &parm;
 }
 
 DATA_SCHEME* Get_encode_scheme(int idx) {
+  static MAP_DESC desc_0[] = {{NORMAL, 0, 0, 0, 0}};
   static DATA_SCHEME scheme_0 = {
-    "input", {0, 0, 0, 0}, 1, {NORMAL, 0, 0, 0, 0}
+    "input", {0, 0, 0, 0}, 1, desc_0
   };
   static DATA_SCHEME* scheme[] = { &scheme_0 };
   return scheme[idx];
 }
 
 DATA_SCHEME* Get_decode_scheme(int idx) {
+  static MAP_DESC desc[] = {{NORMAL, 0, 0, 0, 0}};
   static DATA_SCHEME scheme = {
-    "output", {0, 0, 0, 0}, 1, {NORMAL, 0, 0, 0, 0}
+    "output", {0, 0, 0, 0}, 1, desc
   };
   return &scheme;
 }

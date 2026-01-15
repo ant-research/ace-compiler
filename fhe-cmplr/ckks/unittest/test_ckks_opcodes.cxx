@@ -14,6 +14,7 @@ using namespace air::base;
 using namespace fhe::ckks;
 
 TEST(CKKS, ckks_opcode) {
+  META_INFO::Remove_all();
   // check register process
   bool reg_res = Register_ckks_domain();
   ASSERT_TRUE(reg_res);
@@ -29,7 +30,7 @@ TEST(CKKS, ckks_opcode) {
   op_is_valid = META_INFO::Valid_operator(CKKS_DOMAIN::ID, CKKS_OPERATOR::MUL);
   ASSERT_TRUE(op_is_valid);
 
-#define CKKS_OPCODE(NAME, name, category, kid_num, fld_num, property)  \
+#define CKKS_OPCODE(NAME, name, kid_num, fld_num, property)            \
   op_is_valid =                                                        \
       META_INFO::Valid_operator(CKKS_DOMAIN::ID, CKKS_OPERATOR::NAME); \
   ASSERT_TRUE(op_is_valid);

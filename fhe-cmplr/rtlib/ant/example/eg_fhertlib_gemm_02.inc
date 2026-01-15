@@ -324,7 +324,7 @@ bool Main_graph() {
       Free_poly(_pgen_tmp_poly);
       Free_poly(_pgen_decomp);
     }
-    Encode_plain_from_float(&_pgen_tmp_1, Slice(_cst_2, index_gemm_n1, 51), 51,
+    Encode_float(&_pgen_tmp_1, Slice(_cst_2, index_gemm_n1, 51), 51,
                             Sc_degree(&_ckks_gen_tmp_24),
                             Level(&_ckks_gen_tmp_24));
     Init_ciph_up_scale_plain(&_pgen_tmp_2, &_ckks_gen_tmp_24, &_pgen_tmp_1);
@@ -474,7 +474,7 @@ bool Main_graph() {
       }
     }
   }
-  Encode_plain_from_float(&_pgen_tmp_4, _cst_1, 3, Sc_degree(&tmp_result_n1),
+  Encode_float(&_pgen_tmp_4, _cst_1, 3, Sc_degree(&tmp_result_n1),
                           Level(&tmp_result_n1));
   Init_ciph_same_scale_plain(&tmp_result_n1, &tmp_result_n1, &_pgen_tmp_4);
   {
@@ -499,22 +499,24 @@ bool Main_graph() {
 }
 CKKS_PARAMS* Get_context_params() {
   static CKKS_PARAMS parm = {
-      LIB_ANT, 512, 0, 1, 33, 30, 0, 0, 9, {-51, 0, 1, 2, 3, 6, 12, 24, 48}
+      LIB_ANT, 512, 0, 1, 0, 33, 30, 0, 0, 9, {-51, 0, 1, 2, 3, 6, 12, 24, 48}
   };
   return &parm;
 }
 
 DATA_SCHEME* Get_encode_scheme(int idx) {
+  static MAP_DESC desc_0[] = {{NORMAL, 0, 0, 0, 0}};
   static DATA_SCHEME scheme_0 = {
-    "input", {0, 0, 0, 0}, 1, {NORMAL, 0, 0, 0, 0}
+    "input", {0, 0, 0, 0}, 1, desc_0
   };
   static DATA_SCHEME* scheme[] = { &scheme_0 };
   return scheme[idx];
 }
 
 DATA_SCHEME* Get_decode_scheme(int idx) {
+  static MAP_DESC desc[] = {{NORMAL, 0, 0, 0, 0}};
   static DATA_SCHEME scheme = {
-    "output", {0, 0, 0, 0}, 1, {NORMAL, 0, 0, 0, 0}
+    "output", {0, 0, 0, 0}, 1, desc
   };
   return &scheme;
 }

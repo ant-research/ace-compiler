@@ -11,7 +11,7 @@
 
 #include "nn/onnx2air/name_map.h"
 #include "nn/onnx2air/onnx2air_decl.h"
-#include "onnx.pb.h"
+#include "nn/onnx2air/onnx_pb.h"
 
 namespace nn {
 namespace onnx2air {

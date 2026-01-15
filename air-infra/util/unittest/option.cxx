@@ -23,7 +23,8 @@ struct CONFIG_OPTION {
         _analysis_enable(false),
         _show(false),
         _trace(false),
-        _skip_before(0) {}
+        _skip_before(0),
+        _opt_level(0) {}
   ~CONFIG_OPTION(void) {}
 
   std::string_view Alias(void) { return _alias; }
@@ -31,6 +32,7 @@ struct CONFIG_OPTION {
   bool             Show(void) { return _show; }
   bool             Trace(void) { return _trace; }
   int64_t          Skip_before(void) { return _skip_before; }
+  uint64_t         Opt_level(void) { return _opt_level; }
   std::string_view Output_file(void) { return _o_file; }
   std::string_view Include_file(void) { return _include_file; }
 
@@ -39,6 +41,7 @@ struct CONFIG_OPTION {
   bool        _show;
   bool        _trace;
   int64_t     _skip_before;
+  uint64_t    _opt_level;
   std::string _o_file;
   std::string _include_file;
 };  // struct CONFIG_OPTION
@@ -60,6 +63,12 @@ protected:
         {"show",        "s", "Show the progress of nn2a", &_config_option._show,
          air::util::K_NONE,                                                                                  0, air::util::V_NONE      },
         {"trace",       "t", "Enable trace in nn2a",      &_config_option._trace,
+         air::util::K_NONE,                                                                                  0, air::util::V_NONE      },
+        {"O0",          "",  "optimization level 0",      &_config_option._opt_level,
+         air::util::K_NONE,                                                                                  0, air::util::V_NONE      },
+        {"O1",          "",  "optimization level 1",      &_config_option._opt_level,
+         air::util::K_NONE,                                                                                  0, air::util::V_NONE      },
+        {"O2",          "",  "optimization level 2",      &_config_option._opt_level,
          air::util::K_NONE,                                                                                  0, air::util::V_NONE      },
         {"skip_before", "",  "Skip item before given id",
          &_config_option._skip_before,                                                   air::util::K_INT64, 0,
@@ -281,6 +290,29 @@ TEST_F(OPTION_TEST, ParseMixKindGroupOption) {
             R_CODE::NORMAL);
   EXPECT_TRUE(_config_option.Analysis_enable());
   EXPECT_EQ(_config_option.Alias(), "on");
+}
+
+TEST_F(OPTION_TEST, ParseOptlevelOption) {
+  const char* argv[] = {"./compiler", "-O2"};
+  int         argc   = sizeof(argv) / sizeof(argv[0]);
+  EXPECT_EQ(_option_mgr.Parse_options(argc, const_cast<char**>(argv)),
+            R_CODE::NORMAL);
+  EXPECT_EQ(_config_option.Opt_level(), 2);
+}
+
+TEST_F(OPTION_TEST, ParseOptlevelOptionLastIsValid) {
+  const char* argv[] = {"./compiler", "-O2", "-O1"};
+  int         argc   = sizeof(argv) / sizeof(argv[0]);
+  EXPECT_EQ(_option_mgr.Parse_options(argc, const_cast<char**>(argv)),
+            R_CODE::NORMAL);
+  EXPECT_EQ(_config_option.Opt_level(), 1);
+}
+
+TEST_F(OPTION_TEST, ParseOptLevelOptionWithInvalidValue) {
+  const char* argv[] = {"./compiler", "-Os"};
+  int         argc   = sizeof(argv) / sizeof(argv[0]);
+  EXPECT_EXIT(_option_mgr.Parse_options(argc, const_cast<char**>(argv)),
+              testing::ExitedWithCode(1), "Incorrect option");
 }
 
 }  // namespace

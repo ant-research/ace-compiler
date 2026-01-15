@@ -1,81 +1,62 @@
-file (GLOB_RECURSE FHECKKS_SRC_FILES CONFIGURE_DEPENDS src/*.cxx)
+#=============================================================================
+#
+# Copyright (c) Ant Group Co., Ltd
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+#
+#=============================================================================
 
-set (FHECKKS_INCLUDE_DIRS "")
-list (APPEND FHECKKS_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include")
-list (APPEND FHECKKS_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/include")
-include_directories (${FHECKKS_INCLUDE_DIRS})
-set (FHECKKS_INCLUDE_DIRS "${FHECKKS_INCLUDE_DIRS}" CACHE INTERNAL "")
+file(GLOB_RECURSE FHECKKS_SRC_FILES CONFIGURE_DEPENDS src/*.cxx)
 
-add_library (fheckks_obj OBJECT ${FHECKKS_SRC_FILES})
+set(FHECKKS_INCLUDE_DIRS "")
+list(APPEND FHECKKS_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include")
+list(APPEND FHECKKS_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/include")
+include_directories(${FHECKKS_INCLUDE_DIRS})
+set(FHECKKS_INCLUDE_DIRS "${FHECKKS_INCLUDE_DIRS}" CACHE INTERNAL "")
 
-set_property (TARGET fheckks_obj PROPERTY POSITION_INDEPENDENT_CODE 1)
+add_library(fheckks_obj OBJECT ${FHECKKS_SRC_FILES})
+add_dependencies(fheckks_obj fhe_depend)
+set_property(TARGET fheckks_obj PROPERTY POSITION_INDEPENDENT_CODE 1)
 
-if (BUILD_STATIC)
-	add_library (FHEckks STATIC $<TARGET_OBJECTS:fheckks_obj>)
-	set_property (TARGET FHEckks PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-	install (TARGETS FHEckks EXPORT FHETargets DESTINATION lib)
-endif ()
+# support ckks python dsl
+find_nn_extralib(EXTRA_LIBS)
 
-add_custom_target (fheckks_all)
-
-if (BUILD_STATIC)
-	set (FHECKKS_LIBS ${FHECKKS_LIBS} PUBLIC FHEckks)
-	add_dependencies (fheckks_all FHEckks)
+if(BUILD_STATIC)
+  add_library(FHEckks STATIC $<TARGET_OBJECTS:fheckks_obj>)
+  set_property(TARGET FHEckks PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+  install(TARGETS FHEckks EXPORT FHETargets DESTINATION lib)
 endif()
 
-set (FHECKKS_UTAPP "")
-if (BUILD_UNITTEST)
-	file (GLOB FHECKKS_UNITTEST_SRC_FILES CONFIGURE_DEPENDS unittest/*.cxx)
-	set (FHECKKS_UNITTEST_SRC_FILES ${FHECKKS_UNITTEST_SRC_FILES})
-	add_executable (ut_fheckks ${FHECKKS_UNITTEST_SRC_FILES} ${UNITTESTMAIN})
-	set_property (TARGET ut_fheckks PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/unittest)
-	target_link_libraries (ut_fheckks ${FHE_UTLIBS})
-	set (FHECKKS_UTAPP ${FHECKKS_UTAPP} ut_fheckks)
+# generate sihe options
+set(CKKS_OPTION_OUTPUT_DIR "${CMAKE_BINARY_DIR}/include/fhe/ckks")
+set(CKKS_OPTION_INPUT_DIR "config")
+gen_option(${PYTHON_EXECUTABLE} ckks_option ${CKKS_OPTION_OUTPUT_DIR} ${CKKS_OPTION_INPUT_DIR})
+add_dependencies(fhe_depend ckks_option)
 
-	add_dependencies (fheckks_all ut_fheckks)
+# generate domain opcodes for CKKS
+# the target `ckks_od` will be created
+gen_domain_od(
+  "$ENV{PACKAGE_BASE_DIR}/irgen/od/odgen.py"
+  "${PROJECT_SOURCE_DIR}/ckks/od/opcode_def.yml"
+  "${CMAKE_BINARY_DIR}/include/fhe/ckks"
+  ckks
+)
+add_dependencies(fhe_depend ckks_od)
 
-	add_custom_command (OUTPUT run_fheckks_utapp WORKING_DIRECTORY ${CMAKE_BINARY_DIR} COMMAND ${CMAKE_BINARY_DIR}/unittest/ut_fheckks)
-	add_custom_target (test_fheckks_ut DEPENDS ut_fheckks run_fheckks_utapp)
-	add_test( NAME ut_fheckks COMMAND ${CMAKE_BINARY_DIR}/unittest/ut_fheckks)
+add_custom_target(fheckks_all)
+
+if(BUILD_STATIC)
+  set(FHECKKS_LIBS ${FHECKKS_LIBS} PUBLIC FHEckks)
+  add_dependencies(fheckks_all FHEckks)
 endif()
 
-set (FHECKKS_TESTAPP "")
-if (FHE_BUILD_TEST)
-	file (GLOB FHECKKS_TESTAPP_SRC_FILES CONFIGURE_DEPENDS test/*.cxx)
-	foreach (app ${FHECKKS_TESTAPP_SRC_FILES})
-		get_filename_component (exe ${app} NAME_WE)
-		add_executable (${exe} ${app})
-		set_property (TARGET ${exe} PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test)
-		set (FHECKKS_TESTAPP ${FHECKKS_TESTAPP} ${exe})
-		target_link_libraries (${exe} ${FHE_LIBS})
-		add_test( NAME ${exe} COMMAND ${CMAKE_BINARY_DIR}/test/${exe})
-	endforeach ()
-
-	add_custom_target (fheckks_test)
-	add_dependencies (fheckks_test ${FHECKKS_TESTAPP})
-	add_dependencies (fheckks_all fheckks_test)
+if(FHE_BUILD_TEST)
+  build_app_test(FHE_INSTALL_APP "${FHE_LIBS}")
 endif()
 
-set (FHECKKS_EGAPP "")
-if (FHE_BUILD_EXAMPLE)
-	file (GLOB FHECKKS_EXAMPLE_SRC_FILES CONFIGURE_DEPENDS example/*.cxx)
-	foreach (app ${FHECKKS_EXAMPLE_SRC_FILES})
-		get_filename_component (exe ${app} NAME_WE)
-		add_executable (${exe} ${app})
-		set_property (TARGET ${exe} PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/example)
-		set (FHECKKS_EGAPP ${FHECKKS_EGAPP} ${exe})
-		target_link_libraries (${exe} ${FHE_LIBS})
-		add_test( NAME ${exe} COMMAND ${CMAKE_BINARY_DIR}/example/${exe})
-	endforeach ()
+if(FHE_BUILD_EXAMPLE)
+  build_app_example(FHE_INSTALL_APP "${FHE_LIBS}")
+endif()
 
-	add_custom_target (fheckks_example)
-	add_dependencies (fheckks_example ${FHECKKS_EGAPP})
-	add_dependencies (fheckks_all fheckks_example)
-endif ()
-
-if (FHE_INSTALL_APP)
-	install (TARGETS ${FHECKKS_UTAPP} RUNTIME DESTINATION unittest)
-	install (TARGETS ${FHECKKS_BMAPP} RUNTIME DESTINATION bench)
-	install (TARGETS ${FHECKKS_TESTAPP} RUNTIME DESTINATION test)
-	install (TARGETS ${FHECKKS_EGAPP} RUNTIME DESTINATION example)
-endif ()
+if(BUILD_UNITTEST)
+  build_app_unittest(FHE_INSTALL_APP "${FHERT_ANT_LIBS};${FHE_UTLIBS}" "ut_fheckks")
+endif()

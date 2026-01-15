@@ -9,46 +9,59 @@
 #ifndef FHE_SIHE_CONFIG_H
 #define FHE_SIHE_CONFIG_H
 
-#include "air/driver/common_config.h"
-#include "air/driver/driver_ctx.h"
+#include <math.h>
+#include <stdlib.h>
+
+#include "fhe/sihe/option_config.h"
 
 namespace fhe {
 namespace sihe {
 
-enum TRACE_DETAIL {
-  TRACE_RELU_VR = 0,
+enum TRACE_DETAIL : uint64_t {
+  TD_RELU_VR = 0x1,
 };
 
-struct SIHE_CONFIG : public air::util::COMMON_CONFIG {
+struct SIHE_CONFIG : public fhe::sihe::SIHE_OPTION_CONFIG {
 public:
   SIHE_CONFIG(void) {}
 
-  void Register_options(air::driver::DRIVER_CTX* ctx);
-  void Update_options();
+  void Update_options() {
+    SIHE_OPTION_CONFIG::Update_options();
+    if (fabs(_relu_value_range_default) < 1e-6) {
+      CMPLR_USR_MSG(U_CODE::Incorrect_Option, "relu_vr_def");
+      _relu_value_range_default = 1.0;
+    }
+  }
 
-  void Print(std::ostream& os) const;
+  double Relu_vr(const char* name) const {
+    if (name == nullptr) {
+      return _relu_value_range_default;
+    }
+    const char* str = _relu_value_range.c_str();
+    int         len = strlen(name);
+    do {
+      const char* pos = strstr(str, name);
+      if (pos == nullptr) {
+        break;
+      }
+      if ((pos == str || pos[-1] == ';') && pos[len] == '=') {
+        char*  end;
+        double val = strtod(pos + len + 1, &end);
+        if (isnormal(val) && (*end == ';' || *end == '\0')) {
+          return val;
+        }
+        break;
+      }
+      str += len;
+    } while (true);
+    return _relu_value_range_default;
+  }
 
-  const char* Relu_value_range_msg() const { return _relu_value_range.c_str(); }
-
-  double Relu_value_range(const char* name) const;
-
-  uint32_t Relu_mul_depth() const { return _relu_mul_depth; }
-  uint32_t Relu_base_type() const { return _relu_base_type; }
-
-  // leave this member public so that OPTION_DESC can access it
-  std::string _relu_value_range;
-  double      _relu_value_range_def_val = 1.0;
-  uint32_t    _relu_mul_depth           = 0;
-  uint32_t    _relu_base_type           = 0;
 };  // struct SIHE_CONFIG
 
-#define DECLARE_SIHE_CONFIG_ACCESS_API(cfg)                  \
-  DECLARE_COMMON_CONFIG_ACCESS_API(cfg)                      \
-  double Relu_value_range(const char* name) {                \
-    return cfg.Relu_value_range(name);                       \
-  }                                                          \
-  uint32_t Relu_mul_depth() { return cfg.Relu_mul_depth(); } \
-  uint32_t Relu_base_type() { return cfg.Relu_base_type(); }
+#define DECLARE_SIHE_CONFIG_ACCESS_API(cfg)                            \
+  double Relu_vr(const char* name) const { return cfg.Relu_vr(name); } \
+  DECLARE_SIHE_OPTION_CONFIG_ACCESS_API(cfg)
 
 }  // namespace sihe
 }  // namespace fhe

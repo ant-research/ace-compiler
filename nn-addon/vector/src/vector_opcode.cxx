@@ -16,8 +16,8 @@ using namespace air::base;
 
 bool Register_vector_domain() {
   static const struct OPR_INFO vector_opr_info[] = {
-#define DEF_OPCODE(NAME, name, cat, kid_num, fld_num, prop) \
-  OPCODE_META_GEN(NAME, name, cat, kid_num, fld_num, prop)
+#define DEF_OPCODE(NAME, name, kid_num, fld_num, prop) \
+  OPCODE_META_GEN(NAME, name, kid_num, fld_num, prop)
 #include "nn/vector/opcode_def.inc"
 #undef DEF_OPCODE
   };

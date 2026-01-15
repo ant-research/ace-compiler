@@ -73,7 +73,8 @@ int main() {
   // z = nn::core::RELU(x)
   NODE_PTR nnx_node   = cntr->New_ld(var_x, spos);
   NODE_PTR nnadd_node = cntr->New_una_arith(
-      air::base::OPCODE(nn::core::NN, nn::core::OPCODE::RELU), nnx_node, spos);
+      air::base::OPCODE(nn::core::NN, nn::core::OPCODE::RELU),
+      nnx_node->Rtype(), nnx_node, spos);
 
   STMT_PTR  nnstmt = cntr->New_st(nnadd_node, var_z, spos);
   STMT_LIST sl     = cntr->Stmt_list();

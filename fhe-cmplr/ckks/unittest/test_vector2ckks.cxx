@@ -31,6 +31,7 @@
 #include "fhe/sihe/sihe_gen.h"
 #include "fhe/sihe/vector2sihe_lower.h"
 #include "gtest/gtest.h"
+#include "nn/core/attr.h"
 #include "nn/vector/vector_gen.h"
 #include "nn/vector/vector_opcode.h"
 #include "nn/vector/vector_utils.h"
@@ -48,13 +49,7 @@ public:
   uint32_t              Lower_vector_func(FUNC_SCOPE* vec_func);
 
 protected:
-  void SetUp() override {
-    _glob_scope = GLOB_SCOPE::Get();
-    Register_domains();
-    Register_types();
-    _array_type    = Gen_array_type({20});
-    _array_2d_type = Gen_array_type({2, 4});
-  }
+  void SetUp() override { Register_domains(); }
 
   void TearDown() override {
     META_INFO::Remove_all();
@@ -101,6 +96,10 @@ ARRAY_TYPE_PTR SIHE2CKKSTEST::Gen_array_type(const std::vector<int64_t>& dim) {
 }
 
 FUNC_SCOPE* SIHE2CKKSTEST::Gen_bin_formal_func(const char* func_name) {
+  _glob_scope = new GLOB_SCOPE(0, true);
+  Register_types();
+  _array_type      = Gen_array_type({20});
+  _array_2d_type   = Gen_array_type({2, 4});
   STR_PTR name_ptr = _glob_scope->New_str(func_name);
   SPOS    spos     = _glob_scope->Unknown_simple_spos();
 
@@ -124,6 +123,10 @@ FUNC_SCOPE* SIHE2CKKSTEST::Gen_bin_formal_func(const char* func_name) {
 }
 
 FUNC_SCOPE* SIHE2CKKSTEST::Gen_uni_formal_func(const char* func_name) {
+  _glob_scope = new GLOB_SCOPE(0, true);
+  Register_types();
+  _array_type      = Gen_array_type({20});
+  _array_2d_type   = Gen_array_type({2, 4});
   STR_PTR name_ptr = _glob_scope->New_str(func_name);
   SPOS    spos     = _glob_scope->Unknown_simple_spos();
 
@@ -147,6 +150,7 @@ FUNC_SCOPE* SIHE2CKKSTEST::Gen_uni_formal_func(const char* func_name) {
 uint32_t SIHE2CKKSTEST::Lower_vector_func(FUNC_SCOPE* vec_func_scope) {
   std::cout << "vector func: " << std::endl;
   std::cout << vec_func_scope->To_str() << std::endl;
+  STR_ID func_name = vec_func_scope->Owning_func()->Name_id();
 
   fhe::sihe::SIHE_CONFIG sihe_gen_cfg;
   GLOB_SCOPE*            sihe_glob_scope =
@@ -158,8 +162,7 @@ uint32_t SIHE2CKKSTEST::Lower_vector_func(FUNC_SCOPE* vec_func_scope) {
       sihe_glob_scope->End_func_scope();
   for (; scope_iter != end_scope_iter; ++scope_iter) {
     FUNC_SCOPE& func_scope = *scope_iter;
-    if (func_scope.Owning_func()->Name_id() !=
-        vec_func_scope->Owning_func()->Name_id()) {
+    if (func_scope.Owning_func()->Name_id() != func_name) {
       continue;
     }
     sihe_func_scope = &func_scope;
@@ -241,16 +244,15 @@ TEST_F(SIHE2CKKSTEST, mul_func) {
 
   // x * y
   air::base::OPCODE mul_op(VECTOR_DOMAIN::ID, VECTOR_OPCODE::MUL);
-  NODE_PTR mul_cipher_node = cntr->New_bin_arith(mul_op, load_x, load_y, spos);
-  mul_cipher_node->Set_rtype(_array_type);
+  NODE_PTR          mul_cipher_node =
+      cntr->New_bin_arith(mul_op, _array_type, load_x, load_y, spos);
 
   // (x * y) * cst_array
   CONSTANT_PTR cst_array = _glob_scope->New_const(
       CONSTANT_KIND::ARRAY, _array_type, _array_cst_buf, 80);
-  NODE_PTR ld_cst_array = cntr->New_ldc(cst_array, spos);
-  NODE_PTR mul_plain_node =
-      cntr->New_bin_arith(mul_op, mul_cipher_node, ld_cst_array, spos);
-  mul_plain_node->Set_rtype(_array_type);
+  NODE_PTR ld_cst_array   = cntr->New_ldc(cst_array, spos);
+  NODE_PTR mul_plain_node = cntr->New_bin_arith(
+      mul_op, _array_type, mul_cipher_node, ld_cst_array, spos);
 
   // z = (x * y) * cst_array
   STMT_PTR  store_stmt = cntr->New_st(mul_plain_node, var_z, spos);
@@ -282,7 +284,9 @@ TEST_F(SIHE2CKKSTEST, rotate_func) {
   NODE_PTR load_x1 = cntr->New_ld(*formal_itr, spos);
   // x * x
   air::base::OPCODE mul_op(VECTOR_DOMAIN::ID, VECTOR_OPCODE::MUL);
-  NODE_PTR mul_node = cntr->New_bin_arith(mul_op, load_x0, load_x1, spos);
+  CMPLR_ASSERT(0, "Fix rtype for New_bin_arith.");
+  NODE_PTR mul_node =
+      cntr->New_bin_arith(mul_op, load_x0->Rtype(), load_x0, load_x1, spos);
 
   int      roll_nums = 2;
   TYPE_PTR s32_type  = _glob_scope->Prim_type(PRIMITIVE_TYPE::INT_S32);
@@ -292,7 +296,7 @@ TEST_F(SIHE2CKKSTEST, rotate_func) {
   NODE_PTR rotate_node = cntr->New_cust_node(roll_op, _array_type, spos);
   rotate_node->Set_child(0, mul_node);
   rotate_node->Set_child(1, ld_cst2);
-  rotate_node->Set_attr("nums", &roll_nums, 1);
+  rotate_node->Set_attr(nn::core::ATTR::RNUM, &roll_nums, 1);
 
   // z = roll(x, 2)
   STMT_PTR  store_stmt = cntr->New_st(rotate_node, var_z, spos);
@@ -362,7 +366,7 @@ TEST_F(SIHE2CKKSTEST, loop_func1) {
   air::base::OPCODE rot_op(VECTOR_DOMAIN::ID, VECTOR_OPCODE::ROLL);
   NODE_PTR          rot_node = cntr->New_bin_arith(rot_op, load_z, ld_iv, spos);
   std::vector<int> roll_nums({0, 1, 2, 3});
-  rot_node->Set_attr("nums", roll_nums.data(), roll_nums.size());
+  rot_node->Set_attr(nn::core::ATTR::RNUM, roll_nums.data(), roll_nums.size());
   st_z                       = cntr->New_st(rot_node, var_z, spos);
   loop_sl.Append(st_z);
 
@@ -402,12 +406,14 @@ TEST_F(SIHE2CKKSTEST, loop_func2) {
   ADDR_DATUM_PTR    var_iv  = func_scope->New_var(s32_type, "i", spos);
   NODE_PTR          ld_iv   = cntr->New_ld(var_iv, spos);
   air::base::OPCODE lt_op(air::core::CORE, air::core::OPCODE::LE);
-  NODE_PTR          cmp_node = cntr->New_bin_arith(lt_op, ld_iv, ld_cst4, spos);
+  NODE_PTR          cmp_node =
+      cntr->New_bin_arith(lt_op, s32_type, ld_iv, ld_cst4, spos);
   // incr opnd
   air::base::OPCODE sub_op(air::core::CORE, air::core::OPCODE::SUB);
   NODE_PTR          ld_cst_m1 = cntr->New_intconst(s32_type, -1, spos);
   ld_iv                       = cntr->New_ld(var_iv, spos);
-  NODE_PTR sub_node = cntr->New_bin_arith(sub_op, ld_iv, ld_cst_m1, spos);
+  NODE_PTR sub_node =
+      cntr->New_bin_arith(sub_op, s32_type, ld_iv, ld_cst_m1, spos);
   STMT_PTR do_loop =
       cntr->New_do_loop(var_iv, ld_cst0, cmp_node, sub_node, block_node, spos);
   sl.Append(do_loop);
@@ -423,14 +429,15 @@ TEST_F(SIHE2CKKSTEST, loop_func2) {
   ld_iv                     = cntr->New_ld(var_iv, spos);
   NODE_PTR          ld_cst2 = cntr->New_intconst(s32_type, 2, spos);
   air::base::OPCODE shl_op(air::core::CORE, air::core::OPCODE::SHL);
-  NODE_PTR          shl_iv = cntr->New_bin_arith(shl_op, ld_cst2, ld_iv, spos);
-  ld_cst4                  = cntr->New_intconst(s32_type, 4, spos);
+  NODE_PTR shl_iv = cntr->New_bin_arith(shl_op, s32_type, ld_cst2, ld_iv, spos);
+  ld_cst4         = cntr->New_intconst(s32_type, 4, spos);
   air::base::OPCODE mul_op(air::core::CORE, air::core::OPCODE::MUL);
-  NODE_PTR base_mul_node = cntr->New_bin_arith(mul_op, shl_iv, ld_cst4, spos);
+  NODE_PTR          base_mul_node =
+      cntr->New_bin_arith(mul_op, s32_type, shl_iv, ld_cst4, spos);
 
   NODE_PTR rot_node = vec_gen.New_roll(vec_mul_node, base_mul_node, spos);
   std::vector<int> roll_nums({8, 16, 32, 64});
-  rot_node->Set_attr("nums", roll_nums.data(), roll_nums.size());
+  rot_node->Set_attr(nn::core::ATTR::RNUM, roll_nums.data(), roll_nums.size());
 
   NODE_PTR load_z       = cntr->New_ld(var_z, spos);
   NODE_PTR vec_add_node = vec_gen.New_add(load_z, rot_node, spos);
@@ -520,7 +527,7 @@ TEST_F(SIHE2CKKSTEST, relu_func) {
   uint32_t mul_level = Lower_vector_func(func_scope);
 
   uint32_t relu_mul_level =
-      Lower_ctx().Get_approx_relu_func_info().Get_mul_depth();
+      Lower_ctx().Get_func_info(FHE_FUNC::APPROX_RELU).Get_mul_depth();
   uint32_t func_mul_level =
       relu_mul_level + Lower_ctx().Get_ctx_param().Mul_depth_of_bootstrap() + 1;
   ASSERT_EQ(mul_level, func_mul_level)

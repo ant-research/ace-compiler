@@ -11,11 +11,13 @@
 
 #include <iostream>
 
+#include "ckks/ciphertext.h"
+#include "common/common.h"
+#include "common/rtlib_timing.h"
 #include "common/trace.h"
 #include "gtest/gtest.h"
-#include "util/ciphertext.h"
-#include "util/fhe_types.h"
-#include "util/fhe_utils.h"
+#include "util/modular.h"
+#include "util/type.h"
 
 #define RTLIB_UT_ENV()                     \
   DECL_ENV(TEST_DEGREE, "TEST_DEGREE", 16) \
@@ -41,6 +43,13 @@ typedef enum {
     }                                             \
   }
 
+#define CHECK_BIG_COEFFS(coeffs, degree, expected)      \
+  {                                                     \
+    for (uint32_t idx = 0; idx < degree; idx++) {       \
+      EXPECT_EQ(BI_CMP(coeffs[idx], expected[idx]), 0); \
+    }                                                   \
+  }
+
 #define CHECK_BIG_INT_COEFFS(coeffs, degree, expected)     \
   {                                                        \
     for (uint32_t idx = 0; idx < degree; idx++) {          \
@@ -50,15 +59,12 @@ typedef enum {
 
 const char Default_err_msg[] = "Error: vectors are not approximately equal.";
 
-/**
- * @brief Checks whether two vectors are approximately equal.
- *
- * @param vec1 Vector 1(complex)
- * @param vec2 Vector 2(complex)
- * @param error How close each entry of the two vectors must be to be
- * approximately equal.
- * @param error_message Message to output if not equal.
- */
+//! @brief Checks whether two vectors are approximately equal.
+//! @param vec1 Vector 1(complex)
+//! @param vec2 Vector 2(complex)
+//! @param error How close each entry of the two vectors must be to be
+//! approximately equal.
+//! @param error_message Message to output if not equal.
 static inline void Check_complex_vector_approx_eq(
     VALUE_LIST* vec1, VALUE_LIST* vec2, float error = 0.00001,
     const char* error_message = Default_err_msg) {
@@ -111,29 +117,6 @@ static inline void Calculate_approx_max_error(VALUE_LIST* vec1,
          fabs(log2(max_error)), log10(max_error));
 }
 
-/**
- * @brief Create crt context with given q primes & p primes
- *
- * @param crt return crt context
- * @param ring_degree ring degree
- * @param q_primes value list of q primes
- * @param p_primes value list of p primes
- */
-static inline void Create_crt_with_primes(CRT_CONTEXT* crt,
-                                          uint32_t     ring_degree,
-                                          VALUE_LIST*  q_primes,
-                                          VALUE_LIST*  p_primes) {
-  Set_primes(Get_q(crt), q_primes, ring_degree);
-  Set_primes(Get_p(crt), p_primes, ring_degree);
-
-  Precompute_primes(Get_q(crt), true);
-
-  Precompute_primes(Get_p(crt), true);
-
-  Precompute_new_base(Get_q(crt), Get_p(crt));
-  Precompute_new_base(Get_p(crt), Get_q(crt));
-}
-
 //! @brief Global envoriment for unit test
 class UT_GLOB_ENV : public testing::Environment {
 public:
@@ -144,6 +127,7 @@ public:
   };
 
   void SetUp() override {
+    Init_rtlib_timing();
 #define DECL_ENV(ID, NAME, VALUE) \
   Env_info[ID]._env_name  = NAME; \
   Env_info[ID]._env_value = VALUE;
@@ -162,5 +146,12 @@ public:
 
   static ENV_INFO Env_info[ENV_LAST];
 };
+
+//! @brief Set parameters for CKKS_PARAMS
+CKKS_PARAMS* Set_context_params(uint32_t degree, size_t num_q, size_t q0,
+                                size_t sf, size_t qpart = 0,
+                                size_t input_level = 0, size_t hw = 0,
+                                size_t num_rot = 0, int32_t rot_idxs[] = {},
+                                size_t sec_level = 0);
 
 #endif  // RTLIB_UNITTEST_HELPER_H

@@ -1,3 +1,10 @@
+#=============================================================================
+#
+# Copyright (c) Ant Group Co., Ltd
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+#
+#=============================================================================
+
 file (GLOB_RECURSE FHECG_SRC_FILES CONFIGURE_DEPENDS src/*.cxx)
 
 set (FHECG_INCLUDE_DIRS "")
@@ -7,7 +14,7 @@ include_directories (${FHECG_INCLUDE_DIRS})
 set (FHECG_INCLUDE_DIRS "${FHECG_INCLUDE_DIRS}" CACHE INTERNAL "")
 
 add_library (fhecg_obj OBJECT ${FHECG_SRC_FILES})
-
+add_dependencies(fhecg_obj fhe_depend)
 set_property (TARGET fhecg_obj PROPERTY POSITION_INDEPENDENT_CODE 1)
 
 if (BUILD_STATIC)
@@ -23,59 +30,15 @@ if (BUILD_STATIC)
 	add_dependencies (fhecg_all FHEcg)
 endif()
 
-set (FHECG_UTAPP "")
-if (BUILD_UNITTEST)
-	file (GLOB FHECG_UNITTEST_SRC_FILES CONFIGURE_DEPENDS unittest/*.cxx)
-	set (FHECG_UNITTEST_SRC_FILES ${FHECG_UNITTEST_SRC_FILES})
-	add_executable (ut_fhecg ${FHECG_UNITTEST_SRC_FILES} ${UNITTESTMAIN})
-	set_property (TARGET ut_fhecg PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/unittest)
-	target_link_libraries (ut_fhecg ${FHE_UTLIBS})
-	set (FHECG_UTAPP ${FHECG_UTAPP} ut_fhecg)
 
-	add_dependencies (fhecg_all ut_fhecg)
-
-	add_custom_command (OUTPUT run_fhecg_utapp WORKING_DIRECTORY ${CMAKE_BINARY_DIR} COMMAND ${CMAKE_BINARY_DIR}/unittest/ut_fhecg)
-	add_custom_target (test_fhecg_ut DEPENDS ut_fhecg run_fhecg_utapp)
-	add_test( NAME ut_fhecg COMMAND ${CMAKE_BINARY_DIR}/unittest/ut_fhecg)
-endif()
-
-set (FHECG_TESTAPP "")
 if (FHE_BUILD_TEST)
-	file (GLOB FHECG_TESTAPP_SRC_FILES CONFIGURE_DEPENDS test/*.cxx)
-	foreach (app ${FHECG_TESTAPP_SRC_FILES})
-		get_filename_component (exe ${app} NAME_WE)
-		add_executable (${exe} ${app})
-		set_property (TARGET ${exe} PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test)
-		set (FHECG_TESTAPP ${FHECG_TESTAPP} ${exe})
-		target_link_libraries (${exe} ${FHE_LIBS})
-		add_test( NAME ${exe} COMMAND ${CMAKE_BINARY_DIR}/test/${exe})
-	endforeach ()
+	build_app_test (FHE_INSTALL_APP "${FHE_LIBS}")
+endif ()
 
-	add_custom_target (fhecg_test)
-	add_dependencies (fhecg_test ${FHECG_TESTAPP})
-	add_dependencies (fhecg_all fhecg_test)
-endif()
-
-set (FHECG_EGAPP "")
 if (FHE_BUILD_EXAMPLE)
-	file (GLOB FHECG_EXAMPLE_SRC_FILES CONFIGURE_DEPENDS example/*.cxx)
-	foreach (app ${FHECG_EXAMPLE_SRC_FILES})
-		get_filename_component (exe ${app} NAME_WE)
-		add_executable (${exe} ${app})
-		set_property (TARGET ${exe} PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/example)
-		set (FHECG_EGAPP ${FHECG_EGAPP} ${exe})
-		target_link_libraries (${exe} ${FHE_LIBS})
-		add_test( NAME ${exe} COMMAND ${CMAKE_BINARY_DIR}/example/${exe})
-	endforeach ()
-
-	add_custom_target (fhecg_example)
-	add_dependencies (fhecg_example ${FHECG_EGAPP})
-	add_dependencies (fhecg_all fhecg_example)
+	build_app_example (FHE_INSTALL_APP "${FHE_LIBS}")
 endif ()
 
-if (FHE_INSTALL_APP)
-	install (TARGETS ${FHECG_UTAPP} RUNTIME DESTINATION unittest)
-	install (TARGETS ${FHECG_BMAPP} RUNTIME DESTINATION bench)
-	install (TARGETS ${FHECG_TESTAPP} RUNTIME DESTINATION test)
-	install (TARGETS ${FHECG_EGAPP} RUNTIME DESTINATION example)
-endif ()
+if (BUILD_UNITTEST)
+	build_app_unittest (FHE_INSTALL_APP "${FHE_UTLIBS}" "ut_fhecg")
+endif()

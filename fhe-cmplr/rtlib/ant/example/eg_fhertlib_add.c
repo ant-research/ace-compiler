@@ -13,12 +13,8 @@
 
 #include "common/rtlib.h"
 
-/**
- * @brief generate input data for testing ONNX
- *
- *
- * @return TENSOR input data
- */
+//! @brief Generate input data for testing ONNX
+//! @return TENSOR input data
 TENSOR* Generate_input_data() {
   // return torch.randn(shape);
   // hack input tensor
@@ -26,14 +22,10 @@ TENSOR* Generate_input_data() {
   return Alloc_tensor(1, 1, 2, 4, data);
 }
 
-/**
- * @brief validate output vector with expect vector
- *
- *
- * @param result double *
- * @param expect double *
- * @return return true if value match
- */
+//! @brief Validate output vector with expect vector
+//! @param result double *
+//! @param expect double *
+//! @return return true if value match
 bool Validate_output_data(double* result, double* expect, size_t len) {
   for (size_t i = 0; i < len; i++) {
     double d1 = result[i];
@@ -47,12 +39,7 @@ bool Validate_output_data(double* result, double* expect, size_t len) {
   return true;
 }
 
-/**
- * @brief entry function
- * for add.onnx
- *
- * @return return value
- */
+//! @brief Entry function for add.onnx
 int main() {
   TENSOR* input_data1 = Generate_input_data();
   TENSOR* input_data2 = Generate_input_data();

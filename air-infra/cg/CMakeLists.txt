@@ -1,3 +1,10 @@
+#=============================================================================
+#
+# Copyright (c) Ant Group Co., Ltd
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+#
+#=============================================================================
+
 file (GLOB_RECURSE AIRCG_SRC_FILES CONFIGURE_DEPENDS src/*.cxx)
 
 set (AIRCG_INCLUDE_DIRS "")
@@ -7,8 +14,14 @@ include_directories (${AIRCG_INCLUDE_DIRS})
 set (AIRCG_INCLUDE_DIRS "${AIRCG_INCLUDE_DIRS}" CACHE INTERNAL "")
 
 add_library (aircg_obj OBJECT ${AIRCG_SRC_FILES})
-
+add_dependencies (aircg_obj air_depend)
 set_property (TARGET aircg_obj PROPERTY POSITION_INDEPENDENT_CODE 1)
+
+# generate code_gen option files
+set(AIR2HPU_OPTION_OUTPUT_DIR "${CMAKE_BINARY_DIR}/include/air/cg")
+set(AIR2HPU_OPTION_INPUT_DIR "src")
+gen_option(${PYTHON_EXECUTABLE} air_cg_option ${AIR2HPU_OPTION_OUTPUT_DIR} ${AIR2HPU_OPTION_INPUT_DIR})
+add_dependencies(aircg_obj air_cg_option)
 
 if (BUILD_STATIC)
 	add_dependencies (aircg_obj AIRutil AIRbase)
@@ -24,59 +37,14 @@ if (BUILD_STATIC)
 	add_dependencies (aircg_all AIRutil)
 endif()
 
-set (AIRCG_UTAPP "")
-if (BUILD_UNITTEST)
-	file (GLOB AIRCG_UNITTEST_SRC_FILES CONFIGURE_DEPENDS unittest/*.cxx)
-	set (AIRCG_UNITTEST_SRC_FILES ${AIRCG_UNITTEST_SRC_FILES})
-	add_executable (ut_aircg ${AIRCG_UNITTEST_SRC_FILES} ${UNITTESTMAIN})
-	set_property (TARGET ut_aircg PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/unittest)
-	target_link_libraries (ut_aircg ${AIR_UTLIBS})
-	set (AIRCG_UTAPP ${AIRCG_UTAPP} ut_aircg)
-
-	add_dependencies (aircg_all ut_aircg)
-
-	add_custom_command (OUTPUT run_aircg_utapps WORKING_DIRECTORY ${CMAKE_BINARY_DIR} COMMAND ${CMAKE_BINARY_DIR}/unittest/ut_aircg)
-	add_custom_target (test_aircg_ut DEPENDS ut_aircg run_aircg_utapps)
-	add_test( NAME ut_aircg COMMAND ${CMAKE_BINARY_DIR}/unittest/ut_aircg)
-endif()
-
-set (AIRCG_TESTAPP "")
 if (AIR_BUILD_TEST)
-	file (GLOB AIRCG_TESTAPP_SRC_FILES CONFIGURE_DEPENDS test/*.cxx)
-	foreach (app ${AIRCG_TESTAPP_SRC_FILES})
-		get_filename_component (exe ${app} NAME_WE)
-		add_executable (${exe} ${app})
-		set_property (TARGET ${exe} PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test)
-		set (AIRCG_TESTAPP ${AIRCG_TESTAPP} ${exe})
-		target_link_libraries (${exe} ${AIR_LIBS})
-		add_test( NAME ${exe} COMMAND ${CMAKE_BINARY_DIR}/test/${exe})
-	endforeach ()
-
-	add_custom_target (aircg_test)
-	add_dependencies (aircg_test ${AIRCG_TESTAPP})
-	add_dependencies (aircg_all aircg_test)
+	build_app_test (AIR_INSTALL_APP "${AIR_LIBS}")
 endif()
 
-set (AIRCG_EGAPP "")
 if (AIR_BUILD_EXAMPLE)
-	file (GLOB AIRCG_EXAMPLE_SRC_FILES CONFIGURE_DEPENDS example/*.cxx)
-	foreach (app ${AIRCG_EXAMPLE_SRC_FILES})
-		get_filename_component (exe ${app} NAME_WE)
-		add_executable (${exe} ${app})
-		set_property (TARGET ${exe} PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/example)
-		set (AIRCG_EGAPP ${AIRCG_EGAPP} ${exe})
-		target_link_libraries (${exe} ${AIR_LIBS})
-		add_test( NAME ${exe} COMMAND ${CMAKE_BINARY_DIR}/example/${exe})
-	endforeach ()
-
-	add_custom_target (aircg_example)
-	add_dependencies (aircg_example ${AIRCG_EGAPP})
-	add_dependencies (aircg_all aircg_example)
+	build_app_example (AIR_INSTALL_APP "${AIR_LIBS}")
 endif ()
 
-if (AIR_INSTALL_APP)
-	install (TARGETS ${AIRCG_UTAPP} RUNTIME DESTINATION unittest)
-	install (TARGETS ${AIRCG_BMAPP} RUNTIME DESTINATION bench)
-	install (TARGETS ${AIRCG_TESTAPP} RUNTIME DESTINATION test)
-	install (TARGETS ${AIRCG_EGAPP} RUNTIME DESTINATION example)
-endif ()
+if (BUILD_UNITTEST)
+	build_app_unittest (AIR_INSTALL_APP "${AIR_UTLIBS}" "ut_aircg")
+endif()
