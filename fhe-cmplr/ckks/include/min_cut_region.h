@@ -17,6 +17,7 @@
 #include "dfg_region_container.h"
 #include "fhe/ckks/config.h"
 #include "fhe/core/lower_ctx.h"
+#include <map>
 namespace fhe {
 namespace ckks {
 
@@ -156,6 +157,12 @@ private:
   //! @brief Return the cost of the current cut, which is the sum of the
   //! cost of all bootstrap/rescale operations required for the current cut.
   double Cut_cost(const CUT_TYPE& cut);
+  //! @brief Ensure no ancester-descendant relationship in cut to avoid repeat cut (O(n))
+  bool Verify_scale(const CUT_TYPE& cur_cut);
+  //! @brief Helper function using DFS with memoization to check elem_id's ancestors
+  bool HasValidAncestors( REGION_ELEM_ID elem_id,
+                          const std::set<REGION_ELEM_ID>& cut_set,
+                          std::map<REGION_ELEM_ID, int>& visited_status);
   //! @brief Merge node, and update cur_cut.
   void Update_cut(const SCC_NODE_PTR& node, CUT_TYPE& cur_cut);
   //! @brief Collect all the nodes originating from upper region to use as

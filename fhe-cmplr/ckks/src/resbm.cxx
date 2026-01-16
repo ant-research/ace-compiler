@@ -69,6 +69,10 @@ void RESBM::Cal_min_laten_plan() {
 
     REGION_ID src(src_id);
     if (src_id != 1 && Context()->Plan(src) == nullptr) continue;
+    // filter regions that require excessive bootstrapping.
+    if (Context()->Min_cut(src, Context()->Max_bts_lvl(), MIN_CUT_BTS).Size() >
+        Context()->Max_bts_cnt())
+      continue;
 
     double src_min_laten = Context()->Total_latency(src);
     AIR_ASSERT_MSG(src_min_laten < MAX_LATENCY,
@@ -78,6 +82,11 @@ void RESBM::Cal_min_laten_plan() {
     for (uint32_t dst_id = src_id + min_bts_level;
          dst_id < Region_cntr()->Region_cnt(); ++dst_id) {
       REGION_ID dst(dst_id);
+      // filter regions that require excessive bootstrapping.
+      if (Context()
+              ->Min_cut(dst, Context()->Max_bts_lvl(), MIN_CUT_BTS)
+              .Size() > Context()->Max_bts_cnt())
+        continue;
 
       SCALE_MGR scale_mgr(Context(), Region_cntr(), src, dst, consumable_level);
       MIN_LATENCY_PLAN* plan = scale_mgr.Perform();
