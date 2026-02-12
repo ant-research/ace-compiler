@@ -57,6 +57,8 @@ void Init_ciph_same_scale(CIPHER res, CIPHER ciph1, CIPHER ciph2) {
 void Init_ciph_same_scale_plain(CIPHER res, CIPHER ciph, PLAIN plain) {
   RTLIB_TM_START(RTM_INIT_CIPH_SM_SC, rtm);
   Init_cipher(res, ciph, Get_ciph_sfactor(ciph), Sc_degree(ciph));
+  uint32_t plain_level = Poly_level(Get_plain_poly(plain));
+  if (Level(ciph) > plain_level) Set_ciph_level(res, plain_level);
   RTLIB_TM_END(RTM_INIT_CIPH_SM_SC, rtm);
 }
 
