@@ -1,0 +1,428 @@
+================================================================================
+INITIAL IR (nn::core level) - before tensor2vector
+================================================================================
+
+FUN[0] "Main_graph"
+  VAR[0x10000001] "output"
+    scope_level[0x1], TYP[0x13](array,"_noname")
+  PREG[0x10000000] TYP[0x41](array,"_noname",size:65536), Home[0xffffffff]
+  PREG[0x10000001] TYP[0x42](array,"_noname",size:65536), Home[0xffffffff]
+  PREG[0x10000002] TYP[0x43](array,"_noname",size:65536), Home[0xffffffff]
+  PREG[0x10000003] TYP[0x44](array,"_noname",size:65536), Home[0xffffffff]
+  PREG[0x10000004] TYP[0x45](array,"_noname",size:65536), Home[0xffffffff]
+  PREG[0x10000005] TYP[0x46](array,"_noname",size:65536), Home[0xffffffff]
+  PREG[0x10000006] TYP[0x47](array,"_noname",size:65536), Home[0xffffffff]
+  PREG[0x10000007] TYP[0x48](array,"_noname",size:65536), Home[0xffffffff]
+  PREG[0x10000008] TYP[0x49](array,"_noname",size:65536), Home[0xffffffff]
+  PREG[0x10000009] TYP[0x4a](array,"_noname",size:65536), Home[0xffffffff]
+  PREG[0x1000000a] TYP[0x4b](array,"_noname",size:65536), Home[0xffffffff]
+  PREG[0x1000000b] TYP[0x4c](array,"_noname",size:65536), Home[0xffffffff]
+  PREG[0x1000000c] TYP[0x4d](array,"_noname",size:65536), Home[0xffffffff]
+  PREG[0x1000000d] TYP[0x4e](array,"_noname",size:65536), Home[0xffffffff]
+  PREG[0x1000000e] TYP[0x4f](array,"_noname",size:65536), Home[0xffffffff]
+  PREG[0x1000000f] TYP[0x50](array,"_noname",size:65536), Home[0xffffffff]
+  PREG[0x10000010] TYP[0x51](array,"_noname",size:65536), Home[0xffffffff]
+  PREG[0x10000011] TYP[0x52](array,"_noname",size:32768), Home[0xffffffff]
+  PREG[0x10000012] TYP[0x53](array,"_noname",size:32768), Home[0xffffffff]
+  PREG[0x10000013] TYP[0x54](array,"_noname",size:32768), Home[0xffffffff]
+  PREG[0x10000014] TYP[0x55](array,"_noname",size:32768), Home[0xffffffff]
+  PREG[0x10000015] TYP[0x56](array,"_noname",size:32768), Home[0xffffffff]
+  PREG[0x10000016] TYP[0x57](array,"_noname",size:32768), Home[0xffffffff]
+  PREG[0x10000017] TYP[0x58](array,"_noname",size:32768), Home[0xffffffff]
+  PREG[0x10000018] TYP[0x59](array,"_noname",size:32768), Home[0xffffffff]
+  PREG[0x10000019] TYP[0x5a](array,"_noname",size:32768), Home[0xffffffff]
+  PREG[0x1000001a] TYP[0x5b](array,"_noname",size:32768), Home[0xffffffff]
+  PREG[0x1000001b] TYP[0x5c](array,"_noname",size:32768), Home[0xffffffff]
+  PREG[0x1000001c] TYP[0x5d](array,"_noname",size:32768), Home[0xffffffff]
+  PREG[0x1000001d] TYP[0x5e](array,"_noname",size:32768), Home[0xffffffff]
+  PREG[0x1000001e] TYP[0x5f](array,"_noname",size:32768), Home[0xffffffff]
+  PREG[0x1000001f] TYP[0x60](array,"_noname",size:32768), Home[0xffffffff]
+  PREG[0x10000020] TYP[0x61](array,"_noname",size:32768), Home[0xffffffff]
+  PREG[0x10000021] TYP[0x62](array,"_noname",size:16384), Home[0xffffffff]
+  PREG[0x10000022] TYP[0x63](array,"_noname",size:16384), Home[0xffffffff]
+  PREG[0x10000023] TYP[0x64](array,"_noname",size:16384), Home[0xffffffff]
+  PREG[0x10000024] TYP[0x65](array,"_noname",size:16384), Home[0xffffffff]
+  PREG[0x10000025] TYP[0x66](array,"_noname",size:16384), Home[0xffffffff]
+  PREG[0x10000026] TYP[0x67](array,"_noname",size:16384), Home[0xffffffff]
+  PREG[0x10000027] TYP[0x68](array,"_noname",size:16384), Home[0xffffffff]
+  PREG[0x10000028] TYP[0x69](array,"_noname",size:16384), Home[0xffffffff]
+  PREG[0x10000029] TYP[0x6a](array,"_noname",size:16384), Home[0xffffffff]
+  PREG[0x1000002a] TYP[0x6b](array,"_noname",size:16384), Home[0xffffffff]
+  PREG[0x1000002b] TYP[0x6c](array,"_noname",size:16384), Home[0xffffffff]
+  PREG[0x1000002c] TYP[0x6d](array,"_noname",size:16384), Home[0xffffffff]
+  PREG[0x1000002d] TYP[0x6e](array,"_noname",size:16384), Home[0xffffffff]
+  PREG[0x1000002e] TYP[0x6f](array,"_noname",size:16384), Home[0xffffffff]
+  PREG[0x1000002f] TYP[0x70](array,"_noname",size:16384), Home[0xffffffff]
+  PREG[0x10000030] TYP[0x71](array,"_noname",size:16384), Home[0xffffffff]
+  PREG[0x10000031] TYP[0x72](array,"_noname",size:256), Home[0xffffffff]
+  PREG[0x10000032] TYP[0x74](array,"_noname",size:16), Home[0xffffffff]
+  PREG[0x10000033] TYP[0x75](array,"_noname",size:256), Home[0xffffffff]
+  ATTR[0] name=/conv1/Conv
+  ATTR[0x1] dilations=(1,1)
+  ATTR[0x2] group=1
+  ATTR[0x3] kernel_shape=(3,3)
+  ATTR[0x4] pads=(1,1,1,1)
+  ATTR[0x5] strides=(1,1)
+  ATTR[0x6] name=/relu/Relu
+  ATTR[0x7] name=/layer1/layer1.0/conv1/Conv
+  ATTR[0x8] dilations=(1,1)
+  ATTR[0x9] group=1
+  ATTR[0xa] kernel_shape=(3,3)
+  ATTR[0xb] pads=(1,1,1,1)
+  ATTR[0xc] strides=(1,1)
+  ATTR[0xd] name=/layer1/layer1.0/relu/Relu
+  ATTR[0xe] name=/layer1/layer1.0/conv2/Conv
+  ATTR[0xf] dilations=(1,1)
+  ATTR[0x10] group=1
+  ATTR[0x11] kernel_shape=(3,3)
+  ATTR[0x12] pads=(1,1,1,1)
+  ATTR[0x13] strides=(1,1)
+  ATTR[0x14] name=/layer1/layer1.0/relu_1/Relu
+  ATTR[0x15] name=/layer1/layer1.1/conv1/Conv
+  ATTR[0x16] dilations=(1,1)
+  ATTR[0x17] group=1
+  ATTR[0x18] kernel_shape=(3,3)
+  ATTR[0x19] pads=(1,1,1,1)
+  ATTR[0x1a] strides=(1,1)
+  ATTR[0x1b] name=/layer1/layer1.1/relu/Relu
+  ATTR[0x1c] name=/layer1/layer1.1/conv2/Conv
+  ATTR[0x1d] dilations=(1,1)
+  ATTR[0x1e] group=1
+  ATTR[0x1f] kernel_shape=(3,3)
+  ATTR[0x20] pads=(1,1,1,1)
+  ATTR[0x21] strides=(1,1)
+  ATTR[0x22] name=/layer1/layer1.1/relu_1/Relu
+  ATTR[0x23] name=/layer1/layer1.2/conv1/Conv
+  ATTR[0x24] dilations=(1,1)
+  ATTR[0x25] group=1
+  ATTR[0x26] kernel_shape=(3,3)
+  ATTR[0x27] pads=(1,1,1,1)
+  ATTR[0x28] strides=(1,1)
+  ATTR[0x29] name=/layer1/layer1.2/relu/Relu
+  ATTR[0x2a] name=/layer1/layer1.2/conv2/Conv
+  ATTR[0x2b] dilations=(1,1)
+  ATTR[0x2c] group=1
+  ATTR[0x2d] kernel_shape=(3,3)
+  ATTR[0x2e] pads=(1,1,1,1)
+  ATTR[0x2f] strides=(1,1)
+  ATTR[0x30] name=/layer1/layer1.2/relu_1/Relu
+  ATTR[0x31] name=/layer2/layer2.0/conv1/Conv
+  ATTR[0x32] dilations=(1,1)
+  ATTR[0x33] group=1
+  ATTR[0x34] kernel_shape=(3,3)
+  ATTR[0x35] pads=(1,1,1,1)
+  ATTR[0x36] strides=(2,2)
+  ATTR[0x37] name=/layer2/layer2.0/relu/Relu
+  ATTR[0x38] name=/layer2/layer2.0/conv2/Conv
+  ATTR[0x39] dilations=(1,1)
+  ATTR[0x3a] group=1
+  ATTR[0x3b] kernel_shape=(3,3)
+  ATTR[0x3c] pads=(1,1,1,1)
+  ATTR[0x3d] strides=(1,1)
+  ATTR[0x3e] name=/layer2/layer2.0/downsample/downsample.0/Conv
+  ATTR[0x3f] dilations=(1,1)
+  ATTR[0x40] group=1
+  ATTR[0x41] kernel_shape=(1,1)
+  ATTR[0x42] pads=(0,0,0,0)
+  ATTR[0x43] strides=(2,2)
+  ATTR[0x44] name=/layer2/layer2.0/relu_1/Relu
+  ATTR[0x45] name=/layer2/layer2.1/conv1/Conv
+  ATTR[0x46] dilations=(1,1)
+  ATTR[0x47] group=1
+  ATTR[0x48] kernel_shape=(3,3)
+  ATTR[0x49] pads=(1,1,1,1)
+  ATTR[0x4a] strides=(1,1)
+  ATTR[0x4b] name=/layer2/layer2.1/relu/Relu
+  ATTR[0x4c] name=/layer2/layer2.1/conv2/Conv
+  ATTR[0x4d] dilations=(1,1)
+  ATTR[0x4e] group=1
+  ATTR[0x4f] kernel_shape=(3,3)
+  ATTR[0x50] pads=(1,1,1,1)
+  ATTR[0x51] strides=(1,1)
+  ATTR[0x52] name=/layer2/layer2.1/relu_1/Relu
+  ATTR[0x53] name=/layer2/layer2.2/conv1/Conv
+  ATTR[0x54] dilations=(1,1)
+  ATTR[0x55] group=1
+  ATTR[0x56] kernel_shape=(3,3)
+  ATTR[0x57] pads=(1,1,1,1)
+  ATTR[0x58] strides=(1,1)
+  ATTR[0x59] name=/layer2/layer2.2/relu/Relu
+  ATTR[0x5a] name=/layer2/layer2.2/conv2/Conv
+  ATTR[0x5b] dilations=(1,1)
+  ATTR[0x5c] group=1
+  ATTR[0x5d] kernel_shape=(3,3)
+  ATTR[0x5e] pads=(1,1,1,1)
+  ATTR[0x5f] strides=(1,1)
+  ATTR[0x60] name=/layer2/layer2.2/relu_1/Relu
+  ATTR[0x61] name=/layer3/layer3.0/conv1/Conv
+  ATTR[0x62] dilations=(1,1)
+  ATTR[0x63] group=1
+  ATTR[0x64] kernel_shape=(3,3)
+  ATTR[0x65] pads=(1,1,1,1)
+  ATTR[0x66] strides=(2,2)
+  ATTR[0x67] name=/layer3/layer3.0/relu/Relu
+  ATTR[0x68] name=/layer3/layer3.0/conv2/Conv
+  ATTR[0x69] dilations=(1,1)
+  ATTR[0x6a] group=1
+  ATTR[0x6b] kernel_shape=(3,3)
+  ATTR[0x6c] pads=(1,1,1,1)
+  ATTR[0x6d] strides=(1,1)
+  ATTR[0x6e] name=/layer3/layer3.0/downsample/downsample.0/Conv
+  ATTR[0x6f] dilations=(1,1)
+  ATTR[0x70] group=1
+  ATTR[0x71] kernel_shape=(1,1)
+  ATTR[0x72] pads=(0,0,0,0)
+  ATTR[0x73] strides=(2,2)
+  ATTR[0x74] name=/layer3/layer3.0/relu_1/Relu
+  ATTR[0x75] name=/layer3/layer3.1/conv1/Conv
+  ATTR[0x76] dilations=(1,1)
+  ATTR[0x77] group=1
+  ATTR[0x78] kernel_shape=(3,3)
+  ATTR[0x79] pads=(1,1,1,1)
+  ATTR[0x7a] strides=(1,1)
+  ATTR[0x7b] name=/layer3/layer3.1/relu/Relu
+  ATTR[0x7c] name=/layer3/layer3.1/conv2/Conv
+  ATTR[0x7d] dilations=(1,1)
+  ATTR[0x7e] group=1
+  ATTR[0x7f] kernel_shape=(3,3)
+  ATTR[0x80] pads=(1,1,1,1)
+  ATTR[0x81] strides=(1,1)
+  ATTR[0x82] name=/layer3/layer3.1/relu_1/Relu
+  ATTR[0x83] name=/layer3/layer3.2/conv1/Conv
+  ATTR[0x84] dilations=(1,1)
+  ATTR[0x85] group=1
+  ATTR[0x86] kernel_shape=(3,3)
+  ATTR[0x87] pads=(1,1,1,1)
+  ATTR[0x88] strides=(1,1)
+  ATTR[0x89] name=/layer3/layer3.2/relu/Relu
+  ATTR[0x8a] name=/layer3/layer3.2/conv2/Conv
+  ATTR[0x8b] dilations=(1,1)
+  ATTR[0x8c] group=1
+  ATTR[0x8d] kernel_shape=(3,3)
+  ATTR[0x8e] pads=(1,1,1,1)
+  ATTR[0x8f] strides=(1,1)
+  ATTR[0x90] name=/layer3/layer3.2/relu_1/Relu
+  ATTR[0x91] name=/Reshape
+  ATTR[0x92] name=/fc/Gemm
+  ATTR[0x93] alpha=1
+  ATTR[0x94] beta=1
+  ATTR[0x95] transA=0
+  ATTR[0x96] transB=1
+
+  func_entry "Main_graph" ENT[0x1] ID(0) LINE(0:0:0)
+    idname "input" FML[0x10000000] RTYPE[0x12](_noname)
+    block ID(0x3) LINE(0:0:0)
+      stp PREG[0x10000000] ID(0x8) LINE(0:0:0)
+        NN.conv ATTR[strides=(1,1),pads=(1,1,1,1),kernel_shape=(3,3),group=1,dilations=(1,1),name=/conv1/Conv] RTYPE[18](_noname)
+          ld "input" FML[0x10000000] RTYPE[0x12](_noname)
+          ldc CST[0x2] RTYPE[0x17](_noname)
+          ldc CST[0x3] RTYPE[0x18](_noname)
+      stp PREG[0x10000001] ID(0xb) LINE(0:0:0)
+        NN.relu ATTR[name=/relu/Relu] RTYPE[0x41](_noname)
+          ldp PREG[0x10000000] RTYPE[0x41](_noname)
+      stp PREG[0x10000002] ID(0x10) LINE(0:0:0)
+        NN.conv ATTR[strides=(1,1),pads=(1,1,1,1),kernel_shape=(3,3),group=1,dilations=(1,1),name=/layer1/layer1.0/conv1/Conv] RTYPE[66](_noname)
+          ldp PREG[0x10000001] RTYPE[0x42](_noname)
+          ldc CST[0x4] RTYPE[0x19](_noname)
+          ldc CST[0x5] RTYPE[0x1a](_noname)
+      stp PREG[0x10000003] ID(0x13) LINE(0:0:0)
+        NN.relu ATTR[name=/layer1/layer1.0/relu/Relu] RTYPE[0x43](_noname)
+          ldp PREG[0x10000002] RTYPE[0x43](_noname)
+      stp PREG[0x10000004] ID(0x18) LINE(0:0:0)
+        NN.conv ATTR[strides=(1,1),pads=(1,1,1,1),kernel_shape=(3,3),group=1,dilations=(1,1),name=/layer1/layer1.0/conv2/Conv] RTYPE[68](_noname)
+          ldp PREG[0x10000003] RTYPE[0x44](_noname)
+          ldc CST[0x6] RTYPE[0x1b](_noname)
+          ldc CST[0x7] RTYPE[0x1c](_noname)
+      stp PREG[0x10000005] ID(0x1c) LINE(0:0:0)
+        NN.add RTYPE[0x45](_noname)
+          ldp PREG[0x10000004] RTYPE[0x45](_noname)
+          ldp PREG[0x10000001] RTYPE[0x42](_noname)
+      stp PREG[0x10000006] ID(0x1f) LINE(0:0:0)
+        NN.relu ATTR[name=/layer1/layer1.0/relu_1/Relu] RTYPE[0x46](_noname)
+          ldp PREG[0x10000005] RTYPE[0x46](_noname)
+      stp PREG[0x10000007] ID(0x24) LINE(0:0:0)
+        NN.conv ATTR[strides=(1,1),pads=(1,1,1,1),kernel_shape=(3,3),group=1,dilations=(1,1),name=/layer1/layer1.1/conv1/Conv] RTYPE[71](_noname)
+          ldp PREG[0x10000006] RTYPE[0x47](_noname)
+          ldc CST[0x8] RTYPE[0x1d](_noname)
+          ldc CST[0x9] RTYPE[0x1e](_noname)
+      stp PREG[0x10000008] ID(0x27) LINE(0:0:0)
+        NN.relu ATTR[name=/layer1/layer1.1/relu/Relu] RTYPE[0x48](_noname)
+          ldp PREG[0x10000007] RTYPE[0x48](_noname)
+      stp PREG[0x10000009] ID(0x2c) LINE(0:0:0)
+        NN.conv ATTR[strides=(1,1),pads=(1,1,1,1),kernel_shape=(3,3),group=1,dilations=(1,1),name=/layer1/layer1.1/conv2/Conv] RTYPE[73](_noname)
+          ldp PREG[0x10000008] RTYPE[0x49](_noname)
+          ldc CST[0xa] RTYPE[0x1f](_noname)
+          ldc CST[0xb] RTYPE[0x20](_noname)
+      stp PREG[0x1000000a] ID(0x30) LINE(0:0:0)
+        NN.add RTYPE[0x4a](_noname)
+          ldp PREG[0x10000009] RTYPE[0x4a](_noname)
+          ldp PREG[0x10000006] RTYPE[0x47](_noname)
+      stp PREG[0x1000000b] ID(0x33) LINE(0:0:0)
+        NN.relu ATTR[name=/layer1/layer1.1/relu_1/Relu] RTYPE[0x4b](_noname)
+          ldp PREG[0x1000000a] RTYPE[0x4b](_noname)
+      stp PREG[0x1000000c] ID(0x38) LINE(0:0:0)
+        NN.conv ATTR[strides=(1,1),pads=(1,1,1,1),kernel_shape=(3,3),group=1,dilations=(1,1),name=/layer1/layer1.2/conv1/Conv] RTYPE[76](_noname)
+          ldp PREG[0x1000000b] RTYPE[0x4c](_noname)
+          ldc CST[0xc] RTYPE[0x21](_noname)
+          ldc CST[0xd] RTYPE[0x22](_noname)
+      stp PREG[0x1000000d] ID(0x3b) LINE(0:0:0)
+        NN.relu ATTR[name=/layer1/layer1.2/relu/Relu] RTYPE[0x4d](_noname)
+          ldp PREG[0x1000000c] RTYPE[0x4d](_noname)
+      stp PREG[0x1000000e] ID(0x40) LINE(0:0:0)
+        NN.conv ATTR[strides=(1,1),pads=(1,1,1,1),kernel_shape=(3,3),group=1,dilations=(1,1),name=/layer1/layer1.2/conv2/Conv] RTYPE[78](_noname)
+          ldp PREG[0x1000000d] RTYPE[0x4e](_noname)
+          ldc CST[0xe] RTYPE[0x23](_noname)
+          ldc CST[0xf] RTYPE[0x24](_noname)
+      stp PREG[0x1000000f] ID(0x44) LINE(0:0:0)
+        NN.add RTYPE[0x4f](_noname)
+          ldp PREG[0x1000000e] RTYPE[0x4f](_noname)
+          ldp PREG[0x1000000b] RTYPE[0x4c](_noname)
+      stp PREG[0x10000010] ID(0x47) LINE(0:0:0)
+        NN.relu ATTR[name=/layer1/layer1.2/relu_1/Relu] RTYPE[0x50](_noname)
+          ldp PREG[0x1000000f] RTYPE[0x50](_noname)
+      stp PREG[0x10000011] ID(0x4c) LINE(0:0:0)
+        NN.conv ATTR[strides=(2,2),pads=(1,1,1,1),kernel_shape=(3,3),group=1,dilations=(1,1),name=/layer2/layer2.0/conv1/Conv] RTYPE[81](_noname)
+          ldp PREG[0x10000010] RTYPE[0x51](_noname)
+          ldc CST[0x10] RTYPE[0x25](_noname)
+          ldc CST[0x11] RTYPE[0x26](_noname)
+      stp PREG[0x10000012] ID(0x4f) LINE(0:0:0)
+        NN.relu ATTR[name=/layer2/layer2.0/relu/Relu] RTYPE[0x52](_noname)
+          ldp PREG[0x10000011] RTYPE[0x52](_noname)
+      stp PREG[0x10000013] ID(0x54) LINE(0:0:0)
+        NN.conv ATTR[strides=(1,1),pads=(1,1,1,1),kernel_shape=(3,3),group=1,dilations=(1,1),name=/layer2/layer2.0/conv2/Conv] RTYPE[83](_noname)
+          ldp PREG[0x10000012] RTYPE[0x53](_noname)
+          ldc CST[0x12] RTYPE[0x27](_noname)
+          ldc CST[0x13] RTYPE[0x28](_noname)
+      stp PREG[0x10000014] ID(0x59) LINE(0:0:0)
+        NN.conv ATTR[strides=(2,2),pads=(0,0,0,0),kernel_shape=(1,1),group=1,dilations=(1,1),name=/layer2/layer2.0/downsample/downsample.0/Conv] RTYPE[81](_noname)
+          ldp PREG[0x10000010] RTYPE[0x51](_noname)
+          ldc CST[0x14] RTYPE[0x29](_noname)
+          ldc CST[0x15] RTYPE[0x2a](_noname)
+      stp PREG[0x10000015] ID(0x5d) LINE(0:0:0)
+        NN.add RTYPE[0x54](_noname)
+          ldp PREG[0x10000013] RTYPE[0x54](_noname)
+          ldp PREG[0x10000014] RTYPE[0x55](_noname)
+      stp PREG[0x10000016] ID(0x60) LINE(0:0:0)
+        NN.relu ATTR[name=/layer2/layer2.0/relu_1/Relu] RTYPE[0x56](_noname)
+          ldp PREG[0x10000015] RTYPE[0x56](_noname)
+      stp PREG[0x10000017] ID(0x65) LINE(0:0:0)
+        NN.conv ATTR[strides=(1,1),pads=(1,1,1,1),kernel_shape=(3,3),group=1,dilations=(1,1),name=/layer2/layer2.1/conv1/Conv] RTYPE[87](_noname)
+          ldp PREG[0x10000016] RTYPE[0x57](_noname)
+          ldc CST[0x16] RTYPE[0x2b](_noname)
+          ldc CST[0x17] RTYPE[0x2c](_noname)
+      stp PREG[0x10000018] ID(0x68) LINE(0:0:0)
+        NN.relu ATTR[name=/layer2/layer2.1/relu/Relu] RTYPE[0x58](_noname)
+          ldp PREG[0x10000017] RTYPE[0x58](_noname)
+      stp PREG[0x10000019] ID(0x6d) LINE(0:0:0)
+        NN.conv ATTR[strides=(1,1),pads=(1,1,1,1),kernel_shape=(3,3),group=1,dilations=(1,1),name=/layer2/layer2.1/conv2/Conv] RTYPE[89](_noname)
+          ldp PREG[0x10000018] RTYPE[0x59](_noname)
+          ldc CST[0x18] RTYPE[0x2d](_noname)
+          ldc CST[0x19] RTYPE[0x2e](_noname)
+      stp PREG[0x1000001a] ID(0x71) LINE(0:0:0)
+        NN.add RTYPE[0x5a](_noname)
+          ldp PREG[0x10000019] RTYPE[0x5a](_noname)
+          ldp PREG[0x10000016] RTYPE[0x57](_noname)
+      stp PREG[0x1000001b] ID(0x74) LINE(0:0:0)
+        NN.relu ATTR[name=/layer2/layer2.1/relu_1/Relu] RTYPE[0x5b](_noname)
+          ldp PREG[0x1000001a] RTYPE[0x5b](_noname)
+      stp PREG[0x1000001c] ID(0x79) LINE(0:0:0)
+        NN.conv ATTR[strides=(1,1),pads=(1,1,1,1),kernel_shape=(3,3),group=1,dilations=(1,1),name=/layer2/layer2.2/conv1/Conv] RTYPE[92](_noname)
+          ldp PREG[0x1000001b] RTYPE[0x5c](_noname)
+          ldc CST[0x1a] RTYPE[0x2f](_noname)
+          ldc CST[0x1b] RTYPE[0x30](_noname)
+      stp PREG[0x1000001d] ID(0x7c) LINE(0:0:0)
+        NN.relu ATTR[name=/layer2/layer2.2/relu/Relu] RTYPE[0x5d](_noname)
+          ldp PREG[0x1000001c] RTYPE[0x5d](_noname)
+      stp PREG[0x1000001e] ID(0x81) LINE(0:0:0)
+        NN.conv ATTR[strides=(1,1),pads=(1,1,1,1),kernel_shape=(3,3),group=1,dilations=(1,1),name=/layer2/layer2.2/conv2/Conv] RTYPE[94](_noname)
+          ldp PREG[0x1000001d] RTYPE[0x5e](_noname)
+          ldc CST[0x1c] RTYPE[0x31](_noname)
+          ldc CST[0x1d] RTYPE[0x32](_noname)
+      stp PREG[0x1000001f] ID(0x85) LINE(0:0:0)
+        NN.add RTYPE[0x5f](_noname)
+          ldp PREG[0x1000001e] RTYPE[0x5f](_noname)
+          ldp PREG[0x1000001b] RTYPE[0x5c](_noname)
+      stp PREG[0x10000020] ID(0x88) LINE(0:0:0)
+        NN.relu ATTR[name=/layer2/layer2.2/relu_1/Relu] RTYPE[0x60](_noname)
+          ldp PREG[0x1000001f] RTYPE[0x60](_noname)
+      stp PREG[0x10000021] ID(0x8d) LINE(0:0:0)
+        NN.conv ATTR[strides=(2,2),pads=(1,1,1,1),kernel_shape=(3,3),group=1,dilations=(1,1),name=/layer3/layer3.0/conv1/Conv] RTYPE[97](_noname)
+          ldp PREG[0x10000020] RTYPE[0x61](_noname)
+          ldc CST[0x1e] RTYPE[0x33](_noname)
+          ldc CST[0x1f] RTYPE[0x34](_noname)
+      stp PREG[0x10000022] ID(0x90) LINE(0:0:0)
+        NN.relu ATTR[name=/layer3/layer3.0/relu/Relu] RTYPE[0x62](_noname)
+          ldp PREG[0x10000021] RTYPE[0x62](_noname)
+      stp PREG[0x10000023] ID(0x95) LINE(0:0:0)
+        NN.conv ATTR[strides=(1,1),pads=(1,1,1,1),kernel_shape=(3,3),group=1,dilations=(1,1),name=/layer3/layer3.0/conv2/Conv] RTYPE[99](_noname)
+          ldp PREG[0x10000022] RTYPE[0x63](_noname)
+          ldc CST[0x20] RTYPE[0x35](_noname)
+          ldc CST[0x21] RTYPE[0x36](_noname)
+      stp PREG[0x10000024] ID(0x9a) LINE(0:0:0)
+        NN.conv ATTR[strides=(2,2),pads=(0,0,0,0),kernel_shape=(1,1),group=1,dilations=(1,1),name=/layer3/layer3.0/downsample/downsample.0/Conv] RTYPE[97](_noname)
+          ldp PREG[0x10000020] RTYPE[0x61](_noname)
+          ldc CST[0x22] RTYPE[0x37](_noname)
+          ldc CST[0x23] RTYPE[0x38](_noname)
+      stp PREG[0x10000025] ID(0x9e) LINE(0:0:0)
+        NN.add RTYPE[0x64](_noname)
+          ldp PREG[0x10000023] RTYPE[0x64](_noname)
+          ldp PREG[0x10000024] RTYPE[0x65](_noname)
+      stp PREG[0x10000026] ID(0xa1) LINE(0:0:0)
+        NN.relu ATTR[name=/layer3/layer3.0/relu_1/Relu] RTYPE[0x66](_noname)
+          ldp PREG[0x10000025] RTYPE[0x66](_noname)
+      stp PREG[0x10000027] ID(0xa6) LINE(0:0:0)
+        NN.conv ATTR[strides=(1,1),pads=(1,1,1,1),kernel_shape=(3,3),group=1,dilations=(1,1),name=/layer3/layer3.1/conv1/Conv] RTYPE[103](_noname)
+          ldp PREG[0x10000026] RTYPE[0x67](_noname)
+          ldc CST[0x24] RTYPE[0x39](_noname)
+          ldc CST[0x25] RTYPE[0x3a](_noname)
+      stp PREG[0x10000028] ID(0xa9) LINE(0:0:0)
+        NN.relu ATTR[name=/layer3/layer3.1/relu/Relu] RTYPE[0x68](_noname)
+          ldp PREG[0x10000027] RTYPE[0x68](_noname)
+      stp PREG[0x10000029] ID(0xae) LINE(0:0:0)
+        NN.conv ATTR[strides=(1,1),pads=(1,1,1,1),kernel_shape=(3,3),group=1,dilations=(1,1),name=/layer3/layer3.1/conv2/Conv] RTYPE[105](_noname)
+          ldp PREG[0x10000028] RTYPE[0x69](_noname)
+          ldc CST[0x26] RTYPE[0x3b](_noname)
+          ldc CST[0x27] RTYPE[0x3c](_noname)
+      stp PREG[0x1000002a] ID(0xb2) LINE(0:0:0)
+        NN.add RTYPE[0x6a](_noname)
+          ldp PREG[0x10000029] RTYPE[0x6a](_noname)
+          ldp PREG[0x10000026] RTYPE[0x67](_noname)
+      stp PREG[0x1000002b] ID(0xb5) LINE(0:0:0)
+        NN.relu ATTR[name=/layer3/layer3.1/relu_1/Relu] RTYPE[0x6b](_noname)
+          ldp PREG[0x1000002a] RTYPE[0x6b](_noname)
+      stp PREG[0x1000002c] ID(0xba) LINE(0:0:0)
+        NN.conv ATTR[strides=(1,1),pads=(1,1,1,1),kernel_shape=(3,3),group=1,dilations=(1,1),name=/layer3/layer3.2/conv1/Conv] RTYPE[108](_noname)
+          ldp PREG[0x1000002b] RTYPE[0x6c](_noname)
+          ldc CST[0x28] RTYPE[0x3d](_noname)
+          ldc CST[0x29] RTYPE[0x3e](_noname)
+      stp PREG[0x1000002d] ID(0xbd) LINE(0:0:0)
+        NN.relu ATTR[name=/layer3/layer3.2/relu/Relu] RTYPE[0x6d](_noname)
+          ldp PREG[0x1000002c] RTYPE[0x6d](_noname)
+      stp PREG[0x1000002e] ID(0xc2) LINE(0:0:0)
+        NN.conv ATTR[strides=(1,1),pads=(1,1,1,1),kernel_shape=(3,3),group=1,dilations=(1,1),name=/layer3/layer3.2/conv2/Conv] RTYPE[110](_noname)
+          ldp PREG[0x1000002d] RTYPE[0x6e](_noname)
+          ldc CST[0x2a] RTYPE[0x3f](_noname)
+          ldc CST[0x2b] RTYPE[0x40](_noname)
+      stp PREG[0x1000002f] ID(0xc6) LINE(0:0:0)
+        NN.add RTYPE[0x6f](_noname)
+          ldp PREG[0x1000002e] RTYPE[0x6f](_noname)
+          ldp PREG[0x1000002b] RTYPE[0x6c](_noname)
+      stp PREG[0x10000030] ID(0xc9) LINE(0:0:0)
+        NN.relu ATTR[name=/layer3/layer3.2/relu_1/Relu] RTYPE[0x70](_noname)
+          ldp PREG[0x1000002f] RTYPE[0x70](_noname)
+      stp PREG[0x10000031] ID(0xcc) LINE(0:0:0)
+        NN.global_average_pool RTYPE[0x71](_noname)
+          ldp PREG[0x10000030] RTYPE[0x71](_noname)
+      stp PREG[0x10000033] ID(0xd1) LINE(0:0:0)
+        NN.reshape ATTR[name=/Reshape] RTYPE[0x72](_noname)
+          ldp PREG[0x10000031] RTYPE[0x72](_noname)
+          ldc CST[0x2c] RTYPE[0x73](_noname)
+      st "output" VAR[0x10000001] ID(0xd6) LINE(0:0:0)
+        NN.gemm ATTR[transB=1,transA=0,beta=1,alpha=1,name=/fc/Gemm] RTYPE[117](_noname)
+          ldp PREG[0x10000033] RTYPE[0x75](_noname)
+          ldc CST[0] RTYPE[0x15](_noname)
+          ldc CST[0x1] RTYPE[0x16](_noname)
+      retv ID(0xd8) LINE(0:0:0)
+        ld "output" VAR[0x10000001] RTYPE[0x13](_noname)
+    end_block ID(0x3)
+

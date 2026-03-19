@@ -1,0 +1,78 @@
+# ACE DSL - Python DSL for ACE
+#
+# Build:
+#   pip install -e .           # Install Python package (dev mode)
+#   ./build.sh                 # Build C++ bindings + install package
+#
+# Test:
+#   pytest tests/              # Run unit tests
+#   python examples/test_*.py  # Run integration tests
+
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = [
+    "setuptools>=61.0",
+    "wheel",
+]
+
+[project]
+name = "ace-dsl"
+version = "0.1.0"
+description = "Python DSL for ACE (ANT Compiler for Encryption)"
+readme = "docs/README.md"
+authors = [
+    { name = "ACE Team" }
+]
+license = { text = "Proprietary" }
+requires-python = ">=3.8"
+
+dependencies = [
+    "typing-extensions",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-benchmark",
+    "black>=22.0.0",
+    "flake8>=5.0.0",
+    "mypy>=0.990",
+]
+onnx = [
+    "onnx>=1.12.0",
+]
+all = [
+    "ace-dsl[dev,onnx]",
+]
+
+[project.scripts]
+ace-compile = "ace_dsl.frontend.compile:main"
+
+[project.urls]
+Repository = "https://github.com/example/ace-compiler"
+
+[tool.setuptools.packages.find]
+include = [
+    "ace_dsl*",
+    "base_dsl*",
+]
+
+[tool.setuptools.package-data]
+"ace_dsl.bindings" = ["*.so"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "examples"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
+
+[tool.black]
+line-length = 100
+target-version = ["py38", "py39", "py310", "py311"]
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+

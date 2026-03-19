@@ -1,0 +1,22 @@
+# ACE DSL Requirements
+# ====================
+
+# Core dependencies (Python 3.8+)
+# No external dependencies for core DSL functionality
+
+# Optional: For ONNX model loading
+# onnx>=1.12.0
+
+# Optional: For testing
+# pytest>=7.0.0
+
+# Optional: For development
+# black>=22.0.0
+# flake8>=5.0.0
+# mypy>=0.990
+
+# Note: C++ bindings (air_builder, nn_addon, fhe_cmplr) 
+# must be built separately with CMake:
+#   cmake .. -DBUILD_PYTHON_BINDINGS=ON
+#   make
+
