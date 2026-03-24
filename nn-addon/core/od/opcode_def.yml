@@ -1,0 +1,368 @@
+domain:
+  id: 1
+  name: NN
+
+opcodes:
+  - name: invalid
+    prop: [NONE]
+    desc: Invalid operator
+  - name: add
+    args:
+      - name: a
+        type: Tensor
+        desc: Left-hand side tensor
+      - name: b
+        type: Tensor
+        desc: Right-hand side tensor
+    prop: [EXPR, ATTR]
+    desc: Add two tensors element-wise
+  - name: average_pool
+    args:
+      - name: t
+        type: Tensor
+        desc: Input tensor
+    prop: [EXPR, ATTR]
+    desc: Average pooling
+  - name: conv
+    args:
+      - name: x
+        type: Tensor
+        desc: Input tensor
+      - name: w
+        type: Tensor
+        desc: Filter tensor
+      - name: b
+        type: Tensor
+        desc: Bias tensor
+    prop: [EXPR, ATTR]
+    desc: 2D convolution
+  - name: flatten
+    args:
+      - name: t
+        type: Tensor
+        desc: Input tensor
+    prop: [EXPR, ATTR]
+    desc: Flatten the input tensor
+  - name: gemm
+    args:
+      - name: a
+        type: Tensor
+        desc: Left-hand side tensor
+      - name: b
+        type: Tensor
+        desc: Right-hand side tensor
+      - name: c
+        type: Tensor
+        desc: Bias tensor
+    prop: [EXPR, ATTR]
+    desc: General matrix multiplication
+  - name: global_average_pool
+    args:
+      - name: t
+        type: Tensor
+        desc: Input tensor
+    prop: [EXPR, ATTR]
+    desc: Global average pooling
+  - name: max_pool
+    args:
+      - name: t
+        type: Tensor
+        desc: Input tensor
+    prop: [EXPR, ATTR]
+    desc: Max pooling
+  - name: mul
+    args:
+      - name: a
+        type: Tensor
+        desc: Left-hand side tensor
+      - name: b
+        type: Tensor
+        desc: Right-hand side tensor
+    prop: [EXPR, ATTR]
+    desc: Multiply two tensors element-wise
+  - name: relu
+    args:
+      - name: t
+        type: Tensor
+        desc: Input tensor
+    prop: [EXPR, ATTR]
+    desc: Rectified linear unit activation function
+  - name: reshape
+    args:
+      - name: t
+        type: Tensor
+        desc: Input tensor
+      - name: shape
+        type: Shape
+        desc: Target shape
+    prop: [EXPR, ATTR]
+    desc: Reshape the input tensor
+  - name: strided_slice
+    args:
+      - name: t
+        type: Tensor
+        desc: Input tensor
+      - name: begin
+        type: Shape
+        desc: Begin indices
+      - name: end
+        type: Shape
+        desc: End indices
+      - name: stride
+        type: Shape
+        desc: Stride
+    prop: [EXPR, ATTR]
+    desc: Extract a strided slice from the input tensor
+  - name: sub
+    args:
+      - name: a
+        type: Tensor
+        desc: Left-hand side tensor
+      - name: b
+        type: Tensor
+        desc: Right-hand side tensor
+    prop: [EXPR]
+    desc: Subtract two tensors element-wise
+  - name: rmsnorm
+    args:
+      - name: input
+        type: Tensor
+        desc: Input
+      - name: weight
+        type: Tensor
+        desc: Weight
+    prop: [EXPR]
+    desc: Root mean square normalization
+  - name: matmul
+    args:
+      - name: a
+        type: Tensor
+        desc: Left-hand side tensor
+      - name: b
+        type: Tensor
+        desc: Right-hand side tensor
+    prop: [EXPR]
+    desc: Matrix multiplication
+  - name: rope_rotary
+    args:
+      - name: t
+        type: Tensor
+        desc: Input tensor
+      - name: pos
+        type: int
+        desc: Position
+      - name: dim
+        type: int
+        desc: Dimension
+    prop: [EXPR]
+    desc: Rope rotary operation
+  - name: reshape_kv
+    arg_num: 3
+    prop: [EXPR]
+    desc: Reshape key and value tensors
+  - name: repeat_kv
+    arg_num: 2
+    prop: [EXPR]
+    desc: Repeat key and value tensors
+  - name: transpose
+    args:
+      - name: t
+        type: Tensor
+        desc: Input tensor
+      - name: a
+        type: int
+        desc: Axis A
+      - name: b
+        type: int
+        desc: Axis B
+    prop: [EXPR]
+  - name: sqrt
+    args:
+      - name: t
+        type: Tensor
+        desc: Input tensor
+    prop: [EXPR]
+    desc: Square root
+  - name: divide
+    args:
+      - name: a
+        type: Tensor
+        desc: Left-hand side tensor
+      - name: b
+        type: Tensor
+        desc: Right-hand side tensor
+    prop: [EXPR]
+    desc: Divide two tensors element-wise
+  - name: concat
+    args:
+      - name: a
+        type: Tensor
+        desc: Left-hand side tensor
+      - name: b
+        type: Tensor
+        desc: Right-hand side tensor
+    prop: [EXPR, ATTR]
+  - name: update_kcache
+    args:
+      - name: t
+        type: Tensor
+        desc: Input tensor
+      - name: pos
+        type: int
+        desc: Position
+      - name: dim
+        type: int
+        desc: Dimension
+      - name: n_heads
+        type: int
+        desc: Number of heads
+      - name: len_pad
+        type: int
+        desc: Padding length
+    prop: [EXPR]
+  - name: update_vcache
+    args:
+      - name: t
+        type: Tensor
+        desc: Input tensor
+      - name: pos
+        type: int
+        desc: Position
+      - name: dim
+        type: int
+        desc: Dimension
+      - name: n_heads
+        type: int
+        desc: Number of heads
+      - name: len_pad
+        type: int
+        desc: Padding length
+    prop: [EXPR]
+  - name: bmm
+    args:
+      - name: inp_tensor
+        type: Tensor
+        desc: Input tensor
+      - name: cache_tensor
+        type: Tensor
+        desc: Cache tensor
+      - name: pos
+        type: int
+        desc: Position
+      - name: n_heads
+        type: int
+        desc: Number of heads
+      - name: len_pad
+        type: int
+        desc: Padding length
+    prop: [EXPR]
+  - name: swiglu
+    args:
+      - name: inp_tensor_1
+        type: Tensor
+        desc: Input tensor 1
+      - name: inp_tensor_2
+        type: Tensor
+        desc: Input tensor 2
+    prop: [EXPR]
+  - name: rope
+    args:
+      - name: input
+        type: Tensor
+        desc: Input
+      - name: n_heads
+        type: int
+        desc: Number of heads
+      - name: Weight_1
+        type: Tensor
+        desc: Weight 1
+      - name: Weight_2
+        type: Tensor
+        desc: Weight 2
+      - name: Weight_3
+        type: Tensor
+        desc: Weight 3
+      - name: Weight_4
+        type: Tensor
+        desc: Weight 4
+    prop: [EXPR]
+  - name: upd_kv
+    args:
+      - name: input_1
+        type: Tensor
+        desc: Input 1
+      - name: input_2
+        type: Tensor
+        desc: Input 2
+      - name: pos
+        type: int
+        desc: Position
+    prop: [EXPR]
+  - name: comp_mha
+    args:
+      - name: input_1
+        type: Tensor
+        desc: Input 1
+      - name: input_2
+        type: Tensor
+        desc: Input 2
+      - name: input_3
+        type: Tensor
+        desc: Input 3
+      - name: n_heads
+        type: int
+        desc: Number of heads
+      - name: pos
+        type: int
+        desc: Position
+    prop: [EXPR]
+  - name: softmax
+    args:
+      - name: input
+        type: Tensor
+        desc: Input
+      - name: n_heads
+        type: int
+        desc: Number of heads
+      - name: pos
+        type: int
+        desc: Position
+    prop: [EXPR]
+  - name: upd_mha
+    args:
+      - name: input_1
+        type: Tensor
+        desc: Input 1
+      - name: input_2
+        type: Tensor
+        desc: Input 2
+      - name: input_3
+        type: Tensor
+        desc: Input 3
+      - name: n_heads
+        type: int
+        desc: Number of heads
+      - name: pos
+        type: int
+        desc: Position
+    prop: [EXPR]
+  - name: accum
+    args:
+      - name: input_1
+        type: Tensor
+        desc: Input 1
+      - name: input_2
+        type: Tensor
+        desc: Input 2
+    prop: [EXPR]
+  - name: silu
+    args:
+      - name: input_1
+        type: Tensor
+        desc: Input 1
+    prop: [EXPR]
+
+namespace:
+  decl: nn,core
+
+guard: NN_CORE_OPCODE_H

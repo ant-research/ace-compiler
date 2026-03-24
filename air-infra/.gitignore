@@ -1,0 +1,61 @@
+## common ignore rule:
+.vscode
+.cloudide
+.DS_Store
+.mypy_cache
+build
+debug
+*.jpg
+*.onnx
+*.pth
+*.diff
+*/param-*.data
+*/d*-*.outputs
+*/d*-*.data
+
+
+## C/C++ ignore rule:
+
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+
+## Python ignore rule:
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# meta info
+*.egg-info

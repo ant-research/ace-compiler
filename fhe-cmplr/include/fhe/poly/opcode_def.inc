@@ -1,0 +1,84 @@
+//-*-c++-*-
+//=============================================================================
+//
+// Copyright (c) Ant Group Co., Ltd
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//=============================================================================
+
+/**
+ * @brief Defines all POLYNOMIAL OPCODE in this file with the following format:
+ *   DEF_OPCODE(NAME, name, category, kid_num, fld_num, property)
+ *
+ */
+
+DEF_OPCODE(INVALID, invalid, 0, 0, PROP_EXPR)
+// memory related op
+DEF_OPCODE(ALLOC, alloc, 3, 0, PROP_EXPR)
+DEF_OPCODE(FREE, free, 1, 0, PROP_STMT)
+DEF_OPCODE(INIT_CIPH_SAME_SCALE, init_ciph_same_scale, 3, 0, PROP_STMT)
+DEF_OPCODE(INIT_CIPH_UP_SCALE, init_ciph_up_scale, 3, 0, PROP_STMT)
+DEF_OPCODE(INIT_CIPH_DOWN_SCALE, init_ciph_down_scale, 2, 0, PROP_STMT)
+// polynomial operation related op
+DEF_OPCODE(NTT, ntt, 1, 0, PROP_EXPR|PROP_ATTR)
+DEF_OPCODE(INTT, intt, 1, 0, PROP_EXPR|PROP_ATTR)
+DEF_OPCODE(ADD, add, 2, 0, PROP_EXPR|PROP_ATTR)
+DEF_OPCODE(SUB, sub, 2, 0, PROP_EXPR|PROP_ATTR)
+DEF_OPCODE(MUL, mul, 2, 0, PROP_EXPR|PROP_ATTR)
+DEF_OPCODE(ADD_EXT, add_ext, 2, 0, PROP_EXPR|PROP_ATTR)
+DEF_OPCODE(SUB_EXT, sub_ext, 2, 0, PROP_EXPR|PROP_ATTR)
+DEF_OPCODE(MUL_EXT, mul_ext, 2, 0, PROP_EXPR|PROP_ATTR)
+DEF_OPCODE(RESCALE, rescale, 1, 0, PROP_EXPR|PROP_LIB_CALL|PROP_ATTR)
+DEF_OPCODE(ROTATE, rotate, 2, 0, PROP_EXPR|PROP_ATTR)
+DEF_OPCODE(DECOMP, decomp, 2, 0, PROP_EXPR)
+DEF_OPCODE(DECOMP_MODUP, decomp_modup, 2, 0, PROP_EXPR)
+DEF_OPCODE(AUTO_ORDER, auto_order, 1, 0, PROP_EXPR)
+DEF_OPCODE(MOD_UP, mod_up, 2, 0, PROP_EXPR)
+DEF_OPCODE(MOD_DOWN, mod_down, 1, 0, PROP_EXPR|PROP_LIB_CALL|PROP_ATTR)
+DEF_OPCODE(EXTRACT, extract, 3, 0, PROP_EXPR|PROP_ATTR)
+// polynomial field access ops
+DEF_OPCODE(COEFFS, coeffs, 2, 0, PROP_EXPR)
+DEF_OPCODE(SET_COEFFS, set_coeffs, 3, 0, PROP_STMT | PROP_LIB_CALL)
+DEF_OPCODE(LEVEL, level, 1, 0, PROP_EXPR)
+DEF_OPCODE(SET_LEVEL, set_level, 2, 0, PROP_STMT)
+DEF_OPCODE(NUM_P, num_p, 1, 0, PROP_EXPR)
+DEF_OPCODE(NUM_ALLOC, num_alloc, 1, 0, PROP_EXPR)
+DEF_OPCODE(NUM_DECOMP, num_decomp, 1, 0, PROP_EXPR)
+// scheme related op
+DEF_OPCODE(DEGREE, degree, 0, 0, PROP_EXPR)
+DEF_OPCODE(Q_MODULUS, q_modulus, 0, 0, PROP_EXPR)
+DEF_OPCODE(P_MODULUS, p_modulus, 0, 0, PROP_EXPR)
+// key related op
+DEF_OPCODE(SWK, swk, 2, 0, PROP_EXPR)
+DEF_OPCODE(PK0_AT, pk0_at, 2, 0, PROP_EXPR|PROP_LIB_CALL)
+DEF_OPCODE(PK1_AT, pk1_at, 2, 0, PROP_EXPR|PROP_LIB_CALL)
+// hardware related op
+DEF_OPCODE(HW_NTT, hw_ntt, 2, 0, PROP_EXPR | PROP_LIB_CALL)
+DEF_OPCODE(HW_INTT, hw_intt, 2, 0, PROP_EXPR | PROP_LIB_CALL)
+DEF_OPCODE(HW_MODADD, hw_modadd, 3, 0, PROP_EXPR | PROP_LIB_CALL)
+DEF_OPCODE(HW_MODSUB, hw_modsub, 3, 0, PROP_EXPR | PROP_LIB_CALL)
+DEF_OPCODE(HW_MODMUL, hw_modmul, 3, 0, PROP_EXPR | PROP_LIB_CALL)
+DEF_OPCODE(HW_ROTATE, hw_rotate, 3, 0, PROP_EXPR | PROP_LIB_CALL)
+DEF_OPCODE(MODSWITCH, modswitch, 1, 0, PROP_EXPR | PROP_LIB_CALL)
+
+DEF_OPCODE(INIT_POLY, init_poly, 3, 0, PROP_STMT)
+DEF_OPCODE(INIT_POLY_BY_OPND, init_poly_by_opnd, 4, 0, PROP_STMT)
+DEF_OPCODE(EXTEND, extend, 1, 0, PROP_EXPR | PROP_LIB_CALL|PROP_ATTR)
+DEF_OPCODE(PRECOMP, precomp, 1, 1, PROP_EXPR|PROP_ATTR)
+DEF_OPCODE(DOT_PROD, dot_prod, 3, 0, PROP_EXPR|PROP_LIB_CALL|PROP_ATTR)
+DEF_OPCODE(SWK_C0, swk_c0, 2, 0, PROP_EXPR|PROP_LIB_CALL)
+DEF_OPCODE(SWK_C1, swk_c1, 2, 0, PROP_EXPR|PROP_LIB_CALL)
+
+// fused op
+DEF_OPCODE(MOD_DOWN_FUSE1, mod_down_fuse1, 1, 0, PROP_EXPR|PROP_LIB_CALL)
+DEF_OPCODE(PREC_PLAIN, prec_plain, 5, 0, PROP_EXPR|PROP_ATTR|PROP_LIB_CALL)
+DEF_OPCODE(MULP_FAST, mulp_fast, 3, 0, PROP_EXPR|PROP_LIB_CALL)
+
+DEF_OPCODE(MAC, mac, 3, 0, PROP_EXPR|PROP_ATTR)
+DEF_OPCODE(MAC_EXT, mac_ext, 3, 0, PROP_EXPR|PROP_ATTR)
+DEF_OPCODE(CONCAT, concat, 2, 0, PROP_EXPR|PROP_ATTR)
+DEF_OPCODE(BCONV, bconv, 4, 0, PROP_EXPR|PROP_ATTR)
+DEF_OPCODE(BSWITCH, bswitch, 4, 0, PROP_EXPR|PROP_ATTR)
+DEF_OPCODE(RAISE_MOD, raise_mod, 2, 0, PROP_EXPR|PROP_ATTR)
+
+DEF_OPCODE(ALLOC_N, alloc_n, 4, 0, PROP_EXPR)
