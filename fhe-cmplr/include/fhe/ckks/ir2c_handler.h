@@ -231,7 +231,10 @@ public:
     air::base::NODE_PTR parent = ctx.Parent(1);
 
     AIR_ASSERT(parent != air::base::Null_ptr && parent->Is_st());
-    if (ctx.Provider() == core::PROVIDER::ANT) {
+    bool emit_data_file = ctx.Provider() == core::PROVIDER::ANT ||
+                          (ctx.Provider() == core::PROVIDER::PHANTOM &&
+                           ctx.Emit_data_file());
+    if (emit_data_file) {
       ctx.template Emit_encode<RETV, VISITOR>(visitor, parent, node);
     } else {
       ctx.template Emit_runtime_encode<RETV, VISITOR>(visitor, parent, node);

@@ -4,9 +4,12 @@
 #include "common/common.h"
 #include "common/error.h"
 #include "common/io_api.h"
+#include "common/pt_mgr.h"
 #include "common/rt_api.h"
 #include "common/rtlib_timing.h"
 #include "boot/Bootstrapper.cuh"
+
+#include <cstdlib>
 
 using namespace phantom;
 using namespace phantom::arith;
@@ -333,11 +336,15 @@ public:
         {
             bits.push_back(prog_param->_scaling_mod_size);
         }
-
-        bits.push_back(prog_param->_first_mod_size);
+        constexpr size_t special_modulus_size = 4;
+        for (size_t i = 0; i < special_modulus_size; i++)
+        {
+            bits.push_back(prog_param->_first_mod_size);
+        }
         parms.set_coeff_modulus(phantom::arith::CoeffModulus::Create(degree, bits));
         parms.set_secret_key_hamming_weight(192);
-        _num_prime_parts = bits.size();
+        parms.set_special_modulus_size(special_modulus_size);
+        _num_prime_parts = bits.size() - special_modulus_size + 1;
         phantom::arith::sec_level_type sec = phantom::arith::sec_level_type::tc128;
         switch (prog_param->_sec_level)
         {
@@ -556,10 +563,19 @@ void Prepare_context()
     Init_rtlib_timing();
     Io_init();
     PHANTOM_CONTEXT::Init_context();
+    RT_DATA_INFO *data_info = Get_rt_data_info();
+    if (data_info != nullptr)
+    {
+        Pt_mgr_init(data_info->_file_name);
+    }
 }
 
 void Finalize_context()
 {
+    if (Get_rt_data_info() != nullptr)
+    {
+        Pt_mgr_fini();
+    }
     PHANTOM_CONTEXT::Fini_context();
     Io_fini();
 }
