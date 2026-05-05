@@ -17,6 +17,7 @@ on:
     branches:
       - master
       - 'release/*'
+      - 'opensource/ci-evaluation'
   pull_request:
     branches:
       - master
