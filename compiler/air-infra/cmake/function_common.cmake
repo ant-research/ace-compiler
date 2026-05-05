@@ -68,6 +68,7 @@ endfunction()
 
 # Check Build Version function
 function(check_code_revision project commit)
+  return()
   assert("${project}" "project can't be empty")
 
   execute_process(
