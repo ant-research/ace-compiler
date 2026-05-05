@@ -15,7 +15,7 @@ on:
     branches:
       - master
       - 'release/*'
-      - 'opensource/ci-evaluation'
+      - 'ci/*'
   workflow_dispatch:
     inputs:
       cuda_version:
