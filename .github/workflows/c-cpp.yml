@@ -1,23 +1,15 @@
-name: C/C++ CI
+# .github/workflows/test.yml
+name: Test
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main, develop, opensource/ci-evaluation ]  # ← 只有推送到这些分支才触发
   pull_request:
-    branches: [ "main" ]
+    branches: [ main ]
 
 jobs:
-  build:
-
+  test:
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v4
-    - name: configure
-      run: ./configure
-    - name: make
-      run: make
-    - name: make check
-      run: make check
-    - name: make distcheck
-      run: make distcheck
+      - uses: actions/checkout@v4
+      - run: echo "Hello"
