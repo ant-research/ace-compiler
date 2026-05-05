@@ -113,7 +113,7 @@ jobs:
     name: Publish Wheels
     runs-on: ubuntu-22.04
     needs: [build-cpu-wheels, build-cuda-wheels]
-    if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/opensource/')
     steps:
       - uses: actions/checkout@v4
 
