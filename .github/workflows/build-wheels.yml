@@ -1,0 +1,122 @@
+# ============================================================
+# ACE-Compiler Wheel Build CI
+#
+# Builds wheels for Python + Torch + CUDA combinations.
+# Default: CUDA 12.4 + Python 3.10 + Torch 2.5.0
+#
+# Usage:
+#   - Push to master: builds all configured combinations
+#   - Pull request: builds only primary combination
+#   - Manual dispatch: select specific combination
+# ============================================================
+
+name: Build Wheels
+
+on:
+  push:
+    branches:
+      - master
+      - 'release/*'
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+    inputs:
+      torch_version:
+        description: 'PyTorch version'
+        required: false
+        default: '2.5.0'
+        type: choice
+        options:
+          - '2.5.0'
+      cuda_version:
+        description: 'CUDA version'
+        required: false
+        default: 'cu124'
+        type: choice
+        options:
+          - 'cu124'
+          - 'cu125'
+          - 'cu126'
+
+env:
+  PIP_INDEX_URL: https://pypi.org/simple
+
+jobs:
+  # Build dev image
+  build-dev:
+    name: Build Dev Image (CUDA ${{ matrix.cu_version }})
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { cu_version: "cu124", torch: "2.5.0", torchvision: "0.20.0", torchaudio: "2.5.0", torch_index: "https://download.pytorch.org/whl/cu124", base: "nvidia/cuda:12.4.0-devel-ubuntu22.04" }
+          # - { cu_version: "cu125", torch: "2.5.0", torchvision: "0.20.0", torchaudio: "2.5.0", torch_index: "https://download.pytorch.org/whl/cu125", base: "nvidia/cuda:12.5.0-devel-ubuntu22.04" }
+          # - { cu_version: "cu126", torch: "2.6.0", torchvision: "0.21.0", torchaudio: "2.6.0", torch_index: "https://download.pytorch.org/whl/cu126", base: "nvidia/cuda:12.6.0-devel-ubuntu24.04" }
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build dev image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/Dockerfile.dev.cuda
+          push: false
+          tags: ace-dev-${{ matrix.cu_version }}:latest
+          build-args: |
+            BASE_IMAGE=${{ matrix.base }}
+            PIP_INDEX_URL=${{ env.PIP_INDEX_URL }}
+            TORCH_VERSION=${{ matrix.torch }}
+            TORCHVISION_VERSION=${{ matrix.torchvision }}
+            TORCHAUDIO_VERSION=${{ matrix.torchaudio }}
+            CU_VERSION=${{ matrix.cu_version }}
+            TORCH_INDEX_URL=${{ matrix.torch_index }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build wheel
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}:/app \
+            -v ${{ github.workspace }}/dist:/wheels \
+            -e ACE_LOCAL_VERSION=${{ matrix.cu_version }} \
+            ace-dev-${{ matrix.cu_version }}:latest \
+            /bin/bash -c 'pip wheel --no-deps --no-build-isolation /app -w /wheels'
+
+      - name: Upload wheel artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheel-${{ matrix.cu_version }}
+          path: dist/*.whl
+          retention-days: 30
+
+  # Publish wheels (only on master)
+  publish-wheels:
+    name: Publish Wheels
+    runs-on: ubuntu-22.04
+    needs: [build-dev]
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download wheel artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: wheel-*
+          merge-multiple: true
+          path: dist/
+
+      - name: List wheels
+        run: |
+          echo "Built wheels:"
+          ls -la dist/*.whl
+
+      # - name: Publish to PyPI
+      #   run: |
+      #     pip install twine
+      #     twine upload -r pypi dist/*.whl

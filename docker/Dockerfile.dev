@@ -1,0 +1,55 @@
+# ============================================================
+# ACE-Compiler Dev Image (CPU)
+# Based on Ubuntu, adds system deps + Python + pip deps
+#
+# Internal:  based on opencc/base:ubuntu* (PIP_INDEX_URL already set)
+# External:  based on ubuntu:* (pass PIP_INDEX_URL as build-arg)
+#
+# Usage:
+#   docker build --build-arg BASE_IMAGE=ubuntu:22.04 \
+#                --build-arg TORCH_VERSION=2.5.0 \
+#                --build-arg TORCHVISION_VERSION=0.20.0 \
+#                --build-arg TORCHAUDIO_VERSION=2.5.0 \
+#                -f docker/Dockerfile.dev -t ace/dev:ubuntu22.04 .
+# ============================================================
+
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git curl wget vim gdb time doxygen graphviz autoconf \
+    build-essential gcc g++ clang-15 nlohmann-json3-dev \
+    cmake make ninja-build \
+    python3 python3-dev python3-pip python3-venv pylint \
+    libprotobuf-dev protobuf-compiler libssl-dev libtool \
+    libgmp3-dev libomp5 libomp-dev libntl-dev pybind11-dev && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Create virtual environment and configure pip
+ARG PIP_INDEX_URL=https://pypi.org/simple
+RUN python3 -m venv /opt/ace-env && \
+    /opt/ace-env/bin/pip config set global.index-url ${PIP_INDEX_URL} && \
+    /opt/ace-env/bin/pip install --no-cache-dir --upgrade pip setuptools wheel
+
+# Set PATH to use venv
+ENV PATH=/opt/ace-env/bin:$PATH
+
+# Install common Python dependencies
+COPY requirements-base.txt /tmp/requirements-base.txt
+RUN pip install --no-cache-dir -r /tmp/requirements-base.txt
+
+# Install PyTorch CPU
+ARG TORCH_VERSION=2.5.0
+ARG TORCHVISION_VERSION=0.20.0
+ARG TORCHAUDIO_VERSION=2.5.0
+ARG TORCH_INDEX_URL=https://download.pytorch.org/whl/cpu
+RUN pip install --no-cache-dir \
+        --extra-index-url ${TORCH_INDEX_URL} \
+        torch==${TORCH_VERSION}+cpu \
+        torchvision==${TORCHVISION_VERSION}+cpu \
+        torchaudio==${TORCHAUDIO_VERSION}+cpu \
+        torchsummary
+
+WORKDIR /app
+CMD ["/bin/bash"]

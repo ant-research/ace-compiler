@@ -1,0 +1,197 @@
+# ============================================================
+# ACE-FHE Internal CI Configuration
+# Main pipeline: build, test, publish wheels
+#
+# Dev images (pre-built):
+#   - reg.docker.alibaba-inc.com/ace/dev:ubuntu22.04
+#   - reg.docker.alibaba-inc.com/ace/dev:ubuntu24.04
+# ============================================================
+
+version: "2.0"
+
+parameters:
+  # Internal artifact registry
+  artUrlSimple: "https://artifacts.antgroup-inc.cn/artifact/repositories/simple-dev"
+
+  # Dev images (pre-built by .aci/build-dev-images.sh)
+  imageDevCUDA: "reg.docker.alibaba-inc.com/ace/dev:ubuntu24.04"
+
+stages:
+  - BUILD
+  - UNIT_TEST
+  - E2E_TEST
+  - PUBLISH
+
+components:
+  # Build component: clones repo and builds C++ extension
+  ace-build:
+    kind: agent
+    inputs:
+      arch:
+        description: 'arch'
+        defaultValue: x86_64
+      image:
+        description: 'build image'
+        defaultValue: ${{parameters.imageDevCUDA}}
+      branch:
+        description: 'branch'
+        defaultValue: ${{vcs.ref}}
+      token:
+        description: 'tokenCI'
+        defaultValue: ${{secrets.ciToken}}
+      cacheKey:
+        description: 'cacheKey'
+        defaultValue: ''
+      artifact:
+        description: 'artifact'
+        defaultValue: ''
+      option:
+        description: 'buildOptions'
+        defaultValue: 'Release'
+      parall:
+        description: 'parallNum'
+        defaultValue: 20
+    execute:
+      agent:
+        arch: ${{inputs.arch}}
+        container:
+          image: ${{inputs.image}}
+        resourceClass: XL
+      steps:
+        - name: shell
+          displayName: 'CLONE'
+          with:
+            script: |
+              git clone -b ${{inputs.branch}} https://git:${{inputs.token}}@code.alipay.com/air-infra/ace.git
+        - name: shell
+          displayName: 'BUILD'
+          with:
+            script: |
+              cd ace && CMAKE_BUILD_TYPE='${{inputs.option}}' ./scripts/dev-build.sh
+        - name: oss-cache
+          displayName: 'CACHE-UPLOAD'
+          with:
+            type: upload
+            key: ${{inputs.cacheKey}}
+            paths: ace
+            forceUpload: true
+
+  # Test component: restores cache and runs pytest
+  ace-test:
+    kind: agent
+    inputs:
+      arch:
+        description: 'arch'
+        defaultValue: x86_64
+      image:
+        description: 'test image'
+        defaultValue: ${{parameters.imageDevCUDA}}
+      cacheKey:
+        description: 'cacheKey'
+        defaultValue: ''
+      mark:
+        description: 'testMarks'
+        defaultValue: ''
+    execute:
+      agent:
+        arch: ${{inputs.arch}}
+        container:
+          image: ${{inputs.image}}
+        resourceClass: XL
+      steps:
+        - name: oss-cache
+          displayName: 'CACHE-RESTORE'
+          with:
+            type: restore
+            key: ${{inputs.cacheKey}}
+        - name: shell
+          displayName: 'Install Python deps'
+          with:
+            script: |
+              cd ace && ./scripts/dev-build.sh --install-only
+        - name: shell
+          displayName: 'Pytest'
+          with:
+            script: |
+              cd ace
+              pytest -v '${{inputs.mark}}' -k "not cuda" --junit-xml=report.xml
+
+jobs:
+  # Build Develop (Debug)
+  build-deb-x86_64:
+    id: build-deb-x86_64
+    stage: BUILD
+    component: ace-build
+    inputs:
+      cacheKey: ${{pipeline.id}}-build-deb-x86_64
+      option: Debug
+
+  # Build Develop (Release)
+  build-rel-x86_64:
+    id: build-rel-x86_64
+    stage: BUILD
+    component: ace-build
+    inputs:
+      cacheKey: ${{pipeline.id}}-build-rel-x86_64
+      option: Release
+
+  # Unit tests (Debug build)
+  ut-deb-x86_64:
+    stage: UNIT_TEST
+    component: ace-test
+    inputs:
+      cacheKey: ${{pipeline.id}}-build-deb-x86_64
+      mark: tests/test_unit
+
+  # Unit tests (Release build)
+  ut-rel-x86_64:
+    stage: UNIT_TEST
+    component: ace-test
+    inputs:
+      cacheKey: ${{pipeline.id}}-build-rel-x86_64
+      mark: tests/test_unit
+
+  # E2E tests (Debug build)
+  e2e-deb-x86_64:
+    stage: E2E_TEST
+    component: ace-test
+    inputs:
+      cacheKey: ${{pipeline.id}}-build-deb-x86_64
+      mark: tests/test_regression/test_torch_frontend.py::TestComputeModels::test_compute_success
+
+  # E2E tests (Release build)
+  e2e-rel-x86_64:
+    stage: E2E_TEST
+    component: ace-test
+    inputs:
+      cacheKey: ${{pipeline.id}}-build-rel-x86_64
+      mark: tests/test_regression/test_torch_frontend.py::TestComputeModels::test_compute_success
+
+  # Publish wheels to internal PyPI (only on master)
+  build-wheel:
+    stage: PUBLISH
+    id: build-wheel
+    component: pypi-artifact-uploader
+    inputs:
+      registry: "${{parameters.artUrlSimple}}/"
+      workdir: .
+      outDir: ./dist
+      artifactType: "wheel"
+      buildImage: ${{parameters.imageDevCUDA}}
+      buildCmd: "pip wheel --no-deps --no-build-isolation . -w dist"
+      computeType: xlarge
+    only:
+      - ^master$
+
+triggers:
+  git:
+    push:
+      changesIgnore:
+        - ^LEGAL.md$
+        - ^README.md$
+        - ^doc/**
+    pullRequest:
+      changesIgnore:
+        - ^LEGAL.md$
+        - ^README.md$
+        - ^doc/**

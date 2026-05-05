@@ -1,0 +1,22 @@
+# ============================================================
+# ACE-FHE Base Image Wrapper
+# Adds environment variables to external base image
+# ============================================================
+
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Asia/Shanghai
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+# Environment variables
+ENV PIP_INDEX_URL="https://mirrors.aliyun.com/pypi/simple/"
+ENV ARTIFACT_URL="https://artifacts.antgroup-inc.cn/artifact/repositories/simple-dev"
+ENV CMAKE_BUILD_TYPE="Release"
+
+ARG CI_TOKEN
+ENV CI_TOKEN=${CI_TOKEN}
+
+WORKDIR /workspace
+CMD ["/bin/bash"]
