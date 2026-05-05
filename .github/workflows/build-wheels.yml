@@ -128,3 +128,10 @@ jobs:
         run: |
           echo "Built wheels:"
           ls -la dist/*.whl
+
+      - name: Upload all wheels
+        uses: actions/upload-artifact@v4
+        with:
+          name: all-wheels
+          path: dist/*.whl
+          retention-days: 30
