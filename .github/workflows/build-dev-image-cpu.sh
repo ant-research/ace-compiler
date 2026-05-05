@@ -1,0 +1,61 @@
+# ============================================================
+# ACE-Compiler Dev Docker Image Build (CPU)
+#
+# Builds and pushes CPU-only dev Docker images to Docker Hub.
+# Supports multiple Ubuntu versions.
+#
+# Usage:
+#   - Manual dispatch: build and push CPU images
+#   - Scheduled: rebuild images weekly
+# ============================================================
+
+name: Build Dev Image (CPU)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * 0'  # Weekly on Sunday
+
+env:
+  DOCKERHUB_USER: ${{ secrets.DOCKERHUB_USER }}
+  DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+
+jobs:
+  build-cpu-images:
+    name: Build CPU Images
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { ubuntu: "22.04", torch: "2.5.0", torchvision: "0.20.0", torchaudio: "2.5.0", base: "ubuntu:22.04" }
+          - { ubuntu: "24.04", torch: "2.6.0", torchvision: "0.21.0", torchaudio: "2.6.0", base: "ubuntu:24.04" }
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ env.DOCKERHUB_USER }}
+          password: ${{ env.DOCKERHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/Dockerfile.dev
+          push: true
+          tags: opencc/dev:ubuntu${{ matrix.ubuntu }}
+          build-args: |
+            BASE_IMAGE=${{ matrix.base }}
+            PIP_INDEX_URL=https://pypi.org/simple
+            TORCH_VERSION=${{ matrix.torch }}
+            TORCHVISION_VERSION=${{ matrix.torchvision }}
+            TORCHAUDIO_VERSION=${{ matrix.torchaudio }}
+            TORCH_INDEX_URL=https://download.pytorch.org/whl/cpu
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
