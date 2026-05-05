@@ -12,6 +12,11 @@
 name: Build Dev Image (CPU)
 
 on:
+  push:
+    branches:
+      - master
+      - 'release/*'
+      - 'opensource/ci-evaluation'
   workflow_dispatch:
   schedule:
     - cron: '0 0 * * 0'  # Weekly on Sunday
