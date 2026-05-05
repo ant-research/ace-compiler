@@ -21,10 +21,13 @@ on:
       cuda_version:
         description: 'CUDA version'
         required: false
-        default: 'cu124'
+        default: 'all'
         type: choice
         options:
-          - 'cu124'
+          - 'all'
+          - '12.4.0'
+          - '12.5.0'
+          - '12.6.0'
   schedule:
     - cron: '0 0 * * 0'  # Weekly on Sunday
 
@@ -34,13 +37,15 @@ env:
 
 jobs:
   build-cuda-image:
-    name: Build CUDA Image (CUDA ${{ matrix.cu_version }})
+    name: Build CUDA Image
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
         include:
-          - { cu_version: "cu124", torch: "2.5.0", torchvision: "0.20.0", torchaudio: "2.5.0", torch_index: "https://download.pytorch.org/whl/cu124", base: "nvidia/cuda:12.4.0-devel-ubuntu22.04" }
+          - { cuda: "12.4.0", ubuntu: "22.04", torch: "2.5.0", torchvision: "0.20.0", torchaudio: "2.5.0", torch_index: "https://download.pytorch.org/whl/cu124", base: "nvidia/cuda:12.4.0-devel-ubuntu22.04" }
+          - { cuda: "12.5.0", ubuntu: "22.04", torch: "2.5.0", torchvision: "0.20.0", torchaudio: "2.5.0", torch_index: "https://download.pytorch.org/whl/cu125", base: "nvidia/cuda:12.5.0-devel-ubuntu22.04" }
+          - { cuda: "12.6.0", ubuntu: "24.04", torch: "2.6.0", torchvision: "0.21.0", torchaudio: "2.6.0", torch_index: "https://download.pytorch.org/whl/cu126", base: "nvidia/cuda:12.6.0-devel-ubuntu24.04" }
 
     steps:
       - uses: actions/checkout@v4
@@ -60,14 +65,13 @@ jobs:
           context: .
           file: docker/Dockerfile.dev.cuda
           push: true
-          tags: opencc/dev:${{ matrix.cu_version }}
+          tags: opencc/dev-cuda:${{ matrix.cuda }}-devel-ubuntu${{ matrix.ubuntu }}
           build-args: |
             BASE_IMAGE=${{ matrix.base }}
             PIP_INDEX_URL=https://pypi.org/simple
             TORCH_VERSION=${{ matrix.torch }}
             TORCHVISION_VERSION=${{ matrix.torchvision }}
             TORCHAUDIO_VERSION=${{ matrix.torchaudio }}
-            CU_VERSION=${{ matrix.cu_version }}
             TORCH_INDEX_URL=${{ matrix.torch_index }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
