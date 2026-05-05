@@ -36,7 +36,7 @@ RUN python3 -m venv /opt/ace-env && \
 ENV PATH=/opt/ace-env/bin:$PATH
 
 # Install common Python dependencies
-COPY docker/requirements-base.txt /tmp/requirements-base.txt
+COPY /docker/requirements-base.txt /tmp/requirements-base.txt
 RUN pip install --no-cache-dir -r /tmp/requirements-base.txt
 
 # Install PyTorch CPU
