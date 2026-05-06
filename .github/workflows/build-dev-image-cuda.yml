@@ -16,6 +16,7 @@ on:
       - master
       - 'release/*'
       - 'ci/*'
+      - 'opensource/*'
   workflow_dispatch:
     inputs:
       cuda_version:
@@ -43,9 +44,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { cuda: "12.4.0", ubuntu: "22.04", torch: "2.5.0", torchvision: "0.20.0", torchaudio: "2.5.0", torch_index: "https://download.pytorch.org/whl/cu124", base: "nvidia/cuda:12.4.0-devel-ubuntu22.04" }
-          - { cuda: "12.5.0", ubuntu: "22.04", torch: "2.5.0", torchvision: "0.20.0", torchaudio: "2.5.0", torch_index: "https://download.pytorch.org/whl/cu125", base: "nvidia/cuda:12.5.0-devel-ubuntu22.04" }
-          - { cuda: "12.6.0", ubuntu: "24.04", torch: "2.6.0", torchvision: "0.21.0", torchaudio: "2.6.0", torch_index: "https://download.pytorch.org/whl/cu126", base: "nvidia/cuda:12.6.0-devel-ubuntu24.04" }
+          - { cuda: "12.4.0", ubuntu: "22.04", torch: "2.5.0", torchvision: "0.20.0", torchaudio: "2.5.0", cu_version: "cu124", torch_index: "https://download.pytorch.org/whl/cu124", base: "nvidia/cuda:12.4.0-devel-ubuntu22.04" }
+          - { cuda: "12.5.0", ubuntu: "22.04", torch: "2.5.0", torchvision: "0.20.0", torchaudio: "2.5.0", cu_version: "cu125", torch_index: "https://download.pytorch.org/whl/cu125", base: "nvidia/cuda:12.5.0-devel-ubuntu22.04" }
+          - { cuda: "12.6.0", ubuntu: "24.04", torch: "2.6.0", torchvision: "0.21.0", torchaudio: "2.6.0", cu_version: "cu126", torch_index: "https://download.pytorch.org/whl/cu126", base: "nvidia/cuda:12.6.0-devel-ubuntu24.04" }
 
     steps:
       - uses: actions/checkout@v4
@@ -72,6 +73,7 @@ jobs:
             TORCH_VERSION=${{ matrix.torch }}
             TORCHVISION_VERSION=${{ matrix.torchvision }}
             TORCHAUDIO_VERSION=${{ matrix.torchaudio }}
+            CU_VERSION=${{ matrix.cu_version }}
             TORCH_INDEX_URL=${{ matrix.torch_index }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
