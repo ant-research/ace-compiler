@@ -45,6 +45,8 @@ RUN pip install --no-cache-dir -r /tmp/requirements-base.txt
 ARG TORCH_VERSION=2.5.0
 ARG TORCHVISION_VERSION=0.20.0
 ARG TORCHAUDIO_VERSION=2.5.0
+# CU_VERSION must match an available PyTorch wheel: cu118, cu121, cu124, cu126
+# CUDA 12.5.0 uses cu124 (no cu125 wheel exists; cu124 is forward-compatible)
 ARG CU_VERSION=cu124
 ARG TORCH_INDEX_URL=https://download.pytorch.org/whl/cu124
 RUN pip install --no-cache-dir \

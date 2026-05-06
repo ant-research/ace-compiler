@@ -16,7 +16,7 @@ on:
       - master
       - 'release/*'
       - 'ci/*'
-      - 'opensource/*'
+    #  - 'opensource/*'
   workflow_dispatch:
     inputs:
       cuda_version:
@@ -27,8 +27,8 @@ on:
         options:
           - 'all'
           - '12.4.0'
-          - '12.5.0'
           - '12.6.0'
+          - '13.0.0'
   schedule:
     - cron: '0 0 * * 0'  # Weekly on Sunday
 
@@ -44,9 +44,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { cuda: "12.4.0", ubuntu: "22.04", torch: "2.5.0", torchvision: "0.20.0", torchaudio: "2.5.0", cu_version: "cu124", torch_index: "https://download.pytorch.org/whl/cu124", base: "nvidia/cuda:12.4.0-devel-ubuntu22.04" }
-          - { cuda: "12.5.0", ubuntu: "22.04", torch: "2.5.0", torchvision: "0.20.0", torchaudio: "2.5.0", cu_version: "cu125", torch_index: "https://download.pytorch.org/whl/cu125", base: "nvidia/cuda:12.5.0-devel-ubuntu22.04" }
+          # CUDA 12.4 + torch 2.5.1 (cu124, also covers CUDA 12.5)
+          - { cuda: "12.4.0", ubuntu: "22.04", torch: "2.5.1", torchvision: "0.20.1", torchaudio: "2.5.1", cu_version: "cu124", torch_index: "https://download.pytorch.org/whl/cu124", base: "nvidia/cuda:12.4.0-devel-ubuntu22.04" }
+          # CUDA 12.6 + torch 2.6.0 (cu126)
           - { cuda: "12.6.0", ubuntu: "24.04", torch: "2.6.0", torchvision: "0.21.0", torchaudio: "2.6.0", cu_version: "cu126", torch_index: "https://download.pytorch.org/whl/cu126", base: "nvidia/cuda:12.6.0-devel-ubuntu24.04" }
+          # CUDA 13.0 + torch 2.11.0 (cu130, latest)
+          - { cuda: "13.0.0", ubuntu: "24.04", torch: "2.11.0", torchvision: "0.26.0", torchaudio: "2.11.0", cu_version: "cu130", torch_index: "https://download.pytorch.org/whl/cu130", base: "nvidia/cuda:13.0.0-devel-ubuntu24.04" }
 
     steps:
       - uses: actions/checkout@v4
@@ -66,7 +69,7 @@ jobs:
           context: .
           file: docker/Dockerfile.dev.cuda
           push: true
-          tags: opencc/dev-cuda:${{ matrix.cuda }}-devel-ubuntu${{ matrix.ubuntu }}
+          tags: opencc/dev-cuda:${{ matrix.cuda }}-devel-ubuntu${{ matrix.ubuntu }}-torch${{ matrix.torch }}
           build-args: |
             BASE_IMAGE=${{ matrix.base }}
             PIP_INDEX_URL=https://pypi.org/simple

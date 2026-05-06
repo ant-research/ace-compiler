@@ -48,14 +48,15 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { ubuntu: "22.04", torch: "2.5.0" }
+          - { ubuntu: "22.04", torch: "2.5.1" }
           - { ubuntu: "24.04", torch: "2.6.0" }
+          - { ubuntu: "24.04", torch: "2.11.0" }
 
     steps:
       - uses: actions/checkout@v4
 
       - name: Pull CPU image
-        run: docker pull ${DOCKER_IMAGE}:ubuntu${{ matrix.ubuntu }}
+        run: docker pull ${DOCKER_IMAGE}:ubuntu${{ matrix.ubuntu }}-torch${{ matrix.torch }}
 
       - name: Build wheel
         run: |
@@ -63,7 +64,7 @@ jobs:
             -v ${{ github.workspace }}:/app \
             -v ${{ github.workspace }}/dist:/wheels \
             -e ACE_LOCAL_VERSION=cpu \
-            ${DOCKER_IMAGE}:ubuntu${{ matrix.ubuntu }} \
+            ${DOCKER_IMAGE}:ubuntu${{ matrix.ubuntu }}-torch${{ matrix.torch }} \
             /bin/bash -c 'pip wheel --no-deps --no-build-isolation /app -w /wheels'
 
       - name: Upload wheel artifact
@@ -82,15 +83,15 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { cuda: "12.4.0", cuda_short: "124", ubuntu: "22.04" }
-          - { cuda: "12.5.0", cuda_short: "125", ubuntu: "22.04" }
-          - { cuda: "12.6.0", cuda_short: "126", ubuntu: "24.04" }
+          - { cuda: "12.4.0", cuda_short: "124", ubuntu: "22.04", torch: "2.5.1" }
+          - { cuda: "12.6.0", cuda_short: "126", ubuntu: "24.04", torch: "2.6.0" }
+          - { cuda: "13.0.0", cuda_short: "130", ubuntu: "24.04", torch: "2.11.0" }
 
     steps:
       - uses: actions/checkout@v4
 
       - name: Pull CUDA image
-        run: docker pull opencc/dev-cuda:${{ matrix.cuda }}-devel-ubuntu${{ matrix.ubuntu }}
+        run: docker pull opencc/dev-cuda:${{ matrix.cuda }}-devel-ubuntu${{ matrix.ubuntu }}-torch${{ matrix.torch }}
 
       - name: Build wheel
         run: |
@@ -98,13 +99,13 @@ jobs:
             -v ${{ github.workspace }}:/app \
             -v ${{ github.workspace }}/dist:/wheels \
             -e ACE_LOCAL_VERSION=cu${{ matrix.cuda_short }} \
-            opencc/dev-cuda:${{ matrix.cuda }}-devel-ubuntu${{ matrix.ubuntu }} \
+            opencc/dev-cuda:${{ matrix.cuda }}-devel-ubuntu${{ matrix.ubuntu }}-torch${{ matrix.torch }} \
             /bin/bash -c 'pip wheel --no-deps --no-build-isolation /app -w /wheels'
 
       - name: Upload wheel artifact
         uses: actions/upload-artifact@v4
         with:
-          name: wheel-cuda-${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}
+          name: wheel-cuda-${{ matrix.cuda_short }}-torch${{ matrix.torch }}
           path: dist/*.whl
           retention-days: 30
 

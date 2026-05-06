@@ -17,6 +17,7 @@ on:
       - master
       - 'release/*'
       - 'ci/*'
+    #  - 'opensource/*'
   workflow_dispatch:
   schedule:
     - cron: '0 0 * * 0'  # Weekly on Sunday
@@ -33,8 +34,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { ubuntu: "22.04", torch: "2.5.0", torchvision: "0.20.0", torchaudio: "2.5.0", base: "ubuntu:22.04" }
+          - { ubuntu: "22.04", torch: "2.5.1", torchvision: "0.20.1", torchaudio: "2.5.1", base: "ubuntu:22.04" }
           - { ubuntu: "24.04", torch: "2.6.0", torchvision: "0.21.0", torchaudio: "2.6.0", base: "ubuntu:24.04" }
+          - { ubuntu: "24.04", torch: "2.11.0", torchvision: "0.26.0", torchaudio: "2.11.0", base: "ubuntu:24.04" }
 
     steps:
       - uses: actions/checkout@v4
@@ -54,7 +56,7 @@ jobs:
           context: .
           file: docker/Dockerfile.dev
           push: true
-          tags: opencc/dev:ubuntu${{ matrix.ubuntu }}
+          tags: opencc/dev:ubuntu${{ matrix.ubuntu }}-torch${{ matrix.torch }}
           build-args: |
             BASE_IMAGE=${{ matrix.base }}
             PIP_INDEX_URL=https://pypi.org/simple
