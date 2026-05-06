@@ -5,9 +5,9 @@
 # Supports both CPU and CUDA versions.
 #
 # Usage:
-#   - Push to master: builds all configured combinations
+#   - Push to master or test branches: builds all combinations
 #   - Pull request: builds only primary combination
-#   - Manual dispatch: select specific combination (any branch)
+#   - Manual dispatch: select specific combination
 # ============================================================
 
 name: Build Wheels
@@ -62,7 +62,7 @@ jobs:
           docker run --rm \
             -v ${{ github.workspace }}:/app \
             -v ${{ github.workspace }}/dist:/wheels \
-            -e ACE_LOCAL_VERSION=cpu-ubuntu${{ matrix.ubuntu }} \
+            -e ACE_LOCAL_VERSION=cpu \
             ${DOCKER_IMAGE}:ubuntu${{ matrix.ubuntu }} \
             /bin/bash -c 'pip wheel --no-deps --no-build-isolation /app -w /wheels'
 
@@ -82,9 +82,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { cuda: "12.4.0", ubuntu: "22.04" }
-        #  - { cuda: "12.5.0", ubuntu: "22.04" }
-        #  - { cuda: "12.6.0", ubuntu: "24.04" }
+          - { cuda: "12.4.0", cuda_short: "124", ubuntu: "22.04" }
+          - { cuda: "12.5.0", cuda_short: "125", ubuntu: "22.04" }
+          - { cuda: "12.6.0", cuda_short: "126", ubuntu: "24.04" }
 
     steps:
       - uses: actions/checkout@v4
@@ -97,7 +97,7 @@ jobs:
           docker run --rm \
             -v ${{ github.workspace }}:/app \
             -v ${{ github.workspace }}/dist:/wheels \
-            -e ACE_LOCAL_VERSION=cuda-${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }} \
+            -e ACE_LOCAL_VERSION=cu${{ matrix.cuda_short }} \
             opencc/dev-cuda:${{ matrix.cuda }}-devel-ubuntu${{ matrix.ubuntu }} \
             /bin/bash -c 'pip wheel --no-deps --no-build-isolation /app -w /wheels'
 
@@ -108,7 +108,7 @@ jobs:
           path: dist/*.whl
           retention-days: 30
 
-  # Publish wheels (only on master)
+  # Publish wheels (on master and opensource branches)
   publish-wheels:
     name: Publish Wheels
     runs-on: ubuntu-22.04

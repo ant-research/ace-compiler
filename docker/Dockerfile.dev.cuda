@@ -2,9 +2,6 @@
 # ACE-Compiler Dev Image (CUDA)
 # Based on NVIDIA CUDA, adds system deps + Python + pip deps
 #
-# Internal:  based on opencc/base-cuda:* (PIP_INDEX_URL already set)
-# External:  based on nvidia/cuda:* (pass PIP_INDEX_URL as build-arg)
-#
 # Usage:
 #   docker build --build-arg BASE_IMAGE=nvidia/cuda:12.4.0-devel-ubuntu22.04 \
 #                --build-arg TORCH_VERSION=2.5.0 \
@@ -27,6 +24,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libprotobuf-dev protobuf-compiler libssl-dev libtool \
     libgmp3-dev libomp5 libomp-dev libntl-dev pybind11-dev && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Configure git safe.directory for Docker builds
+RUN git config --global --add safe.directory '*'
 
 # Create virtual environment and configure pip
 ARG PIP_INDEX_URL=https://pypi.org/simple

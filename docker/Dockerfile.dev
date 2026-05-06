@@ -2,14 +2,9 @@
 # ACE-Compiler Dev Image (CPU)
 # Based on Ubuntu, adds system deps + Python + pip deps
 #
-# Internal:  based on opencc/base:ubuntu* (PIP_INDEX_URL already set)
-# External:  based on ubuntu:* (pass PIP_INDEX_URL as build-arg)
-#
 # Usage:
 #   docker build --build-arg BASE_IMAGE=ubuntu:22.04 \
 #                --build-arg TORCH_VERSION=2.5.0 \
-#                --build-arg TORCHVISION_VERSION=0.20.0 \
-#                --build-arg TORCHAUDIO_VERSION=2.5.0 \
 #                -f docker/Dockerfile.dev -t ace/dev:ubuntu22.04 .
 # ============================================================
 
@@ -26,6 +21,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libgmp3-dev libomp5 libomp-dev libntl-dev pybind11-dev && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Configure git safe.directory for Docker builds
+RUN git config --global --add safe.directory '*'
+
 # Create virtual environment and configure pip
 ARG PIP_INDEX_URL=https://pypi.org/simple
 RUN python3 -m venv /opt/ace-env && \
@@ -36,7 +34,7 @@ RUN python3 -m venv /opt/ace-env && \
 ENV PATH=/opt/ace-env/bin:$PATH
 
 # Install common Python dependencies
-COPY /docker/requirements-base.txt /tmp/requirements-base.txt
+COPY docker/requirements-base.txt /tmp/requirements-base.txt
 RUN pip install --no-cache-dir -r /tmp/requirements-base.txt
 
 # Install PyTorch CPU

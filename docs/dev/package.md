@@ -99,6 +99,24 @@ rm -rf build/ dist/ _skbuild/
 ./scripts/build-wheel.sh --clean
 ```
 
+### GitHub Actions Build
+
+Wheel naming convention in GitHub Actions:
+
+```yaml
+# CPU wheels
+ACE_LOCAL_VERSION=cpu
+# Output: ace_fhe-0.2.0+cpu-cp310-cp310-linux_x86_64.whl
+
+# CUDA wheels
+ACE_LOCAL_VERSION=cu124  # CUDA 12.4.0
+ACE_LOCAL_VERSION=cu125  # CUDA 12.5.0
+ACE_LOCAL_VERSION=cu126  # CUDA 12.6.0
+# Output: ace_fhe-0.2.0+cu124-cp310-cp310-linux_x86_64.whl
+```
+
+The local version tag format is `+cpu` or `+cuXXX` where `XXX` is the CUDA major/minor version without dots (e.g., `124` for CUDA 12.4.0).
+
 ## Package Structure
 
 After installation, the package structure is:
