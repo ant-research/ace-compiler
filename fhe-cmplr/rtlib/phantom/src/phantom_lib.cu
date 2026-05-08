@@ -9,7 +9,11 @@
 #include "common/rtlib_timing.h"
 #include "boot/Bootstrapper.cuh"
 
+#include <algorithm>
+#include <cmath>
 #include <cstdlib>
+#include <cstdint>
+#include <string>
 
 using namespace phantom;
 using namespace phantom::arith;
@@ -60,7 +64,9 @@ public:
         std::vector<double> vec(input->_vals, input->_vals + len);
         CKKS_PARAMS *prog_param = Get_context_params();
         Plaintext pt;
-        _evaluator->encoder.encode(vec, std::pow(2.0, _scaling_mod_size), pt);
+        int chain_index = _num_prime_parts - prog_param->_input_level;
+        double encode_scale = std::pow(2.0, _scaling_mod_size);
+        _evaluator->encoder.encode(vec, chain_index, encode_scale, pt);
         Ciphertext *ct = new Ciphertext;
         _evaluator->encryptor.encrypt(pt, *ct);
         Io_set_input(name, 0, ct);
@@ -94,8 +100,9 @@ public:
                       LEVEL_T level)
     {
         std::vector<double> vec(input, input + len);
-        std::vector<double> vec_after;
-        _evaluator->encoder.encode(vec, _num_prime_parts - level, std::pow(2.0, _scaling_mod_size * scale), *pt);
+        double encode_scale = std::pow(2.0, _scaling_mod_size * scale);
+        int chain_index = _num_prime_parts - level;
+        _evaluator->encoder.encode(vec, chain_index, encode_scale, *pt);
     }
 
     void Encode_float_cst_lvl(Plaintext *pt, float *input, size_t len,
@@ -112,7 +119,9 @@ public:
                            LEVEL_T level)
     {
         std::vector<double> vec(len, input);
-        _evaluator->encoder.encode(vec, _num_prime_parts - level, std::pow(2.0, _scaling_mod_size * scale), *pt);
+        double encode_scale = std::pow(2.0, _scaling_mod_size * scale);
+        int chain_index = _num_prime_parts - level;
+        _evaluator->encoder.encode(vec, chain_index, encode_scale, *pt);
     }
     void Encode_float_mask_cst_lvl(Plaintext *pt, float input, size_t len,
                                    SCALE_T scale, int level)
@@ -279,24 +288,71 @@ public:
             _evaluator->evaluator.relinearize(*op1, *_rlk, *res);
         }
     }
+
     void Bootstrap(Ciphertext *op1, Ciphertext *res, int level, int slot)
     {
         _evaluator->evaluator.mod_switch_to_inplace(*op1, _num_prime_parts - 1);
 
-        switch (slot)
+        int effective_slot = slot;
+        if (effective_slot == 0)
+        {
+            effective_slot = 32768;
+        }
+
+        Ciphertext *bootstrap_input = op1;
+
+        Ciphertext cyclic_input;
+        bool cyclic_input_used = false;
+        if (effective_slot > 0 && static_cast<uint64_t>(effective_slot) < _slot_count)
+        {
+            cyclic_input = *bootstrap_input;
+            Ciphertext rotated_input = *bootstrap_input;
+            for (uint64_t offset = effective_slot; offset < _slot_count; offset += effective_slot)
+            {
+                Rotate(&rotated_input, effective_slot, &rotated_input);
+                Add(&cyclic_input, &rotated_input, &cyclic_input);
+            }
+            rotated_input.release();
+            bootstrap_input = &cyclic_input;
+            cyclic_input_used = true;
+        }
+
+        Ciphertext in_place_input;
+        bool in_place_bootstrap = res == op1;
+        if (in_place_bootstrap)
+        {
+            in_place_input = *bootstrap_input;
+            bootstrap_input = &in_place_input;
+        }
+
+        res->release();
+        switch (effective_slot)
         {
         case 16384:
-            _bootstrapper_16384->bootstrap_3(*res, *op1);
+            _bootstrapper_16384->bootstrap_real_3(*res, *bootstrap_input);
             break;
         case 8192:
-            _bootstrapper_8192->bootstrap_3(*res, *op1);
+            _bootstrapper_8192->bootstrap_real_3(*res, *bootstrap_input);
             break;
         case 4096:
-            _bootstrapper_4096->bootstrap_3(*res, *op1);
+            _bootstrapper_4096->bootstrap_real_3(*res, *bootstrap_input);
+            break;
+        case 32768:
+            _bootstrapper_32768->bootstrap_real_3(*res, *bootstrap_input);
             break;
         default:
-            std::cout<<"Unsupported slot size for bootstrap: (must 16384,8192,4096)" << slot << std::endl;
+            IS_TRUE(false, "Unsupported slot size for bootstrap");
             break;
+        }
+
+        if (in_place_bootstrap)
+        {
+            in_place_input.release();
+        }
+
+        if (cyclic_input_used)
+        {
+            cyclic_input.release();
         }
 
         int target_level = _num_prime_parts - level;
@@ -330,11 +386,18 @@ public:
         EncryptionParameters parms(scheme_type::ckks);
         uint32_t degree = prog_param->_poly_degree;
         parms.set_poly_modulus_degree(degree);
+
+        uint32_t _bts_required_level = 14;
+        uint32_t _bts_remaining_level = prog_param->_mul_depth - 14;
         std::vector<int> bits;
-        bits.push_back(prog_param->_scaling_mod_size);
-        for (uint32_t i = 0; i < prog_param->_mul_depth; ++i)
+        bits.push_back(prog_param->_first_mod_size);
+        for (uint32_t i = 0; i < _bts_remaining_level; ++i)
         {
             bits.push_back(prog_param->_scaling_mod_size);
+        }
+        for (uint32_t i = 0; i < _bts_required_level; ++i)
+        {
+            bits.push_back(prog_param->_first_mod_size);
         }
         constexpr size_t special_modulus_size = 4;
         for (size_t i = 0; i < special_modulus_size; i++)
@@ -386,6 +449,9 @@ public:
         long loge = 10;
 
         int log_slot_count = 15;
+        _bootstrapper_32768 = std::make_unique<Bootstrapper>(
+            loge, 15, log_slot_count, prog_param->_mul_depth, std::pow(2.0, _scaling_mod_size),
+            boundary_K, deg, scale_factor, inverse_deg, _evaluator.get());
         _bootstrapper_16384 = std::make_unique<Bootstrapper>(
             loge, 14, log_slot_count, prog_param->_mul_depth, std::pow(2.0, _scaling_mod_size),
             boundary_K, deg, scale_factor, inverse_deg, _evaluator.get());
@@ -396,6 +462,7 @@ public:
             loge, 12, log_slot_count, prog_param->_mul_depth, std::pow(2.0, _scaling_mod_size),
             boundary_K, deg, scale_factor, inverse_deg, _evaluator.get());
 
+        _bootstrapper_32768->prepare_mod_polynomial();
         _bootstrapper_16384->prepare_mod_polynomial();
         _bootstrapper_8192->prepare_mod_polynomial();
         _bootstrapper_4096->prepare_mod_polynomial();
@@ -407,22 +474,22 @@ public:
             gal_steps_vector.push_back((1 << i));
         }
 
+        _bootstrapper_32768->addLeftRotKeys_Linear_to_vector_3(gal_steps_vector);
         _bootstrapper_16384->addLeftRotKeys_Linear_to_vector_3(gal_steps_vector);
         _bootstrapper_8192->addLeftRotKeys_Linear_to_vector_3(gal_steps_vector);
         _bootstrapper_4096->addLeftRotKeys_Linear_to_vector_3(gal_steps_vector);
 
-        std::cout << "the size of gal_steps_vector is " << gal_steps_vector.size() << std::endl;
         _evaluator->decryptor.create_galois_keys_from_steps(gal_steps_vector, *(_evaluator.get()->galois_keys));
-        std::cout << "gen rot key done " << gal_steps_vector.size() << std::endl;
         // log2(32768) = 15, log2(16384) = 14, log2(8192) = 13, log2(4096) = 12
-         _bootstrapper_16384->slot_vec.push_back(14);
+        _bootstrapper_32768->slot_vec.push_back(15);
+        _bootstrapper_16384->slot_vec.push_back(14);
         _bootstrapper_8192->slot_vec.push_back(13);
         _bootstrapper_4096->slot_vec.push_back(12);
 
+        _bootstrapper_32768->generate_LT_coefficient_3();
         _bootstrapper_16384->generate_LT_coefficient_3();
         _bootstrapper_8192->generate_LT_coefficient_3();
         _bootstrapper_4096->generate_LT_coefficient_3();
-
         printf(
             "ckks_param: _provider = %d, _poly_degree = %d, _sec_level = %ld, "
             "mul_depth = %ld, _first_mod_size = %ld, _scaling_mod_size = %ld, "
@@ -495,14 +562,6 @@ public:
         }
 
         _evaluator->decryptor.create_galois_keys_from_steps(gal_steps_vector, *(_evaluator.get()->galois_keys));
-        printf(
-            "ckks_param: _provider = %d, _poly_degree = %d, _sec_level = %ld, "
-            "mul_depth = %ld, _first_mod_size = %ld, _scaling_mod_size = %ld, "
-            "_num_q_parts = %ld, _num_rot_idx = %ld,_num_prime_parts = %ld\n",
-            prog_param->_provider, prog_param->_poly_degree, prog_param->_sec_level,
-            prog_param->_mul_depth, prog_param->_first_mod_size,
-            prog_param->_scaling_mod_size, prog_param->_num_q_parts,
-            prog_param->_num_rot_idx, _num_prime_parts);
     }
     SCALE_T Scale(const Ciphertext *op)
     {

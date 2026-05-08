@@ -8,8 +8,8 @@
 # Build external Phantom project dependent function
 function(build_external_phantom)
   
-  set(PHANTOM_URL      "https://git:$ENV{CI_TOKEN}@code.alipay.com/zhanggongliang.zgl/phantom-fhe.git")
-  set(PHANTOM_URL_SSH  "git@code.alipay.com:zhanggongliang.zgl/phantom-fhe.git")
+  set(PHANTOM_URL      "https://github.com/zggl404/phantom-fhe.git")
+  set(PHANTOM_URL_SSH  "git@github.com:zggl404/phantom-fhe.git")
   if(EXTERNAL_URL_SSH)
     set(REPO_PHANTOM_URL ${PHANTOM_URL_SSH})
   else()
