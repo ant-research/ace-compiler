@@ -1,0 +1,21 @@
+add_count: 0
+add_ops: []
+constant_shapes: {}
+conv_count: 0
+conv_layers: []
+input_shape:
+- 1
+- 1
+- 8
+- 8
+linear_count: 0
+linear_layers: []
+op_counts:
+  max_pool: 1
+output_shape:
+- 1
+- 1
+- 4
+- 4
+total_constants: 0
+total_ops: 1

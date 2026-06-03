@@ -1,0 +1,226 @@
+{
+  "relu_vr_def": 3,
+  "relu_vr": "relu_Relu=5;layer1_0_relu_Relu=3;layer1_0_relu_1_Relu=5;layer1_1_relu_Relu=5;layer1_1_relu_1_Relu=6;layer1_2_relu_Relu=3;layer1_2_relu_1_Relu=6;layer1_3_relu_Relu=2;layer1_3_relu_1_Relu=6;layer1_4_relu_Relu=3;layer1_4_relu_1_Relu=7;layer1_5_relu_Relu=3;layer1_5_relu_1_Relu=7;layer1_6_relu_Relu=3;layer1_6_relu_1_Relu=7;layer1_7_relu_Relu=3;layer1_7_relu_1_Relu=7;layer1_8_relu_Relu=2;layer1_8_relu_1_Relu=8;layer2_0_relu_Relu=3;layer2_0_relu_1_Relu=6;layer2_1_relu_Relu=2;layer2_1_relu_1_Relu=6;layer2_2_relu_Relu=2;layer2_2_relu_1_Relu=6;layer2_3_relu_Relu=2;layer2_3_relu_1_Relu=6;layer2_4_relu_Relu=2;layer2_4_relu_1_Relu=8;layer2_5_relu_Relu=2;layer2_5_relu_1_Relu=8;layer2_6_relu_Relu=2;layer2_6_relu_1_Relu=11;layer2_7_relu_Relu=1;layer2_7_relu_1_Relu=11;layer2_8_relu_Relu=1;layer2_8_relu_1_Relu=11;layer3_0_relu_Relu=4;layer3_0_relu_1_Relu=7;layer3_1_relu_Relu=2;layer3_1_relu_1_Relu=7;layer3_2_relu_Relu=2;layer3_2_relu_1_Relu=8;layer3_3_relu_Relu=3;layer3_3_relu_1_Relu=9;layer3_4_relu_Relu=2;layer3_4_relu_1_Relu=11;layer3_5_relu_Relu=2;layer3_5_relu_1_Relu=12;layer3_6_relu_Relu=3;layer3_6_relu_1_Relu=14;layer3_7_relu_Relu=3;layer3_7_relu_1_Relu=17;layer3_8_relu_Relu=4;layer3_8_relu_1_Relu=22",
+  "per_node": {
+    "relu_Relu": {
+      "abs_max": 4.495138168334961,
+      "vr": 5
+    },
+    "layer1_0_relu_Relu": {
+      "abs_max": 2.790304660797119,
+      "vr": 3
+    },
+    "layer1_0_relu_1_Relu": {
+      "abs_max": 4.931436538696289,
+      "vr": 5
+    },
+    "layer1_1_relu_Relu": {
+      "abs_max": 4.181377410888672,
+      "vr": 5
+    },
+    "layer1_1_relu_1_Relu": {
+      "abs_max": 5.561398506164551,
+      "vr": 6
+    },
+    "layer1_2_relu_Relu": {
+      "abs_max": 2.2629923820495605,
+      "vr": 3
+    },
+    "layer1_2_relu_1_Relu": {
+      "abs_max": 5.873486518859863,
+      "vr": 6
+    },
+    "layer1_3_relu_Relu": {
+      "abs_max": 1.651085376739502,
+      "vr": 2
+    },
+    "layer1_3_relu_1_Relu": {
+      "abs_max": 5.903993606567383,
+      "vr": 6
+    },
+    "layer1_4_relu_Relu": {
+      "abs_max": 2.2118148803710938,
+      "vr": 3
+    },
+    "layer1_4_relu_1_Relu": {
+      "abs_max": 6.326567649841309,
+      "vr": 7
+    },
+    "layer1_5_relu_Relu": {
+      "abs_max": 2.031022787094116,
+      "vr": 3
+    },
+    "layer1_5_relu_1_Relu": {
+      "abs_max": 6.748673439025879,
+      "vr": 7
+    },
+    "layer1_6_relu_Relu": {
+      "abs_max": 2.0205233097076416,
+      "vr": 3
+    },
+    "layer1_6_relu_1_Relu": {
+      "abs_max": 6.847208499908447,
+      "vr": 7
+    },
+    "layer1_7_relu_Relu": {
+      "abs_max": 2.180234670639038,
+      "vr": 3
+    },
+    "layer1_7_relu_1_Relu": {
+      "abs_max": 6.223773002624512,
+      "vr": 7
+    },
+    "layer1_8_relu_Relu": {
+      "abs_max": 1.9495238065719604,
+      "vr": 2
+    },
+    "layer1_8_relu_1_Relu": {
+      "abs_max": 7.677055358886719,
+      "vr": 8
+    },
+    "layer2_0_relu_Relu": {
+      "abs_max": 2.879470109939575,
+      "vr": 3
+    },
+    "layer2_0_relu_1_Relu": {
+      "abs_max": 5.933243751525879,
+      "vr": 6
+    },
+    "layer2_1_relu_Relu": {
+      "abs_max": 1.8430839776992798,
+      "vr": 2
+    },
+    "layer2_1_relu_1_Relu": {
+      "abs_max": 5.997226715087891,
+      "vr": 6
+    },
+    "layer2_2_relu_Relu": {
+      "abs_max": 1.7836189270019531,
+      "vr": 2
+    },
+    "layer2_2_relu_1_Relu": {
+      "abs_max": 5.784143924713135,
+      "vr": 6
+    },
+    "layer2_3_relu_Relu": {
+      "abs_max": 1.7536966800689697,
+      "vr": 2
+    },
+    "layer2_3_relu_1_Relu": {
+      "abs_max": 5.826041221618652,
+      "vr": 6
+    },
+    "layer2_4_relu_Relu": {
+      "abs_max": 1.8508864641189575,
+      "vr": 2
+    },
+    "layer2_4_relu_1_Relu": {
+      "abs_max": 7.479606628417969,
+      "vr": 8
+    },
+    "layer2_5_relu_Relu": {
+      "abs_max": 1.7053157091140747,
+      "vr": 2
+    },
+    "layer2_5_relu_1_Relu": {
+      "abs_max": 7.419213771820068,
+      "vr": 8
+    },
+    "layer2_6_relu_Relu": {
+      "abs_max": 1.9169574975967407,
+      "vr": 2
+    },
+    "layer2_6_relu_1_Relu": {
+      "abs_max": 10.494470596313477,
+      "vr": 11
+    },
+    "layer2_7_relu_Relu": {
+      "abs_max": 0.8537824153900146,
+      "vr": 1
+    },
+    "layer2_7_relu_1_Relu": {
+      "abs_max": 10.436431884765625,
+      "vr": 11
+    },
+    "layer2_8_relu_Relu": {
+      "abs_max": 1.0296301979906275e-06,
+      "vr": 1
+    },
+    "layer2_8_relu_1_Relu": {
+      "abs_max": 10.378410339355469,
+      "vr": 11
+    },
+    "layer3_0_relu_Relu": {
+      "abs_max": 3.01983642578125,
+      "vr": 4
+    },
+    "layer3_0_relu_1_Relu": {
+      "abs_max": 6.579614162445068,
+      "vr": 7
+    },
+    "layer3_1_relu_Relu": {
+      "abs_max": 1.7671958208084106,
+      "vr": 2
+    },
+    "layer3_1_relu_1_Relu": {
+      "abs_max": 6.424182891845703,
+      "vr": 7
+    },
+    "layer3_2_relu_Relu": {
+      "abs_max": 1.7854821681976318,
+      "vr": 2
+    },
+    "layer3_2_relu_1_Relu": {
+      "abs_max": 7.537075996398926,
+      "vr": 8
+    },
+    "layer3_3_relu_Relu": {
+      "abs_max": 2.0329487323760986,
+      "vr": 3
+    },
+    "layer3_3_relu_1_Relu": {
+      "abs_max": 8.072803497314453,
+      "vr": 9
+    },
+    "layer3_4_relu_Relu": {
+      "abs_max": 1.762096643447876,
+      "vr": 2
+    },
+    "layer3_4_relu_1_Relu": {
+      "abs_max": 10.760016441345215,
+      "vr": 11
+    },
+    "layer3_5_relu_Relu": {
+      "abs_max": 1.9189088344573975,
+      "vr": 2
+    },
+    "layer3_5_relu_1_Relu": {
+      "abs_max": 11.429924964904785,
+      "vr": 12
+    },
+    "layer3_6_relu_Relu": {
+      "abs_max": 2.7194957733154297,
+      "vr": 3
+    },
+    "layer3_6_relu_1_Relu": {
+      "abs_max": 13.028782844543457,
+      "vr": 14
+    },
+    "layer3_7_relu_Relu": {
+      "abs_max": 2.5044987201690674,
+      "vr": 3
+    },
+    "layer3_7_relu_1_Relu": {
+      "abs_max": 16.30073356628418,
+      "vr": 17
+    },
+    "layer3_8_relu_Relu": {
+      "abs_max": 3.461512804031372,
+      "vr": 4
+    },
+    "layer3_8_relu_1_Relu": {
+      "abs_max": 21.314281463623047,
+      "vr": 22
+    }
+  }
+}

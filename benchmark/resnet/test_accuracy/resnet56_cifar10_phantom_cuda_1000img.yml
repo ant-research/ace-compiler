@@ -1,0 +1,17 @@
+fhe_correct: 946
+fhe_match_count: 989
+fhe_mismatch:
+- 84
+- 232
+- 376
+- 417
+- 485
+- 577
+- 601
+- 675
+- 920
+- 924
+- 933
+num_images: 1000
+plaintext_correct: 948
+top1_accuracy: 0.946

@@ -1,0 +1,9 @@
+fhe_correct: 94
+fhe_match_count: 97
+fhe_mismatch:
+- 15
+- 26
+- 58
+num_images: 100
+plaintext_correct: 96
+top1_accuracy: 0.94

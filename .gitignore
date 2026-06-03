@@ -1,0 +1,75 @@
+# Build artifacts
+build/
+dist/
+*.so
+*.dylib
+*.dll
+*.exe
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+
+# Node modules (if any)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
+
+# Log files
+*.log
+
+# Coverage reports
+coverage/
+*.gcno
+*.gcda
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+
+# Compiled objects
+*.o
+*.obj
+
+# Archives
+*.tar.gz
+*.zip
+*.7z
+
+# Test results
+test_results/
+pytest_cache/
+.pytest_cache/
+
+# Environment files
+.env
+.env.local
+*.env
+
+# Documentation build
+docs/_build/
+site/
+
+# Misc
+*.orig
+*.rej

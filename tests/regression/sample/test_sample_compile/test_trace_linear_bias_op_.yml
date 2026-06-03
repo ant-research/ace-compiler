@@ -1,0 +1,26 @@
+add_count: 0
+add_ops: []
+constant_shapes:
+  linear_bias:
+  - 4
+  linear_weight:
+  - 4
+  - 4
+conv_count: 0
+conv_layers: []
+input_shape:
+- 1
+- 4
+linear_count: 1
+linear_layers:
+- bias: true
+  in_features: 4
+  name: linear
+  out_features: 4
+op_counts:
+  gemm: 1
+output_shape:
+- 1
+- 4
+total_constants: 2
+total_ops: 1

@@ -1,0 +1,36 @@
+add_count: 0
+add_ops: []
+constant_shapes:
+  fc1_bias:
+  - 8
+  fc1_weight:
+  - 8
+  - 4
+  fc2_bias:
+  - 4
+  fc2_weight:
+  - 4
+  - 8
+conv_count: 0
+conv_layers: []
+input_shape:
+- 1
+- 4
+linear_count: 2
+linear_layers:
+- bias: true
+  in_features: 4
+  name: fc1
+  out_features: 8
+- bias: true
+  in_features: 8
+  name: fc2
+  out_features: 4
+op_counts:
+  gemm: 2
+  relu: 1
+output_shape:
+- 1
+- 4
+total_constants: 4
+total_ops: 3

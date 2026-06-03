@@ -1,0 +1,60 @@
+[build-system]
+requires = [
+    "scikit-build-core>=0.11",
+    "torch>=2.0,<3",
+    "pybind11>=2.10",
+    "cmake>=3.28",
+    "PyYAML>=5.3.1"
+]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "ace-fhe"
+dynamic = ["version"]
+description = "ACE-Compiler: An FHE Domain-Specific Compiler"
+authors = [
+    {name = "ACE", email = "ace_group@antgroup.com"},
+]
+license = {text = "Apache-2.0 WITH LLVM-exception"}
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "torch>=2.0",
+    "numpy>=1.20",
+    "PyYAML>=5.3",
+]
+
+[project.scripts]
+ace_tool = "ace.cli:main"
+
+[project.optional-dependencies]
+onnx = ["onnx>=1.10"]
+dev = ["pytest>=7.0", "pytest-xdist", "pytest-dependency", "pytest-benchmark>=4.0", "pytest-regressions>=2.0", "pytest-env"]
+
+[project.urls]
+Homepage = "https://github.com/ant-group/ace"
+Documentation = "https://github.com/ant-group/ace/docs"
+Repository = "https://github.com/ant-group/ace"
+
+[tool.scikit-build]
+build-dir = "build"
+install.components = ["frontend", "core", "runtime", "library"]
+experimental = true
+
+[tool.scikit-build.wheel]
+packages = ["fhe_dsl/python"]
+
+[tool.scikit-build.metadata.version]
+provider = "version_provider"
+provider-path = "scripts"
+
+[tool.scikit-build.cmake]
+source-dir = "."
+
+[tool.scikit-build.cmake.define]
+TORCH_EXTENSION_NAME = "ace_torch_ext"
+BUILD_BACKENDS = {env = "BUILD_BACKENDS", default = false}
+BUILD_EXTENSION = {env = "BUILD_EXTENSION", default = true}
+ENABLE_LIB = {env = "ENABLE_LIB", default = "phantom"}
+CMAKE_BUILD_TYPE = "Release"
+COMPILE_MODULE = "fhe-cmplr"

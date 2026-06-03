@@ -1,0 +1,138 @@
+# ============================================================
+# ACE-Compiler Wheel Build CI
+#
+# Builds wheels using pre-built dev images from Docker Hub.
+# Supports both CPU and CUDA versions.
+#
+# Usage:
+#   - Push to master or test branches: builds all combinations
+#   - Pull request: builds only primary combination
+#   - Manual dispatch: select specific combination
+# ============================================================
+
+name: Build Wheels
+
+on:
+  push:
+    branches:
+      - master
+      - 'release/*'
+      - 'opensource/*'
+      - 'ci/*'
+      - 'test*'
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+    inputs:
+      wheel_type:
+        description: 'Wheel type'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - 'all'
+          - 'cpu'
+          - 'cuda'
+
+env:
+  DOCKER_IMAGE: opencc/dev
+
+jobs:
+  # Build CPU wheels
+  build-cpu-wheels:
+    name: Build Wheel (CPU Ubuntu ${{ matrix.ubuntu }})
+    runs-on: ubuntu-22.04
+    if: github.event.inputs.wheel_type == 'all' || github.event.inputs.wheel_type == 'cpu' || github.event_name != 'workflow_dispatch'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { ubuntu: "22.04", torch: "2.5.1" }
+          - { ubuntu: "24.04", torch: "2.6.0" }
+          - { ubuntu: "24.04", torch: "2.11.0" }
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Pull CPU image
+        run: docker pull ${DOCKER_IMAGE}:ubuntu${{ matrix.ubuntu }}-torch${{ matrix.torch }}
+
+      - name: Build wheel
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}:/app \
+            -v ${{ github.workspace }}/dist:/wheels \
+            -e ACE_LOCAL_VERSION=cpu \
+            ${DOCKER_IMAGE}:ubuntu${{ matrix.ubuntu }}-torch${{ matrix.torch }} \
+            /bin/bash -c 'pip wheel --no-deps --no-build-isolation /app -w /wheels'
+
+      - name: Upload wheel artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: wheel-cpu-ubuntu${{ matrix.ubuntu }}
+          path: dist/*.whl
+          retention-days: 30
+
+  # Build CUDA wheels
+  build-cuda-wheels:
+    name: Build Wheel (CUDA ${{ matrix.cuda }})
+    runs-on: ubuntu-22.04
+    if: github.event.inputs.wheel_type == 'all' || github.event.inputs.wheel_type == 'cuda' || github.event_name != 'workflow_dispatch'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { cuda: "12.4.0", cuda_short: "124", ubuntu: "22.04", torch: "2.5.1" }
+          - { cuda: "12.6.0", cuda_short: "126", ubuntu: "24.04", torch: "2.6.0" }
+          - { cuda: "13.0.0", cuda_short: "130", ubuntu: "24.04", torch: "2.11.0" }
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Pull CUDA image
+        run: docker pull opencc/dev-cuda:${{ matrix.cuda }}-devel-ubuntu${{ matrix.ubuntu }}-torch${{ matrix.torch }}
+
+      - name: Build wheel
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}:/app \
+            -v ${{ github.workspace }}/dist:/wheels \
+            -e ACE_LOCAL_VERSION=cu${{ matrix.cuda_short }} \
+            opencc/dev-cuda:${{ matrix.cuda }}-devel-ubuntu${{ matrix.ubuntu }}-torch${{ matrix.torch }} \
+            /bin/bash -c 'pip wheel --no-deps --no-build-isolation /app -w /wheels'
+
+      - name: Upload wheel artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: wheel-cuda-${{ matrix.cuda_short }}-torch${{ matrix.torch }}
+          path: dist/*.whl
+          retention-days: 30
+
+  # Publish wheels (on master and opensource branches)
+  publish-wheels:
+    name: Publish Wheels
+    runs-on: ubuntu-22.04
+    needs: [build-cpu-wheels, build-cuda-wheels]
+    if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/opensource/')
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Download wheel artifacts
+        uses: actions/download-artifact@v5
+        with:
+          pattern: wheel-*
+          merge-multiple: true
+          path: dist/
+
+      - name: List wheels
+        run: |
+          echo "Built wheels:"
+          ls -la dist/*.whl
+
+      - name: Upload all wheels
+        uses: actions/upload-artifact@v5
+        with:
+          name: all-wheels
+          path: dist/*.whl
+          retention-days: 30
