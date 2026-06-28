@@ -39,22 +39,31 @@ The ANT-ACE compiler framework marks an initial step in our FHE compiler technol
 
 ## 1. Preparing a Docker environment to Build and Test the ANT-ACE Compiler
 
-It's recommended to use a Docker environment to Build and Test the ANT-ACE Compiler. We provide the [*Dockerfile*](docker/Dockerfile) to build the Docker image. The docker image is based on Ubuntu 20.04. You may set up your own environment on other Linux platforms with necessary Linux and Python packages listed in [*Dockerfile*](docker/Dockerfile) and [*requirements.txt*](requirements.txt). We recommended to pull the pre-built docker image (opencc/dev:ubuntu24.04) from Docker Hub:
+It's recommended to use a Docker environment to Build and Test the ANT-ACE Compiler. You may set up your own environment on other Linux platforms with necessary Linux and Python packages listed in [*Dockerfile*](docker/Dockerfile.dev) and [*requirements.txt*](requirements.txt).
+
+### Option A: Pull pre-built image and clone inside container
+
+Pull the pre-built docker image (opencc/dev:ubuntu24.04) from Docker Hub:
 
 ```
-mkdir ace-compiler && cd ace-compiler
 docker pull opencc/dev:ubuntu24.04
 docker run -it --name ace -v "$(pwd)":/app --privileged opencc/dev:ubuntu24.04 bash
 ```
-A local directory `ace-compiler` is created and mounted in the docker container. The container will launch and automatically enters the `/app` directory:
+
+The container will launch and enter the `/app` directory. Then clone the repository inside the container:
+
 ```
-root@xxxxxx:/app#
+root@xxxxxx:/app# git clone https://github.com/ant-research/ace-compiler.git
 ```
-Alternatively, if you encounter issues pulling the pre-built image, you can build the image from the [*Dockerfile*](docker/Dockerfile):
+
+### Option B: Clone repository and build image locally
+
+If you encounter issues pulling the pre-built image, you can build the image from the [*Dockerfile*](docker/Dockerfile.dev):
+
 ```
-git clone https://github.com/ace-compiler/ace-compiler.git
+git clone https://github.com/ant-research/ace-compiler.git
 cd ace-compiler
-docker build -t ace:latest .
+docker build -t ace:latest -f docker/Dockerfile.dev --build-arg BASE_IMAGE=ubuntu:24.04 .
 docker run -it --name ace -v "$(pwd)":/app --privileged ace:latest bash
 ```
 
