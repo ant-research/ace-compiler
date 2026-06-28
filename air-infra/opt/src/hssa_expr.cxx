@@ -8,7 +8,6 @@
 
 #include "air/opt/hssa_expr.h"
 
-#if ENABLED_HSSA
 #include <sstream>
 
 #include "air/base/node.h"
@@ -38,9 +37,9 @@ bool VAR_DATA::Match_lex(VAR_DATA_PTR other) const {
 
 std::string VAR_DATA::Name(HCONTAINER* hssa_cont) const {
   std::string name_str = "";
-  if (Var_kind() == VAR_KIND::PREG) {
+  if (Var_kind() == VK_PREG) {
     name_str = "_preg." + std::to_string(Var_id());
-  } else if (Var_kind() == VAR_KIND::ADDR_DATUM) {
+  } else if (Var_kind() == VK_ADDR_DATUM) {
     FUNC_SCOPE* fs = hssa_cont->Air_cont()->Parent_func_scope();
     SYM_ID      sym_id(Var_id());
     SYM_PTR     sym = fs->Find_sym(sym_id);
@@ -71,20 +70,20 @@ CST_DATA::CST_DATA(NODE_PTR node) : HEXPR_DATA(node, EK_CONST) {
   AIR_ASSERT(node->Domain() == air::core::CORE);
   switch (node->Operator()) {
     case air::core::OPCODE::INTCONST:
-      Set_cst_kind(CSTKIND_INT);
+      Set_cst_kind(CK_INT);
       Set_value(node->Intconst());
       break;
     case air::core::OPCODE::LDC:
     case air::core::OPCODE::LDCA:
-      Set_cst_kind(CSTKIND_ID);
+      Set_cst_kind(CK_ID);
       Set_value(node->Const_id());
       break;
     case air::core::OPCODE::ONE:
-      Set_cst_kind(CSTKIND_INT);
+      Set_cst_kind(CK_INT);
       Set_value(1);
       break;
     case air::core::OPCODE::ZERO:
-      Set_cst_kind(CSTKIND_INT);
+      Set_cst_kind(CK_INT);
       Set_value(0);
       break;
     default:
@@ -94,9 +93,9 @@ CST_DATA::CST_DATA(NODE_PTR node) : HEXPR_DATA(node, EK_CONST) {
 
 uint32_t CST_DATA::Hash_idx(void) const {
   switch (Cst_kind()) {
-    case CSTKIND_INT:
+    case CK_INT:
       return (uint32_t)Cst_val();
-    case CSTKIND_ID:
+    case CK_ID:
       return Cst_id().Value();
     default:
       AIR_ASSERT_MSG(false, "invalid const operator");
@@ -107,9 +106,9 @@ uint32_t CST_DATA::Hash_idx(void) const {
 bool CST_DATA::Match(CST_DATA_PTR other) const {
   if (Cst_kind() != other->Cst_kind()) return false;
   switch (Cst_kind()) {
-    case CSTKIND_INT:
+    case CK_INT:
       return Cst_val() == other->Cst_val();
-    case CSTKIND_ID:
+    case CK_ID:
       return Cst_id() == other->Cst_id();
     default:
       AIR_ASSERT_MSG(false, "invalid const operator");
@@ -120,10 +119,10 @@ bool CST_DATA::Match(CST_DATA_PTR other) const {
 void CST_DATA::Print(HCONTAINER* hssa_cont, std::ostream& os,
                      uint32_t indent) const {
   switch (Cst_kind()) {
-    case CSTKIND_INT:
+    case CK_INT:
       os << "#" << Cst_val();
       break;
-    case CSTKIND_ID:
+    case CK_ID:
       os << "CST" << Cst_id().Value();
       break;
     default:
@@ -159,20 +158,20 @@ void OP_DATA::Print(HCONTAINER* hssa_cont, std::ostream& os,
     os << std::endl;
     HEXPR_ID kid = Kid(idx);
     AIR_ASSERT_MSG(kid != HEXPR_ID(), "kid not set");
-    HEXPR_PTR kid_ptr = hssa_cont->Cr_ptr(kid);
+    HEXPR_PTR kid_ptr = hssa_cont->Expr_ptr(kid);
     kid_ptr->Print(os, indent + 1);
   }
 }
 
-HEXPR_DATA::HEXPR_DATA(NODE_PTR node, CODEKIND k)
+HEXPR_DATA::HEXPR_DATA(NODE_PTR node, EXPR_KIND k)
     : _opc(node->Opcode()),
       _kind(k),
       _usecnt(0),
-      _flags(CF_EMPTY),
+      _flags(EF_EMPTY),
       _next(HEXPR_ID()) {
   _rtype   = node->Has_rtype() ? node->Rtype_id() : TYPE_ID();
   _dsctype = node->Has_access_type() ? node->Access_type_id() : TYPE_ID();
-  _attr    = node->Attr_id();
+  _attr    = air::base::ATTR_ID();
   _spos    = node->Spos();
 }
 
@@ -205,7 +204,7 @@ int32_t HEXPR::Kid_idx(HEXPR_PTR expr) const {
 }
 
 HEXPR_PTR HEXPR::Kid(uint32_t idx) const {
-  return Hssa_cont()->Cr_ptr(Cast_to_op_expr()->Kid(idx));
+  return Hssa_cont()->Expr_ptr(Cast_to_op_expr()->Kid(idx));
 }
 
 void HEXPR::Set_defphi(HPHI_PTR hphi) {
@@ -248,6 +247,10 @@ bool HEXPR::Match_lex(HEXPR_PTR other) const {
       VAR_DATA_PTR var_expr = Cast_to_var_expr();
       return var_expr->Match_lex(other->Cast_to_var_expr());
     }
+    case EK_OP: {
+      OP_DATA_PTR op_expr = Cast_to_op_expr();
+      return op_expr->Match_lex(other->Cast_to_op_expr());
+    }
     case EK_CONST:
       // Constants must have the same EXPR node to match
       return false;
@@ -260,7 +263,7 @@ bool HEXPR::Match_lex(HEXPR_PTR other) const {
 uint32_t HEXPR::Hash_idx() const {
   switch (Kind()) {
     case EK_VAR:
-      CMPLR_ASSERT(false, "TO IMPL ");
+      CMPLR_ASSERT(false, "Hash_idx for EK_VAR not yet implemented");
       break;
     case EK_OP: {
       OP_DATA_PTR op_expr = Cast_to_op_expr();
@@ -292,7 +295,7 @@ bool HEXPR::Replace_expr(HEXPR_ID expr, HEXPR_ID new_expr) {
       is_replaced = (Id() == expr);
       break;
     default:
-      AIR_ASSERT_MSG(false, "TO IMPL:HEXPR::Replace_expr");
+      AIR_ASSERT_MSG(false, "Replace_expr: unsupported expression kind");
   }
   return is_replaced;
 }
@@ -328,7 +331,7 @@ HSTMT_PTR HEXPR::Def_stmt(void) const {
   } else if (var_expr->Def_by_phi()) {
     return Null_ptr;
   } else {
-    CMPLR_ASSERT(false, "TO IMPL");
+    CMPLR_ASSERT(false, "Def_stmt: unsupported definition kind");
     return Null_ptr;
   }
   return Hssa_cont()->Stmt_ptr(def_id);
@@ -342,7 +345,7 @@ BB_ID HEXPR::Def_bb() const {
   } else {
     HSTMT_PTR def_stmt = Def_stmt();
     if (def_stmt->Is_null()) {
-      CMPLR_ASSERT(false, "TO IMPL");
+      CMPLR_ASSERT(false, "Def_bb: variable has no defining stmt or phi");
       return BB_ID();
     }
     return def_stmt->Bb_id();
@@ -405,6 +408,23 @@ std::string HEXPR::To_str() const {
   return buf.str();
 }
 
+bool OP_DATA::Match_lex(OP_DATA_PTR other) const {
+  CMPLR_ASSERT(false, "OP_DATA::Match_lex not yet implemented");
+  return false;
+}
+
+void HEXPR::Init_const(NODE_PTR node) {
+  CMPLR_ASSERT(false, "HEXPR::Init_const not yet implemented");
+}
+
+void HEXPR::Init_sym(NODE_PTR node) {
+  CMPLR_ASSERT(false, "HEXPR::Init_sym not yet implemented");
+}
+
+bool HEXPR::Is_dominate(HSTMT_PTR sr) const {
+  CMPLR_ASSERT(false, "HEXPR::Is_dominate not yet implemented");
+  return false;
+}
+
 }  // namespace opt
 }  // namespace air
-#endif

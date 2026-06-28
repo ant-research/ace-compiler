@@ -8,23 +8,20 @@
 # Build external gperftools project dependent function
 function(build_external_gperf)
 
-  set(GPERF_URL      "https://code.alipay.com/opencc/gperftools.git")
-  set(GPERF_URL_SSH  "git@code.alipay.com:opencc/gperftools.git")
-  if(EXTERNAL_URL_SSH)
-    set(REPO_GPERF_URL ${GPERF_URL_SSH})
-  else()
-    set(REPO_GPERF_URL ${GPERF_URL})
+  # Default: upstream GitHub; internal override via .aci/
+  if(NOT DEFINED GPERF_URL)
+    set(GPERF_URL "https://github.com/gperftools/gperftools.git")
   endif()
 
-  message(STATUS "Cloning External Repository    : ${REPO_GPERF_URL}")
+  message(STATUS "Cloning External Repository    : ${GPERF_URL}")
 
   include(ExternalProject)
   ExternalProject_Add(
     gperftools
-    GIT_REPOSITORY ${REPO_GPERF_URL}
+    GIT_REPOSITORY ${GPERF_URL}
     GIT_TAG master
     PREFIX ${CMAKE_BINARY_DIR}/external
-    CMAKE_ARGS  -DCMAKE_BUILD_TYPE=Release 
+    CMAKE_ARGS  -DCMAKE_BUILD_TYPE=Release
                 -DBUILD_TESTING=OFF
                 -DGPERFTOOLS_BUILD_STATIC=ON
     UPDATE_COMMAND ""
@@ -51,7 +48,7 @@ function(build_external_gperf)
 endfunction()
 
 if(NOT TARGET tcmalloc)
-	build_external_gperf()
+  build_external_gperf()
   add_dependencies(air_depend tcmalloc)
   set(PERF_LIBS "benchmark;pthread" CACHE STRING "Global common libs of perftools")
 endif()

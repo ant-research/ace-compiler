@@ -29,6 +29,20 @@
     return _impl.template Handle_##name<RETV, VISITOR>(visitor, node); \
   }
 
+//! @brief OPCODE_IMPL_GEN_EXPR generates HSSA expr dispatch to IMPL
+#define OPCODE_IMPL_GEN_EXPR(NAME, name, kid_num, fld_num, prop)            \
+  template <typename RETV, typename VISITOR>                                \
+  RETV Handle_##name(VISITOR* visitor, air::opt::HEXPR_PTR node) {          \
+    return _impl.template Handle_expr_##name<RETV, VISITOR>(visitor, node); \
+  }
+
+//! @brief OPCODE_IMPL_GEN_STMT generates HSSA stmt dispatch to IMPL
+#define OPCODE_IMPL_GEN_STMT(NAME, name, kid_num, fld_num, prop)            \
+  template <typename RETV, typename VISITOR>                                \
+  RETV Handle_##name(VISITOR* visitor, air::opt::HSTMT_PTR node) {          \
+    return _impl.template Handle_stmt_##name<RETV, VISITOR>(visitor, node); \
+  }
+
 //! @brief OPCODE_NULL_HANDLER_GEN generates null handler for each OPCODE
 #define OPCODE_NULL_HANDLER_GEN(NAME, name, kid_num, fld_num, prop) \
   template <typename RETV, typename VISITOR>                        \
@@ -42,6 +56,22 @@
   RETV Handle_##name(VISITOR* visitor, air::base::NODE_PTR node) {         \
     return visitor->Context().template Handle_node<RETV, VISITOR>(visitor, \
                                                                   node);   \
+  }
+
+//! @brief OPCODE_DEFAULT_HANDLER_GEN_EXPR generates default HSSA expr handler
+#define OPCODE_DEFAULT_HANDLER_GEN_EXPR(NAME, name, kid_num, fld_num, prop) \
+  template <typename RETV, typename VISITOR>                                \
+  RETV Handle_expr_##name(VISITOR* visitor, air::opt::HEXPR_PTR node) {     \
+    return visitor->Context().template Handle_expr<RETV, VISITOR>(visitor,  \
+                                                                  node);    \
+  }
+
+//! @brief OPCODE_DEFAULT_HANDLER_GEN_STMT generates default HSSA stmt handler
+#define OPCODE_DEFAULT_HANDLER_GEN_STMT(NAME, name, kid_num, fld_num, prop) \
+  template <typename RETV, typename VISITOR>                                \
+  RETV Handle_stmt_##name(VISITOR* visitor, air::opt::HSTMT_PTR node) {     \
+    return visitor->Context().template Handle_stmt<RETV, VISITOR>(visitor,  \
+                                                                  node);    \
   }
 
 //! @brief OPCODE_INVALID_HANDLER_GEN generates invalid handler for each OPCODE

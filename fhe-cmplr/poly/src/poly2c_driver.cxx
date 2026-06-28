@@ -14,6 +14,7 @@
 #include "air/base/st.h"
 #include "air/core/opcode.h"
 #include "air/util/debug.h"
+#include "fhe/poly/opcode.h"
 #include "nn/core/data_scheme.h"
 
 using namespace air::base;
@@ -38,6 +39,17 @@ GLOB_SCOPE* POLY2C_DRIVER::Flatten(GLOB_SCOPE* glob) {
       if (node->Domain() == air::core::CORE ||
           node->Opcode() == nn::vector::OPC_SLICE) {
         return false;
+      }
+      // Do not flatten HW_* ops that are SET_COEFFS value; IR2C emits
+      // Coeffs(...) as first arg only when value is direct HW_*.
+      if (node->Domain() == fhe::poly::POLYNOMIAL_DID) {
+        air::base::OPCODE opc = node->Opcode();
+        if (opc == fhe::poly::OPC_HW_MODADD ||
+            opc == fhe::poly::OPC_HW_MODSUB ||
+            opc == fhe::poly::OPC_HW_MODMUL ||
+            opc == fhe::poly::OPC_HW_ROTATE) {
+          return false;
+        }
       }
       return true;
     };
@@ -133,7 +145,7 @@ void POLY2C_DRIVER::Emit_data_shape(air::base::NODE_PTR node) {
       _ctx << "{" << shape[0] << ", " << shape[1] << ", " << shape[2] << ", "
            << shape[3] << "}, ";
     } else if (dim == 2) {
-      _ctx << "{" << shape[0] << ", " << shape[1] << ", 0, 0},";
+      _ctx << "{" << shape[0] << ", " << shape[1] << ", 1, 1},";
     } else {
       AIR_ASSERT(false);
     }
@@ -206,6 +218,60 @@ void POLY2C_DRIVER::Emit_helper_function(FUNC_SCOPE* func_scope) {
   _ctx << "  };\n";
   _ctx << "  return &scheme;\n";
   _ctx << "}\n\n";
+}
+
+void POLY2C_DRIVER::Emit_rotate_zero_fast_path(FUNC_SCOPE* func_scope) {
+  if (_ctx.Provider() != core::PROVIDER::ANT) {
+    return;
+  }
+
+  const core::LOWER_CTX& lower_ctx = _ctx.Lower_ctx();
+  if (func_scope->Id() !=
+      lower_ctx.Get_func_info(core::FHE_FUNC::ROTATE).Get_func_id()) {
+    return;
+  }
+
+  AIR_ASSERT(func_scope->Formal_cnt() == 2);
+  air::base::ADDR_DATUM_PTR ciph    = func_scope->Formal(0);
+  air::base::ADDR_DATUM_PTR rot_idx = func_scope->Formal(1);
+  air::base::ADDR_DATUM_PTR result  = air::base::Null_ptr;
+  for (auto it = func_scope->Begin_addr_datum();
+       it != func_scope->End_addr_datum(); ++it) {
+    if ((*it)->Is_formal()) {
+      continue;
+    }
+    air::base::TYPE_PTR type    = (*it)->Type();
+    air::base::TYPE_ID  type_id = type->Is_array()
+                                      ? type->Cast_to_arr()->Elem_type_id()
+                                      : type->Id();
+    if (_ctx.Is_cipher_type(type_id)) {
+      AIR_ASSERT_MSG(result == air::base::Null_ptr,
+                     "rotate helper should expose a single ciphertext result");
+      result = *it;
+    }
+  }
+
+  AIR_ASSERT_MSG(result != air::base::Null_ptr,
+                 "rotate helper ciphertext result not found");
+  _ctx << "  if (";
+  _ctx.Emit_var(rot_idx);
+  _ctx << " == 0) {\n";
+  _ctx << "    Init_ciph_same_scale(&";
+  _ctx.Emit_var(result);
+  _ctx << ", &";
+  _ctx.Emit_var(ciph);
+  _ctx << ", 0);\n";
+  _ctx << "    Copy_ciphertext(&";
+  _ctx.Emit_var(result);
+  _ctx << ", &";
+  _ctx.Emit_var(ciph);
+  _ctx << ");\n";
+  _ctx << "    RTLIB_TM_END(" << (uint32_t)(core::RTM_FHE_ROTATE)
+       << ", rtm);\n";
+  _ctx << "    return ";
+  _ctx.Emit_var(result);
+  _ctx << ";\n";
+  _ctx << "  }\n";
 }
 
 }  // namespace poly

@@ -637,7 +637,8 @@ void Embedding_inv(VALUE_LIST* res, FFT_CONTEXT* fft, VALUE_LIST* coeffs) {
   Check_embedding_input(fft, coeffs);
 
   // copy from coeffs to result
-  DCMPLX result[coeffs_len];
+  DCMPLX* result = (DCMPLX*)malloc(sizeof(DCMPLX) * coeffs_len);
+  IS_TRUE(result != NULL, "failed to allocate embedding buffer");
   memmove(result, DCMPLX_VALUES(coeffs), sizeof(DCMPLX) * coeffs_len);
 
   size_t log_num_coeffs = log2(coeffs_len);
@@ -666,6 +667,7 @@ void Embedding_inv(VALUE_LIST* res, FFT_CONTEXT* fft, VALUE_LIST* coeffs) {
   }
 
   Bit_reverse_vec_for_complex(DCMPLX_VALUES(res), result, coeffs_len);
+  free(result);
 
   for (size_t i = 0; i < coeffs_len; i++) {
     DCMPLX_VALUE_AT(res, i) /= coeffs_len;

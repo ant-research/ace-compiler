@@ -18,6 +18,8 @@
 namespace air {
 namespace opt {
 
+class HSSA_FUNC;
+
 //! @brief BB kind
 enum BB_KIND {
   BB_UNKNOWN,     //!< Unknown block kind
@@ -28,6 +30,17 @@ enum BB_KIND {
   BB_COND,        //!< Condition for loop and if
   BB_GOTO,        //!< Single target basic block
   BB_EXIT,        //!< Exit block
+  // New BB kinds for HSSA framework support
+  // TODO: Incremental approach ensures the availability of both the original
+  // code and the newly merged code, allowing for subsequent refinement.
+  BB_DEF,        //!< Default block
+  BB_LOOP_PHI,   //!< Loop header phi block
+  BB_LOOP_INIT,  //!< Loop initialization block
+  BB_LOOP_BODY,  //!< Loop body block
+  BB_LOOP_EXIT,  //!< Loop exit block (HSSA)
+  BB_TRUE,       //!< True branch block
+  BB_FALSE,      //!< False branch block
+  BB_IF_PHI,     //!< If-merge phi block
 };
 
 //! @brief BB_DATA holds the contents of a basic block
@@ -129,8 +142,17 @@ public:
   //! @brief Emit BB, returns an AIR NODE_PTR
   air::base::NODE_PTR Emit(air::base::NODE_PTR blk, BBID_SET& visited);
 
+  //! @brief Emit BB via HSSA_FUNC, returns an AIR NODE_PTR
+  air::base::NODE_PTR Emit(HSSA_FUNC* hssa_func, air::base::NODE_PTR cur_blk,
+                           BBID_SET& visited);
+
   //! @brief Emit loop body, returns an AIR NODE_PTR
   air::base::NODE_PTR Emit_loop_body(air::base::NODE_PTR& cur_blk,
+                                     BBID_SET&            visited);
+
+  //! @brief Emit loop body via HSSA_FUNC, returns an AIR NODE_PTR
+  air::base::NODE_PTR Emit_loop_body(HSSA_FUNC*           hssa_func,
+                                     air::base::NODE_PTR& cur_blk,
                                      BBID_SET&            visited);
 
   void        Print(std::ostream& os, uint32_t indent = 0) const;

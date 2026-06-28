@@ -17,6 +17,8 @@
 namespace air {
 namespace opt {
 
+class CFG;
+
 //! @brief HSSA HMU
 //! HSSA HMU for May-Use
 

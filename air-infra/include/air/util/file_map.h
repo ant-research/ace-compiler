@@ -48,6 +48,9 @@ public:
   //! @brief remap a opened file
   void Remap(uint32_t sz);
 
+  //! @brief Ensure enough space for writing, remap if needed
+  void Ensure_space(uint32_t required_size);
+
 private:
   const char* _file;
   int32_t     _fd;

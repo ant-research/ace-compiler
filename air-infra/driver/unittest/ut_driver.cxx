@@ -25,11 +25,8 @@ TEST(DRIVER_CTX, TFileReg) {
     TFILE&     tfile   = ctx.Tfile();
     TFILE&     tfile_0 = ctx.Tfile(DEFAULT_TFILE);
     TFILE&     tfile_1 = ctx.Register_tfile(DEFAULT_TFILE, "tmp.default");
-    TFILE&     pfile   = ctx.Tfile(DEFAULT_PFILE);
-    TFILE&     pfile_0 = ctx.Register_tfile(DEFAULT_PFILE, "tmp.default");
     EXPECT_EQ(&tfile, &tfile_0);
     EXPECT_EQ(&tfile, &tfile_1);
-    EXPECT_EQ(&pfile, &pfile_0);
 
     TFILE& xfile   = ctx.Register_tfile(100, "tmp.xfile");
     TFILE& xfile_0 = ctx.Register_tfile(100, "tmp.xfile.0");

@@ -1194,6 +1194,10 @@ bool CONTAINER::Verify_node(NODE_PTR node) const {
     CMPLR_DEV_WARN("Wrong container");
     return false;
   }
+  if (node->Id() == Null_id) {
+    CMPLR_DEV_WARN("Null node id");
+    return false;
+  }
   OPCODE op = node->Opcode();
   // Verify OPCODE specific properties
   if (op == core::OPC_FUNC_ENTRY) {

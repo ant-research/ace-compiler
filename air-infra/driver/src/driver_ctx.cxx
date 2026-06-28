@@ -9,6 +9,7 @@
 #include "air/driver/driver_ctx.h"
 
 #include "air/base/meta_info.h"
+#include "air/util/binary/elf_info.h"
 
 namespace air {
 
@@ -22,6 +23,29 @@ void DRIVER_CTX::Handle_global_options() {
     _option_mgr.Print();
     Teardown(R_CODE::NORMAL);
   }
+}
+
+void DRIVER_CTX::Analyze_input_file() {
+  const char* ifile = _option_mgr.Ifile();
+  if (ifile == nullptr) {
+    return;
+  }
+
+  std::string ifile_str(ifile);
+  // Check if input is a .B IR file (resume from previous phase)
+  if (ifile_str.size() > strlen(BFILE_SUFFIX) &&
+      ifile_str.substr(ifile_str.size() - strlen(BFILE_SUFFIX)) ==
+          BFILE_SUFFIX) {
+    // Read phase info from ELF header
+    std::string phase = Get_ir_phase(ifile_str);
+    if (!phase.empty()) {
+      _config.Set_resume_phase(phase);
+    }
+  }
+}
+
+std::string DRIVER_CTX::Get_ir_phase(const std::string& ifile) {
+  return air::util::Read_ir_phase_abbr(ifile);
 }
 
 void DRIVER_CTX::Teardown(R_CODE rc) { exit((int)rc); }

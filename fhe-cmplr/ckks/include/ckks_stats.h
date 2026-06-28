@@ -80,6 +80,7 @@ public:
         kind = RELIN;
         break;
       case OPC_ROTATE:
+      case OPC_ROTATE_BATCH:
         kind = ROTATE;
         break;
       case OPC_RESCALE:

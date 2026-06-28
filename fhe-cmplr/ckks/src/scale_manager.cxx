@@ -178,6 +178,10 @@ SCALE_INFO PARS::Downscale_analysis(NODE_PTR node) {
 
 SCALE_INFO ACE_SM::Handle_mul(NODE_PTR node, SCALE_INFO si0, SCALE_INFO si1) {
   SCALE_MNG_CTX* ctx = Context();
+  const uint32_t* lazy_rescale_attr =
+      node->Attr<uint32_t>(fhe::core::FHE_ATTR_KIND::SKIP_AUTO_RESCALE);
+  bool lazy_rescale =
+      (lazy_rescale_attr != nullptr) && (*lazy_rescale_attr != 0);
   if (si0.Scale_deg() >= 2) {
     si0 = Rescale_res(node->Child(0), si0);
   }
@@ -187,6 +191,7 @@ SCALE_INFO ACE_SM::Handle_mul(NODE_PTR node, SCALE_INFO si0, SCALE_INFO si1) {
   uint32_t   scale_deg = si0.Scale_deg() + si1.Scale_deg();
   uint32_t   rs_level  = std::max(si0.Rescale_level(), si1.Rescale_level());
   SCALE_INFO si(scale_deg, rs_level);
+  if (lazy_rescale) return si;
   if (!ctx->Rescale_node(node, ctx->Parent_stmt(), scale_deg)) return si;
 
   si                       = SCALE_INFO(1, rs_level + 1);
@@ -415,8 +420,20 @@ void CKKS_SCALE_MANAGER::Handle_encode_in_bin_arith_node(
 
   SPOS           spos           = bin_node->Spos();
   const uint32_t scale_child_id = 2;
+  const uint32_t level_child_id = 3;
   NODE_PTR       scale          = encode_node->Child(scale_child_id);
+  const uint32_t* explicit_level_attr =
+      encode_node->Attr<uint32_t>(core::FHE_ATTR_KIND::LEVEL);
+  bool preserve_explicit_level =
+      explicit_level_attr != nullptr && *explicit_level_attr != 0;
   CONTAINER*     cntr           = bin_node->Container();
+  NODE_PTR       child0         = bin_node->Child(0);
+  AIR_ASSERT(ana_ctx->Lower_ctx()->Is_cipher_type(child0->Rtype_id()));
+  CKKS_GEN ckks_gen(cntr, ana_ctx->Lower_ctx());
+  if (!preserve_explicit_level) {
+    NODE_PTR new_level = ckks_gen.Gen_get_level(child0);
+    encode_node->Set_child(level_child_id, new_level);
+  }
   if (ana_ctx->Enc_scl_cst()) {
     TYPE_PTR u32_type  = cntr->Glob_scope()->Prim_type(PRIMITIVE_TYPE::INT_U32);
     NODE_PTR new_scale = cntr->New_intconst(u32_type, child0_scale, spos);
@@ -432,8 +449,6 @@ void CKKS_SCALE_MANAGER::Handle_encode_in_bin_arith_node(
 
   // 2. handle scale get from child0
   AIR_ASSERT(scale->Opcode() == OPC_SCALE);
-  NODE_PTR child0 = bin_node->Child(0);
-  AIR_ASSERT(ana_ctx->Lower_ctx()->Is_cipher_type(child0->Rtype_id()));
   if (!child0->Is_ld() || !child0->Has_sym()) {
     PREG_PTR preg        = cntr->Parent_func_scope()->New_preg(child0->Rtype());
     STMT_PTR stp_child0  = cntr->New_stp(child0, preg, spos);
@@ -451,19 +466,22 @@ void CKKS_SCALE_MANAGER::Handle_encode_in_bin_arith_node(
   }
   // reset scale and level nodes of encode
   child0 = bin_node->Child(0);
-  CKKS_GEN       ckks_gen(cntr, ana_ctx->Lower_ctx());
-  const uint32_t level_child_id = 3;
   if (child0->Opcode() == air::core::OPC_LD) {
     ADDR_DATUM_PTR cipher_var = child0->Addr_datum();
     scale->Set_child(0, cntr->New_ld(cipher_var, spos));
-    NODE_PTR new_level = ckks_gen.Gen_get_level(cntr->New_ld(cipher_var, spos));
-    encode_node->Set_child(level_child_id, new_level);
+    if (!preserve_explicit_level) {
+      NODE_PTR new_level =
+          ckks_gen.Gen_get_level(cntr->New_ld(cipher_var, spos));
+      encode_node->Set_child(level_child_id, new_level);
+    }
   } else if (child0->Opcode() == air::core::OPC_LDP) {
     PREG_PTR cipher_var = child0->Preg();
     scale->Set_child(0, cntr->New_ldp(cipher_var, spos));
-    NODE_PTR new_level =
-        ckks_gen.Gen_get_level(cntr->New_ldp(cipher_var, spos));
-    encode_node->Set_child(level_child_id, new_level);
+    if (!preserve_explicit_level) {
+      NODE_PTR new_level =
+          ckks_gen.Gen_get_level(cntr->New_ldp(cipher_var, spos));
+      encode_node->Set_child(level_child_id, new_level);
+    }
   }
 }
 

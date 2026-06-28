@@ -7,13 +7,18 @@
 
 function(fetch_uthash)
 
-  set(REPO_UTHASH_URL      "${PROJECT_SOURCE_DIR}/cmake/modules/uthash")
-  message(STATUS "Cloning External Repository   : ${REPO_UTHASH_URL}")
+  # Default: upstream GitHub; internal override via .aci/
+  if(NOT DEFINED UTHASH_URL)
+    set(UTHASH_URL "https://github.com/troydhanson/uthash.git")
+  endif()
+
+  message(STATUS "Cloning External Repository   : ${UTHASH_URL}")
 
   include(FetchContent)
   FetchContent_Declare(
       uthash
-      SOURCE_DIR ${REPO_UTHASH_URL}
+      GIT_REPOSITORY ${UTHASH_URL}
+      GIT_TAG master
   )
   FetchContent_MakeAvailable(uthash)
 
@@ -25,6 +30,3 @@ endfunction()
 if(NOT TARGET uthash)
   fetch_uthash()
 endif()
-
-
-

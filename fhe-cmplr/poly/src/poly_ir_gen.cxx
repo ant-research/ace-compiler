@@ -36,20 +36,6 @@ STMT_PTR POLY_IR_GEN::New_poly_stmt(OPCODE opcode, const SPOS& spos) {
 
 NODE_PAIR POLY_IR_GEN::New_ciph_poly_load(CONST_VAR v_ciph, bool is_rns,
                                           const SPOS& spos) {
-  if (!Lower_ctx()->Is_cipher_type(v_ciph.Type_id())) {
-    std::cerr << "[DEBUG POLY] v_ciph type_id: 0x" << std::hex
-              << v_ciph.Type_id().Value() << ", cipher_type_id: 0x"
-              << Lower_ctx()->Get_cipher_type_id().Value()
-              << ", cipher3_type_id: 0x"
-              << Lower_ctx()->Get_cipher3_type_id().Value();
-    if (v_ciph.Is_preg()) {
-      std::cerr << " (PREG)";
-    } else if (!v_ciph.Is_null()) {
-      std::cerr << " (VAR: " << v_ciph.Addr_var()->Name()->Char_str() << ")";
-    }
-    std::cerr << std::dec << "\n";
-  }
-
   CMPLR_ASSERT(Lower_ctx()->Is_cipher_type(v_ciph.Type_id()),
                "v_ciph is not ciphertext");
 
@@ -94,19 +80,19 @@ STMT_PTR POLY_IR_GEN::New_plain_poly_store(CONST_VAR v_plain, NODE_PTR node,
 STMT_PAIR POLY_IR_GEN::New_ciph_poly_store(CONST_VAR v_ciph, NODE_PTR n_c0,
                                            NODE_PTR n_c1, bool is_rns,
                                            const SPOS& spos) {
-  if (!Lower_ctx()->Is_cipher_type(v_ciph.Type_id())) {
-    std::cerr << "[DEBUG POLY] store v_ciph type_id: 0x" << std::hex
-              << v_ciph.Type_id().Value() << ", cipher_type_id: 0x"
-              << Lower_ctx()->Get_cipher_type_id().Value();
-    if (v_ciph.Is_preg()) {
-      std::cerr << " (PREG)";
-    } else if (!v_ciph.Is_null()) {
-      std::cerr << " (VAR: " << v_ciph.Addr_var()->Name()->Char_str() << ")";
+  // Check by type ID first, then fall back to type name for cross-scope
+  // compatibility
+  bool is_ciph_type = Lower_ctx()->Is_cipher_type(v_ciph.Type_id()) ||
+                      Lower_ctx()->Is_cipher3_type(v_ciph.Type_id());
+  if (!is_ciph_type && !v_ciph.Is_null() && !v_ciph.Is_preg()) {
+    TYPE_PTR vtype = Container()->Glob_scope()->Type(v_ciph.Type_id());
+    if (vtype != air::base::Null_ptr && vtype->Is_record()) {
+      const char* type_name = vtype->Cast_to_rec()->Name()->Char_str();
+      is_ciph_type          = (strcmp(type_name, "CIPHERTEXT") == 0 ||
+                      strcmp(type_name, "CIPHERTEXT3") == 0);
     }
-    std::cerr << std::dec << "\n";
   }
-  CMPLR_ASSERT(Lower_ctx()->Is_cipher_type(v_ciph.Type_id()),
-               "v_ciph is not ciphertext");
+  CMPLR_ASSERT(is_ciph_type, "v_ciph is not ciphertext");
 
   STMT_PTR s_c0;
   STMT_PTR s_c1;
@@ -336,10 +322,16 @@ STMT_PTR POLY_IR_GEN::New_init_ciph_up_scale(NODE_PTR lhs, NODE_PTR opnd0,
 
 STMT_PTR POLY_IR_GEN::New_init_ciph_down_scale(NODE_PTR res, NODE_PTR opnd,
                                                const SPOS& spos) {
-  CMPLR_ASSERT(res->Rtype_id() == opnd->Rtype_id() &&
-                   (Lower_ctx()->Is_cipher_type(res->Rtype_id()) ||
-                    Lower_ctx()->Is_cipher3_type(res->Rtype_id())),
-               "down scale opnds are not ciphertext type");
+  // Check by type ID first, then fall back to type name for cross-scope
+  // compatibility
+  bool res_is_ciph = Lower_ctx()->Is_cipher_type(res->Rtype_id()) ||
+                     Lower_ctx()->Is_cipher3_type(res->Rtype_id());
+  if (!res_is_ciph && res->Rtype()->Is_record()) {
+    const char* type_name = res->Rtype()->Cast_to_rec()->Name()->Char_str();
+    res_is_ciph           = (strcmp(type_name, "CIPHERTEXT") == 0 ||
+                   strcmp(type_name, "CIPHERTEXT3") == 0);
+  }
+  CMPLR_ASSERT(res_is_ciph, "down scale opnds are not ciphertext type");
   STMT_PTR stmt      = New_poly_stmt(INIT_CIPH_DOWN_SCALE, spos);
   NODE_PTR stmt_node = stmt->Node();
   stmt_node->Set_child(0, res);
@@ -351,10 +343,17 @@ STMT_PTR POLY_IR_GEN::New_init_ciph_down_scale(NODE_PTR res, NODE_PTR opnd,
 // A better design is: postpone to CG IR phase
 STMT_PTR POLY_IR_GEN::New_init_ciph(CONST_VAR v_parent, NODE_PTR node) {
   TYPE_ID tid = node->Rtype_id();
-  AIR_ASSERT_MSG(Lower_ctx()->Is_cipher_type(tid) ||
-                     Lower_ctx()->Is_cipher3_type(tid) ||
-                     node->Opcode() == air::core::OPC_ZERO,
-                 "not ciphertext type");
+  // Check by type ID first, then fall back to type name for cross-scope
+  // compatibility
+  bool is_cipher = Lower_ctx()->Is_cipher_type(tid) ||
+                   Lower_ctx()->Is_cipher3_type(tid) ||
+                   node->Opcode() == air::core::OPC_ZERO;
+  if (!is_cipher && node->Rtype()->Is_record()) {
+    const char* type_name = node->Rtype()->Cast_to_rec()->Name()->Char_str();
+    is_cipher             = (strcmp(type_name, "CIPHERTEXT") == 0 ||
+                 strcmp(type_name, "CIPHERTEXT3") == 0);
+  }
+  AIR_ASSERT_MSG(is_cipher, "not ciphertext type");
   CONST_VAR& v_res = v_parent.Is_null() ? Node_var(node) : v_parent;
   SPOS       spos  = node->Spos();
   if (node->Domain() == fhe::ckks::CKKS_DOMAIN::ID) {
@@ -362,10 +361,20 @@ STMT_PTR POLY_IR_GEN::New_init_ciph(CONST_VAR v_parent, NODE_PTR node) {
       case fhe::ckks::CKKS_OPERATOR::ADD:
       case fhe::ckks::CKKS_OPERATOR::SUB:
       case fhe::ckks::CKKS_OPERATOR::MUL: {
-        AIR_ASSERT(Has_node_var(node->Child(0)) &&
-                   Has_node_var(node->Child(1)));
-        CONST_VAR& v_opnd0 = Node_var(node->Child(0));
-        CONST_VAR& v_opnd1 = Node_var(node->Child(1));
+        // Normalize operand order: cipher should be child 0.
+        // The Python DSL may emit ADD(encode, cipher) where child 0 is
+        // plain/encode.  Swap so init_ciph sees the expected layout.
+        NODE_PTR child0 = node->Child(0);
+        NODE_PTR child1 = node->Child(1);
+        if (!Lower_ctx()->Is_cipher_type(child0->Rtype_id()) &&
+            !Lower_ctx()->Is_cipher3_type(child0->Rtype_id()) &&
+            (Lower_ctx()->Is_cipher_type(child1->Rtype_id()) ||
+             Lower_ctx()->Is_cipher3_type(child1->Rtype_id()))) {
+          std::swap(child0, child1);
+        }
+        AIR_ASSERT(Has_node_var(child0) && Has_node_var(child1));
+        CONST_VAR& v_opnd0 = Node_var(child0);
+        CONST_VAR& v_opnd1 = Node_var(child1);
         if (v_res != v_opnd0 || v_res != v_opnd1) {
           NODE_PTR n_res   = New_var_load(v_res, spos);
           NODE_PTR n_opnd0 = New_var_load(v_opnd0, spos);
@@ -567,6 +576,20 @@ NODE_PTR POLY_IR_GEN::New_hw_modadd(NODE_PTR opnd0, NODE_PTR opnd1,
   add_node->Set_child(1, opnd1);
   add_node->Set_child(2, opnd2);
   return add_node;
+}
+
+NODE_PTR POLY_IR_GEN::New_hw_modsub(NODE_PTR opnd0, NODE_PTR opnd1,
+                                    NODE_PTR opnd2, const SPOS& spos) {
+  CMPLR_ASSERT((opnd0->Rtype() == opnd1->Rtype() &&
+                opnd0->Rtype() == Get_type(INT64_PTR, spos) &&
+                opnd2->Rtype() == Get_type(MODULUS_PTR, spos)),
+               "unmatched type");
+
+  NODE_PTR sub_node = New_poly_node(HW_MODSUB, opnd0->Rtype(), spos);
+  sub_node->Set_child(0, opnd0);
+  sub_node->Set_child(1, opnd1);
+  sub_node->Set_child(2, opnd2);
+  return sub_node;
 }
 
 NODE_PTR POLY_IR_GEN::New_hw_modmul(NODE_PTR opnd0, NODE_PTR opnd1,

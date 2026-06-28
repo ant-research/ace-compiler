@@ -32,25 +32,25 @@ The ANT-ACE compiler framework marks an initial step in our FHE compiler technol
 - **nn-addon:** Includes ONNX-related components for the ACE compiler.
 - **scripts:** Scripts for building and running ACE and EXPERT tests.
 - **README.md:** This README file.
-- **Dockerfile:** File used to build the Docker image.
+- **docker/Dockerfile:** File used to build the Docker image.
 - **requirements.txt:** Specifies Python package requirements.
 
 # Build ANT-ACE Compiler
 
 ## 1. Preparing a Docker environment to Build and Test the ANT-ACE Compiler
 
-It's recommended to use a Docker environment to Build and Test the ANT-ACE Compiler. We provide the [*Dockerfile*](https://github.com/ant-research/ace-compiler/blob/main/Dockerfile) to build the Docker image. The docker image is based on Ubuntu 20.04. You may set up your own environment on other Linux platforms with necessary Linux and Python packages listed in [*Dockerfile*](https://github.com/ant-research/ace-compiler/blob/main/Dockerfile) and [*requirements.txt*](https://github.com/ant-research/ace-compiler/blob/main/requirements.txt). We recommended to pull the pre-built docker image (opencc/ace:latest) from Docker Hub:
+It's recommended to use a Docker environment to Build and Test the ANT-ACE Compiler. We provide the [*Dockerfile*](docker/Dockerfile) to build the Docker image. The docker image is based on Ubuntu 20.04. You may set up your own environment on other Linux platforms with necessary Linux and Python packages listed in [*Dockerfile*](docker/Dockerfile) and [*requirements.txt*](requirements.txt). We recommended to pull the pre-built docker image (opencc/dev:ubuntu24.04) from Docker Hub:
 
 ```
 mkdir ace-compiler && cd ace-compiler
-docker pull opencc/ace:latest
-docker run -it --name ace -v "$(pwd)":/app --privileged opencc/ace:latest bash
+docker pull opencc/dev:ubuntu24.04
+docker run -it --name ace -v "$(pwd)":/app --privileged opencc/dev:ubuntu24.04 bash
 ```
 A local directory `ace-compiler` is created and mounted in the docker container. The container will launch and automatically enters the `/app` directory:
 ```
 root@xxxxxx:/app#
 ```
-Alternatively, if you encounter issues pulling the pre-built image, you can build the image from the [*Dockerfile*](https://github.com/ace-compiler/ace-compiler/blob/main/Dockerfile):
+Alternatively, if you encounter issues pulling the pre-built image, you can build the image from the [*Dockerfile*](docker/Dockerfile):
 ```
 git clone https://github.com/ace-compiler/ace-compiler.git
 cd ace-compiler

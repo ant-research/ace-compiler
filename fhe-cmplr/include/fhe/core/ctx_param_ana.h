@@ -165,6 +165,15 @@ public:
   STMT_PTR Gen_modswitch(air::opt::SSA_SYM_PTR sym, uint32_t mul_lev,
                          uint32_t in_lev, SPOS spos);
 
+  //! @brief Ignore unknown domains by traversing children.
+  template <typename RETV, typename VISITOR>
+  RETV Handle_unknown_domain(VISITOR* visitor, NODE_PTR node) {
+    for (uint32_t i = 0; i < node->Num_child(); ++i) {
+      visitor->template Visit<RETV>(node->Child(i));
+    }
+    return RETV();
+  }
+
   LOWER_CTX*     Lower_ctx() const { return _lower_ctx; }
   FUNC_SCOPE*    Func_scope() const { return _func_scope; }
   SSA_CONTAINER* Ssa_cntr() const { return _ssa_cntr; }
@@ -422,13 +431,13 @@ RETV CORE_ANA_IMPL::Handle_idname(VISITOR*            visitor,
   SSA_VER_ID         ver_id   = ssa_cntr->Node_ver_id(formal->Id());
 
   LOWER_CTX* lower_ctx = ana_ctx.Lower_ctx();
-  TYPE_ID    type = formal->Addr_datum()->Type_id();
-  if (!lower_ctx->Is_cipher3_type(type) &&
-      !lower_ctx->Is_cipher_type(type) &&
+  TYPE_ID    type      = formal->Addr_datum()->Type_id();
+  if (!lower_ctx->Is_cipher3_type(type) && !lower_ctx->Is_cipher_type(type) &&
       !lower_ctx->Is_plain_type(type)) {
     ana_ctx.Trace(ckks::TRACE_DETAIL::TD_CKKS_LEVEL_MGT,
-          std::string(ana_ctx.Indent(), '+'),
-          "skip non-CIPHER/PLAIN idname: ", ssa_cntr->Ver(ver_id)->To_str(), "\n");
+                  std::string(ana_ctx.Indent(), '+'),
+                  "skip non-CIPHER/PLAIN idname: ",
+                  ssa_cntr->Ver(ver_id)->To_str(), "\n");
     return RETV{false, 0};
   }
 
@@ -784,6 +793,12 @@ public:
   template <typename RETV, typename VISITOR>
   RETV Handle_rotate(VISITOR* visitor, NODE_PTR rot_node);
   template <typename RETV, typename VISITOR>
+  RETV Handle_rotate_batch(VISITOR* visitor, NODE_PTR rot_node);
+  template <typename RETV, typename VISITOR>
+  RETV Handle_mul_mono(VISITOR* visitor, NODE_PTR mul_mono_node);
+  template <typename RETV, typename VISITOR>
+  RETV Handle_conjugate(VISITOR* visitor, NODE_PTR conjugate_node);
+  template <typename RETV, typename VISITOR>
   RETV Handle_relin(VISITOR* visitor, NODE_PTR relin_node);
   template <typename RETV, typename VISITOR>
   RETV Handle_modswitch(VISITOR* visitor, NODE_PTR mod_switch);
@@ -791,6 +806,12 @@ public:
   RETV Handle_rescale(VISITOR* visitor, NODE_PTR rescale);
   template <typename RETV, typename VISITOR>
   RETV Handle_bootstrap(VISITOR* visitor, NODE_PTR bootstrap);
+  template <typename RETV, typename VISITOR>
+  RETV Handle_bootstrap_coeffs_to_slots(VISITOR* visitor, NODE_PTR node);
+  template <typename RETV, typename VISITOR>
+  RETV Handle_bootstrap_eval_mod(VISITOR* visitor, NODE_PTR node);
+  template <typename RETV, typename VISITOR>
+  RETV Handle_bootstrap_slots_to_coeffs(VISITOR* visitor, NODE_PTR node);
   template <typename RETV, typename VISITOR>
   RETV Handle_encode(VISITOR* visitor, NODE_PTR encode);
 };
@@ -887,6 +908,90 @@ RETV CKKS_ANA_IMPL::Handle_rotate(VISITOR* visitor, NODE_PTR rot_node) {
     visitor->Context().Add_rotate_index(rot_idx[i]);
   }
 
+  return child0_res;
+}
+
+template <typename RETV, typename VISITOR>
+RETV CKKS_ANA_IMPL::Handle_rotate_batch(VISITOR* visitor, NODE_PTR rot_node) {
+  CTX_PARAM_ANA_CTX& ana_ctx   = visitor->Context();
+  uint32_t           mul_level = ana_ctx.Top_mul_level();
+  ana_ctx.Set_node_mul_level(rot_node, mul_level);
+
+  ana_ctx.Push_mul_level(mul_level);
+  RETV child0_res = visitor->template Visit<RETV>(rot_node->Child(0));
+  AIR_ASSERT_MSG(mul_level == ana_ctx.Top_mul_level(),
+                 "mul level inconsistent");
+  ana_ctx.Pop_mul_level();
+
+  const char* rot_idx_key   = nn::core::ATTR::RNUM;
+  uint32_t    rot_idx_count = 0;
+  const int*  rot_idx       = rot_node->Attr<int>(rot_idx_key, &rot_idx_count);
+  AIR_ASSERT(rot_idx != nullptr && rot_idx_count > 0);
+  for (uint32_t i = 0; i < rot_idx_count; ++i) {
+    if (rot_idx[i] != 0) {
+      visitor->Context().Add_rotate_index(rot_idx[i]);
+    }
+  }
+
+  return child0_res;
+}
+
+template <typename RETV, typename VISITOR>
+RETV CKKS_ANA_IMPL::Handle_mul_mono(VISITOR* visitor, NODE_PTR mul_mono_node) {
+  CTX_PARAM_ANA_CTX& ana_ctx   = visitor->Context();
+  uint32_t           mul_level = ana_ctx.Top_mul_level();
+  ana_ctx.Set_node_mul_level(mul_mono_node, mul_level);
+
+  ana_ctx.Trace(ckks::TRACE_DETAIL::TD_CKKS_LEVEL_MGT,
+                std::string(ana_ctx.Indent(), '+'), "mul_mono: l=", mul_level,
+                "\n");
+
+  ana_ctx.Push_mul_level(mul_level);
+  RETV child0_res = visitor->template Visit<RETV>(mul_mono_node->Child(0));
+  AIR_ASSERT_MSG(mul_level == ana_ctx.Top_mul_level(),
+                 "mul level inconsistent");
+  ana_ctx.Pop_mul_level();
+
+  const char* rot_idx_key   = nn::core::ATTR::RNUM;
+  uint32_t    rot_idx_count = 0;
+  const int*  rot_idx       =
+      mul_mono_node->Attr<int>(rot_idx_key, &rot_idx_count);
+  if (rot_idx != nullptr && rot_idx_count > 0) {
+    for (uint32_t i = 0; i < rot_idx_count; ++i) {
+      if (rot_idx[i] != 0) {
+        ana_ctx.Add_rotate_index(rot_idx[i]);
+      }
+    }
+  } else if (mul_mono_node->Child(1)->Opcode() == air::core::OPC_INTCONST) {
+    int32_t int_rot_idx =
+        static_cast<int32_t>(mul_mono_node->Child(1)->Intconst());
+    if (int_rot_idx != 0) {
+      ana_ctx.Add_rotate_index(int_rot_idx);
+    }
+  }
+
+  return child0_res;
+}
+
+template <typename RETV, typename VISITOR>
+RETV CKKS_ANA_IMPL::Handle_conjugate(VISITOR* visitor, NODE_PTR conjugate_node) {
+  CTX_PARAM_ANA_CTX& ana_ctx   = visitor->Context();
+  uint32_t           mul_level = ana_ctx.Top_mul_level();
+  ana_ctx.Set_node_mul_level(conjugate_node, mul_level);
+
+  ana_ctx.Trace(ckks::TRACE_DETAIL::TD_CKKS_LEVEL_MGT,
+                std::string(ana_ctx.Indent(), '+'), "conjugate: l=", mul_level,
+                "\n");
+
+  ana_ctx.Push_mul_level(mul_level);
+  RETV child0_res = visitor->template Visit<RETV>(conjugate_node->Child(0));
+  AIR_ASSERT_MSG(mul_level == ana_ctx.Top_mul_level(),
+                 "mul level inconsistent");
+  ana_ctx.Pop_mul_level();
+
+  int32_t rot_idx = static_cast<int32_t>(
+      2 * ana_ctx.Lower_ctx()->Get_ctx_param().Get_poly_degree() - 1);
+  ana_ctx.Add_rotate_index(rot_idx);
   return child0_res;
 }
 
@@ -1039,11 +1144,63 @@ RETV CKKS_ANA_IMPL::Handle_bootstrap(VISITOR* visitor, NODE_PTR bootstrap) {
 }
 
 template <typename RETV, typename VISITOR>
+RETV CKKS_ANA_IMPL::Handle_bootstrap_coeffs_to_slots(VISITOR* visitor,
+                                                     NODE_PTR node) {
+  CTX_PARAM_ANA_CTX& ana_ctx   = visitor->Context();
+  uint32_t           mul_level = ana_ctx.Top_mul_level();
+  ana_ctx.Set_node_mul_level(node, mul_level);
+  ana_ctx.Push_mul_level(mul_level);
+  (void)visitor->template Visit<RETV>(node->Child(0));
+  AIR_ASSERT_MSG(mul_level == ana_ctx.Top_mul_level(),
+                 "mul level inconsistent");
+  ana_ctx.Pop_mul_level();
+  return RETV(false, mul_level);
+}
+
+template <typename RETV, typename VISITOR>
+RETV CKKS_ANA_IMPL::Handle_bootstrap_eval_mod(VISITOR* visitor, NODE_PTR node) {
+  CTX_PARAM_ANA_CTX& ana_ctx   = visitor->Context();
+  uint32_t           mul_level = ana_ctx.Top_mul_level();
+  ana_ctx.Set_node_mul_level(node, mul_level);
+  ana_ctx.Push_mul_level(mul_level);
+  (void)visitor->template Visit<RETV>(node->Child(0));
+  AIR_ASSERT_MSG(mul_level == ana_ctx.Top_mul_level(),
+                 "mul level inconsistent");
+  ana_ctx.Pop_mul_level();
+  return RETV(false, mul_level);
+}
+
+template <typename RETV, typename VISITOR>
+RETV CKKS_ANA_IMPL::Handle_bootstrap_slots_to_coeffs(VISITOR* visitor,
+                                                     NODE_PTR node) {
+  CTX_PARAM_ANA_CTX& ana_ctx   = visitor->Context();
+  uint32_t           mul_level = ana_ctx.Top_mul_level();
+  ana_ctx.Set_node_mul_level(node, mul_level);
+  ana_ctx.Push_mul_level(mul_level);
+  (void)visitor->template Visit<RETV>(node->Child(0));
+  AIR_ASSERT_MSG(mul_level == ana_ctx.Top_mul_level(),
+                 "mul level inconsistent");
+  ana_ctx.Pop_mul_level();
+  return RETV(false, mul_level);
+}
+
+template <typename RETV, typename VISITOR>
 RETV CKKS_ANA_IMPL::Handle_encode(VISITOR* visitor, NODE_PTR encode) {
   // 1. get mul_level of bootstrap result
   CTX_PARAM_ANA_CTX& ana_ctx   = visitor->Context();
   uint32_t           mul_level = ana_ctx.Top_mul_level();
-  AIR_ASSERT_MSG(mul_level > 0, "target level of encode must >= 1");
+  const uint32_t*    level_attr =
+      encode->Attr<uint32_t>(core::FHE_ATTR_KIND::LEVEL);
+  if (level_attr != nullptr && *level_attr > 0) {
+    mul_level = *level_attr;
+  } else if (encode->Num_child() > 3 &&
+             encode->Child(3)->Opcode() == air::core::OPC_INTCONST &&
+             encode->Child(3)->Intconst() > 0) {
+    mul_level = static_cast<uint32_t>(encode->Child(3)->Intconst());
+  }
+  if (mul_level == 0) {
+    return RETV{false, 0};
+  }
 
   ana_ctx.Trace(ckks::TRACE_DETAIL::TD_CKKS_LEVEL_MGT,
                 std::string(ana_ctx.Indent(), '+'), "encode: l=", mul_level,

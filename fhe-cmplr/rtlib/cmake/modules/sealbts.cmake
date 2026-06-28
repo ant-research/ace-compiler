@@ -5,28 +5,29 @@
 #
 #=============================================================================
 
-function(seal_find_package version) 
+function(seal_find_package version)
   if(${version} STREQUAL BTS)
-    set(SEALBTS_URL      "https://code.alipay.com/fhe/SEAL.git")
-    set(SEALBTS_URL_SSH  "git@code.alipay.com:fhe/SEAL.git")
-    if(SEALBTS_URL_SSH)
-      set(REPO_SEALBTS_URL ${SEALBTS_URL_SSH})
-    else()
-      set(REPO_SEALBTS_URL ${SEALBTS_URL})
+
+    # Default: upstream GitHub; internal override via .aci/
+    if(NOT DEFINED SEALBTS_URL)
+      set(SEALBTS_URL "https://github.com/ant-research/ace-seal-bts.git")
+    endif()
+    if(NOT DEFINED SEALBTS_REF)
+      set(SEALBTS_REF "v3.6.6")
     endif()
 
-    message(STATUS "Cloning External Repository   : ${REPO_SEALBTS_URL}")
-  
+    message(STATUS "Cloning External Repository   : ${SEALBTS_URL} @ ${SEALBTS_REF}")
+
     include(ExternalProject)
     ExternalProject_Add(
       SEAL_BTS_Project
-      GIT_REPOSITORY ${REPO_SEALBTS_URL}
-      GIT_TAG feat-seal-bts-v3.6.6
+      GIT_REPOSITORY ${SEALBTS_URL}
+      GIT_TAG ${SEALBTS_REF}
       PREFIX ${CMAKE_BINARY_DIR}/external
       BUILD_ALWAYS OFF
       BUILD_COMMAND         ${CMAKE_COMMAND} --build <BINARY_DIR>
       INSTALL_COMMAND       ""
-      BUILD_BYPRODUCTS 
+      BUILD_BYPRODUCTS
         ${CMAKE_BINARY_DIR}/external/src/SEAL_BTS_Project-build/libSEAL_BTS.a
         ${CMAKE_BINARY_DIR}/external/src/SEAL_BTS_Project-build/external/SEAL/install/lib/libseal-3.6.a
         ${CMAKE_BINARY_DIR}/external/src/SEAL_BTS_Project-build/external/NTL/src/NTL/src/ntl.a
@@ -39,7 +40,7 @@ function(seal_find_package version)
     add_library(SEAL IMPORTED STATIC GLOBAL)
     set_target_properties(SEAL PROPERTIES
         IMPORTED_LOCATION ${BINARY_DIR}/external/SEAL/install/lib/libseal-3.6.a)
-    
+
     add_library(SEAL_BTS IMPORTED STATIC GLOBAL)
     set_target_properties(SEAL_BTS PROPERTIES
       IMPORTED_LOCATION ${BINARY_DIR}/libSEAL_BTS.a)
@@ -48,7 +49,7 @@ function(seal_find_package version)
     include_directories(${BINARY_DIR}/external/SEAL/install/include/SEAL-3.6)
     set(ENV{SEALBTS_INCLUDE_DIR} ${BINARY_DIR}/external/SEAL/install/include/SEAL-3.6)
     add_dependencies(SEAL_BTS SEAL_BTS_Project)
-    
+
     set(ENABLE_BTS true PARENT_SCOPE)
     set(SEAL_BTS_LIBS SEAL_BTS SEAL NTL pthread gmp PARENT_SCOPE)
     add_compile_definitions(SEAL_BTS_MACRO)

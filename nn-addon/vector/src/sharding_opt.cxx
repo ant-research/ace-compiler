@@ -209,7 +209,8 @@ GLOB_SCOPE* Run_sharding_opt(GLOB_SCOPE* gscope, VECTOR_CTX& ctx,
                     new_fscope->Owning_func()->Name()->Char_str(), "\n");
     ctx_trans.Trace_obj(TF_SHARDING, new_fscope);
   }
-  delete gscope;
+  // NOTE: Do NOT delete gscope - it may be the singleton from GLOB_SCOPE::Get()
+  // delete gscope;
   return new_sharding_gscope;
 }
 

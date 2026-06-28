@@ -41,11 +41,16 @@ option(FHE_INSTALL_APP     "Control whether to install the APPs"               O
 option(FHE_ENABLE_SEAL     "Control whether to build with SEAL libraries"      ON)
 option(FHE_ENABLE_SEAL_BTS "Control whether to build with SEAL_BTS libraries" OFF)
 option(FHE_ENABLE_OPENFHE  "Control whether to build with OPENFHE libraries"   ON)
-option(FHE_ENABLE_CUDA     "Control whether to build with CUDA libraries"     OFF)
+option(FHE_ENABLE_PHANTOM  "Control whether to build with PHANTOM libraries"  OFF)
+option(FHE_ENABLE_ACE      "Control whether to build with ACE libraries"      OFF)
 option(BUILD_WITH_OPENMP   "Control whether to build with OpenMP libraries"   OFF)
-option(EXTERNAL_URL_SSH    "Control choose external URL for repository"       OFF)
 
 set(FHE_WITH_SRC "" CACHE STRING "The default compilation depends")
+
+# Internal URL overrides (file only exists in internal repo)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.aci/config-internal.cmake")
+  include("${CMAKE_CURRENT_SOURCE_DIR}/.aci/config-internal.cmake")
+endif()
 
 if(NOT DEFINED FHE_SEED_MODE)
   set(FHE_SEED_MODE "prng" CACHE STRINGS "Default seed mode")
@@ -100,6 +105,7 @@ message(STATUS "FHE_ENABLE_SEAL               : ${FHE_ENABLE_SEAL}")
 message(STATUS "FHE_ENABLE_SEAL_BTS           : ${FHE_ENABLE_SEAL_BTS}")
 message(STATUS "FHE_ENABLE_OPENFHE            : ${FHE_ENABLE_OPENFHE}")
 message(STATUS "FHE_ENABLE_PHANTOM            : ${FHE_ENABLE_PHANTOM}")
+message(STATUS "FHE_ENABLE_ACE                : ${FHE_ENABLE_ACE}")
 message(STATUS "FHE_INSTALL_APP               : ${FHE_INSTALL_APP}")
 message(STATUS "BUILD_WITH_OPENMP             : ${BUILD_WITH_OPENMP}")
 message(STATUS "BUILD_TIMESTAMP               : ${BUILD_TIMESTAMP}")
@@ -115,6 +121,9 @@ install_hooks($ENV{PACKAGE_DEVTOOLS_DIR}/hooks)
 if(FHE_CODE_CHECK)
   # codes from other parties are excluded from coding style checks
   set(CODEING_STYLE_EXCLUDES "third-party")
+  # rtlib is a C runtime library; its files are not in compile_commands.json
+  # and mix third-party naming conventions (uthash HH, etc.), so exclude it.
+  set(CODEING_STYLE_EXCLUDES ${CODEING_STYLE_EXCLUDES} "rtlib")
   # exclude unittest source from coding style check if not build
   if(NOT BUILD_UNITTEST)
     set(CODEING_STYLE_EXCLUDES ${CODEING_STYLE_EXCLUDES} "unittest")

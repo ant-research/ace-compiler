@@ -580,7 +580,6 @@ R_CODE OPTION_MGR::Parse_options(int argc, char** options) {
       _fname                 = fname.replace_extension("").string();
       AIR_DEBUG(Ifile());
       AIR_DEBUG(Tfile(""));
-      AIR_DEBUG(Pfile(""));
     }
   }
   return R_CODE::NORMAL;

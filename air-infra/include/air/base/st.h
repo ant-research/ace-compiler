@@ -565,11 +565,12 @@ public:
 
   bool Verify_ir() const;
 
-  void Print_mp_info(std::ostream& os, bool func = true) const;
-  void Print_st(std::ostream& os) const;
-  void Print_ir(std::ostream& os, bool rot = true) const;
-  void Print(std::ostream& os, bool rot = true) const;
-  void Print() const;
+  void        Print_mp_info(std::ostream& os, bool func = true) const;
+  void        Print_st(std::ostream& os) const;
+  std::string Dump(bool rot = true) const;
+  void        Print_ir(std::ostream& os, bool rot = true) const;
+  void        Print(std::ostream& os, bool rot = true) const;
+  void        Print() const;
 
 private:
   PRIM_ID_ITER Begin(SYM_ID) const { return Main_table().Begin(); }

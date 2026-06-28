@@ -8,8 +8,8 @@
 
 #include "air/opt/loop_info.h"
 
-#if ENABLED_HSSA
 #include "air/opt/cfg.h"
+#include "air/opt/hssa_container.h"
 #include "air/opt/hssa_expr.h"
 #include "air/opt/hssa_stmt.h"
 namespace air {
@@ -35,7 +35,7 @@ HSTMT_PTR LOOP_INFO::Init_stmt() const {
 }
 
 HEXPR_PTR LOOP_INFO::Cond_expr() const {
-  return Hssa_cont()->Cr_ptr(Data()->Cond_expr());
+  return Hssa_cont()->Expr_ptr(Data()->Cond_expr());
 }
 
 HSTMT_PTR LOOP_INFO::Incr_stmt() const {
@@ -49,7 +49,7 @@ BB_PTR LOOP_INFO::Exit() const { return Cfg()->Bb_ptr(Data()->Exit()); }
 BB_PTR LOOP_INFO::Cond() const { return Cfg()->Bb_ptr(Data()->Cond()); }
 
 HEXPR_PTR LOOP_INFO::Ind_expr() const {
-  return Hssa_cont()->Cr_ptr(Data()->Ind_expr());
+  return Hssa_cont()->Expr_ptr(Data()->Ind_expr());
 }
 
 LOOP_INFO_PTR LOOP_INFO::Parent(void) const {
@@ -58,4 +58,3 @@ LOOP_INFO_PTR LOOP_INFO::Parent(void) const {
 }
 }  // namespace opt
 }  // namespace air
-#endif

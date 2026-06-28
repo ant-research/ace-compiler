@@ -114,9 +114,12 @@ void Post_decode_scheme(double* ret, size_t len, VALUE_LIST* vec,
   // TODO: post decode from DATA_SCHEME
   IS_TRUE(LIST_TYPE(vec) == DCMPLX_TYPE, "invalid type");
   if (desc->_count == 0) {
-    FOR_ALL_ELEM(vec, idx) { ret[idx] = creal(Get_dcmplx_value_at(vec, idx)); }
+    size_t out_len = LIST_LEN(vec) < len ? LIST_LEN(vec) : len;
+    for (size_t idx = 0; idx < out_len; ++idx) {
+      ret[idx] = creal(Get_dcmplx_value_at(vec, idx));
+    }
   } else {
-    IS_TRUE(desc->_count < len &&
+    IS_TRUE(desc->_count <= len &&
                 desc->_start + desc->_count * desc->_stride <= len,
             "chunk out of image bound");
     IS_TRUE(desc->_kind == NORMAL, "TODO: other kind");

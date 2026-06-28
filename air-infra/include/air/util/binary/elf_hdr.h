@@ -174,25 +174,40 @@ public:
     memcpy(&_s[static_cast<uint32_t>(id)], &shdr, sizeof(Elf64_Shdr));
   }
 
-  //! @brief Set alignment of the section
-  template <typename T>
-  void Set_sym(T id, Elf64_Sym& sym) {}
+  //! @brief Set phase name in e_ident[EI_AIR_PHASE]
+  //! @param phase Phase name (full name, will be abbreviated to 4 chars)
+  void Set_phase(const char* phase) {
+    const char* abbr = Get_phase_abbr(phase);
+    if (abbr == nullptr) {
+      abbr = phase;  // Use as-is if not found (already an abbreviation)
+    }
+    strncpy((char*)_ehdr.e_ident + EI_AIR_PHASE, abbr, AIR_PHASE_LEN);
+  }
+
+  //! @brief Get phase name from e_ident
+  const char* Get_phase() const {
+    return (const char*)_ehdr.e_ident + EI_AIR_PHASE;
+  }
+
+  //! @brief Set metadata version in e_flags
+  void Set_metadata_version(uint32_t ver) { _ehdr.e_flags = ver; }
+
+  //! @brief Get metadata version from e_flags
+  uint32_t Get_metadata_version() const { return _ehdr.e_flags; }
 
   void Print(std::ostream& os) {
     os << "ELF FILE: " << std::endl;
     os << "  ehdr: " << std::endl;
     os << "    e_ident: " << _ehdr.e_ident << std::endl;
     os << "    e_type: " << _ehdr.e_type << std::endl;
-    os << "    e_ident: " << _ehdr.e_ident << std::endl;
     os << "    e_machine: " << _ehdr.e_machine << std::endl;
     os << "    e_version: " << _ehdr.e_version << std::endl;
     os << "    e_shoff: " << _ehdr.e_shoff << std::endl;
-    os << "    e_flags: " << _ehdr.e_shoff << std::endl;
-    os << "    e_ehsize: " << _ehdr.e_shoff << std::endl;
-    os << "    e_shentsize: " << _ehdr.e_shoff << std::endl;
-    os << "    e_shoff: " << _ehdr.e_shoff << std::endl;
-    os << "    e_shnum: " << _ehdr.e_shoff << std::endl;
-    os << "    e_shstrndx: " << _ehdr.e_shoff << std::endl;
+    os << "    e_flags: " << _ehdr.e_flags << std::endl;
+    os << "    e_ehsize: " << _ehdr.e_ehsize << std::endl;
+    os << "    e_shentsize: " << _ehdr.e_shentsize << std::endl;
+    os << "    e_shnum: " << _ehdr.e_shnum << std::endl;
+    os << "    e_shstrndx: " << _ehdr.e_shstrndx << std::endl;
 
     os << "  shdr: " << std::endl;
     for (uint32_t id = 0; id < static_cast<uint32_t>(SHDR::MAX); id++) {
@@ -204,30 +219,47 @@ private:
   std::ostream&                                             _os;
   ELF_EHDR                                                  _ehdr;
   std::array<SECTION_HDR, static_cast<uint32_t>(SHDR::MAX)> _s = {
-      SECTION_HDR(SHDR::INVALID),   SECTION_HDR(SHDR::STR_TAB),
+      SECTION_HDR(SHDR::INVALID),   SECTION_HDR(SHDR::LIT_TAB),
       SECTION_HDR(SHDR::TYPE_TAB),  SECTION_HDR(SHDR::ARB_TAB),
       SECTION_HDR(SHDR::FIELD_TAB), SECTION_HDR(SHDR::PARAM_TAB),
       SECTION_HDR(SHDR::MAIN_TAB),  SECTION_HDR(SHDR::AUX_TAB),
       SECTION_HDR(SHDR::CONS_TTAB), SECTION_HDR(SHDR::ATTR_TAB),
       SECTION_HDR(SHDR::FILE_TAB),  SECTION_HDR(SHDR::FUNC_DEF_TAB),
       SECTION_HDR(SHDR::BLK_TAB),   SECTION_HDR(SHDR::FUNC_DATA),
+      SECTION_HDR(SHDR::COMMENT),   SECTION_HDR(SHDR::STR_TAB),
       SECTION_HDR(SHDR::SHSTRTAB)};
 
   //! @brief Init elf file header
   void Set_ehdr() {
+    // Clear the entire header first to ensure all fields are zeroed
+    memset(&_ehdr, 0, sizeof(ELF_EHDR));
+
+    // ELF magic and identification
     strcpy((char*)_ehdr.e_ident, ELFMAG);
-    _ehdr.e_ident[EI_CLASS]   = ELFCLASS64;
-    _ehdr.e_ident[EI_DATA]    = ELFDATA2LSB;
+    _ehdr.e_ident[EI_CLASS]   = ELFCLASS64;   // 64-bit
+    _ehdr.e_ident[EI_DATA]    = ELFDATA2LSB;  // Little endian
     _ehdr.e_ident[EI_VERSION] = EV_CURRENT;
-    _ehdr.e_type              = ET_AIR;      // AIR elf file
-    _ehdr.e_machine           = EM_RISCV;    // RISC-V
-    _ehdr.e_version           = EV_CURRENT;  // Default Elf64 Current version
-    _ehdr.e_shoff     = sizeof(ELF_EHDR);    // Section header table offset
-    _ehdr.e_flags     = EF_RISCV_RVC;        // TODO: define
+    _ehdr.e_ident[EI_OSABI]   = ELFOSABI_NONE;  // No specific OS ABI
+
+    // AIR IR magic at e_ident[EI_AIR_MAGIC] (bytes 9-11)
+    strncpy((char*)_ehdr.e_ident + EI_AIR_MAGIC, AIR_MAGIC, AIR_MAGIC_LEN);
+
+    // Use ET_NONE for intermediate representation files (like Open64 .B files)
+    // This indicates the file is not an executable or traditional object file
+    _ehdr.e_type      = ET_NONE;           // No file type (IR file)
+    _ehdr.e_machine   = EM_NONE;           // No specific machine architecture
+    _ehdr.e_version   = EV_CURRENT;        // ELF version
+    _ehdr.e_entry     = 0;                 // No entry point
+    _ehdr.e_phoff     = 0;                 // No program headers
+    _ehdr.e_shoff     = sizeof(ELF_EHDR);  // Section header table offset
+    _ehdr.e_flags     = 0;                 // No architecture-specific flags
     _ehdr.e_ehsize    = sizeof(ELF_EHDR);
+    _ehdr.e_phentsize = 0;  // No program headers
+    _ehdr.e_phnum     = 0;  // No program headers
     _ehdr.e_shentsize = sizeof(ELF_SHDR);
     _ehdr.e_shnum     = static_cast<uint32_t>(SHDR::MAX);
-    _ehdr.e_shstrndx  = static_cast<uint32_t>(SHDR::MAX) - 1;
+    _ehdr.e_shstrndx =
+        static_cast<uint32_t>(SHDR::SHSTRTAB);  // Index of .shstrtab
   }
 
   //! @brief Set index of section
@@ -246,11 +278,7 @@ private:
   //! @brief Set .shstrtab section information
   void Set_shstrtab(Elf64_Word idx) {
     _s[static_cast<uint32_t>(SHDR::SHSTRTAB)].Set_size(idx);
-
-    Elf64_Word offset =
-        sizeof(ELF_EHDR) +
-        sizeof(ELF_SHDR) * (static_cast<uint32_t>(SHDR::MAX) - 1);
-    _s[static_cast<uint32_t>(SHDR::SHSTRTAB)].Set_offset(offset);
+    // offset will be set by ELF_WRITE::Write_shstrtab
   }
 };
 

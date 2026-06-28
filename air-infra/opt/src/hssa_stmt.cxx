@@ -8,10 +8,10 @@
 
 #include "air/opt/hssa_stmt.h"
 
-#if ENABLED_HSSA
 #include <iomanip>
 #include <sstream>
 
+#include "air/core/opcode.h"
 #include "air/opt/bb.h"
 #include "air/opt/cfg.h"
 #include "air/opt/hssa_container.h"
@@ -75,7 +75,42 @@ void CALL_DATA::Print(HCONTAINER* cont, std::ostream& os,
   }
 }
 
-BB_PTR HSTMT::Bb() const { return Hssa_cont()->Cfg()->Bb_ptr(Bb_id()); }
+DO_LOOP_DATA::DO_LOOP_DATA(air::base::NODE_PTR node, HSTMT_PTR init,
+                           HEXPR_PTR cond, HSTMT_PTR body, HEXPR_PTR incr,
+                           HPHI_PTR hphi)
+    : HSTMT_DATA(node, SK_DO_LOOP) {
+  AIR_ASSERT_MSG(node->Opcode() == air::core::OPC_DO_LOOP,
+                 "DO_LOOP_DATA: node must be a do_loop");
+  AIR_ASSERT_MSG(init != Null_ptr, "DO_LOOP_DATA: init stmt is required");
+  AIR_ASSERT_MSG(cond != Null_ptr, "DO_LOOP_DATA: cond expr is required");
+  AIR_ASSERT_MSG(body != Null_ptr, "DO_LOOP_DATA: body stmt is required");
+  AIR_ASSERT_MSG(incr != Null_ptr, "DO_LOOP_DATA: incr expr is required");
+  _entry = init->Id();
+  _exit  = HSTMT_ID();
+  _cond  = cond->Id();
+  _body  = body->Id();
+  _incr  = incr->Id();
+}
+
+void DO_LOOP_DATA::Print(HCONTAINER* cont, std::ostream& os,
+                         uint32_t indent) const {
+  HSTMT_DATA::Print(cont, os, indent);
+  os << std::endl;
+  os << std::string((indent + 1) * INDENT_SPACE, ' ')
+     << "entry: " << Entry().Value();
+  os << " cond: " << Cond().Value();
+  os << " body: " << Body().Value();
+  os << " incr: " << Incr().Value();
+}
+
+void IF_DATA::Print(HCONTAINER* cont, std::ostream& os, uint32_t indent) const {
+  HSTMT_DATA::Print(cont, os, indent);
+  os << std::endl;
+  os << std::string((indent + 1) * INDENT_SPACE, ' ')
+     << "cond: " << Cond().Value();
+}
+
+BB_PTR HSTMT::Bb(CFG* cfg) const { return cfg->Bb_ptr(Bb_id()); }
 
 HEXPR_ID HSTMT::Lhs_id() const { return Cast_to_assign()->Lhs(); }
 
@@ -115,6 +150,20 @@ HCHI_ID HSTMT::Chi() const {
   return HCHI_ID();
 }
 
+HMU_ID HSTMT::Mu(void) const {
+  switch (Kind()) {
+    case SK_ASSIGN:
+      return Cast_to_assign()->Mu();
+    case SK_NARY:
+      return Cast_to_nary()->Mu();
+    case SK_CALL:
+      return Cast_to_call()->Mu();
+    default:
+      AIR_ASSERT_MSG(false, "unexpected stmt kind for mu");
+  }
+  return HMU_ID();
+}
+
 void HSTMT_DATA::Print(HCONTAINER* cont, std::ostream& os,
                        uint32_t indent) const {
   OPCODE opcode = Opcode();
@@ -138,6 +187,15 @@ void HSTMT::Print(std::ostream& os, uint32_t indent) const {
       break;
     case SK_CALL:
       Cast_to_call()->Print(_cont, os, indent);
+      break;
+    case SK_DO_LOOP:
+      Cast_to_do_loop()->Print(_cont, os, indent);
+      break;
+    case SK_IF:
+      Cast_to_if()->Print(_cont, os, indent);
+      break;
+    case SK_BLK_ENTRY:
+      _data->Print(_cont, os, indent);
       break;
     default:
       AIR_ASSERT(false);
@@ -166,6 +224,19 @@ bool HSTMT::Replace_expr(HEXPR_ID expr, HEXPR_ID new_expr) {
       Set_rhs(rhs->Id() == expr ? new_expr : rhs->Id());
       break;
     }
+    case SK_CALL: {
+      CALL_DATA_PTR call = Cast_to_call();
+      for (uint32_t idx = 0; idx < call->Arg_cnt(); idx++) {
+        HEXPR_ID  arg_id = call->Arg(idx);
+        HEXPR_PTR arg    = _cont->Expr_ptr(arg_id);
+        is_replaced |= arg->Replace_expr(expr, new_expr);
+        call->Set_arg(idx, arg_id == expr ? new_expr : arg_id);
+      }
+      break;
+    }
+    case SK_DO_LOOP:
+    case SK_BLK_ENTRY:
+      break;
     default:
       AIR_ASSERT_MSG(false, "Replace expression unsupported");
   }
@@ -192,5 +263,3 @@ std::string HSTMT::To_str() const {
 
 }  // namespace opt
 }  // namespace air
-
-#endif

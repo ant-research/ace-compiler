@@ -13,17 +13,13 @@ list (APPEND AIRUTIL_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/include")
 include_directories (${AIRUTIL_INCLUDE_DIRS})
 set (AIRUTIL_INCLUDE_DIRS "${AIRUTIL_INCLUDE_DIRS}" CACHE INTERNAL "")
 
-# build jsoncpp dependent libraries
-include(jsoncpp)
-
 add_library (airutil_obj OBJECT ${AIRUTIL_SRC_FILES})
 add_dependencies (airutil_obj air_depend)
 set_property (TARGET airutil_obj PROPERTY POSITION_INDEPENDENT_CODE 1)
 
 if (BUILD_STATIC)
-	add_library (AIRutil STATIC $<TARGET_OBJECTS:airutil_obj> $<TARGET_OBJECTS:jsoncpp_objects>)
+	add_library (AIRutil STATIC $<TARGET_OBJECTS:airutil_obj>)
 	set_property (TARGET AIRutil PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-	target_include_directories(AIRutil PRIVATE ${JSONCPP_INCLUDE_DIRS})
 	install (TARGETS AIRutil EXPORT AIRTargets DESTINATION lib)
 endif ()
 

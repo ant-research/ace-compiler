@@ -17,6 +17,13 @@ else()
   message(STATUS "Bare Enviroment does not support OS, file read|write")
 endif()
 
+# Dynamic library support sources - only compiled into shared library
+set(RTLIB_DYNAMIC_SRC_FILES)
+if(BUILD_SHARED)
+  file(GLOB_RECURSE DYNAMIC_SRC_FILES CONFIGURE_DEPENDS dynamic/*.c)
+  list(APPEND RTLIB_DYNAMIC_SRC_FILES ${DYNAMIC_SRC_FILES})
+endif()
+
 set(FHERTLIB_INCLUDE_DIRS "")
 list(APPEND FHERTLIB_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include")
 list(APPEND FHERTLIB_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/include")
@@ -32,6 +39,26 @@ if(BUILD_STATIC)
   set_property(TARGET FHErt_common PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${RTLIB_INSTALL_PATH})
   add_dependencies(FHErt_common rtlib_depend)
   install(TARGETS FHErt_common EXPORT RTLIBTargets DESTINATION ${RTLIB_INSTALL_PATH})
+endif()
+
+if(BUILD_SHARED)
+  # Create dynamic library support object files (only for shared library)
+  if(RTLIB_DYNAMIC_SRC_FILES)
+    add_library(fhert_common_shared_obj OBJECT ${RTLIB_DYNAMIC_SRC_FILES})
+    set_property(TARGET fhert_common_shared_obj PROPERTY POSITION_INDEPENDENT_CODE 1)
+    target_include_directories(fhert_common_shared_obj PRIVATE ${FHERTLIB_INCLUDE_DIRS})
+  endif()
+
+  add_library(FHErt_common_shared SHARED $<TARGET_OBJECTS:fhert_common_obj> $<TARGET_OBJECTS:fhert_common_shared_obj>)
+  set_property(TARGET FHErt_common_shared PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${RTLIB_INSTALL_PATH})
+  set_property(TARGET FHErt_common_shared PROPERTY OUTPUT_NAME "FHErt_common")
+  add_dependencies(FHErt_common_shared rtlib_depend)
+  target_link_libraries(FHErt_common_shared ${MATH_LIBS})
+  # Allow undefined symbols (like Main_graph) that will be resolved at runtime
+  set_target_properties(FHErt_common_shared PROPERTIES
+    LINK_FLAGS "-Wl,--allow-shlib-undefined"
+  )
+  install(TARGETS FHErt_common_shared EXPORT RTLIBTargets DESTINATION ${RTLIB_INSTALL_PATH})
 endif()
 
 # install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ DESTINATION include/rtlib)

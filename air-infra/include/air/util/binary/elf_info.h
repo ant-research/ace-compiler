@@ -11,14 +11,20 @@
 
 #include <elf.h>
 
+#include <string>
+
 namespace air {
 namespace util {
 
-#define AIR_MAGIC     "Ant IR,"
-#define AIR_MAGIC_LEN (8)
-#define AIR_VER       "0.01"
-#define AIR_VER_LEN   (5)
-#define AIR_PHASE_LEN (8)  // onnx, vect, sihe, ckks, poly, be
+#define AIR_MAGIC            "AIR"  // AIR IR magic
+#define AIR_MAGIC_LEN        (3)    // "AIR" length
+#define AIR_PHASE_LEN        (4)    // Max phase abbreviation length
+#define AIR_METADATA_VERSION (1)    // Metadata version stored in e_flags
+
+// EI_PAD starts at index 9, we have 7 bytes (9-15) for custom use
+// Layout: [9-11] = "AIR" magic, [12-15] = phase abbreviation
+#define EI_AIR_MAGIC (9)   // AIR IR magic offset in e_ident
+#define EI_AIR_PHASE (12)  // Phase abbreviation offset in e_ident
 
 //
 // TODO!! : MUST CHNAGE THIS BEFORE SOURCE GO PUBLIC
@@ -47,7 +53,7 @@ typedef Elf64_Sym  ELF_SYM;
 //! @brief Section header index of AIR sections
 enum class SHDR {
   INVALID      = 0x0,
-  STR_TAB      = 0x1,
+  LIT_TAB      = 0x1,
   TYPE_TAB     = 0x2,
   ARB_TAB      = 0x3,
   FIELD_TAB    = 0x4,
@@ -60,8 +66,10 @@ enum class SHDR {
   FUNC_DEF_TAB = 0xb,
   BLK_TAB      = 0xc,
   FUNC_DATA    = 0xd,
-  SHSTRTAB     = 0xe,
-  MAX          = 0xf
+  COMMENT      = 0xe,  // .comment section for metadata
+  STR_TAB      = 0xf,  // string table, right before .shstrtab
+  SHSTRTAB     = 0x10,
+  MAX          = 0x11
 };
 
 enum class SCOPE { GLOB, LOCAL };
@@ -115,6 +123,29 @@ typedef struct {
 } TABLE_INFO;
 
 typedef char* BYTE_PTR;
+
+//! @brief Read phase abbreviation from ELF file (lightweight, only reads
+//! e_ident)
+//! @param filepath Path to the ELF file
+//! @return Phase abbreviation string, empty string if not a valid AIR IR file
+//! @note This function only reads the first 16 bytes of the file (e_ident),
+//!       making it efficient for quick phase detection without full ELF parsing
+std::string Read_ir_phase_abbr(const std::string& filepath);
+
+//! @brief Get phase abbreviation from full name
+//! @param name Full pass name (e.g., "ONNX2AIR")
+//! @return Abbreviation string, or nullptr if not found
+const char* Get_phase_abbr(const char* name);
+
+//! @brief Get phase index from name or abbreviation
+//! @param name_or_abbr Full name or abbreviation
+//! @return Phase index, or -1 if not found
+int Get_phase_index(const char* name_or_abbr);
+
+//! @brief Get phase full name from abbreviation (case-insensitive)
+//! @param abbr Abbreviation (case-insensitive, e.g., "o2a" or "O2A")
+//! @return Full name string, or nullptr if not found
+const char* Get_phase_name_nocase(const char* abbr);
 
 }  // namespace util
 }  // namespace air

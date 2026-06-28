@@ -94,6 +94,7 @@ public:
   LOOP_INFO_PTR      Parent(void) const;
 
   void Emit(air::base::NODE_PTR blk, BBID_SET& visited);
+  void Emit(HSSA_FUNC* hssa_func, air::base::NODE_PTR blk, BBID_SET& visited);
 
 private:
   CFG*               _cfg;   //!< Owning control flow graph

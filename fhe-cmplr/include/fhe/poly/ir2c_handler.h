@@ -10,6 +10,7 @@
 #define FHE_POLY_IR2C_HANDLER_H
 
 #include "air/base/container.h"
+#include "air/core/opcode.h"
 #include "fhe/poly/invalid_handler.h"
 #include "fhe/poly/ir2c_ctx.h"
 #include "fhe/poly/opcode.h"
@@ -262,9 +263,9 @@ public:
     IR2C_CTX& ctx = visitor->Context();
     ctx << "Dot_prod(";
     air::base::NODE_PTR parent = ctx.Parent(1);
-    if (parent != air::base::Null_ptr && parent->Is_preg_op()) {
+    if (parent != air::base::Null_ptr) {
       ctx << "&";
-      ctx.Emit_preg_id(parent->Preg_id());
+      Emit_sym(ctx, parent);
       ctx << ", ";
     }
     visitor->template Visit<RETV>(node->Child(0));
@@ -303,6 +304,21 @@ public:
     ctx << ")";
   }
 
+  //! @brief Emit C code for CHK_LEVEL (level consistency check)
+  template <typename RETV, typename VISITOR>
+  void Handle_chk_level(VISITOR* visitor, air::base::NODE_PTR node) {
+    IR2C_CTX& ctx = visitor->Context();
+    AIR_ASSERT(ctx.Is_poly_type(node->Child(0)->Rtype_id()) &&
+               ctx.Is_poly_type(node->Child(1)->Rtype_id()));
+    ctx << "Chk_level(";
+    visitor->template Visit<RETV>(node->Child(0));
+    ctx << ", ";
+    visitor->template Visit<RETV>(node->Child(1));
+    ctx << ", ";
+    visitor->template Visit<RETV>(node->Child(2));
+    ctx << ")";
+  }
+
   //! @brief Emit a HW_MODADD call to RTlib
   template <typename RETV, typename VISITOR>
   void Handle_hw_modadd(VISITOR* visitor, air::base::NODE_PTR node) {
@@ -337,6 +353,23 @@ public:
     ctx << ", degree)";
   }
 
+  //! @brief Emit a HW_MODSUB call to RTlib
+  template <typename RETV, typename VISITOR>
+  void Handle_hw_modsub(VISITOR* visitor, air::base::NODE_PTR node) {
+    IR2C_CTX&           ctx    = visitor->Context();
+    air::base::NODE_PTR parent = ctx.Parent(1);
+    AIR_ASSERT(parent != air::base::Null_ptr && parent->Is_st());
+    ctx << "Hw_modsub(";
+    ctx.template Emit_st_var<RETV, VISITOR>(visitor, parent);
+    ctx << ", ";
+    visitor->template Visit<RETV>(node->Child(0));
+    ctx << ", ";
+    visitor->template Visit<RETV>(node->Child(1));
+    ctx << ", ";
+    visitor->template Visit<RETV>(node->Child(2));
+    ctx << ", degree)";
+  }
+
   //! @brief Emit a HW_ROTATE call to RTlib
   template <typename RETV, typename VISITOR>
   void Handle_hw_rotate(VISITOR* visitor, air::base::NODE_PTR node) {
@@ -359,17 +392,62 @@ public:
   void Handle_init_ciph_down_scale(VISITOR* visitor, air::base::NODE_PTR node) {
     IR2C_CTX& ctx = visitor->Context();
 
-    if (ctx.Is_cipher_type(node->Child(0)->Rtype_id())) {
-      AIR_ASSERT(ctx.Is_cipher_type(node->Child(1)->Rtype_id()));
-      ctx << "Init_ciph_down_scale";
-    } else if (ctx.Is_cipher3_type(node->Child(0)->Rtype_id())) {
-      AIR_ASSERT(ctx.Is_cipher3_type(node->Child(1)->Rtype_id()));
-      ctx << "Init_ciph3_down_scale";
+    // Helper to check cipher type by ID or name
+    auto is_cipher_by_name = [](air::base::NODE_PTR n) -> bool {
+      if (n->Rtype()->Is_record()) {
+        const char* name = n->Rtype()->Cast_to_rec()->Name()->Char_str();
+        return strcmp(name, "CIPHERTEXT") == 0;
+      }
+      return false;
+    };
+    auto is_cipher3_by_name = [](air::base::NODE_PTR n) -> bool {
+      if (n->Rtype()->Is_record()) {
+        const char* name = n->Rtype()->Cast_to_rec()->Name()->Char_str();
+        return strcmp(name, "CIPHERTEXT3") == 0;
+      }
+      return false;
+    };
+
+    // Decide based on source operand type (child1), not result type (child0)
+    // because runtime functions require both args to be the same type
+    bool child0_is_cipher = ctx.Is_cipher_type(node->Child(0)->Rtype_id()) ||
+                            is_cipher_by_name(node->Child(0));
+    bool child0_is_cipher3 = ctx.Is_cipher3_type(node->Child(0)->Rtype_id()) ||
+                             is_cipher3_by_name(node->Child(0));
+    bool child1_is_cipher = ctx.Is_cipher_type(node->Child(1)->Rtype_id()) ||
+                            is_cipher_by_name(node->Child(1));
+    bool child1_is_cipher3 = ctx.Is_cipher3_type(node->Child(1)->Rtype_id()) ||
+                             is_cipher3_by_name(node->Child(1));
+
+    if (child1_is_cipher) {
+      ctx << "Init_ciph_down_scale(";
+      // Cast result to CIPHER* if it's declared as CIPHER3
+      if (child0_is_cipher3) {
+        ctx << "(CIPHER)";
+      }
+    } else if (child1_is_cipher3) {
+      ctx << "Init_ciph3_down_scale(";
+      // Cast result to CIPHER3* if it's declared as CIPHER
+      if (child0_is_cipher) {
+        ctx << "(CIPHER3)";
+      }
     } else {
       AIR_ASSERT_MSG(false, "Not supported cipher type");
     }
 
-    Gen_init_ciph_param(visitor, node, true);
+    // Emit result parameter
+    if (node->Child(0)->Opcode() == air::core::OPC_ILD) {
+      ctx << "&";
+    }
+    visitor->template Visit<void>(node->Child(0));
+    ctx << ", ";
+
+    // Emit source parameter
+    if (node->Child(1)->Opcode() == air::core::OPC_ILD) {
+      ctx << "&";
+    }
+    visitor->template Visit<void>(node->Child(1));
+    ctx << ")";
   }
 
   template <typename RETV, typename VISITOR>
@@ -508,7 +586,18 @@ public:
       Gen_hw_op_param(visitor, node, val);
       ctx << ")";
     } else if (val->Opcode() ==
+               air::base::OPCODE(POLYNOMIAL_DID, OPCODE::HW_MODSUB)) {
+      ctx << "Hw_modsub(";
+      Gen_hw_op_param(visitor, node, val);
+      ctx << ")";
+    } else if (val->Opcode() ==
                air::base::OPCODE(POLYNOMIAL_DID, OPCODE::COEFFS)) {
+      ctx << "Set_coeffs(";
+      Gen_poly_coeffs_param(visitor, node);
+      ctx << ", ";
+      visitor->template Visit<RETV>(val);
+      ctx << ")";
+    } else if (val->Opcode().Domain() == air::core::CORE) {
       ctx << "Set_coeffs(";
       Gen_poly_coeffs_param(visitor, node);
       ctx << ", ";

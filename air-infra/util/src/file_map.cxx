@@ -63,12 +63,8 @@ void FILE_MAP::Read(uint32_t prot, uint32_t flags) {
 
   Set_file_size(file_info.st_size);
 
-  // TODO: To be completed remap ops
-  if (file_info.st_size > MAPPED_SIZE) {
-    Set_map_size(MAPPED_SIZE);
-  } else {
-    Set_map_size(file_info.st_size);
-  }
+  // Map the entire file for reading
+  Set_map_size(file_info.st_size);
 
   _map = (char*)mmap(NULL, Get_map_size(), prot, flags, Get_file_id(), 0);
   if (_map == MAP_FAILED) {
@@ -97,7 +93,6 @@ void FILE_MAP::Write(uint32_t prot, uint32_t flags) {
 void FILE_MAP::Remap(uint32_t sz) {
   // remap file
   if (ftruncate(_fd, sz) == -1) {
-    std::cerr << "Failed to truncate file" << std::endl;
     CMPLR_ASSERT(false, "Failed to truncate file");
     munmap(_map, Get_map_size());
     close(_fd);
@@ -110,7 +105,31 @@ void FILE_MAP::Remap(uint32_t sz) {
     munmap(_map, Get_map_size());
     close(_fd);
   }
-  _map = (char*)new_data;
+  _map      = (char*)new_data;
+  _map_size = sz;
+}
+
+void FILE_MAP::Ensure_space(uint32_t required_size) {
+  if (required_size > _map_size) {
+    // Round up to next MAPPED_SIZE boundary
+    uint32_t new_size =
+        ((required_size + MAPPED_SIZE - 1) / MAPPED_SIZE) * MAPPED_SIZE;
+
+    // Extend the file
+    lseek(_fd, new_size - 1, SEEK_SET);
+    ssize_t result = write(_fd, "", 1);
+    if (result == -1) {
+      CMPLR_ASSERT(false, "Failed to extend file");
+    }
+
+    // Remap
+    void* new_data = mremap(_map, _map_size, new_size, MREMAP_MAYMOVE);
+    if (new_data == MAP_FAILED) {
+      CMPLR_ASSERT(false, "Failed to remap file");
+    }
+    _map      = (char*)new_data;
+    _map_size = new_size;
+  }
 }
 void FILE_MAP::Unmap() {
   // Don't forget to free the mmapped memory

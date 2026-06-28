@@ -30,6 +30,12 @@ public:
     return _glob;
   }
 
+  //! @brief Get phase name from ELF header
+  const char* Get_phase() const { return _ir.Get_phase(); }
+
+  //! @brief Get metadata version from ELF header
+  uint32_t Get_metadata_version() const { return _ir.Get_metadata_version(); }
+
 private:
   air::base::IR_READ     _ir;
   air::base::GLOB_SCOPE* _glob;

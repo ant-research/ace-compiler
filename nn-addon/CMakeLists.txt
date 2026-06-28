@@ -37,9 +37,13 @@ option(NN_CODE_CHECK       "Control whether to check coding style"          ON)
 option(NN_BUILD_TEST       "Control whether to build the tests"             ON)
 option(NN_BUILD_EXAMPLE    "Control whether to build the examples"          ON)
 option(NN_INSTALL_APP      "Control whether to install the APPs"            ON)
-option(EXTERNAL_URL_SSH    "Control choose external URL for repository"    OFF)
 
 set(NN_WITH_SRC "" CACHE STRING "The default compilation depends")
+
+# Internal URL overrides (file only exists in internal repo)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.aci/config-internal.cmake")
+  include("${CMAKE_CURRENT_SOURCE_DIR}/.aci/config-internal.cmake")
+endif()
 
 # Add target nn_depend
 add_custom_target(nn_depend)

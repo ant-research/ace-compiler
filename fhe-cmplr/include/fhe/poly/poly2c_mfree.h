@@ -13,6 +13,7 @@
 
 #include "air/base/analyze_ctx.h"
 #include "air/core/opcode.h"
+#include "fhe/ckks/ckks_opcode.h"
 #include "fhe/core/lower_ctx.h"
 #include "fhe/poly/opcode.h"
 
@@ -117,6 +118,19 @@ public:
     var_set.insert(var->Id().Value());
   }
 
+  template <typename VAR_TYPE>
+  void Mark_borrowed(VAR_TYPE var) {
+    auto& var_set = Borrowed_var_set(var);
+    var_set.insert(var->Id().Value());
+    Mark_var_freed(var);
+  }
+
+  template <typename VAR_TYPE>
+  bool Is_borrowed(VAR_TYPE var) const {
+    const auto& var_set = Borrowed_var_set(var);
+    return var_set.find(var->Id().Value()) != var_set.end();
+  }
+
   bool Type_need_mfree(air::base::TYPE_PTR type) {
     if (_lower_ctx.Is_plain_type(type->Id()) ||
         _lower_ctx.Is_cipher_type(type->Id()) ||
@@ -141,10 +155,26 @@ private:
   std::unordered_set<uint32_t>& Var_set(air::base::PREG_PTR var) {
     return _preg_set;
   }
+  const std::unordered_set<uint32_t>& Borrowed_var_set(
+      air::base::ADDR_DATUM_PTR) const {
+    return _borrowed_sym_set;
+  }
+  const std::unordered_set<uint32_t>& Borrowed_var_set(
+      air::base::PREG_PTR) const {
+    return _borrowed_preg_set;
+  }
+  std::unordered_set<uint32_t>& Borrowed_var_set(air::base::ADDR_DATUM_PTR) {
+    return _borrowed_sym_set;
+  }
+  std::unordered_set<uint32_t>& Borrowed_var_set(air::base::PREG_PTR) {
+    return _borrowed_preg_set;
+  }
 
   const fhe::core::LOWER_CTX&  _lower_ctx;
   std::unordered_set<uint32_t> _sym_set;
   std::unordered_set<uint32_t> _preg_set;
+  std::unordered_set<uint32_t> _borrowed_sym_set;
+  std::unordered_set<uint32_t> _borrowed_preg_set;
 };
 
 //! @brief Context to forward traverse IR tree
@@ -157,27 +187,41 @@ public:
 
   template <typename RETV, typename VISITOR>
   RETV Handle_node(VISITOR* visitor, air::base::NODE_PTR node) {
-    if (node->Opcode() == air::core::OPC_ST &&
-        node->Child(0)->Opcode() == air::core::OPC_ILD &&
-        node->Child(0)->Child(0)->Opcode() == air::core::OPC_ARRAY) {
-      // we have loop to free whole array, so won't free individual
-      _pass.Mark_var_freed(node->Addr_datum());
-      // if the st-ild is in top-level, ignore mfree so far
-      // a possible solution is to post-pone mfree to PRAGMA END
-      air::base::NODE_PTR rhs = node->Child(0)->Child(0)->Child(0);
-      if (Parent(2) == air::base::Null_ptr &&
-          rhs->Opcode() == air::core::OPC_LDA) {
-        CMPLR_DEV_WARN("TODO: find right place to free %s.\n",
-                       rhs->Addr_datum()->Name()->Char_str());
+    air::base::NODE_PTR stmt_node = node;
+    if (stmt_node != air::base::Null_ptr && stmt_node->Is_root()) {
+      stmt_node = stmt_node->Stmt()->Node();
+    }
+    if (stmt_node != air::base::Null_ptr && stmt_node->Opcode() == air::core::OPC_ST &&
+        stmt_node->Num_child() >= 1) {
+      air::base::NODE_PTR rhs = stmt_node->Child(0);
+      if (rhs != air::base::Null_ptr &&
+          rhs->Domain() == fhe::ckks::CKKS_DOMAIN::ID &&
+          rhs->Operator() == fhe::ckks::CKKS_OPERATOR::ENCODE) {
+        const uint32_t* cache_attr =
+            rhs->Attr<uint32_t>(fhe::core::FHE_ATTR_KIND::ENCODE_CACHE);
+        if (cache_attr != nullptr && *cache_attr != 0) {
+          _pass.Mark_borrowed(stmt_node->Addr_datum());
+        }
+      }
+    }
+    if (stmt_node != air::base::Null_ptr && stmt_node->Opcode() == air::core::OPC_ST &&
+        stmt_node->Child(0)->Opcode() == air::core::OPC_ILD &&
+        stmt_node->Child(0)->Child(0)->Opcode() == air::core::OPC_ARRAY) {
+      // `st x = ild(array(a, i))` is a move-like extraction for mfreeable
+      // element types. Keep the extracted value on the normal last-use path
+      // and suppress container frees on the backing array to avoid double-free.
+      air::base::NODE_PTR rhs = stmt_node->Child(0)->Child(0)->Child(0);
+      if (rhs->Opcode() == air::core::OPC_LDA &&
+          _pass.Type_need_mfree(stmt_node->Addr_datum()->Type())) {
         _pass.Mark_var_freed(rhs->Addr_datum());
       }
-    } else if (node->Opcode() == air::core::OPC_CALL &&
-               strcmp(node->Entry()->Name()->Char_str(), "Rotate") == 0 &&
+    } else if (stmt_node != air::base::Null_ptr && stmt_node->Opcode() == air::core::OPC_CALL &&
+               strcmp(stmt_node->Entry()->Name()->Char_str(), "Rotate") == 0 &&
                Parent(2) != air::base::Null_ptr) {
       // rotate return value should be freed in end of the same level
       // but if rotate is in top-level, still after last use
-      AIR_ASSERT(node->Has_ret_var());
-      air::base::PREG_PTR retv = node->Ret_preg();
+      AIR_ASSERT(stmt_node->Has_ret_var());
+      air::base::PREG_PTR retv = stmt_node->Ret_preg();
       AIR_ASSERT(_pass.Type_need_mfree(retv->Type()));
       AIR_ASSERT(_pass.Need_mfree(retv));
       _pass.Mark_var_freed(retv);
@@ -269,6 +313,9 @@ public:
 private:
   template <typename VAR_TYPE>
   void Handle_variable(VAR_TYPE var) {
+    if (_pass.Is_borrowed(var)) {
+      return;
+    }
     air::base::TYPE_PTR type = var->Type();
     if (_pass.Type_need_mfree(type) && _pass.Need_mfree(var)) {
       air::base::STMT_PTR pos = Find_insert_pos();

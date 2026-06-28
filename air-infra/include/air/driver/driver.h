@@ -16,6 +16,7 @@
 #include "air/driver/pass_manager.h"
 #include "air/util/binary/air2elf.h"
 #include "air/util/binary/elf2air.h"
+#include "air/util/binary/elf_info.h"
 
 namespace air {
 namespace driver {
@@ -119,6 +120,17 @@ public:
     ir2b.Run(_ctx->Glob_scope());
   }
 
+  //! @brief Write IR to ELF file with phase metadata
+  //! @param ofile Output file path
+  //! @param phase_name Name of the pass generating this IR
+  void Write_ir(const std::string& ofile, const std::string& phase_name) {
+    if (ofile.empty())
+      CMPLR_USR_MSG(U_CODE::Incorrect_Option, "use option : :ir2b=file");
+
+    air::util::AIR2ELF ir2b(ofile, _ctx->Tstream());
+    ir2b.Run(_ctx->Glob_scope(), phase_name);
+  }
+
   //! @brief Read IR to ARENA
   void Read_ir(const std::string& ifile) {
     if (ifile.empty())
@@ -127,6 +139,13 @@ public:
     air::util::ELF2AIR     b2ir(ifile, _ctx->Tstream());
     air::base::GLOB_SCOPE* scope = b2ir.Run();
     _ctx->Update_glob_scope(scope);
+  }
+
+  //! @brief Get phase name from IR file (reads ELF header only)
+  //! @param ifile IR file path
+  //! @return Phase name string, empty string if not a valid IR file
+  std::string Get_ir_phase(const std::string& ifile) {
+    return air::util::Read_ir_phase_abbr(ifile);
   }
 
   bool Verify_ir() { return Glob_scope()->Verify_ir(); }
@@ -142,16 +161,11 @@ public:
   //! @brief get executable program name
   const char* Exe_name() const { return _ctx->Exe_name(); }
 
-  //! @brief Reset measure position
-  void Perf_start() { _ctx->Perf_start(); }
-
-  //! @brief Call measure position
-  void Perf_taken(std::string driver, std::string phase, std::string pass) {
-    _ctx->Perf_taken(driver, phase, pass);
-  }
-
   //! @brief Get Input file object
   const char* Ifile() { return _ctx->Ifile(); }
+
+  //! @brief Get input file basename (filename without path)
+  std::string Ifile_basename() { return _ctx->Ifile_basename(); }
 
   //! @brief Access global config items
   DECLARE_GLOBAL_CONFIG_ACCESS_API((*_ctx))

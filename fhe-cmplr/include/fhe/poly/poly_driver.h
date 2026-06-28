@@ -59,6 +59,8 @@ private:
   air::base::GLOB_SCOPE* Run_flatten(air::base::GLOB_SCOPE* glob,
                                      POLY_LAYER             tgt_layer);
 
+  air::base::GLOB_SCOPE* Flatten_for_hssa(air::base::GLOB_SCOPE* glob);
+
   void Run_attr_prop(POLY_CONFIG& config, air::base::GLOB_SCOPE* glob,
                      air::driver::DRIVER_CTX* driver_ctx,
                      core::LOWER_CTX&         lower_ctx);

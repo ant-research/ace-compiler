@@ -31,7 +31,14 @@ public:
     _ir2c_util << fhe::core::Provider_header(Provider());
     _ir2c_util << "\"" << std::endl << std::endl;
     _ir2c_util << "typedef double float64_t;" << std::endl;
-    _ir2c_util << "typedef float float32_t;" << std::endl << std::endl;
+    _ir2c_util << "typedef float float32_t;" << std::endl;
+    if (this->Provider() != core::PROVIDER::ACE) {
+      // ACE defines library-specific LEVEL_T/SCALE_T in its runtime API header;
+      // emit defaults only for providers that do not.
+      _ir2c_util << "typedef size_t LEVEL_T;" << std::endl;
+      _ir2c_util << "typedef double SCALE_T;" << std::endl;
+    }
+    _ir2c_util << std::endl;
   }
 
   //! @brief Emit fhe server function definition
@@ -39,7 +46,10 @@ public:
   void Emit_func_def(air::base::FUNC_SCOPE* func) {
     air::base::FUNC_PTR decl = func->Owning_func();
     if (decl->Entry_point()->Is_program_entry()) {
-      _ir2c_util << "bool " << decl->Name()->Char_str() << "()";
+      _ir2c_util << "#ifdef __cplusplus\n"
+                 << "extern \"C\"\n"
+                 << "#endif\n"
+                 << "bool " << decl->Name()->Char_str() << "()";
     } else {
       air::base::IR2C_CTX::Emit_func_def(func);
     }
@@ -108,7 +118,8 @@ public:
 
   void Emit_need_bts() {
     if (this->Provider() == core::PROVIDER::SEAL ||
-        this->Provider() == core::PROVIDER::PHANTOM) {
+        this->Provider() == core::PROVIDER::PHANTOM ||
+        this->Provider() == core::PROVIDER::ACE) {
       _ir2c_util << "bool Need_bts() {"
                  << "\n";
       if (this->_need_bts) {

@@ -190,21 +190,25 @@ inline LEVEL_T Level(CIPHER ct) {
   return result;
 }
 
-inline void Free_ciph(CIPHER res) {
+inline void Free_cipher(CIPHER res) {
   START_TIMER
-  Phantom_free_ciph(res);
-  END_TIMER("Free_ciph")
+  Phantom_free_cipher(res);
+  END_TIMER("Free_cipher")
 }
 inline void Free_plain(PLAIN res) {
   START_TIMER
   Phantom_free_plain(res);
   END_TIMER("Free_plain")
 }
-inline void Free_ciph_array(CIPHER3 res, size_t size) {
+inline void Free_ciph_poly(CIPHER res, size_t size) {
   START_TIMER
-  Phantom_free_ciph_array(res, size);
-  END_TIMER("Free_ciph_array")
+  Phantom_free_ciph_poly(res, size);
+  END_TIMER("Free_ciph_poly")
 }
+
+// Backward-compatible aliases for legacy generated code
+inline void Free_ciph(CIPHER res) { Free_cipher(res); }
+inline void Free_ciph_array(CIPHER res, size_t size) { Free_ciph_poly(res, size); }
 
 // Dump utilities
 void Dump_ciph(CIPHER ct, size_t start, size_t len);

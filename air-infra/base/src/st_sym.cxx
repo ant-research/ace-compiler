@@ -537,8 +537,20 @@ void PREG::Print(std::ostream& os, uint32_t indent) const {
   os << std::hex << std::showbase;
   CONST_TYPE_PTR type = Type();
   os << "PREG[" << Id().Value() << "] TYP[" << type->Id().Value() << "]("
-     << type->Type_kind_name() << ",\"" << type->Name()->Char_str()
-     << "\",size:" << std::dec << type->Byte_size() << "), ";
+     << type->Type_kind_name() << ",\"" << type->Name()->Char_str() << "\"";
+  // Only print size if the type has size info (some record types may be
+  // incomplete)
+  if (type->Is_record()) {
+    CONST_RECORD_TYPE_PTR rec = type->Cast_to_rec();
+    if (rec->Has_size()) {
+      os << ",size:" << std::dec << type->Byte_size();
+    } else {
+      os << ",size:incomplete";
+    }
+  } else {
+    os << ",size:" << std::dec << type->Byte_size();
+  }
+  os << "), ";
   SYM_PTR home = Home_sym();
   os << "Home[" << std::hex << home->Id().Value() << "]";
   if (home != Null_ptr) {

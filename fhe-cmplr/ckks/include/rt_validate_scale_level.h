@@ -81,6 +81,13 @@ public:
         Trace_obj(TD_RT_VAL, node);
         break;
       }
+      case OPC_ROTATE_BATCH: {
+        int32_t default_rot = DEFAULT_ROT_IDX;
+        node->Set_attr(nn::core::ATTR::RNUM, &default_rot, 1);
+        _fhe_ctx->Get_ctx_param().Add_rotate_index(default_rot);
+        Trace(TD_RT_VAL, "RT_VALIDATE_SCL_LVL reset rotate_batch to default\n");
+        break;
+      }
       case OPC_MUL:
       case OPC_ADD: {
         AIR_ASSERT(node->Num_child() == 2);

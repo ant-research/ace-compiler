@@ -9,6 +9,8 @@
 #ifndef FHE_POLY_POLY2C_DRIVER_H
 #define FHE_POLY_POLY2C_DRIVER_H
 
+#include <string>
+
 #include "air/base/container.h"
 #include "air/base/visitor.h"
 #include "air/core/handler.h"
@@ -67,6 +69,7 @@ private:
   void     Emit_data_shape(air::base::NODE_PTR node);
   void     Emit_get_context_params();
   void     Emit_helper_function(air::base::FUNC_SCOPE* func_scope);
+  void     Emit_rotate_zero_fast_path(air::base::FUNC_SCOPE* func_scope);
 
   IR2C_CTX _ctx;
 };  // POLY2C_DRIVER
@@ -118,6 +121,7 @@ void POLY2C_DRIVER::Run(air::base::GLOB_SCOPE* glob, VISITOR& visitor) {
            << ", rtm);\n";
     }
     _ctx.Emit_local_var(func);
+    Emit_rotate_zero_fast_path(func);
 
     // Emit domain specific body to C code
     visitor.template Visit<void>(body);
@@ -127,6 +131,10 @@ void POLY2C_DRIVER::Run(air::base::GLOB_SCOPE* glob, VISITOR& visitor) {
 
     if (func->Owning_func()->Entry_point()->Is_program_entry()) {
       Emit_helper_function(func);
+      // Emit config file for program entry function
+      std::string conf_file_name(_ctx.Config());
+      lower_ctx.Emit_conf(conf_file_name, func, _ctx.Data_file(),
+                         static_cast<uint32_t>(_ctx.Provider()));
     }
   }
 

@@ -24,6 +24,9 @@
 namespace air {
 namespace opt {
 
+typedef uint8_t  MTYPE;
+typedef uint32_t IDTYPE;
+
 //! @brief HSSA Expression Kind
 enum EXPR_KIND {
   EK_INVALID = 0x00,  //!< Invalid EXPR
@@ -38,7 +41,31 @@ enum EXPR_KIND {
 
 //! @brief HSSA Expression Flags
 enum EXPR_FLAG {
-  EF_EMPTY = 0x00,  //!< no flag set
+  EF_EMPTY         = 0x00,  //!< no flag set
+  EF_C_P_PROCESSED = 0x01,  //!< For non-leaf: processed by copy propagation
+  EF_LDA_LABEL     = 0x01,  //!< This EK_LDA node is an LDA_LABEL
+  EF_DONT_PROP     = 0x02,  //!< Do not copy propagate this EK_VAR/EK_IVAR
+  EF_C_P_REHASHED  = 0x02,  //!< For non-leaf: rehashed due to copy propagation
+  EF_SPRE_REMOVED  = 0x04,  //!< Store removed by SPRE, uses need renaming
+  EF_DEF_BY_PHI    = 0x08,  //!< Defined by phi
+  EF_DEF_BY_CHI    = 0x10,  //!< Defined by chi
+  EF_OWNED_BY_TEMP = 0x20,  //!< For EK_OP/EK_IVAR only, in SSAPRE
+  EF_INCOMPLETE_USES = 0x40,   //!< EK_VAR only; converted from zero version
+  EF_IS_ZERO_VERSION = 0x80,   //!< Is a zero version
+  EF_FOLDED_LDID     = 0x100,  //!< Folded from (ILOAD(LDA))
+  EF_MADEUP_TYPE     = 0x200,  //!< Type is made up by SSA
+};
+
+//! @brief ISOP flags for operator expression
+enum ISOP_FLAG {
+  ISOP_EMPTY = 0x00,  //!< no flag set
+};
+
+//! @brief Propagatability of an expression
+enum PROPAGATABILITY {
+  NOT_PROPAGATABLE,   //!< cannot be propagated
+  PROP_WITH_INVERSE,  //!< can be propagated with inverse function
+  PROPAGATABLE,       //!< can be propagated
 };
 
 //! @brief VAR Kind
@@ -62,6 +89,7 @@ enum CST_KIND {
   CK_INT,      //!< integer constant
   CK_FLOAT,    //!< float constant
   CK_ID,       //!< symbolic constant specified by ID (string/array/struct)
+  CK_ADDR,     //!< address constant
 };
 
 //! @brief HEXPR_DATA holds the common data for HSSA Expression
@@ -76,6 +104,7 @@ public:
         _kind(k),
         _rtype(rtype),
         _dsctype(dsctype),
+        _usecnt(0),
         _flags(EF_EMPTY),
         _attr(attr),
         _spos(spos),
@@ -86,6 +115,7 @@ public:
         _kind(k),
         _rtype(air::base::TYPE_ID()),
         _dsctype(air::base::TYPE_ID()),
+        _usecnt(0),
         _flags(EF_EMPTY),
         _attr(air::base::ATTR_ID()),
         _spos(),
@@ -96,20 +126,21 @@ public:
         _kind(other.Kind()),
         _rtype(other.Rtype()),
         _dsctype(other.Dsctype()),
+        _usecnt(0),
         _flags(other.Flags()),
         _attr(other.Attr()),
         _spos(other.Spos()),
         _next(HEXPR_ID()) {}
 
-  EXPR_KIND          Kind(void) const { return _kind; }
-  HEXPR_ID           Next(void) const { return _next; }
-  air::base::OPCODE  Opcode(void) const { return _opc; }
-  air::base::TYPE_ID Dsctype(void) const { return _dsctype; }
-  air::base::TYPE_ID Rtype(void) const { return _rtype; }
-  air::base::ATTR_ID Attr(void) const { return _attr; }
-  air::base::SPOS    Spos(void) const { return _spos; }
-  EXPR_FLAG          Flags(void) const { return _flags; }
-  bool               Is_set_flag(EXPR_FLAG f) const { return _flags & f; }
+  EXPR_KIND                 Kind(void) const { return _kind; }
+  HEXPR_ID                  Next(void) const { return _next; }
+  air::base::OPCODE         Opcode(void) const { return _opc; }
+  air::base::TYPE_ID        Dsctype(void) const { return _dsctype; }
+  air::base::TYPE_ID        Rtype(void) const { return _rtype; }
+  const air::base::ATTR_ID& Attr(void) const { return _attr; }
+  air::base::SPOS           Spos(void) const { return _spos; }
+  EXPR_FLAG                 Flags(void) const { return _flags; }
+  bool Is_set_flag(EXPR_FLAG f) const { return _flags & f; }
 
   void Set_flag(EXPR_FLAG flag) { _flags = (EXPR_FLAG)(_flags | flag); }
   void Set_rtype(air::base::TYPE_ID rtype) { _rtype = rtype; }
@@ -122,6 +153,7 @@ public:
 
 private:
   EXPR_KIND          _kind;     //!< EXPR kind
+  uint32_t           _usecnt;   //!< use count
   EXPR_FLAG          _flags;    //!< EXPR flags
   air::base::OPCODE  _opc;      //!< EXPR opcode
   air::base::TYPE_ID _rtype;    //!< EXPR return type
@@ -252,12 +284,22 @@ private:
   uint32_t   _var_id;      //!< ADDR_DATUM_ID or PREG_ID
   uint32_t   _sub_idx;     //!< Field id or element index
   uint32_t   _ver;         //!< SSA version number
+  SSA_VER_ID _ver_id;      //!< SSA version ID
   VAR_DEF_BY _def_by : 3;  //!< var def by
   union {
     HCHI_ID  _chi;      //!< the chi node that define this expr
     HPHI_ID  _phi;      //!< the phi node that define this expr
     HSTMT_ID _defstmt;  //!< statement that defines this var
   };
+};
+
+//! @brief LDA_DATA holds the information of a load address expression
+class LDA_DATA : public HEXPR_DATA {
+private:
+  SSA_SYM_ID                _aux_id;    //!< entry number in aux symbol table
+  air::base::ADDR_DATUM_PTR _base_st;   //!< the base
+  air::base::TYPE_ID        _ty;        //!< type pointer for LDA
+  uint16_t                  _afieldid;  //!< field id of the LDA
 };
 
 //! @brief CST_DATA holds the information of a const kind expression
@@ -315,11 +357,17 @@ private:
 class OP_DATA : public HEXPR_DATA {
 public:
   OP_DATA(air::base::NODE_PTR node) : HEXPR_DATA(node, EK_OP) {
-    _kid_cnt = node->Num_child();
+    _isop_flags      = ISOP_EMPTY;
+    _propagatability = PROPAGATABLE;
+    _kid_cnt         = node->Num_child();
+    _max_depth       = 0;
   }
 
   OP_DATA(OP_DATA_PTR other) : HEXPR_DATA(*(other.Addr())) {
-    _kid_cnt = other->_kid_cnt;
+    _isop_flags      = other->_isop_flags;
+    _propagatability = other->_propagatability;
+    _kid_cnt         = other->_kid_cnt;
+    _max_depth       = other->_max_depth;
     for (uint32_t idx = 0; idx < Kid_cnt(); idx++) {
       _kids[idx] = other->Kid(idx);
     }
@@ -328,7 +376,10 @@ public:
   OP_DATA(air::base::OPCODE opcode, uint32_t kid_cnt, air::base::TYPE_ID rtype,
           air::base::TYPE_ID dsctype, air::base::SPOS spos)
       : HEXPR_DATA(opcode, EK_OP, rtype, dsctype, air::base::Null_id, spos) {
-    _kid_cnt = kid_cnt;
+    _isop_flags      = ISOP_EMPTY;
+    _propagatability = PROPAGATABLE;
+    _kid_cnt         = kid_cnt;
+    _max_depth       = 0;
   }
 
   //! @brief static method to allocate a temporay OP_DATA
@@ -361,7 +412,16 @@ public:
   //! @brief content match
   bool Match(OP_DATA_PTR other) const;
 
-  //! @brief Emit CST_DATA, returns an AIR NODE_PTR
+  //! @brief lexical match
+  bool Match_lex(OP_DATA_PTR other) const;
+
+  //! @brief static cast from HEXPR_DATA to OP_DATA
+  static const OP_DATA& Cast_to_me(const HEXPR_DATA& data) {
+    AIR_ASSERT(data.Kind() == EK_OP);
+    return static_cast<const OP_DATA&>(data);
+  }
+
+  //! @brief Emit OP_DATA, returns an AIR NODE_PTR
   air::base::NODE_PTR Emit(air::base::CONTAINER* cont,
                            HCONTAINER*           hssa_cont) const;
 
@@ -369,8 +429,22 @@ public:
              uint32_t indent = 0) const;
 
 private:
-  uint32_t _kid_cnt;  //!< number of kids
-  HEXPR_ID _kids[];   //!< operation kids
+  ISOP_FLAG       _isop_flags : 22;      //!< ISOP flags
+  PROPAGATABILITY _propagatability : 2;  //!< propagatability (copy prop)
+  int32_t         _kid_cnt : 14;         //!< number of kids
+  uint8_t         _max_depth;            //!< max depth (SSAPRE rehash cost)
+  HEXPR_ID        _kids[];               //!< operation kids
+};
+
+//! @brief IVAR_DATA holds the information of an indirect load expression
+class IVAR_DATA : public HEXPR_DATA {
+private:
+  int32_t  _num_of_min_max : 6;  //!< number of minmax, collectively
+  int32_t  _unused : 10;         //!< unused
+  int16_t  _ifieldid;            //!< field id
+  MU_NODE* _mu_node;             //!< MU-list for this memory ref
+  HSTMT_ID _defstmt;             //!< defining stmt for ILOD
+  HEXPR*   _base[2];             //!< base address expr
 };
 
 //! @brief HEXPR - Wrapper for accessing all kinds of EXPR data
@@ -378,7 +452,7 @@ class HEXPR {
   friend class HCONTAINER;
 
 public:
-  HEXPR(void) = delete;
+  HEXPR(void) : _cont(nullptr), _data() {}
   HEXPR(const HCONTAINER* cont, HEXPR_DATA_PTR data)
       : _cont(const_cast<HCONTAINER*>(cont)), _data(data) {}
 
@@ -402,7 +476,14 @@ public:
   HPHI_PTR            Def_phi(void) const;
   HSTMT_PTR           Def_stmt(void) const;
   BB_ID               Def_bb(void) const;
-  const air::base::ATTR_ID Attr(void) const { return _data->Attr(); }
+
+  //! @brief Initialize constant expression from AIR node
+  void Init_const(air::base::NODE_PTR node);
+  //! @brief Initialize symbolic expression from AIR node
+  void Init_sym(air::base::NODE_PTR node);
+  //! @brief Check if current expr dominates stmt sr
+  bool                      Is_dominate(HSTMT_PTR sr) const;
+  const air::base::ATTR_ID& Attr(void) const { return _data->Attr(); }
   DECLATR_ATTR_ACCESS_API(Attr(), (air::base::SCOPE_BASE*)Func_scope())
 
   void Set_next(HEXPR_ID next) { _data->Set_next(next); }

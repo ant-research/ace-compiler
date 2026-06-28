@@ -54,6 +54,7 @@ public:
     air::base::IR2C_CTX& ctx = visitor->Context();
     ctx << "// pragma: " << node->Pragma_id() << ", " << node->Pragma_arg0()
         << ", " << node->Pragma_arg1() << "\n";
+    return RETV();
   }
 
   //! @brief Handle FUNC_ENTRY for IR2C

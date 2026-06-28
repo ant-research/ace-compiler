@@ -343,6 +343,12 @@ POLY Extend(POLY res, POLY poly);
 //! @param poly input extended poly
 POLY Mod_down_rescale(POLY res, POLY poly);
 
+//! @brief Check polynomial level consistency between result and operands
+//! @param res result poly
+//! @param p0 first operand poly
+//! @param p1 second operand poly (may be NULL)
+void Chk_level(POLY res, POLY p0, POLY p1);
+
 //! @brief Convert polynomial from coefficient form to NTT
 void Conv_poly2ntt_inplace(POLY poly);
 void Conv_poly2ntt(POLY res, POLY poly);

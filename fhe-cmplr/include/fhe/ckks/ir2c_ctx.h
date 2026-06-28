@@ -12,6 +12,7 @@
 #include "air/base/container_decl.h"
 #include "air/base/st_decl.h"
 #include "air/util/debug.h"
+#include <cstdlib>
 #include "fhe/core/ir2c_ctx.h"
 #include "fhe/core/rt_context.h"
 #include "fhe/core/rt_data_writer.h"
@@ -29,19 +30,43 @@ public:
   //! @brief Construct a new ir2c ctx object
   IR2C_CTX(std::ostream& os, const fhe::core::LOWER_CTX& lower_ctx,
            const fhe::poly::POLY2C_CONFIG& cfg)
-      : fhe::core::IR2C_CTX(os, lower_ctx, cfg), _rt_data_writer(nullptr) {
+      : fhe::core::IR2C_CTX(os, lower_ctx, cfg),
+        _rt_data_writer(nullptr),
+        _ct_encode(cfg.Ct_encode()) {
     if (cfg.Emit_data_file()) {
       // create rt_data_writer
       _data_file_uuid  = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX";
-      _data_entry_type = fhe::core::DE_MSG_F32;
+      _data_entry_type =
+          _ct_encode ? fhe::core::DE_PLAINTEXT : fhe::core::DE_MSG_F32;
       _rt_data_writer =
           new fhe::core::RT_DATA_WRITER(cfg.Data_file(), _data_entry_type,
                                         cfg.Ifile(), _data_file_uuid.c_str());
+      if (_ct_encode && cfg.Provider() == fhe::core::PROVIDER::ANT) {
+        const auto& ctx_param = lower_ctx.Get_ctx_param();
+        uint32_t encode_depth =
+            ctx_param.Get_mul_level() > 0 ? ctx_param.Get_mul_level() - 1 : 0;
+        if (const char* raw = std::getenv("ACE_CT_ENCODE_DEPTH")) {
+          char* end = nullptr;
+          unsigned long parsed = std::strtoul(raw, &end, 10);
+          if (end != raw && *end == '\0') {
+            encode_depth = static_cast<uint32_t>(parsed);
+          }
+        }
+        Prepare_encode_context(
+            ctx_param.Get_poly_degree(), ctx_param.Get_security_level(),
+            encode_depth,
+            ctx_param.Get_input_level(), ctx_param.Get_first_prime_bit_num(),
+            ctx_param.Get_scaling_factor_bit_num(), ctx_param.Get_q_part_num(),
+            ctx_param.Get_hamming_weight());
+      }
     }
   }
 
   //! @brief Destruct ir2c ctx object
   ~IR2C_CTX() {
+    if (_ct_encode) {
+      Finalize_encode_context();
+    }
     if (_rt_data_writer != nullptr) {
       delete _rt_data_writer;
     }
@@ -50,11 +75,27 @@ public:
   template <typename RETV, typename VISITOR>
   void Emit_encode(VISITOR* visitor, air::base::NODE_PTR dest,
                    air::base::NODE_PTR node) {
-    if (_rt_data_writer != nullptr &&
+    const uint32_t* complex_attr =
+        node->Attr<uint32_t>(fhe::core::FHE_ATTR_KIND::ENCODE_DCMPLX);
+    const uint32_t* scale_attr =
+        node->Attr<uint32_t>(fhe::core::FHE_ATTR_KIND::SCALE);
+    const uint32_t* level_attr =
+        node->Attr<uint32_t>(fhe::core::FHE_ATTR_KIND::LEVEL);
+    const uint32_t* num_p_attr =
+        node->Attr<uint32_t>(fhe::core::FHE_ATTR_KIND::NUM_P);
+    const uint32_t* cache_attr =
+        node->Attr<uint32_t>(fhe::core::FHE_ATTR_KIND::ENCODE_CACHE);
+    bool encoding_dcmplx = (complex_attr != nullptr) && (*complex_attr != 0);
+    bool encode_cache = (cache_attr != nullptr) && (*cache_attr != 0);
+    if (!encoding_dcmplx && _rt_data_writer != nullptr &&
         node->Child(0)->Opcode() == air::core::OPC_LDC &&
-        node->Child(1)->Opcode() == air::core::OPC_INTCONST) {
+        node->Child(1)->Opcode() == air::core::OPC_INTCONST &&
+        node->Child(2)->Opcode() == air::core::OPC_INTCONST &&
+        node->Child(3)->Opcode() == air::core::OPC_INTCONST &&
+        node->Child(0)->Const()->Kind() == air::base::CONSTANT_KIND::ARRAY) {
+      // Offline encoding path: ldc of an ARRAY constant (not scalar FLOAT
+      // from mask encoding — scalar constants fall through to runtime encode)
       air::base::CONSTANT_PTR cst = node->Child(0)->Const();
-      AIR_ASSERT(cst->Kind() == air::base::CONSTANT_KIND::ARRAY);
       AIR_ASSERT(cst->Type()->Is_array());
       AIR_ASSERT(cst->Type()->Cast_to_arr()->Elem_type()->Is_prim());
       AIR_ASSERT(
@@ -66,9 +107,11 @@ public:
       uint64_t     count = cst->Array_byte_len() / sizeof(float);
       AIR_ASSERT(count >= node->Child(1)->Intconst());
       // get level & scale from node
-      uint32_t sc  = node->Child(2)->Intconst();
-      uint32_t lv  = node->Child(3)->Intconst();
-      uint64_t idx = _rt_data_writer->Append(name, data, count, sc, lv);
+      uint32_t sc  = (scale_attr != nullptr) ? *scale_attr : node->Child(2)->Intconst();
+      uint32_t lv  = (level_attr != nullptr) ? *level_attr : node->Child(3)->Intconst();
+      uint64_t idx = (!_ct_encode)
+                         ? _rt_data_writer->Append(name, data, count, sc, lv)
+                         : Append_plain_buffer(name, data, count, sc, lv);
       // Pt_from_msg_validate(&dest, cst, index, len, scale, level)
       // Pt_from_msg(&dest, index, len, scale, level)
       // TODO: offline encoding support validate?
@@ -151,9 +194,18 @@ public:
       AIR_ASSERT(ret == true && subscript.size() > 0);
       uint64_t loop_cnt = 1;
       for (uint64_t i = 0; i < subscript.size(); ++i) {
-        air::base::NODE_PTR loop = visitor->Parent_loop(i);
-        AIR_ASSERT(loop != air::base::Null_ptr &&
-                   loop->Opcode() == air::core::DO_LOOP);
+        // Find the matching DO_LOOP by IV id in the parent stack.
+        air::base::NODE_PTR loop = air::base::Null_ptr;
+        for (size_t depth = 1;; ++depth) {
+          air::base::NODE_PTR cand = visitor->Parent(depth);
+          if (cand == air::base::Null_ptr) break;
+          if (cand->Opcode() == air::core::DO_LOOP &&
+              cand->Iv_id().Value() == subscript[i].first) {
+            loop = cand;
+            break;
+          }
+        }
+        AIR_ASSERT(loop != air::base::Null_ptr);
         int64_t lb, ub, stride;
         ret = Parse_do_loop(loop, lb, ub, stride);
         AIR_ASSERT(ret == true && lb == 0 && stride == 1);
@@ -197,15 +249,162 @@ public:
     } else {
       // runtime encoding with internal data embedded in C code
       // Encode_float(&dest, cst, len, scale, level);
-      Emit_runtime_encode<RETV, VISITOR>(visitor, dest, node);
+      if (_ct_encode && encoding_dcmplx && encode_cache &&
+          node->Child(0)->Opcode() == air::core::OPC_LDC) {
+        Emit_offline_dcmplx_encode<RETV, VISITOR>(visitor, dest, node);
+        return;
+      } else if (encoding_dcmplx && encode_cache &&
+          node->Child(0)->Opcode() == air::core::OPC_LDC) {
+        Emit_cached_dcmplx_encode<RETV, VISITOR>(visitor, dest, node);
+        return;
+      } else {
+        Emit_runtime_encode<RETV, VISITOR>(visitor, dest, node);
+      }
     }
     _ir2c_util << ", ";
     visitor->template Visit<RETV>(node->Child(1));  // element count
-    _ir2c_util << ", ";
-    visitor->template Visit<RETV>(node->Child(2));  // scale
-    _ir2c_util << ", ";
-    visitor->template Visit<RETV>(node->Child(3));  // level
+    if (encoding_dcmplx && num_p_attr != nullptr && *num_p_attr != 0) {
+      // Encode_dcmplx_ext(plain, input, len, level, p_cnt)
+      _ir2c_util << ", ";
+      if (level_attr != nullptr) {
+        _ir2c_util << *level_attr;
+      } else {
+        visitor->template Visit<RETV>(node->Child(3));  // level
+      }
+      _ir2c_util << ", " << *num_p_attr;
+    } else {
+      _ir2c_util << ", ";
+      if (scale_attr != nullptr) {
+        _ir2c_util << *scale_attr;
+      } else {
+        visitor->template Visit<RETV>(node->Child(2));  // scale
+      }
+      _ir2c_util << ", ";
+      if (level_attr != nullptr) {
+        _ir2c_util << *level_attr;
+      } else {
+        visitor->template Visit<RETV>(node->Child(3));  // level
+      }
+    }
     _ir2c_util << ")";
+  }
+
+  uint64_t Append_plain_buffer(const char* name, const float* data,
+                               uint32_t count, uint32_t sc, uint32_t lv) {
+    struct PLAINTEXT_BUFFER* buf =
+        Encode_plain_buffer(data, count, sc, lv);
+    uint64_t idx =
+        _rt_data_writer->Append_pt(name, (const char*)buf, Plain_buffer_length(buf),
+                                   sc, lv);
+    Free_plain_buffer(buf);
+    return idx;
+  }
+
+  template <typename RETV, typename VISITOR>
+  void Emit_offline_dcmplx_encode(VISITOR* visitor, air::base::NODE_PTR dest,
+                                  air::base::NODE_PTR node) {
+    air::base::NODE_PTR cst = node->Child(0);
+    AIR_ASSERT(cst->Opcode() == air::core::OPC_LDC);
+    air::base::CONSTANT_PTR cst_val = cst->Const();
+    AIR_ASSERT(cst_val != air::base::Null_ptr);
+    AIR_ASSERT(cst_val->Kind() == air::base::CONSTANT_KIND::ARRAY);
+
+    const uint32_t* num_p_attr =
+        node->Attr<uint32_t>(fhe::core::FHE_ATTR_KIND::NUM_P);
+    const uint32_t* level_attr =
+        node->Attr<uint32_t>(fhe::core::FHE_ATTR_KIND::LEVEL);
+    AIR_ASSERT(num_p_attr != nullptr && *num_p_attr != 0);
+    uint32_t num_p = *num_p_attr;
+    if (_ct_encode) {
+      AIR_ASSERT_MSG(
+          num_p <= Get_p_cnt(),
+          "offline Encode_dcmplx_ext requires num_p within encode context");
+    }
+
+    uint32_t lv = (level_attr != nullptr) ? *level_attr : node->Child(3)->Intconst();
+    uint64_t count = cst_val->Array_byte_len() / sizeof(double);
+    AIR_ASSERT((count % 2) == 0);
+    uint32_t complex_len = node->Child(1)->Intconst();
+    AIR_ASSERT(count >= (uint64_t)complex_len * 2);
+
+    char name[32];
+    snprintf(name, 32, "cst_%d", cst_val->Id().Value());
+    struct PLAINTEXT_BUFFER* buf = Encode_dcmplx_ext_buffer(
+        cst_val->Array_buffer(), complex_len, lv, num_p);
+    uint64_t idx = _rt_data_writer->Append_pt(
+        name, (const char*)buf, Plain_buffer_length(buf), 1, lv);
+    Free_plain_buffer(buf);
+
+    uint32_t node_id = node->Id().Value();
+    _ir2c_util << "{ static PLAINTEXT _pre_plain_" << node_id
+               << "; static uint32_t _pre_plain_" << node_id
+               << "_init = 0; if (!_pre_plain_" << node_id << "_init) {\n";
+    _ir2c_util << "#pragma omp critical(_pre_plain_" << node_id << "_lock)\n";
+    _ir2c_util << "{ if (!_pre_plain_" << node_id << "_init) { Copy_plain(&_pre_plain_"
+               << node_id << ", (PLAIN)Pt_from_msg(&_pre_plain_" << node_id;
+    _ir2c_util << ", " << idx << " /* " << name << " */";
+    _ir2c_util << ", ";
+    visitor->template Visit<RETV>(node->Child(1));
+    _ir2c_util << ", 1, " << lv << ")); _pre_plain_" << node_id
+               << "_init = 1; } } } ";
+    Emit_st_var<RETV, VISITOR>(visitor, dest);
+    _ir2c_util << " = _pre_plain_" << node_id << "; }";
+  }
+
+  template <typename RETV, typename VISITOR>
+  void Emit_cached_dcmplx_encode(VISITOR* visitor, air::base::NODE_PTR dest,
+                                 air::base::NODE_PTR node) {
+    air::base::NODE_PTR cst = node->Child(0);
+    AIR_ASSERT(cst->Opcode() == air::core::OPC_LDC);
+    air::base::CONSTANT_PTR cst_val = cst->Const();
+    AIR_ASSERT(cst_val != air::base::Null_ptr);
+
+    const uint32_t* num_p_attr =
+        node->Attr<uint32_t>(fhe::core::FHE_ATTR_KIND::NUM_P);
+    const uint32_t* level_attr =
+        node->Attr<uint32_t>(fhe::core::FHE_ATTR_KIND::LEVEL);
+
+    uint32_t node_id = node->Id().Value();
+    _ir2c_util << "{ static PLAINTEXT _pre_plain_" << node_id
+               << "; static uint32_t _pre_plain_" << node_id
+               << "_init = 0; if (!_pre_plain_" << node_id << "_init) {\n";
+    _ir2c_util << "#pragma omp critical(_pre_plain_" << node_id << "_lock)\n";
+    _ir2c_util << "{ if (!_pre_plain_" << node_id << "_init) { ";
+    _ir2c_util << ((num_p_attr != nullptr && *num_p_attr != 0)
+                       ? "Encode_dcmplx_ext(&_pre_plain_"
+                       : "Encode_dcmplx(&_pre_plain_");
+    _ir2c_util << node_id << ", (DCMPLX*)";
+    Emit_buffer_address<RETV, VISITOR>(visitor, cst);
+    _ir2c_util << ", ";
+    visitor->template Visit<RETV>(node->Child(1));
+    if (num_p_attr != nullptr && *num_p_attr != 0) {
+      _ir2c_util << ", ";
+      if (level_attr != nullptr) {
+        _ir2c_util << *level_attr;
+      } else {
+        visitor->template Visit<RETV>(node->Child(3));
+      }
+      _ir2c_util << ", " << *num_p_attr;
+    } else {
+      const uint32_t* scale_attr =
+          node->Attr<uint32_t>(fhe::core::FHE_ATTR_KIND::SCALE);
+      _ir2c_util << ", ";
+      if (scale_attr != nullptr) {
+        _ir2c_util << *scale_attr;
+      } else {
+        visitor->template Visit<RETV>(node->Child(2));
+      }
+      _ir2c_util << ", ";
+      if (level_attr != nullptr) {
+        _ir2c_util << *level_attr;
+      } else {
+        visitor->template Visit<RETV>(node->Child(3));
+      }
+    }
+    _ir2c_util << "); _pre_plain_" << node_id
+               << "_init = 1; } } } ";
+    Emit_st_var<RETV, VISITOR>(visitor, dest);
+    _ir2c_util << " = _pre_plain_" << node_id << "; }";
   }
 
   template <typename RETV, typename VISITOR>
@@ -216,6 +415,9 @@ public:
     air::base::TYPE_PTR domain_type;
     const double*       mask_attr = node->Attr<double>(nn::core::ATTR::MASK);
     bool                encoding_mask = (mask_attr != nullptr);
+    const uint32_t*     complex_attr =
+        node->Attr<uint32_t>(fhe::core::FHE_ATTR_KIND::ENCODE_DCMPLX);
+    bool encoding_dcmplx = (complex_attr != nullptr) && (*complex_attr != 0);
     if (cst_type->Is_ptr()) {
       domain_type = cst_type->Cast_to_ptr()->Domain_type();
     } else if (cst_type->Is_prim()) {
@@ -232,6 +434,20 @@ public:
     }
     AIR_ASSERT(domain_type->Is_prim());
     air::base::NODE_PTR level_child = node->Child(3);
+    if (encoding_dcmplx) {
+      AIR_ASSERT_MSG(!encoding_mask,
+                     "Encode_dcmplx and mask-encoding are mutually exclusive");
+      const uint32_t* num_p_attr =
+          node->Attr<uint32_t>(fhe::core::FHE_ATTR_KIND::NUM_P);
+      _ir2c_util << ((num_p_attr != nullptr && *num_p_attr != 0)
+                         ? "Encode_dcmplx_ext(&"
+                         : "Encode_dcmplx(&");
+      Emit_st_var<RETV, VISITOR>(visitor, dest);
+      _ir2c_util << ", (DCMPLX*)";
+      Emit_buffer_address<RETV, VISITOR>(visitor, cst);
+      return;
+    }
+
     switch (domain_type->Cast_to_prim()->Encoding()) {
       case air::base::PRIMITIVE_TYPE::FLOAT_32:
         if (this->Provider() == core::PROVIDER::SEAL &&
@@ -244,6 +460,11 @@ public:
         }
         break;
       case air::base::PRIMITIVE_TYPE::FLOAT_64:
+      // Handle integer types from Python DSL - treat as double encoding
+      case air::base::PRIMITIVE_TYPE::INT_S32:
+      case air::base::PRIMITIVE_TYPE::INT_U32:
+      case air::base::PRIMITIVE_TYPE::INT_S64:
+      case air::base::PRIMITIVE_TYPE::INT_U64:
         if (this->Provider() == core::PROVIDER::SEAL &&
             level_child->Opcode() == air::core::OPC_INTCONST) {
           _ir2c_util << (encoding_mask ? "Encode_double_mask_cst_lvl(&"
@@ -253,34 +474,26 @@ public:
                                        : "Encode_double(&");
         }
         break;
-      // Handle integer types from Python DSL - treat as double encoding
-      case air::base::PRIMITIVE_TYPE::INT_S32:
-      case air::base::PRIMITIVE_TYPE::INT_U32:
-      case air::base::PRIMITIVE_TYPE::INT_S64:
-      case air::base::PRIMITIVE_TYPE::INT_U64:
-        if (this->Provider() == core::PROVIDER::SEAL &&
-            level_child->Opcode() == air::core::OPC_INTCONST) {
-          _ir2c_util << "Encode_double_cst_lvl(&";
-        } else {
-          _ir2c_util << "Encode_double(&";
-        }
-        break;
-      // Handle complex types from Python DSL bootstrap (weight encodings)
-      case air::base::PRIMITIVE_TYPE::COMPLEX_32:
-      case air::base::PRIMITIVE_TYPE::COMPLEX_64:
-        if (this->Provider() == core::PROVIDER::SEAL &&
-            level_child->Opcode() == air::core::OPC_INTCONST) {
-          _ir2c_util << "Encode_dcmplx_cst_lvl(&";
-        } else {
-          _ir2c_util << "Encode_dcmplx(&";
-        }
-        break;
       default:
-        AIR_ASSERT_MSG(false, "not supported primitive type");
+        AIR_ASSERT_MSG(false, "not supported primitive type for encoding");
     }
 
     Emit_st_var<RETV, VISITOR>(visitor, dest);
     _ir2c_util << ", ";
+
+    // For integer arrays, emit cast to (double*) for Encode_double
+    // compatibility
+    bool need_cast = (domain_type->Cast_to_prim()->Encoding() ==
+                          air::base::PRIMITIVE_TYPE::INT_S32 ||
+                      domain_type->Cast_to_prim()->Encoding() ==
+                          air::base::PRIMITIVE_TYPE::INT_U32 ||
+                      domain_type->Cast_to_prim()->Encoding() ==
+                          air::base::PRIMITIVE_TYPE::INT_S64 ||
+                      domain_type->Cast_to_prim()->Encoding() ==
+                          air::base::PRIMITIVE_TYPE::INT_U64);
+    if (need_cast) {
+      _ir2c_util << "(double*)";
+    }
     Emit_buffer_address<RETV, VISITOR>(visitor, cst);
   }
 
@@ -293,6 +506,19 @@ public:
       AIR_ASSERT(cst->Type()->Is_array());
       air::base::CONST_ARRAY_TYPE_PTR arr_ty = cst->Type()->Cast_to_arr();
       AIR_ASSERT(arr_ty->Elem_type()->Is_prim());
+
+      // Check if element type is integer - need cast to (double*)
+      air::base::PRIMITIVE_TYPE elem_enc =
+          arr_ty->Elem_type()->Cast_to_prim()->Encoding();
+      bool need_cast = (elem_enc == air::base::PRIMITIVE_TYPE::INT_S32 ||
+                        elem_enc == air::base::PRIMITIVE_TYPE::INT_U32 ||
+                        elem_enc == air::base::PRIMITIVE_TYPE::INT_S64 ||
+                        elem_enc == air::base::PRIMITIVE_TYPE::INT_U64);
+
+      if (need_cast) {
+        _ir2c_util << "(double*)";
+      }
+
       uint32_t dims = arr_ty->Dim();
       if (dims == 1) {
         visitor->template Visit<RETV>(node);
@@ -455,6 +681,7 @@ public:
   fhe::core::RT_DATA_WRITER* _rt_data_writer;
   std::string                _data_file_uuid;
   fhe::core::DATA_ENTRY_TYPE _data_entry_type;
+  bool                       _ct_encode = false;
   bool                       _need_bts = false;
 };  // IR2C_CTX
 

@@ -1,0 +1,309 @@
+version: "2.0"
+
+stages:
+  - META
+  - BUILD
+  - UNIT_TEST
+  - BENCH_TEST
+  - MONITOR
+
+components:
+  ace-build:
+    kind: agent
+    inputs:
+      arch:
+        description: 'arch'
+        defaultValue: x86_64
+      image:
+        description: 'imageBuild'
+        defaultValue: ${{jobs.meta.outputs.metadata.imageBuild}}:${{parameters.version}}
+      branch:
+        description: 'branch'
+        defaultValue: ${{vcs.ref}}
+      token:
+        description: 'tokenCI'
+        defaultValue: ${{secrets.ciToken}}
+      cacheKey:
+        description: 'cacheKey'
+        defaultValue: ''
+      option:
+        description: 'buildOptions'
+        defaultValue: ''
+      parall:
+        description: 'parallNum'
+        defaultValue: 40
+    execute:
+      agent:
+        arch: ${{inputs.arch}}
+        container:
+          image: ${{inputs.image}}
+        resourceClass: L
+      steps:
+        - name: shell
+          displayName: 'CLONE'
+          with:
+            script: |
+              git clone -b master https://git:${{inputs.token}}@code.alipay.com/air-infra/air-infra.git
+              git clone -b master https://git:${{inputs.token}}@code.alipay.com/air-infra/nn-addon.git
+              git clone -b ${{inputs.branch}} https://git:${{inputs.token}}@code.alipay.com/fhe-cmplr/fhe-cmplr.git
+        - name: shell
+          displayName: 'BUILD'
+          with:
+            script: |
+              export CI_TOKEN=${{inputs.token}}
+              cmake -S fhe-cmplr -B build -DFHE_WITH_SRC="air-infra;nn-addon" ${{inputs.option}} -GNinja
+              cmake --build build -- -j ${{inputs.parall}}
+        - name: shell
+          displayName: 'CTEST'
+          with:
+            script: |
+              cmake --build build --target test
+        - name: shell
+          displayName: 'INSTALL'
+          with:
+            script: |
+              cmake --install build --prefix install
+        - name: oss-cache
+          displayName: 'CACHE-UPLOAD'
+          with:
+            type: upload
+            key: ${{inputs.cacheKey}}
+            paths: install
+            forceUpload: true
+
+  ace-test:
+    kind: agent
+    inputs:
+      arch:
+        description: 'arch'
+        defaultValue: x86_64
+      image:
+        description: 'imageTest'
+        defaultValue: ${{jobs.meta.outputs.metadata.imageTest}}:${{parameters.version}}
+      cacheKey:
+        description: 'cacheKey'
+        defaultValue: ''
+      mark:
+        description: 'testMarks'
+        defaultValue: ''
+    execute:
+      agent:
+        arch: ${{inputs.arch}}
+        container:
+          image: ${{inputs.image}}
+        resourceClass: XL
+      steps:
+        - name: oss-cache
+          displayName: 'CACHE-RESTORE'
+          with:
+            type: restore
+            key: ${{inputs.cacheKey}}
+        - name: shell
+          with:
+            script: |
+              mv install /opt/avhc
+              pip install cti==0.1.0 -i https://artifacts.antgroup-inc.cn/artifact/repositories/simple-dev
+              python3 -m pytest --pyargs cti -m '${{inputs.mark}}' -p no:warnings --junit-xml=report.xml
+    #     - name: testcase-and-coverage-uploader
+    #       alwaysRun: true
+    #       with:
+    #         caseReportPath: 'report.xml'
+    # outputs:
+    #   uploadResult:
+    #     description: 'report'
+    #     value: ${{execute.outputs.uploadResult}}
+    # web:
+    #   type: template
+    #   source: common-ut
+    #   config:
+    #     afterExecute:
+    #       checkRule:
+    #       - ${{outputs.caseFailCount}} < 1
+    #     data:
+    #       ${{outputs.uploadResult}}
+jobs:
+  meta:
+    stage: META
+    id: meta
+    component: aci-metadata
+  config:
+    stage: META
+    id: config
+    component: aci-metadata
+    inputs:
+      key: app
+
+  # for build
+  build-deb-x86_64:
+    id: build-deb-x86_64
+    stage: BUILD
+    component: ace-build
+    inputs:
+      cacheKey: ${{pipeline.id}}-build-deb-x86_64
+      option: -DCMAKE_BUILD_TYPE=Debug
+  build-rel-x86_64:
+    id: build-rel-x86_64
+    stage: BUILD
+    component: ace-build
+    inputs:
+      cacheKey: ${{pipeline.id}}-build-rel-x86_64
+      option: -DCMAKE_BUILD_TYPE=Release
+  build-deb-aarch64:
+    id: build-deb-aarch64
+    stage: BUILD
+    component: ace-build
+    inputs:
+      arch: arm
+      cacheKey: ${{pipeline.id}}-build-deb-aarch64
+      option: -DCMAKE_BUILD_TYPE=Debug
+  build-rel-aarch64:
+    id: build-rel-aarch64
+    stage: BUILD
+    component: ace-build
+    inputs:
+      arch: arm
+      cacheKey: ${{pipeline.id}}-build-rel-aarch64
+      option: -DCMAKE_BUILD_TYPE=Release
+
+  # for build with openmp
+  build-deb-omp-x86_64:
+    id: build-deb-omp-x86_64
+    stage: BUILD
+    component: ace-build
+    inputs:
+      cacheKey: ${{pipeline.id}}-build-deb-omp-x86_64
+      option: -DCMAKE_BUILD_TYPE=Debug -DBUILD_WITH_OPENMP=ON
+  build-rel-omp-x86_64:
+    id: build-rel-omp-x86_64
+    stage: BUILD
+    component: ace-build
+    inputs:
+      cacheKey: ${{pipeline.id}}-build-rel-omp-x86_64
+      option: -DCMAKE_BUILD_TYPE=Release -DBUILD_WITH_OPENMP=ON
+  build-deb-omp-aarch64:
+    id: build-deb-omp-aarch64
+    stage: BUILD
+    component: ace-build
+    inputs:
+      arch: arm
+      cacheKey: ${{pipeline.id}}-build-deb-omp-aarch64
+      option: -DCMAKE_BUILD_TYPE=Debug -DBUILD_WITH_OPENMP=ON
+  build-rel-omp-aarch64:
+    id: build-rel-omp-aarch64
+    stage: BUILD
+    component: ace-build
+    inputs:
+      arch: arm
+      cacheKey: ${{pipeline.id}}-build-rel-omp-aarch64
+      option: -DCMAKE_BUILD_TYPE=Release -DBUILD_WITH_OPENMP=ON
+
+  # for test
+  test-deb-x86_64:
+    stage: UNIT_TEST
+    component: ace-test
+    inputs:
+      cacheKey: ${{pipeline.id}}-build-deb-x86_64
+      mark: unit
+  test-rel-x86_64:
+    stage: UNIT_TEST
+    component: ace-test
+    inputs:
+      cacheKey: ${{pipeline.id}}-build-rel-x86_64
+      mark: unit
+  test-deb-aarch64:
+    stage: UNIT_TEST
+    component: ace-test
+    inputs:
+      arch: arm
+      cacheKey: ${{pipeline.id}}-build-deb-aarch64
+      mark: unit
+  test-rel-aarch64:
+    stage: UNIT_TEST
+    component: ace-test
+    inputs:
+      arch: arm
+      cacheKey: ${{pipeline.id}}-build-rel-aarch64
+      mark: unit
+
+  # for test with openmp
+  test-deb-omp-x86_64:
+    stage: UNIT_TEST
+    component: ace-test
+    inputs:
+      cacheKey: ${{pipeline.id}}-build-deb-omp-x86_64
+      mark: unit
+  test-rel-omp-x86_64:
+    stage: UNIT_TEST
+    component: ace-test
+    inputs:
+      cacheKey: ${{pipeline.id}}-build-rel-omp-x86_64
+      mark: unit
+  test-deb-omp-aarch64:
+    stage: UNIT_TEST
+    component: ace-test
+    inputs:
+      arch: arm
+      cacheKey: ${{pipeline.id}}-build-deb-omp-aarch64
+      mark: unit
+  test-rel-omp-aarch64:
+    stage: UNIT_TEST
+    component: ace-test
+    inputs:
+      arch: arm
+      cacheKey: ${{pipeline.id}}-build-rel-omp-aarch64
+      mark: unit
+
+  # for bench test
+  test-ben-x86_64:
+    stage: BENCH_TEST
+    component: ace-test
+    inputs:
+      cacheKey: ${{pipeline.id}}-build-rel-x86_64
+      mark: bench
+  test-ben-aarch64:
+    stage: BENCH_TEST
+    component: ace-test
+    inputs:
+      arch: arm
+      cacheKey: ${{pipeline.id}}-build-rel-aarch64
+      mark: bench
+
+  # for bench test with openmp
+  test-ben-omp-x86_64:
+    stage: BENCH_TEST
+    component: ace-test
+    inputs:
+      cacheKey: ${{pipeline.id}}-build-rel-omp-x86_64
+      mark: bench
+  test-ben-omp-aarch64:
+    stage: BENCH_TEST
+    component: ace-test
+    inputs:
+      arch: arm
+      cacheKey: ${{pipeline.id}}-build-rel-omp-aarch64
+      mark: bench
+
+  check-repos-sync:
+    stage: MONITOR
+    component: trigger-x-pipeline
+    inputs:
+      devapiKey: ${{secrets.AccessKey}}
+      devapiSecret: ${{secrets.AccessSecret}}
+      projectId: ${{parameters.checkPrjId}}
+      ymlPath: ${{parameters.checkRule}}
+      branch: master
+    only:
+      - ^master$
+
+triggers:
+  git:
+    push:
+      changesIgnore:
+        - ^LEGAL.md$
+        - ^README.md$
+        - ^doc/**
+    pullRequest:
+      changesIgnore:
+        - ^LEGAL.md$
+        - ^README.md$
+        - ^doc/**

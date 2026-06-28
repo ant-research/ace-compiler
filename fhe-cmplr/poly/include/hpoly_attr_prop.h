@@ -266,6 +266,23 @@ public:
                   irgen.Get_sbase(node));
     return ret;
   }
+
+  template <typename RETV, typename VISITOR>
+  RETV Handle_bootstrap_coeffs_to_slots(VISITOR*            visitor,
+                                        air::base::NODE_PTR node) {
+    return Handle_bootstrap<RETV>(visitor, node);
+  }
+
+  template <typename RETV, typename VISITOR>
+  RETV Handle_bootstrap_eval_mod(VISITOR* visitor, air::base::NODE_PTR node) {
+    return Handle_bootstrap<RETV>(visitor, node);
+  }
+
+  template <typename RETV, typename VISITOR>
+  RETV Handle_bootstrap_slots_to_coeffs(VISITOR*            visitor,
+                                        air::base::NODE_PTR node) {
+    return Handle_bootstrap<RETV>(visitor, node);
+  }
 };
 
 class HPOLY_ATTR_PROP : public fhe::poly::DEFAULT_HANDLER {

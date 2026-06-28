@@ -114,11 +114,14 @@ POLY_LOWER_RETV CKKS2POLY::Handle_add_plain(CKKS2POLY_CTX& ctx, NODE_PTR node,
 POLY_LOWER_RETV CKKS2POLY::Handle_add_float(CKKS2POLY_CTX& ctx, NODE_PTR node,
                                             POLY_LOWER_RETV opnd0_pair,
                                             POLY_LOWER_RETV opnd1_pair) {
-  CMPLR_ASSERT((!opnd0_pair.Is_null() && !opnd1_pair.Is_null() &&
-                (opnd0_pair.Kind() == RETV_KIND::RK_CIPH_RNS_POLY ||
-                 opnd0_pair.Kind() == RETV_KIND::RK_CIPH3_RNS_POLY) &&
-                opnd1_pair.Node()->Rtype()->Is_prim()),
-               "invalid node");
+  // Allow various types for Python DSL support
+  CMPLR_ASSERT(!opnd0_pair.Is_null() && !opnd1_pair.Is_null(),
+               "null operand pair");
+  CMPLR_ASSERT(opnd0_pair.Kind() == RETV_KIND::RK_CIPH_RNS_POLY ||
+                   opnd0_pair.Kind() == RETV_KIND::RK_CIPH3_RNS_POLY ||
+                   opnd0_pair.Kind() == RETV_KIND::RK_CIPH_POLY ||
+                   opnd0_pair.Kind() == RETV_KIND::RK_CIPH3_POLY,
+               "invalid opnd0 kind");
 
   CONTAINER* cntr = ctx.Poly_gen().Container();
   SPOS       spos = node->Spos();
@@ -151,6 +154,30 @@ POLY_LOWER_RETV CKKS2POLY::Handle_add_float(CKKS2POLY_CTX& ctx, NODE_PTR node,
     return POLY_LOWER_RETV(opnd0_pair.Kind(), add_0, add_1, opnd0_pair.Node3());
   }
   return POLY_LOWER_RETV(opnd0_pair.Kind(), add_0, add_1);
+}
+
+POLY_LOWER_RETV CKKS2POLY::Handle_sub_ciph(CKKS2POLY_CTX& ctx, NODE_PTR node,
+                                           POLY_LOWER_RETV opnd0_pair,
+                                           POLY_LOWER_RETV opnd1_pair) {
+  CONTAINER* cntr      = ctx.Poly_gen().Container();
+  CONST_VAR& v_modulus = ctx.Poly_gen().Get_var(VAR_MODULUS, node->Spos());
+  NODE_PTR   new_opnd2 = ctx.Poly_gen().New_var_load(v_modulus, node->Spos());
+  CMPLR_ASSERT((!opnd0_pair.Is_null() && !opnd1_pair.Is_null()), "null node");
+
+  NODE_PTR sub_0 = ctx.Poly_gen().New_hw_modsub(
+      opnd0_pair.Node1(), opnd1_pair.Node1(), new_opnd2, node->Spos());
+  NODE_PTR sub_1 = ctx.Poly_gen().New_hw_modsub(
+      opnd0_pair.Node2(), opnd1_pair.Node2(), new_opnd2, node->Spos());
+
+  // Handle CIPHER3 (3 polynomials) subtraction
+  if (opnd0_pair.Kind() == RETV_KIND::RK_CIPH3_RNS_POLY ||
+      opnd0_pair.Kind() == RETV_KIND::RK_CIPH3_POLY) {
+    NODE_PTR sub_2 = ctx.Poly_gen().New_hw_modsub(
+        opnd0_pair.Node3(), opnd1_pair.Node3(), new_opnd2, node->Spos());
+    return POLY_LOWER_RETV(opnd0_pair.Kind(), sub_0, sub_1, sub_2);
+  }
+
+  return POLY_LOWER_RETV(opnd0_pair.Kind(), sub_0, sub_1);
 }
 
 POLY_LOWER_RETV CKKS2POLY::Handle_mul_ciph(CKKS2POLY_CTX& ctx, NODE_PTR node,
@@ -250,10 +277,12 @@ POLY_LOWER_RETV CKKS2POLY::Handle_mul_plain(CKKS2POLY_CTX& ctx, NODE_PTR node,
 POLY_LOWER_RETV CKKS2POLY::Handle_mul_float(CKKS2POLY_CTX& ctx, NODE_PTR node,
                                             POLY_LOWER_RETV opnd0_pair,
                                             POLY_LOWER_RETV opnd1_pair) {
-  CMPLR_ASSERT((!opnd0_pair.Is_null() && !opnd1_pair.Is_null() &&
-                opnd0_pair.Kind() == RETV_KIND::RK_CIPH_RNS_POLY &&
-                opnd1_pair.Node()->Rtype()->Is_prim()),
-               "invalid node");
+  // Allow various types for Python DSL support
+  CMPLR_ASSERT(!opnd0_pair.Is_null() && !opnd1_pair.Is_null(),
+               "null operand pair");
+  CMPLR_ASSERT(opnd0_pair.Kind() == RETV_KIND::RK_CIPH_RNS_POLY ||
+                   opnd0_pair.Kind() == RETV_KIND::RK_CIPH_POLY,
+               "invalid opnd0 kind");
 
   CONTAINER* cntr = ctx.Poly_gen().Container();
   SPOS       spos = node->Spos();
@@ -847,12 +876,7 @@ NODE_PTR CKKS2POLY::Gen_encode_float_from_ciph(CKKS2POLY_CTX& ctx,
 
   AIR_ASSERT(ctx.Lower_ctx()->Is_cipher_type(v_ciph.Type_id()) ||
              ctx.Lower_ctx()->Is_cipher3_type(v_ciph.Type_id()));
-  AIR_ASSERT(n_cst->Opcode() ==
-                 air::base::OPCODE(air::core::CORE, air::core::OPCODE::LD) ||
-             n_cst->Opcode() ==
-                 air::base::OPCODE(air::core::CORE, air::core::OPCODE::LDC) ||
-             n_cst->Opcode() == air::base::OPCODE(air::core::CORE,
-                                                  air::core::OPCODE::INTCONST));
+  // Note: We handle various opcodes including Python DSL array nodes
 
   NODE_PTR n_ciph = ctx.Poly_gen().New_var_load(v_ciph, spos);
 
@@ -861,6 +885,18 @@ NODE_PTR CKKS2POLY::Gen_encode_float_from_ciph(CKKS2POLY_CTX& ctx,
       air::base::OPCODE(air::core::CORE, air::core::OPCODE::LD)) {
     n_cst = cntr->New_lda(n_cst->Addr_datum(), air::base::POINTER_KIND::FLAT32,
                           spos);
+  } else if (n_cst->Opcode() ==
+             air::base::OPCODE(air::core::CORE, air::core::OPCODE::LDP)) {
+    // For LDP (load from preg), clone the node
+    n_cst = cntr->Clone_node_tree(n_cst);
+  } else if (n_cst->Opcode() ==
+             air::base::OPCODE(air::core::CORE, air::core::OPCODE::ILD)) {
+    // For ILD (indirect load), clone the tree
+    n_cst = cntr->Clone_node_tree(n_cst);
+  } else if (n_cst->Opcode() ==
+             air::base::OPCODE(air::core::CORE, air::core::OPCODE::LDCA)) {
+    // For LDCA (load constant array), already in right format - clone it
+    n_cst = cntr->Clone_node_tree(n_cst);
   } else if (n_cst->Opcode() ==
              air::base::OPCODE(air::core::CORE, air::core::OPCODE::INTCONST)) {
     // For INTCONST, convert integer to a double array constant with 1 element
@@ -875,9 +911,15 @@ NODE_PTR CKKS2POLY::Gen_encode_float_from_ciph(CKKS2POLY_CTX& ctx,
     CONSTANT_PTR cst = cntr->Glob_scope()->New_const(
         air::base::CONSTANT_KIND::ARRAY, arr_type, &flt_val, sizeof(flt_val));
     n_cst = cntr->New_ldca(cst, air::base::POINTER_KIND::FLAT32, spos);
-  } else {
+  } else if (n_cst->Opcode() ==
+             air::base::OPCODE(air::core::CORE, air::core::OPCODE::LDC)) {
+    // For LDC (load constant), use ldca
     n_cst =
         cntr->New_ldca(n_cst->Const(), air::base::POINTER_KIND::FLAT32, spos);
+  } else {
+    // Fallback: clone the node tree for any other opcode (e.g., Python DSL
+    // nodes)
+    n_cst = cntr->Clone_node_tree(n_cst);
   }
   // child 2: data len = 1
   NODE_PTR n_len = cntr->New_intconst(t_ui32, 1, spos);

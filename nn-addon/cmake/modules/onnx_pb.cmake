@@ -8,29 +8,34 @@
 # Build external onnx project dependent function
 function(build_external_proto)
 
-  set(REPO_ONNX_URL      "${PROJECT_SOURCE_DIR}/cmake/modules/onnx")
-  message(STATUS "Cloning External Repository   : ${REPO_ONNX_URL}")
+  # Default: upstream GitHub; internal override via .aci/
+  if(NOT DEFINED ONNX_URL)
+    set(ONNX_URL "https://github.com/onnx/onnx.git")
+  endif()
+  if(NOT DEFINED ONNX_REF)
+    set(ONNX_REF "v1.9.0")
+  endif()
+
+  message(STATUS "Cloning External Repository   : ${ONNX_URL} @ ${ONNX_REF}")
 
   include(FetchContent)
   FetchContent_Declare(
     onnx
-    SOURCE_DIR  ${REPO_ONNX_URL}
+    GIT_REPOSITORY  ${ONNX_URL}
+    GIT_TAG         ${ONNX_REF}
+    GIT_SUBMODULES  ""
   )
 
   FetchContent_GetProperties(onnx)
   if(NOT onnx_POPULATED)
-    FetchContent_Populate(onnx)
-
-    # Path to onnx.proto
-    set(ONNX_PROTO ${onnx_SOURCE_DIR}/onnx/onnx.proto)
-
-    # Modify onnx.proto
-    execute_process(
-      COMMAND ${CMAKE_COMMAND} -E echo "Modifying onnx.proto..."
-      COMMAND ${CMAKE_COMMAND} -E copy ${ONNX_PROTO} ${ONNX_PROTO}.bak
-      COMMAND ${CMAKE_COMMAND} -E sed -i.bak 's/option optimize_for = LITE_RUNTIME;//' ${ONNX_PROTO}
-    )
+      FetchContent_Populate(onnx)
   endif()
+
+  # Patch: disable LITE_RUNTIME optimization for compatibility
+  execute_process(
+    COMMAND sed -i "s/^option optimize_for = LITE_RUNTIME;/\\/\\/ option optimize_for = LITE_RUNTIME;/"
+            ${onnx_SOURCE_DIR}/onnx/onnx.proto
+  )
 
   set(ONNX_PATH   ${onnx_SOURCE_DIR}/onnx/)
   set(ONNX_PROTO  ${onnx_SOURCE_DIR}/onnx/onnx.proto)
@@ -46,6 +51,7 @@ function(build_external_proto)
   add_library(onnx_objects OBJECT
     ${ONNX_OUTPUT}/onnx.pb.cc
   )
+  set_property(TARGET onnx_objects PROPERTY POSITION_INDEPENDENT_CODE 1)
 
   include_directories (${ONNX_OUTPUT})
 endfunction()

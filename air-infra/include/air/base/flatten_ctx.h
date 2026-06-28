@@ -47,6 +47,9 @@ public:
         child = util.Flatten_node(visitor, child);
       }
       n_node->Set_child(i, child);
+      if (child->Is_block() && child->Parent_stmt_id() == Null_id) {
+        child->Set_parent_stmt(n_node->Stmt());
+      }
     }
     // pop current node from ANALYZE_CTX's stack
     ANALYZE_CTX::Pop(node);

@@ -74,6 +74,22 @@ if(BUILD_STATIC)
   install(TARGETS FHErt_ant_encode EXPORT RTLIBTargets LIBRARY DESTINATION ${RTLIB_INSTALL_PATH})
 endif()
 
+if(BUILD_SHARED)
+  # Build shared library for Python extension support
+  add_library(FHErt_ant_shared SHARED $<TARGET_OBJECTS:fhert_ant_obj>)
+  target_link_libraries(FHErt_ant_shared ${MATH_LIBS} FHErt_common_shared)
+  add_dependencies(FHErt_ant_shared rtlib_depend)
+  # Set all target properties at once
+  set_target_properties(FHErt_ant_shared PROPERTIES
+      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${RTLIB_INSTALL_PATH}
+      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${RTLIB_INSTALL_PATH}
+      OUTPUT_NAME "FHErt_ant"
+      INSTALL_RPATH "$ORIGIN"
+      BUILD_RPATH "${CMAKE_BINARY_DIR}/common"
+  )
+  install(TARGETS FHErt_ant_shared EXPORT RTLIBTargets LIBRARY DESTINATION ${RTLIB_INSTALL_PATH})
+endif()
+
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ DESTINATION rtlib/include/ant)
 
 add_custom_target(fhert_ant_all)

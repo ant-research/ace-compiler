@@ -1206,14 +1206,14 @@ static void Transform_values_to_dcrt(int64_t* res, size_t res_len,
 }
 
 void Transform_to_dcrt(int64_t* res, size_t res_len, VALUE_LIST* vals,
-                       size_t q_cnt, bool extend_p, bool without_mod,
+                       size_t q_cnt, size_t p_cnt, bool without_mod,
                        CRT_CONTEXT* crt) {
-  size_t p_cnt = extend_p ? Get_crt_num_p(crt) : 0;
+  IS_TRUE(p_cnt <= Get_crt_num_p(crt), "p count exceeds active crt context");
   IS_TRUE(res_len == LIST_LEN(vals) * (q_cnt + p_cnt), "length not match");
   size_t q_len = q_cnt * LIST_LEN(vals);
   Transform_values_to_dcrt(res, q_len, vals, q_cnt, true, without_mod, crt);
-  if (extend_p) {
-    size_t val_len = Get_crt_num_p(crt) * LIST_LEN(vals);
+  if (p_cnt) {
+    size_t val_len = p_cnt * LIST_LEN(vals);
     Transform_values_to_dcrt(res + q_len, val_len, vals, p_cnt, false,
                              without_mod, crt);
   }
@@ -1273,8 +1273,8 @@ static void Reconstruct(VALUE_LIST* res, int64_t* val, size_t val_len,
 }
 
 void Reconstruct_from_dcrt(VALUE_LIST* res, int64_t* val, size_t val_len,
-                           size_t q_cnt, bool extend_p, CRT_CONTEXT* crt) {
-  size_t p_cnt = extend_p ? Get_crt_num_p(crt) : 0;
+                           size_t q_cnt, size_t p_cnt, CRT_CONTEXT* crt) {
+  IS_TRUE(p_cnt <= Get_crt_num_p(crt), "p count exceeds active crt context");
   IS_TRUE(val_len == LIST_LEN(res) * (q_cnt + p_cnt), "length not match");
   size_t def_q_cnt = Get_crt_num_q(crt);
   IS_TRUE(q_cnt > 0 && q_cnt <= def_q_cnt, "index overflow");
@@ -1283,7 +1283,7 @@ void Reconstruct_from_dcrt(VALUE_LIST* res, int64_t* val, size_t val_len,
   CRT_PRIMES* primes = Get_q(crt);
   // if the input CRT representation values do not all match the default q cnt,
   // a new set of CRT primes and its precomputations need to be allocated.
-  bool is_special = (q_cnt < def_q_cnt || extend_p) ? true : false;
+  bool is_special = (q_cnt < def_q_cnt || p_cnt > 0) ? true : false;
   if (is_special) {
     primes = Alloc_new_primes(q_cnt, p_cnt, crt);
     Precompute_primes(primes, true);

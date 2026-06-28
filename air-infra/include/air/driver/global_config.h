@@ -31,19 +31,29 @@ public:
         _verify(AIR_DEBUG_ON),  // turn on in debug version
         _print_pass(false),
         _print_meta(false),
-        _opt_level(0) {}
+        _opt_level(0),
+        _is_resume(false) {}
 
   bool        Help() const { return _help; }
   bool        Show() const { return _show; }
   bool        Trace() const { return _trace; }
   bool        Trace_mp() const { return _trace_mp; }
-  bool        Perf() const { return _perf; }
   bool        Keep() const { return _keep; }
   bool        Verify() const { return _verify; }
   bool        Print_pass() const { return _print_pass; }
   bool        Print_meta() const { return _print_meta; }
   uint64_t    Opt_level() const { return _opt_level; }
   const char* Ofile() const { return _ofile.c_str(); }
+  const char* Dump() const { return _dump.c_str(); }
+  bool        Dump_enabled() const { return !_dump.empty(); }
+
+  // IR resume related accessors
+  bool        Is_resume() const { return _is_resume; }
+  const char* Resume_phase() const { return _resume_phase.c_str(); }
+  void        Set_resume_phase(const std::string& phase) {
+    _is_resume    = true;
+    _resume_phase = phase;
+  }
 
   void Register_options(DRIVER_CTX* ctx);
   void Update_options(const char* ifile);
@@ -53,26 +63,33 @@ public:
   bool        _show;        // -show
   bool        _trace;       // -trace   // .t
   bool        _trace_mp;    // -trace_mp // .t
-  bool        _perf;        // -perf    // .json
   bool        _keep;        // -keep
   bool        _verify;      // -verify
   bool        _print_pass;  // -print-pass
   bool        _print_meta;  // -print-meta
   uint64_t    _opt_level;   // -O0, -O1, -O2, -O3
   std::string _ofile;       // -o <output c/c++ file>
+  std::string _dump;        // --dump=<phase> dump IR after specified phase
+
+  // IR resume related members
+  bool        _is_resume;     // true if input is .B IR file (resume mode)
+  std::string _resume_phase;  // phase stored in IR file (abbreviation)
 };
 
 //! @brief Macro to define API to access global config
-#define DECLARE_GLOBAL_CONFIG_ACCESS_API(cfg)               \
-  bool        Help() const { return cfg.Help(); }           \
-  bool        Show() const { return cfg.Show(); }           \
-  bool        Trace() const { return cfg.Trace(); }         \
-  bool        Trace_mp() const { return cfg.Trace_mp(); }   \
-  bool        Perf() const { return cfg.Perf(); }           \
-  bool        Keep() const { return cfg.Keep(); }           \
-  bool        Verify() const { return cfg.Verify(); }       \
-  uint64_t    Opt_level() const { return cfg.Opt_level(); } \
-  const char* Ofile() const { return cfg.Ofile(); }
+#define DECLARE_GLOBAL_CONFIG_ACCESS_API(cfg)                     \
+  bool        Help() const { return cfg.Help(); }                 \
+  bool        Show() const { return cfg.Show(); }                 \
+  bool        Trace() const { return cfg.Trace(); }               \
+  bool        Trace_mp() const { return cfg.Trace_mp(); }         \
+  bool        Keep() const { return cfg.Keep(); }                 \
+  bool        Verify() const { return cfg.Verify(); }             \
+  uint64_t    Opt_level() const { return cfg.Opt_level(); }       \
+  const char* Ofile() const { return cfg.Ofile(); }               \
+  const char* Dump() const { return cfg.Dump(); }                 \
+  bool        Dump_enabled() const { return cfg.Dump_enabled(); } \
+  bool        Is_resume() const { return cfg.Is_resume(); }       \
+  const char* Resume_phase() const { return cfg.Resume_phase(); }
 
 }  // namespace driver
 

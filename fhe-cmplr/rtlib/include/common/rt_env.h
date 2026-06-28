@@ -25,6 +25,8 @@
 #define ENV_PT_ENTRY_COUNT "PT_ENTRY_COUNT"
 //! PT_PREFETCH_COUNT: number of pt for prefetching. default: 2
 #define ENV_PT_PREFETCH_COUNT "PT_PREFETCH_COUNT"
+//! PT_MSG_DUMP_COUNT: number of pt msg to dump for debugging. default: 0
+#define ENV_PT_MSG_DUMP_COUNT "PT_MSG_DUMP_COUNT"
 
 //! environment variable to control rt data file reader (RT_DATA_FILE)
 //! RT_DATA_ASYNC_READ=0|1: use asynchronous read. default: 0

@@ -15,10 +15,18 @@ else()
     message(FATAL_ERROR "Python not found. Please make sure Python is installed.")
 endif()
 
+find_package(pybind11 REQUIRED)
+if (pybind11_FOUND)
+    message (STATUS "pybind11_INCLUDE_DIRS          : ${pybind11_INCLUDE_DIRS}")
+else()
+    message(FATAL_ERROR "pybind11 not found. Please make sure pybind11 is installed.")
+endif()
+
 set (AIRPLUGIN_INCLUDE_DIRS "")
 list (APPEND AIRPLUGIN_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include")
 list (APPEND AIRPLUGIN_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/include")
 list (APPEND AIRPLUGIN_INCLUDE_DIRS "${Python3_INCLUDE_DIRS}")
+list (APPEND AIRPLUGIN_INCLUDE_DIRS "${pybind11_INCLUDE_DIRS}")
 include_directories (${AIRPLUGIN_INCLUDE_DIRS})
 set (AIRPLUGIN_INCLUDE_DIRS "${AIRPLUGIN_INCLUDE_DIRS}" CACHE INTERNAL "")
 
