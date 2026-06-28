@@ -32,6 +32,24 @@ void Encode_float(PLAIN plain, float* input, size_t len, uint32_t sc_degree,
 void Encode_double(PLAIN plain, double* input, size_t len, uint32_t sc_degree,
                    uint32_t level);
 
+//! @brief Encode plaintext from input complex value list
+//! @param len length of input complex vector
+//! @param level level of plaintext: num of q primes
+void Encode_dcmplx(PLAIN plain, DCMPLX* input, size_t len, uint32_t sc_degree,
+                   uint32_t level);
+
+//! @brief Encode plaintext from input complex value list with extended p primes.
+//! @param len length of input complex vector
+//! @param level level of plaintext: num of q primes
+//! @param p_cnt number of p primes to include in the plaintext modulus basis
+void Encode_dcmplx_ext(PLAIN plain, DCMPLX* input, size_t len, uint32_t level,
+                       uint32_t p_cnt);
+
+//! @brief Serialize an extended complex plaintext into a plain buffer.
+struct PLAINTEXT_BUFFER* Encode_dcmplx_ext_buffer(const void* input, size_t len,
+                                                  uint32_t level,
+                                                  uint32_t p_cnt);
+
 //! @brief Encode plaintext for mask with float value
 //! @param len length of non-zero values in mask vector
 //! @param level level of plaintext: num of q primes
@@ -69,6 +87,9 @@ double* Get_msg_from_plain(PLAIN plain);
 //! @brief Get the DCMPLX message(with imag part) content obtained by decoding
 //! plaintext
 DCMPLX* Get_dcmplx_msg_from_plain(PLAIN plain);
+
+//! @brief Deep-copy plaintext metadata and polynomial data.
+void Copy_plain(PLAIN res, PLAIN plain);
 
 //! @brief Get lpoly from PLAINTEXT at given idx
 //! need free data by Free_lpoly_data().

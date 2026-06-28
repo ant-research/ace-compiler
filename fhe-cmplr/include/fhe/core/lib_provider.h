@@ -20,7 +20,7 @@ namespace core {
   DEFINE_PROVIDER(SEAL, "seal", "LIB_SEAL")          \
   DEFINE_PROVIDER(OPENFHE, "openfhe", "LIB_OPENFHE") \
   DEFINE_PROVIDER(PHANTOM, "phantom", "LIB_PHANTOM") \
-  DEFINE_PROVIDER(HYPERFHE, "hyperfhe", "LIB_HYPERFHE")
+  DEFINE_PROVIDER(ACE, "ace", "LIB_ACE")
 
 //! @brief Define enum for all supported library
 enum class PROVIDER : uint32_t {

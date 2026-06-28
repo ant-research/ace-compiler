@@ -17,7 +17,7 @@ function(build_fhe_with_src name)
 
   string(FIND "${name}" "nn-addon" CONF_NN_ADDON)
   if(${CONF_NN_ADDON} GREATER "-1")
-    set(NN_ADDON_PROJECT ${CMAKE_SOURCE_DIR}/../nn-addon)
+    set(NN_ADDON_PROJECT ${CMAKE_CURRENT_SOURCE_DIR}/../nn-addon)
     if(IS_DIRECTORY ${NN_ADDON_PROJECT})
       add_subdirectory(${NN_ADDON_PROJECT} nn-addon)
     else()

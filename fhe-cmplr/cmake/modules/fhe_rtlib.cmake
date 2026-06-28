@@ -20,6 +20,7 @@ function(build_rtlib)
     CMAKE_ARGS -G "Unix Makefiles"
               -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
               -DBUILD_STATIC=${BUILD_STATIC}
+              -DBUILD_SHARED=${BUILD_SHARED}
               -DBUILD_UNITTEST=${BUILD_UNITTEST}
               -DBUILD_BENCH=${BUILD_BENCH}
               -DRTLIB_BUILD_TEST=${FHE_BUILD_TEST}
@@ -28,13 +29,13 @@ function(build_rtlib)
               -DRTLIB_ENABLE_SEAL=${FHE_ENABLE_SEAL}
               -DRTLIB_ENABLE_SEAL_BTS=${FHE_ENABLE_SEAL_BTS}
               -DRTLIB_ENABLE_OPENFHE=${FHE_ENABLE_OPENFHE}
-              -DRTLIB_ENABLE_CUDA=${FHE_ENABLE_CUDA}
+              -DRTLIB_ENABLE_PHANTOM=${FHE_ENABLE_PHANTOM}
+              -DRTLIB_ENABLE_ACE=${FHE_ENABLE_ACE}
               -DRTLIB_SUPPORT_HPU=${FHE_SUPPORT_HPU}
               -DRTLIB_SEED_MODE=${FHE_SEED_MODE}
               -DBUILD_WITH_OPENMP=${BUILD_WITH_OPENMP}
               -DPACKAGE_BASE_DIR=$ENV{PACKAGE_BASE_DIR}
               -DPACKAGE_INC_DIR_TF=${PACKAGE_INC_DIR_TF}
-              -DEXTERNAL_URL_SSH=${EXTERNAL_URL_SSH}
               -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
     UPDATE_COMMAND ""
     BUILD_ALWAYS ON
@@ -47,6 +48,10 @@ function(build_rtlib)
                       <BINARY_DIR>/seal/libFHErt_seal.a
                       <BINARY_DIR>/openfhe/libFHErt_openfhe.a
                       <BINARY_DIR>/phantom/libFHErt_phantom.a
+                      <BINARY_DIR>/ace/libFHErt_ace.a
+                      # Shared libraries for Python support
+                      <BINARY_DIR>/common/libFHErt_common.so
+                      <BINARY_DIR>/rtlib/lib/libFHErt_ant.so
   )
   ExternalProject_Get_Property(fhe_rtlib SOURCE_DIR BINARY_DIR)
 
@@ -63,15 +68,27 @@ function(build_rtlib)
     IMPORTED_LOCATION "${BINARY_DIR}/ant/libFHErt_ant_encode.a"
   )
 
+  # Import shared libraries (for Python support - built when BUILD_SHARED=ON)
+  if(BUILD_SHARED)
+    add_library(FHErt_common_shared SHARED IMPORTED GLOBAL)
+    set_target_properties(FHErt_common_shared PROPERTIES
+      IMPORTED_LOCATION "${BINARY_DIR}/common/libFHErt_common.so"
+    )
+    add_library(FHErt_ant_shared SHARED IMPORTED GLOBAL)
+    set_target_properties(FHErt_ant_shared PROPERTIES
+      IMPORTED_LOCATION "${BINARY_DIR}/rtlib/lib/libFHErt_ant.so"
+    )
+  endif()
+
   # for seal & openfhe & phantom
-  if(FHE_ENABLE_SEAL)
+  if(FHE_ENABLE_SEAL AND DEFINED ENV{RTLIB_SEAL_PATH})
     add_library(FHErt_seal STATIC IMPORTED GLOBAL)
     set_target_properties(FHErt_seal PROPERTIES
       IMPORTED_LOCATION "${BINARY_DIR}/seal/libFHErt_seal.a"
     )
     install(FILES ${BINARY_DIR}/seal/libFHErt_seal.a DESTINATION rtlib/lib)
   endif()
-  if(FHE_ENABLE_OPENFHE)
+  if(FHE_ENABLE_OPENFHE AND (DEFINED ENV{RTLIB_OPENFHE_PATH} OR DEFINED ENV{RTLIB_OPENFHE_OMP_PATH}))
     add_library(FHErt_openfhe STATIC IMPORTED GLOBAL)
     set_target_properties(FHErt_openfhe PROPERTIES
       IMPORTED_LOCATION "${BINARY_DIR}/openfhe/libFHErt_openfhe.a"
@@ -85,6 +102,13 @@ function(build_rtlib)
     )
     install(FILES ${BINARY_DIR}/phantom/libFHErt_phantom.a DESTINATION rtlib/lib)
   endif()
+  if(FHE_ENABLE_ACE)
+    add_library(FHErt_ace STATIC IMPORTED GLOBAL)
+    set_target_properties(FHErt_ace PROPERTIES
+      IMPORTED_LOCATION "${BINARY_DIR}/ace/libFHErt_ace.a"
+    )
+    install(FILES ${BINARY_DIR}/ace/libFHErt_ace.a DESTINATION rtlib/lib)
+  endif()
 
   add_test(NAME test_fhe_rtlib COMMAND ${CMAKE_COMMAND} --build ${BINARY_DIR} --target test)
 
@@ -92,11 +116,16 @@ function(build_rtlib)
   install(DIRECTORY ${SOURCE_DIR}/ant/include/ DESTINATION rtlib/include/ant)
 
   # put it here now, rm it wait for refactor private key
-  install(FILES ${SOURCE_DIR}/cmake/modules/uthash/src/uthash.h DESTINATION rtlib/include/ant)
+  install(FILES ${BINARY_DIR}/_deps/uthash-src/src/uthash.h DESTINATION rtlib/include/ant)
 
   install(FILES ${BINARY_DIR}/common/libFHErt_common.a DESTINATION rtlib/lib)
   install(FILES ${BINARY_DIR}/ant/libFHErt_ant.a DESTINATION rtlib/lib)
   install(FILES ${BINARY_DIR}/ant/libFHErt_ant_encode.a DESTINATION rtlib/lib)
+
+  if(BUILD_SHARED)
+    install(FILES ${BINARY_DIR}/common/libFHErt_common.so DESTINATION ace/lib)
+    install(FILES ${BINARY_DIR}/rtlib/lib/libFHErt_ant.so DESTINATION ace/lib)
+  endif()
 
 endfunction()
 

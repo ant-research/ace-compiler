@@ -7,7 +7,6 @@
 //=============================================================================
 #include "air/opt/bb.h"
 
-#ifdef ENABLED_HSSA
 #include <algorithm>
 #include <sstream>
 
@@ -15,7 +14,7 @@
 #include "air/opt/hssa_container.h"
 #include "air/opt/hssa_mu_chi.h"
 #include "air/opt/hssa_stmt.h"
-#include "air/util/node_list.h"
+#include "air/opt/node_list.h"
 namespace air {
 
 namespace opt {
@@ -208,5 +207,3 @@ std::string BB::To_str() const {
 
 }  // namespace opt
 }  // namespace air
-
-#endif

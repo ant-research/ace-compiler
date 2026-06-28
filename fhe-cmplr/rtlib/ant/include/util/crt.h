@@ -247,7 +247,7 @@ size_t Get_num_decomp(CRT_CONTEXT* crt, size_t num_q);
 //! @param without_mod within modulus or not
 //! @param crt CRT_CONTEXT
 void Transform_to_dcrt(int64_t* res, size_t res_len, VALUE_LIST* vals,
-                       size_t q_cnt, bool extend_p, bool without_mod,
+                       size_t q_cnt, size_t p_cnt, bool without_mod,
                        CRT_CONTEXT* crt);
 
 //! @brief Reconstructs double-CRT representation values to the regular values
@@ -259,7 +259,7 @@ void Transform_to_dcrt(int64_t* res, size_t res_len, VALUE_LIST* vals,
 //! @param crt CRT_CONTEXT
 //! @return A value list whose values are reconstructed.
 void Reconstruct_from_dcrt(VALUE_LIST* res, int64_t* vals, size_t val_len,
-                           size_t q_cnt, bool extend_p, CRT_CONTEXT* crt);
+                           size_t q_cnt, size_t p_cnt, CRT_CONTEXT* crt);
 
 #ifdef __cplusplus
 }

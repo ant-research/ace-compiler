@@ -19,7 +19,7 @@
 #include "air/base/container.h"
 #include "air/base/st.h"
 #include "air/base/transform_ctx.h"
-#include "fhe/core/lower_cfg.h"
+#include "fhe/core/lower_conf.h"
 #include "fhe/core/rt_context.h"
 #include "fhe/core/scheme_info.h"
 #include "nn/core/data_scheme.h"
@@ -83,6 +83,12 @@ public:
   static constexpr const char* NUM_P = "num_p";
   // bool, annotate if polynomial under coefficient mode
   static constexpr const char* COEFF_MODE = "coeff_mode";
+  // bool, annotate CKKS.encode input as complex vector (DCMPLX*)
+  static constexpr const char* ENCODE_DCMPLX = "encode_dcmplx";
+  // bool, annotate CKKS.encode as reusable precomputed plaintext
+  static constexpr const char* ENCODE_CACHE = "encode_cache";
+  // bool, annotate CKKS.mul so the scale manager defers auto-rescale
+  static constexpr const char* SKIP_AUTO_RESCALE = "skip_auto_rescale";
 };
 
 //! info of function gen in FHE phase
@@ -442,7 +448,11 @@ public:
     return ty_id == Get_rns_poly_type_id();
   }
   bool Is_poly_type(air::base::TYPE_ID ty_id) const {
-    return ty_id == Get_poly_type_id();
+    air::base::TYPE_ID poly_type_id = _fhe_type[FHE_TYPE_KIND::POLY];
+    if (poly_type_id == air::base::TYPE_ID()) {
+      return false;  // POLY type not initialized
+    }
+    return ty_id == poly_type_id;
   }
 
   //! @brief Register runtime context
@@ -454,9 +464,11 @@ public:
   //! calls to Register_rt_context
   void Release_rt_context() const;
 
-  void Emit_cfg(air::base::FUNC_SCOPE* func_scope, std::ostream& ofile) {
-    _cfg.Emit_cfg(func_scope, Get_ctx_param());
-    _cfg.Dump(ofile);
+  void Emit_conf(const std::string&     name,
+                air::base::FUNC_SCOPE* func_scope,
+                const std::string&     data_file,
+                uint32_t               provider) const {
+    _conf.To_file(name, func_scope, Get_ctx_param(), data_file, provider);
   }
 
 private:
@@ -467,8 +479,31 @@ private:
   air::base::TYPE_PTR Find_or_create_type(FHE_TYPE_KIND id, const char* name,
                                           air::base::GLOB_SCOPE* glob) {
     if (_fhe_type[id] != air::base::Null_ptr) {
-      return glob->Type(_fhe_type[id]);
+      // Check if this type ID is valid in the current glob_scope
+      air::base::TYPE_PTR existing = glob->Type(_fhe_type[id]);
+      if (existing != air::base::Null_ptr && existing->Is_record()) {
+        // Verify it's the correct type by checking the name
+        if (existing->Name() != air::base::Null_ptr) {
+          std::string existing_name(existing->Name()->Char_str());
+          if (existing_name == name) {
+            return existing;
+          }
+        }
+      }
+      // Type ID is from a different glob_scope or wrong type - try to find by
+      // name
+      for (auto tit = glob->Begin_type(); tit != glob->End_type(); ++tit) {
+        air::base::TYPE_PTR t = *tit;
+        if (t->Is_record() && t->Name() != air::base::Null_ptr) {
+          std::string tname(t->Name()->Char_str());
+          if (tname == name) {
+            _fhe_type[id] = t->Id();  // Update cached ID
+            return t;
+          }
+        }
+      }
     }
+    // Create new type
     air::base::RECORD_TYPE_PTR type = glob->New_rec_type(
         air::base::RECORD_KIND::STRUCT, name, glob->Unknown_simple_spos());
     _fhe_type[id] = type->Id();
@@ -480,7 +515,7 @@ private:
   air::base::TYPE_ID _fhe_type[FHE_TYPE_KIND::END];  // type id gen in fhe
   FHE_FUNC_INFO
   _fhe_func_info[FHE_FUNC::FHE_FUNC_END];  // info of func gen in fhe
-  LOWER_CFG _cfg;
+  LOWER_CONF _conf;
 };
 
 //! @brief Context for FHE lowering phases

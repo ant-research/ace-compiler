@@ -35,11 +35,20 @@ void Prepare_encode_context(uint32_t degree, uint32_t sec_level, uint32_t depth,
 //! @brief destroy context for encoding only
 void Finalize_encode_context();
 
+//! @brief get the p-prime count of the current encode-only context
+size_t Get_p_cnt();
+
 //! @brief encode float array and return pointer to PLAINTEXT which can be
 //! freed as a whole
 struct PLAINTEXT_BUFFER* Encode_plain_buffer(const float* input, size_t len,
                                              uint32_t sc_degree,
                                              uint32_t level);
+
+//! @brief encode complex array with extended p primes and return a serialized
+//! plaintext buffer.
+struct PLAINTEXT_BUFFER* Encode_dcmplx_ext_buffer(const void* input, size_t len,
+                                                  uint32_t level,
+                                                  uint32_t p_cnt);
 
 //! @brief free PLAINTEXT_BUFFER
 void Free_plain_buffer(struct PLAINTEXT_BUFFER* buf);

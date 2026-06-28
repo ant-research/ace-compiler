@@ -7,7 +7,7 @@
 
 # check option : -DNN_WITH_SRC
 function(build_nn_with_src name)
-  set(AIR_INFRA_PROJECT ${CMAKE_SOURCE_DIR}/../air-infra CACHE STRING "The air-infra project path")
+  set(AIR_INFRA_PROJECT ${CMAKE_CURRENT_SOURCE_DIR}/../air-infra CACHE STRING "The air-infra project path")
 
   string(FIND "${name}" "air-infra" CONF_AIR_INFRA)
   if(${CONF_AIR_INFRA} GREATER "-1")

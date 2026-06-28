@@ -67,7 +67,6 @@ option(AIR_BUILD_TEST      "Control whether to build the tests"             ON)
 option(AIR_BUILD_EXAMPLE   "Control whether to build the examples"          ON)
 option(AIR_INSTALL_APP     "Control whether to install the APPs"            ON)
 option(BUILD_TCM           "Control whether to analysis memory"            OFF)
-option(EXTERNAL_URL_SSH    "Control choose external URL for repository"    OFF)
 
 # Check commit : BUILD_GIT_COMMIT
 string(TIMESTAMP BUILD_TIMESTAMP "%Y-%m-%d %H:%M:%S")
@@ -106,6 +105,11 @@ install_hooks($ENV{PACKAGE_DEVTOOLS_DIR}/hooks)
 add_custom_target(air_depend)
 
 # build external dependent libraries
+# Internal URL overrides (file only exists in internal repo)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.aci/config-internal.cmake")
+  include("${CMAKE_CURRENT_SOURCE_DIR}/.aci/config-internal.cmake")
+endif()
+
 if(BUILD_UNITTEST)
   include(unittest)
 endif()

@@ -17,33 +17,27 @@
 #include "air/util/error.h"
 #include "air/util/messg.h"
 #include "air/util/option.h"
-#include "air/util/perf.h"
 
 namespace air {
 
 namespace driver {
 
-//! @brief ID for default trace & perf file
+//! @brief ID for default trace file
 static constexpr uint32_t DEFAULT_TFILE = 0;
-static constexpr uint32_t DEFAULT_PFILE = 1;
 
 //! @brief Driver context which can be shared among all drivers and passes
 class DRIVER_CTX {
 public:
   //! @brief Construct a new DRIVER_CTX
   DRIVER_CTX() {
-    air::util::TFILE& tfile = Register_tfile(DEFAULT_TFILE, nullptr);
-    air::util::TFILE& pfile = Register_tfile(DEFAULT_PFILE, nullptr);
-    _perf                   = new air::util::PERF(tfile, pfile);
-    _glob                   = new air::base::GLOB_SCOPE(0, true);
+    Register_tfile(DEFAULT_TFILE, nullptr);
+    _glob = new air::base::GLOB_SCOPE(0, true);
   }
 
   ~DRIVER_CTX() {
     if (_glob != nullptr) {
       delete _glob;
     }
-    AIR_ASSERT(_perf != nullptr);
-    delete _perf;
     Destroy_tfile();
   }
 
@@ -52,6 +46,10 @@ public:
     _config.Register_options(this);
     R_CODE ret_code = _option_mgr.Parse_options(argc, argv);
     _config.Update_options(Ifile());
+
+    // Analyze input file for IR resume detection (after Update_options)
+    Analyze_input_file();
+
     // print option has higher priority than no input file
     Handle_global_options();
     if (!Ifile()) {
@@ -60,9 +58,8 @@ public:
       return R_CODE::USER;
     }
     if (ret_code == R_CODE::NORMAL) {
-      // redirect default trace & perf to files named by input file
+      // redirect default trace to file named by input file
       Tfile(DEFAULT_TFILE).Open(_option_mgr.Tfile("").c_str());
-      Tfile(DEFAULT_PFILE).Open(_option_mgr.Pfile("").c_str());
     }
     return ret_code;
   }
@@ -88,34 +85,33 @@ public:
   //! @brief Get input file name
   const char* Ifile() const { return _option_mgr.Ifile(); }
 
+  //! @brief Get input file basename (filename without path)
+  std::string Ifile_basename() const {
+    return Ifile() == nullptr
+               ? DFILE_PREFIX
+               : std::filesystem::path(Ifile()).filename().string();
+  }
+
   //! @brief Get extra output file name
   std::string Ext_ofile(const char* ext) const {
     return _option_mgr.Ofile(ext);
   }
 
   //! @brief Get default assembly file name
-  std::string Def_sfile() const {
-    std::string str = Ifile() == nullptr
-                          ? DFILE_PREFIX
-                          : std::filesystem::path(Ifile()).filename().string();
-    return str + SFILE_SUFFIX;
-  }
+  std::string Def_sfile() const { return Ifile_basename() + SFILE_SUFFIX; }
 
   //! @brief Get default c file name
-  std::string Def_cfile() const {
-    std::string str = Ifile() == nullptr
-                          ? DFILE_PREFIX
-                          : std::filesystem::path(Ifile()).filename().string();
-    return str + CFILE_SUFFIX;
-  }
+  std::string Def_cfile() const { return Ifile_basename() + CFILE_SUFFIX; }
 
   //! @brief Get configure file name
   std::string Def_cfg_file() const {
-    std::string str = Ifile() == nullptr
-                          ? DFILE_PREFIX
-                          : std::filesystem::path(Ifile()).filename().string();
-    return str + CFG_FILE_SUFFIX;
+    return Ifile_basename() + CFG_FILE_SUFFIX;
   }
+
+  //! @brief Get phase name from IR file (reads ELF header only)
+  //! @param ifile IR file path
+  //! @return Phase name string, empty string if not a valid IR file
+  std::string Get_ir_phase(const std::string& ifile);
 
   //! @brief Access global config items
   DECLARE_GLOBAL_CONFIG_ACCESS_API(_config)
@@ -139,24 +135,15 @@ public:
   //! @brief get executable program name
   const char* Exe_name() const { return _option_mgr.Exe_name(); }
 
-  //! @brief Reset measure position
-  void Perf_start() {
-    AIR_ASSERT(_perf != nullptr);
-    _perf->Start();
-  }
-
-  //! @brief Call measure position
-  void Perf_taken(std::string driver, std::string phase, std::string pass) {
-    AIR_ASSERT(_perf != nullptr);
-    _perf->Taken(driver, phase, pass);
-  }
-
   //! @brief Terminate compilation process early
   void Teardown(R_CODE rc);
 
 private:
   // handle global options
   void Handle_global_options();
+
+  // analyze input file for IR resume detection
+  void Analyze_input_file();
 
   // destroy tfiles
   void Destroy_tfile();
@@ -167,14 +154,11 @@ private:
   // Global common config
   air::driver::GLOBAL_CONFIG _config;
 
-  // Trace & perf files
+  // Trace files
   std::unordered_map<uint32_t, air::util::TFILE*> _tfiles;
 
   // Global scope
   air::base::GLOB_SCOPE* _glob;
-
-  // pointer to unique perf context
-  air::util::PERF* _perf;
 };  // DRIVER_CTX
 
 //! @brief Macro to define API for tracing

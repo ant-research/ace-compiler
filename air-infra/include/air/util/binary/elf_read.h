@@ -67,6 +67,12 @@ public:
     return _elf.Get_entsize(t);
   }
 
+  //! @brief Get phase name from ELF header
+  const char* Get_phase() const { return _elf.Get_phase(); }
+
+  //! @brief Get metadata version from ELF header
+  uint32_t Get_metadata_version() const { return _elf.Get_metadata_version(); }
+
 private:
   std::ostream& _os;
   FILE_MAP*     _map;

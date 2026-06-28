@@ -153,27 +153,44 @@ public:
 
   template <typename RETV, typename VISITOR>
   RETV Handle_node(VISITOR* visitor, air::base::NODE_PTR node) {
-    if (node->Opcode() == air::core::OPC_ST &&
-        node->Child(0)->Opcode() == air::core::OPC_ILD &&
-        node->Child(0)->Child(0)->Opcode() == air::core::OPC_ARRAY) {
+    air::base::NODE_PTR stmt_node = node;
+    if (stmt_node != air::base::Null_ptr && stmt_node->Is_root()) {
+      stmt_node = stmt_node->Stmt()->Node();
+    }
+    if (stmt_node != air::base::Null_ptr && stmt_node->Opcode() == air::core::OPC_ST &&
+        stmt_node->Num_child() >= 1) {
+      air::base::NODE_PTR rhs = stmt_node->Child(0);
+      if (rhs != air::base::Null_ptr &&
+          rhs->Domain() == fhe::ckks::CKKS_DOMAIN::ID &&
+          rhs->Operator() == fhe::ckks::CKKS_OPERATOR::ENCODE) {
+        const uint32_t* cache_attr =
+            rhs->Attr<uint32_t>(fhe::core::FHE_ATTR_KIND::ENCODE_CACHE);
+        if (cache_attr != nullptr && *cache_attr != 0) {
+          _pass.Mark_var_freed(stmt_node->Addr_datum());
+        }
+      }
+    }
+    if (stmt_node != air::base::Null_ptr && stmt_node->Opcode() == air::core::OPC_ST &&
+        stmt_node->Child(0)->Opcode() == air::core::OPC_ILD &&
+        stmt_node->Child(0)->Child(0)->Opcode() == air::core::OPC_ARRAY) {
       // we have loop to free whole array, so won't free individual
-      _pass.Mark_var_freed(node->Addr_datum());
+      _pass.Mark_var_freed(stmt_node->Addr_datum());
       // if the st-ild is in top-level, ignore mfree so far
       // a possible solution is to post-pone mfree to PRAGMA END
-      air::base::NODE_PTR rhs = node->Child(0)->Child(0)->Child(0);
+      air::base::NODE_PTR rhs = stmt_node->Child(0)->Child(0)->Child(0);
       if (Parent(2) == air::base::Null_ptr &&
           rhs->Opcode() == air::core::OPC_LDA) {
         CMPLR_DEV_WARN("TODO: find right place to free %s.\n",
                        rhs->Addr_datum()->Name()->Char_str());
         _pass.Mark_var_freed(rhs->Addr_datum());
       }
-    } else if (node->Opcode() == air::core::OPC_CALL &&
-               strcmp(node->Entry()->Name()->Char_str(), "Rotate") == 0 &&
+    } else if (stmt_node != air::base::Null_ptr && stmt_node->Opcode() == air::core::OPC_CALL &&
+               strcmp(stmt_node->Entry()->Name()->Char_str(), "Rotate") == 0 &&
                Parent(2) != air::base::Null_ptr) {
       // rotate return value should be freed in end of the same level
       // but if rotate is in top-level, still after last use
-      AIR_ASSERT(node->Has_ret_var());
-      air::base::PREG_PTR retv = node->Ret_preg();
+      AIR_ASSERT(stmt_node->Has_ret_var());
+      air::base::PREG_PTR retv = stmt_node->Ret_preg();
       AIR_ASSERT(_pass.Type_need_mfree(retv->Type()));
       AIR_ASSERT(_pass.Need_mfree(retv));
       _pass.Mark_var_freed(retv);
@@ -238,11 +255,8 @@ public:
   RETV Handle_node(VISITOR* visitor, air::base::NODE_PTR node) {
     if (node->Has_sym()) {
       air::base::ADDR_DATUM_PTR var = node->Addr_datum();
-      bool                      is_entry =
-          node->Func_scope()->Owning_func()->Entry_point()->Is_program_entry();
-      if ((!is_entry && var->Is_formal()) ||
-          Parent(1)->Opcode() == air::core::OPC_RETV) {
-        // don't free formal except main and return value
+      if (Parent(1)->Opcode() == air::core::OPC_RETV) {
+        // don't free return value
         _pass.Mark_var_freed(var);
         return;
       }

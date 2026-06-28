@@ -20,7 +20,7 @@ static OPTION_DESC Poly2c_option[] = {
     DECLARE_COMMON_CONFIG(Poly2c_config),
     {"lib", "",
                      "FHE library used by generated code: ant, seal, openfhe, phantom, "
-     "hyperfhe",                                                                                &Poly2c_config._prov_str, air::util::K_STR,  0, V_EQUAL},
+     "ace",                                                                                &Poly2c_config._prov_str, air::util::K_STR,  0, V_EQUAL},
     {"df",  "data_file", "Store weight data in a seperated file",
                      &Poly2c_config._data_file,                                                                           air::util::K_STR,  0, V_EQUAL},
     {"fp",  "free_poly",

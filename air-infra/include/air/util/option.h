@@ -29,7 +29,7 @@ namespace util {
 #define SFILE_SUFFIX    ".s"
 #define PFILE_SUFFIX    ".json"
 #define DFILE_PREFIX    "out"
-#define CFG_FILE_SUFFIX ".cfg"
+#define CFG_FILE_SUFFIX ".conf"
 
 uint32_t constexpr INDENT_SPACE = 2;
 
@@ -115,9 +115,9 @@ public:
       : _ifile(nullptr),
         _next_option(""),
         _exe_name(nullptr),
-        _option_increment(1) {};
+        _option_increment(1){};
 
-  ~OPTION_MGR() {};
+  ~OPTION_MGR(){};
 
   //! @brief show the available command line options
   void Print(std::ostream& os, uint32_t indent = 0);
@@ -262,7 +262,7 @@ private:
   const char* _next_option;  // next command line option
   const char* _exe_name;     // executable program name
   int _option_increment;  // command line option increment, only support 1 or 2
-};  // OPTION_MGR
+};                        // OPTION_MGR
 
 }  // namespace util
 

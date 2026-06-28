@@ -25,15 +25,17 @@ public:
   ELF_WRITE(const std::string& ofile, std::ostream& os) : _os(os), _elf(os) {
     _map = new FILE_MAP(ofile.c_str(), true);  // O_WRITE
 
-    // Write ELF file basic format
+    // Write ELF file basic format (shstrtab will be written in destructor)
     Write_ehdr();
     Write_shdr();
-    Write_shstrtab();
   }
 
   //! @brief Write ir to file & Destruct irwriter object
   ~ELF_WRITE(void) {
-    // Calculate file size
+    // Write .shstrtab first to set correct offset
+    Write_shstrtab();
+
+    // Calculate file size (after .shstrtab is written)
     _map->Remap(Get_pos() - Get_map_addr());
 
     // Re-write ELF EHDR and SHDR after update
@@ -54,6 +56,17 @@ public:
 
   //! @brief Set offset position to opened file
   void Set_pos(BYTE_PTR pos) { _pos = pos; }
+
+  //! @brief Ensure enough space for writing
+  void Ensure_space(uint32_t additional_size) {
+    uint32_t required = (_pos - Get_map_addr()) + additional_size;
+    BYTE_PTR old_map  = Get_map_addr();
+    _map->Ensure_space(required);
+    // Update _pos if map address changed
+    if (Get_map_addr() != old_map) {
+      _pos = Get_map_addr() + (_pos - old_map);
+    }
+  }
 
   //! @brief Address alignment according to the system bits
   uint32_t Align_pos(BYTE_PTR pos, uint32_t align) {
@@ -85,6 +98,12 @@ public:
     _os << "ELF_WRITE::Update_shdr() id: " << static_cast<uint32_t>(id)
         << " offset: " << offset << " size: " << sz << "  align: " << align
         << "  entysize: " << entsize << std::endl;
+  }
+
+  //! @brief Set phase name in ELF header
+  void Set_phase(const std::string& phase) {
+    _elf.Set_phase(phase.c_str());
+    _elf.Set_metadata_version(AIR_METADATA_VERSION);
   }
 
 private:
@@ -122,14 +141,13 @@ private:
 
   //! @brief Written section .shstrtab
   void Write_shstrtab() {
+    // Write .shstrtab at current position (end of file)
     BYTE_PTR offset = _pos;
     _pos++;
 
     for (uint32_t id = 1; id < static_cast<uint32_t>(SHDR::MAX); id++) {
       strcpy(_pos, _elf.Get_name(id));
       _pos += strlen(_pos) + 1;
-      //_os << "  section: " << id << "  index: " << _elf.Get_index(id)
-      //    << "  name: " << _elf.Get_name(id) << std::endl;
     }
 
     Update_shdr(SHDR::SHSTRTAB, offset, _pos - offset, 1, 0);

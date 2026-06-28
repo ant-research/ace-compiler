@@ -22,12 +22,16 @@ class HCONTAINER;
 
 class OP_DATA;
 class VAR_DATA;
+class LDA_DATA;
 class CST_DATA;
 class HEXPR_DATA;
 class HEXPR;
 
+class BLK_DATA;
 class ASSIGN_DATA;
 class NARY_DATA;
+class DO_LOOP_DATA;
+class IF_DATA;
 class CALL_DATA;
 class HSTMT_DATA;
 class HSTMT;
@@ -43,6 +47,7 @@ class CFG;
 template <typename ID_TYPE, typename PTR_TYPE, typename CONT_TYPE>
 class NODE_LIST;
 
+typedef air::base::ID<OP_DATA>    OP_HEXPR_ID;
 typedef air::base::ID<HEXPR_DATA> HEXPR_ID;
 typedef air::base::ID<HSTMT_DATA> HSTMT_ID;
 typedef air::base::ID<HMU_DATA>   HMU_ID;
@@ -51,13 +56,17 @@ typedef air::base::ID<HPHI_DATA>  HPHI_ID;
 
 typedef air::base::PTR_FROM_DATA<HEXPR_DATA> HEXPR_DATA_PTR;
 typedef air::base::PTR_FROM_DATA<VAR_DATA>   VAR_DATA_PTR;
+typedef air::base::PTR_FROM_DATA<LDA_DATA>   LDA_DATA_PTR;
 typedef air::base::PTR_FROM_DATA<CST_DATA>   CST_DATA_PTR;
 typedef air::base::PTR_FROM_DATA<OP_DATA>    OP_DATA_PTR;
 
-typedef air::base::PTR_FROM_DATA<HSTMT_DATA>  HSTMT_DATA_PTR;
-typedef air::base::PTR_FROM_DATA<ASSIGN_DATA> ASSIGN_DATA_PTR;
-typedef air::base::PTR_FROM_DATA<NARY_DATA>   NARY_DATA_PTR;
-typedef air::base::PTR_FROM_DATA<CALL_DATA>   CALL_DATA_PTR;
+typedef air::base::PTR_FROM_DATA<HSTMT_DATA>   HSTMT_DATA_PTR;
+typedef air::base::PTR_FROM_DATA<BLK_DATA>     BLK_BEGIN_DATA_PTR;
+typedef air::base::PTR_FROM_DATA<ASSIGN_DATA>  ASSIGN_DATA_PTR;
+typedef air::base::PTR_FROM_DATA<NARY_DATA>    NARY_DATA_PTR;
+typedef air::base::PTR_FROM_DATA<DO_LOOP_DATA> DO_LOOP_DATA_PTR;
+typedef air::base::PTR_FROM_DATA<IF_DATA>      IF_DATA_PTR;
+typedef air::base::PTR_FROM_DATA<CALL_DATA>    CALL_DATA_PTR;
 
 typedef air::base::PTR_FROM_DATA<HMU_DATA>  HMU_DATA_PTR;
 typedef air::base::PTR_FROM_DATA<HCHI_DATA> HCHI_DATA_PTR;

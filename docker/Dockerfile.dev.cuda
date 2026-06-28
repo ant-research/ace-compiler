@@ -1,0 +1,77 @@
+# ============================================================
+# ACE-Compiler Dev Image (CUDA)
+# Based on NVIDIA CUDA, adds system deps + Python + pip deps
+#
+# Usage (external):
+#   docker build --build-arg BASE_IMAGE=nvidia/cuda:12.4.0-devel-ubuntu22.04 \
+#                --build-arg TORCH_VERSION=2.5.1 \
+#                --build-arg TORCHVISION_VERSION=0.20.1 \
+#                --build-arg TORCHAUDIO_VERSION=2.5.1 \
+#                --build-arg CU_VERSION=cu124 \
+#                --build-arg TORCH_INDEX_URL=https://download.pytorch.org/whl/cu124 \
+#                -f docker/Dockerfile.dev.cuda -t ace/dev-cuda:12.4.0-devel-ubuntu22.04 .
+#
+# Usage (internal):
+#   docker build --build-arg BASE_IMAGE=nvidia/cuda:12.4.0-devel-ubuntu22.04 \
+#                --build-arg PIP_INDEX_URL=https://mirrors.aliyun.com/pypi/simple/ \
+#                --build-arg TORCH_VERSION=2.5.1 \
+#                ...
+# ============================================================
+
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+
+# Environment defaults
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Asia/Shanghai
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+ENV CMAKE_BUILD_TYPE=Release
+ARG ARTIFACT_URL=https://artifacts.antgroup-inc.cn/artifact/repositories/simple-dev
+ENV ARTIFACT_URL=${ARTIFACT_URL}
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git curl wget vim gdb time doxygen graphviz autoconf \
+    build-essential gcc g++ clang-15 clang-format-15 nlohmann-json3-dev \
+    cmake make ninja-build \
+    python3 python3-dev python3-pip python3-venv pylint \
+    libprotobuf-dev protobuf-compiler libssl-dev libtool \
+    libgmp3-dev libomp5 libomp-dev libntl-dev pybind11-dev && \
+    update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-15 100 && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Configure git safe.directory for Docker builds
+RUN git config --global --add safe.directory '*'
+
+# Create virtual environment and configure pip
+ARG PIP_INDEX_URL=https://pypi.org/simple
+RUN python3 -m venv /opt/ace-env && \
+    /opt/ace-env/bin/pip config set global.index-url ${PIP_INDEX_URL} && \
+    /opt/ace-env/bin/pip install --no-cache-dir --upgrade pip setuptools wheel
+
+# Set PATH to use venv
+ENV PATH=/opt/ace-env/bin:$PATH
+
+# Install common Python dependencies
+COPY docker/requirements-base.txt /tmp/requirements-base.txt
+RUN pip install --no-cache-dir -r /tmp/requirements-base.txt
+
+# Install PyTorch CUDA
+ARG TORCH_VERSION=2.5.1
+ARG TORCHVISION_VERSION=0.20.1
+ARG TORCHAUDIO_VERSION=2.5.1
+# CU_VERSION must match an available PyTorch wheel: cu128, cu130
+# CUDA 12.8 hosts: use cu128
+# CUDA 13.0 hosts: use cu130
+# CUDA 13.1 hosts: use cu130 (no cu131 wheel yet; cu130 is forward-compatible)
+ARG CU_VERSION=cu124
+ARG TORCH_INDEX_URL=https://download.pytorch.org/whl/cu124
+RUN pip install --no-cache-dir \
+        --extra-index-url ${TORCH_INDEX_URL} \
+        torch==${TORCH_VERSION}+${CU_VERSION} \
+        torchvision==${TORCHVISION_VERSION}+${CU_VERSION} \
+        torchaudio==${TORCHAUDIO_VERSION}+${CU_VERSION} \
+        torchsummary
+
+WORKDIR /app
+CMD ["/bin/bash"]

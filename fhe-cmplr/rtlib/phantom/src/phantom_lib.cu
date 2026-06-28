@@ -1,12 +1,18 @@
-
 #include "rt_phantom/phantom_api.h"
 #include "rt_phantom/rt_phantom.h"
 #include "common/common.h"
 #include "common/error.h"
 #include "common/io_api.h"
+#include "common/pt_mgr.h"
 #include "common/rt_api.h"
 #include "common/rtlib_timing.h"
 #include "boot/Bootstrapper.cuh"
+
+#include <algorithm>
+#include <cmath>
+#include <cstdlib>
+#include <cstdint>
+#include <string>
 
 using namespace phantom;
 using namespace phantom::arith;
@@ -57,21 +63,25 @@ public:
         std::vector<double> vec(input->_vals, input->_vals + len);
         CKKS_PARAMS *prog_param = Get_context_params();
         Plaintext pt;
-        _evaluator->encoder.encode(vec, std::pow(2.0, _scaling_mod_size), pt);
+        int chain_index = _num_prime_parts - prog_param->_input_level;
+        double encode_scale = std::pow(2.0, _scaling_mod_size);
+        _evaluator->encoder.encode(vec, chain_index, encode_scale, pt);
         Ciphertext *ct = new Ciphertext;
         _evaluator->encryptor.encrypt(pt, *ct);
         Io_set_input(name, 0, ct);
     }
-    void Set_output_data(const char *name, size_t idx, Ciphertext *ct)
+    void Set_output_data(const char *name, size_t idx, Ciphertext &ct)
     {
-        Io_set_output(name, idx, new Ciphertext(*ct));
+        Io_set_output(name, idx, new Ciphertext(std::move(ct)));
     }
 
     Ciphertext Get_input_data(const char *name, size_t idx)
     {
         Ciphertext *data = (Ciphertext *)Io_get_input(name, idx);
         IS_TRUE(data != nullptr, "not find data");
-        return *data;
+        Ciphertext ret = std::move(*data);
+        delete data;
+        return ret;
     }
 
     double *Handle_output(const char *name, size_t idx)
@@ -84,52 +94,52 @@ public:
         _evaluator->encoder.decode(pt, vec);
         double *msg = (double *)malloc(sizeof(double) * vec.size());
         memcpy(msg, vec.data(), sizeof(double) * vec.size());
+        delete data;
         return msg;
     }
 
-    void Encode_float(Plaintext *pt, float *input, size_t len, SCALE_T scale,
+    void Encode_float(Plaintext &pt, const float *input, size_t len, SCALE_T scale,
                       LEVEL_T level)
     {
         std::vector<double> vec(input, input + len);
-        std::vector<double> vec_after;
-        _evaluator->encoder.encode(vec, _num_prime_parts - level, std::pow(2.0, _scaling_mod_size * scale), *pt);
+        _evaluator->encoder.encode(vec, _num_prime_parts - level, std::pow(2.0, _scaling_mod_size * scale), pt);
     }
 
-    void Encode_float_cst_lvl(Plaintext *pt, float *input, size_t len,
+    void Encode_float_cst_lvl(Plaintext &pt, const float *input, size_t len,
                               SCALE_T scale, int level)
     {
         std::vector<double> vec(input, input + len);
         auto &context_data = _ctx->get_context_data(level);
 
         _encoder->encode(*_ctx, vec,
-                         std::pow(2.0, _scaling_mod_size * scale), *pt, context_data.chain_index());
+                         std::pow(2.0, _scaling_mod_size * scale), pt, context_data.chain_index());
     }
 
-    void Encode_float_mask(Plaintext *pt, float input, size_t len, SCALE_T scale,
+    void Encode_float_mask(Plaintext &pt, float input, size_t len, SCALE_T scale,
                            LEVEL_T level)
     {
         std::vector<double> vec(len, input);
-        _evaluator->encoder.encode(vec, _num_prime_parts - level, std::pow(2.0, _scaling_mod_size * scale), *pt);
+        _evaluator->encoder.encode(vec, _num_prime_parts - level, std::pow(2.0, _scaling_mod_size * scale), pt);
     }
-    void Encode_float_mask_cst_lvl(Plaintext *pt, float input, size_t len,
+    void Encode_float_mask_cst_lvl(Plaintext &pt, float input, size_t len,
                                    SCALE_T scale, int level)
     {
         std::vector<double> vec(len, input);
         auto &context_data = _ctx->get_context_data(level);
         _encoder->encode(*_ctx, vec,
-                         std::pow(2.0, _scaling_mod_size * scale), *pt, context_data.chain_index());
+                         std::pow(2.0, _scaling_mod_size * scale), pt, context_data.chain_index());
     }
 
-    void Decrypt(Ciphertext *ct, std::vector<double> &vec)
+    void Decrypt(Ciphertext &ct, std::vector<double> &vec)
     {
         Plaintext pt;
-        _evaluator->decryptor.decrypt(*ct, pt);
+        _evaluator->decryptor.decrypt(ct, pt);
         _evaluator->encoder.decode(pt, vec);
     }
 
-    void Decode(Plaintext *pt, std::vector<double> &vec)
+    void Decode(Plaintext &pt, std::vector<double> &vec)
     {
-        _evaluator->encoder.decode(*pt, vec);
+        _evaluator->encoder.decode(pt, vec);
     }
 
 public:
@@ -166,151 +176,198 @@ public:
         }
     }
 
-    void Add(Ciphertext *op1, Ciphertext *op2, Ciphertext *res)
+    void Add(Ciphertext &res, const Ciphertext &op1, const Ciphertext &op2)
     {
-        Ciphertext final_op1 = *op1;
-        Ciphertext final_op2 = *op2;
-        Equal_level(final_op1, final_op2);
-        _evaluator->evaluator.add(final_op1, final_op2, *res);
+        Ciphertext tmp1 = op1;
+        Ciphertext tmp2 = op2;
+        Equal_level(tmp1, tmp2);
+        _evaluator->evaluator.add(tmp1, tmp2, res);
     }
 
-    void Add(Ciphertext *op1, Plaintext *op2, Ciphertext *res)
+    void Add(Ciphertext &res, const Ciphertext &op1, const Plaintext &op2)
     {
-        Ciphertext final_op1 = *op1;
-        Plaintext final_op2 = *op2;
-        Equal_level(final_op1, final_op2);
-        _evaluator->evaluator.add_plain(final_op1, final_op2, *res);
+        Ciphertext tmp1 = op1;
+        Plaintext tmp2 = op2;
+        Equal_level(tmp1, tmp2);
+        _evaluator->evaluator.add_plain(tmp1, tmp2, res);
     }
-    void Add_const(const Ciphertext *op1, double op2, Ciphertext *res)
+    void Add_const(Ciphertext &res, const Ciphertext &op1, double op2)
     {
         Plaintext pt;
-        _evaluator->encoder.encode(op2, op1->chain_index(), op1->scale(), pt);
-        if (res == op1)
+        _evaluator->encoder.encode(op2, op1.chain_index(), op1.scale(), pt);
+        if (&res == &op1)
         {
-            _evaluator->evaluator.add_plain_inplace(*res, pt);
+            _evaluator->evaluator.add_plain_inplace(res, pt);
         }
         else
         {
-            _evaluator->evaluator.add_plain(*op1, pt, *res);
+            _evaluator->evaluator.add_plain(op1, pt, res);
         }
     }
 
-    void Mul(Ciphertext *op1, Ciphertext *op2, Ciphertext *res)
+    void Mul(Ciphertext &res, const Ciphertext &op1, const Ciphertext &op2)
     {
-        Ciphertext final_op1 = *op1;
-        Ciphertext final_op2 = *op2;
-        Equal_level(final_op1, final_op2);
-        _evaluator->evaluator.multiply(final_op1, final_op2, *res);
+        Ciphertext tmp1 = op1;
+        Ciphertext tmp2 = op2;
+        Equal_level(tmp1, tmp2);
+        _evaluator->evaluator.multiply(tmp1, tmp2, res);
     }
 
-    void Mul(Ciphertext *op1, Plaintext *op2, Ciphertext *res)
+    void Mul(Ciphertext &res, const Ciphertext &op1, const Plaintext &op2)
     {
-        Ciphertext final_op1 = *op1;
-        Plaintext final_op2 = *op2;
-        Equal_level(final_op1, final_op2);
-        _evaluator->evaluator.multiply_plain(final_op1, final_op2, *res);
+        Ciphertext tmp1 = op1;
+        Plaintext tmp2 = op2;
+        Equal_level(tmp1, tmp2);
+        _evaluator->evaluator.multiply_plain(tmp1, tmp2, res);
     }
-    void Mul_const(const Ciphertext *op1, double op2, Ciphertext *res)
+    void Mul_const(Ciphertext &res, const Ciphertext &op1, double op2)
     {
         Plaintext pt;
-        _evaluator->encoder.encode(op2, op1->chain_index(), op1->scale(), pt);
-        if (res == op1)
+        _evaluator->encoder.encode(op2, op1.chain_index(), op1.scale(), pt);
+        if (&res == &op1)
         {
-            _evaluator->evaluator.multiply_plain_inplace(*res, pt);
+            _evaluator->evaluator.multiply_plain_inplace(res, pt);
         }
         else
         {
-            _evaluator->evaluator.multiply_plain(*op1, pt, *res);
+            _evaluator->evaluator.multiply_plain(op1, pt, res);
         }
     }
-    void Rotate(const Ciphertext *op1, int step, Ciphertext *res)
+    void Rotate(Ciphertext &res, const Ciphertext &op1, int step)
     {
         if (step < 0)
         {
             step = _slot_count + step;
         }
-        if (res == op1)
+        if (&res == &op1)
         {
-
-            _evaluator->evaluator.rotate_vector_inplace(*res, step, *_rtk);
+            _evaluator->evaluator.rotate_vector_inplace(res, step, *_rtk);
         }
         else
         {
-            _evaluator->evaluator.rotate_vector(*const_cast<Ciphertext *>(op1), step, *_rtk, *res);
+            _evaluator->evaluator.rotate_vector(const_cast<Ciphertext &>(op1), step, *_rtk, res);
         }
     }
 
-    void Rescale(const Ciphertext *op1, Ciphertext *res)
+    void Rescale(Ciphertext &res, const Ciphertext &op1)
     {
-        if (res == op1)
+        if (&res == &op1)
         {
-            _evaluator->evaluator.rescale_to_next_inplace(*res);
+            _evaluator->evaluator.rescale_to_next_inplace(res);
         }
         else
         {
-            _evaluator->evaluator.rescale_to_next(*op1, *res);
+            _evaluator->evaluator.rescale_to_next(op1, res);
         }
     }
 
-    void Mod_switch(const Ciphertext *op1, Ciphertext *res)
+    void Mod_switch(Ciphertext &res, const Ciphertext &op1)
     {
-        if (res == op1)
+        if (&res == &op1)
         {
-            _evaluator->evaluator.mod_switch_to_next_inplace(*res);
+            _evaluator->evaluator.mod_switch_to_next_inplace(res);
         }
         else
         {
-            _evaluator->evaluator.mod_switch_to_inplace(*res, op1->chain_index());
+            _evaluator->evaluator.mod_switch_to_inplace(res, op1.chain_index());
         }
     }
 
-    void Relin(const Ciphertext *op1, Ciphertext *res)
+    void Relin(Ciphertext &res, const Ciphertext &op1)
     {
-        if (res == op1)
+        if (&res == &op1)
         {
-
-            _evaluator->evaluator.relinearize_inplace(*res, *_rlk);
+            _evaluator->evaluator.relinearize_inplace(res, *_rlk);
         }
         else
         {
-            _evaluator->evaluator.relinearize(*op1, *_rlk, *res);
+            _evaluator->evaluator.relinearize(op1, *_rlk, res);
         }
     }
-    void Bootstrap(Ciphertext *op1, Ciphertext *res, int level, int slot)
+    void Bootstrap(Ciphertext &res, Ciphertext &op1, int level, int slot)
     {
-        _evaluator->evaluator.mod_switch_to_inplace(*op1, _num_prime_parts - 1);
+        _evaluator->evaluator.mod_switch_to_inplace(op1, _num_prime_parts - 1);
 
-        switch (slot)
+        int effective_slot = slot;
+        if (effective_slot == 0)
+        {
+            effective_slot = 32768;
+        }
+
+        Ciphertext *bootstrap_input = &op1;
+
+        Ciphertext cyclic_input;
+        bool cyclic_input_used = false;
+        if (effective_slot > 0 && static_cast<uint64_t>(effective_slot) < _slot_count)
+        {
+            cyclic_input = op1;
+            Ciphertext rotated_input = op1;
+            for (uint64_t offset = effective_slot; offset < _slot_count; offset += effective_slot)
+            {
+                Rotate(rotated_input, rotated_input, effective_slot);
+                Add(cyclic_input, rotated_input, cyclic_input);
+            }
+            rotated_input.release();
+            bootstrap_input = &cyclic_input;
+            cyclic_input_used = true;
+        }
+
+        Ciphertext in_place_input;
+        bool in_place_bootstrap = &res == &op1;
+        if (in_place_bootstrap)
+        {
+            in_place_input = *bootstrap_input;
+            bootstrap_input = &in_place_input;
+        }
+
+        res.release();
+        switch (effective_slot)
         {
         case 16384:
-            _bootstrapper_16384->bootstrap_3(*res, *op1);
+            _bootstrapper_16384->bootstrap_real_3(res, *bootstrap_input);
             break;
         case 8192:
-            _bootstrapper_8192->bootstrap_3(*res, *op1);
+            _bootstrapper_8192->bootstrap_real_3(res, *bootstrap_input);
             break;
         case 4096:
-            _bootstrapper_4096->bootstrap_3(*res, *op1);
+            _bootstrapper_4096->bootstrap_real_3(res, *bootstrap_input);
+            break;
+        case 32768:
+            _bootstrapper_32768->bootstrap_real_3(res, *bootstrap_input);
             break;
         default:
-            std::cout<<"Unsupported slot size for bootstrap: (must 16384,8192,4096)" << slot << std::endl;
+            IS_TRUE(false, "Unsupported slot size for bootstrap");
             break;
+        }
+
+        if (in_place_bootstrap)
+        {
+            in_place_input.release();
+        }
+
+        if (cyclic_input_used)
+        {
+            cyclic_input.release();
         }
 
         int target_level = _num_prime_parts - level;
-        if (level != 0 && target_level > res->chain_index())
+        if (level != 0 && target_level > res.chain_index())
         {
-            _evaluator->evaluator.mod_switch_to_inplace(*res, target_level);
+            _evaluator->evaluator.mod_switch_to_inplace(res, target_level);
         }
     }
-    void Free_ciph(Ciphertext *ct)
+    void Free_cipher(Ciphertext &ct)
     {
-        ct->release();
+        if (ct.size() > 0)
+        {
+            ct.release();
+        }
     }
-    void Free_plain(Plaintext *pt)
+    void Free_plain(Plaintext &pt)
     {
-        pt->release();
+        pt.release();
     }
-    void Free_ciph_array(Ciphertext *ct, size_t size)
+    void Free_ciph_poly(Ciphertext *ct, size_t size)
     {
         for (size_t i = 0; i < size; ++i)
         {
@@ -327,17 +384,28 @@ public:
         EncryptionParameters parms(scheme_type::ckks);
         uint32_t degree = prog_param->_poly_degree;
         parms.set_poly_modulus_degree(degree);
+
+        uint32_t _bts_required_level = 14;
+        uint32_t _bts_remaining_level = prog_param->_mul_depth - 14;
         std::vector<int> bits;
-        bits.push_back(prog_param->_scaling_mod_size);
-        for (uint32_t i = 0; i < prog_param->_mul_depth; ++i)
+        bits.push_back(prog_param->_first_mod_size);
+        for (uint32_t i = 0; i < _bts_remaining_level; ++i)
         {
             bits.push_back(prog_param->_scaling_mod_size);
         }
-
-        bits.push_back(prog_param->_first_mod_size);
+        for (uint32_t i = 0; i < _bts_required_level; ++i)
+        {
+            bits.push_back(prog_param->_first_mod_size);
+        }
+        constexpr size_t special_modulus_size = 4;
+        for (size_t i = 0; i < special_modulus_size; i++)
+        {
+            bits.push_back(prog_param->_first_mod_size);
+        }
         parms.set_coeff_modulus(phantom::arith::CoeffModulus::Create(degree, bits));
         parms.set_secret_key_hamming_weight(192);
-        _num_prime_parts = bits.size();
+        parms.set_special_modulus_size(special_modulus_size);
+        _num_prime_parts = bits.size() - special_modulus_size + 1;
         phantom::arith::sec_level_type sec = phantom::arith::sec_level_type::tc128;
         switch (prog_param->_sec_level)
         {
@@ -379,6 +447,9 @@ public:
         long loge = 10;
 
         int log_slot_count = 15;
+        _bootstrapper_32768 = std::make_unique<Bootstrapper>(
+            loge, 15, log_slot_count, prog_param->_mul_depth, std::pow(2.0, _scaling_mod_size),
+            boundary_K, deg, scale_factor, inverse_deg, _evaluator.get());
         _bootstrapper_16384 = std::make_unique<Bootstrapper>(
             loge, 14, log_slot_count, prog_param->_mul_depth, std::pow(2.0, _scaling_mod_size),
             boundary_K, deg, scale_factor, inverse_deg, _evaluator.get());
@@ -389,6 +460,7 @@ public:
             loge, 12, log_slot_count, prog_param->_mul_depth, std::pow(2.0, _scaling_mod_size),
             boundary_K, deg, scale_factor, inverse_deg, _evaluator.get());
 
+        _bootstrapper_32768->prepare_mod_polynomial();
         _bootstrapper_16384->prepare_mod_polynomial();
         _bootstrapper_8192->prepare_mod_polynomial();
         _bootstrapper_4096->prepare_mod_polynomial();
@@ -400,18 +472,19 @@ public:
             gal_steps_vector.push_back((1 << i));
         }
 
+        _bootstrapper_32768->addLeftRotKeys_Linear_to_vector_3(gal_steps_vector);
         _bootstrapper_16384->addLeftRotKeys_Linear_to_vector_3(gal_steps_vector);
         _bootstrapper_8192->addLeftRotKeys_Linear_to_vector_3(gal_steps_vector);
         _bootstrapper_4096->addLeftRotKeys_Linear_to_vector_3(gal_steps_vector);
 
-        std::cout << "the size of gal_steps_vector is " << gal_steps_vector.size() << std::endl;
         _evaluator->decryptor.create_galois_keys_from_steps(gal_steps_vector, *(_evaluator.get()->galois_keys));
-        std::cout << "gen rot key done " << gal_steps_vector.size() << std::endl;
         // log2(32768) = 15, log2(16384) = 14, log2(8192) = 13, log2(4096) = 12
-         _bootstrapper_16384->slot_vec.push_back(14);
+        _bootstrapper_32768->slot_vec.push_back(15);
+        _bootstrapper_16384->slot_vec.push_back(14);
         _bootstrapper_8192->slot_vec.push_back(13);
         _bootstrapper_4096->slot_vec.push_back(12);
 
+        _bootstrapper_32768->generate_LT_coefficient_3();
         _bootstrapper_16384->generate_LT_coefficient_3();
         _bootstrapper_8192->generate_LT_coefficient_3();
         _bootstrapper_4096->generate_LT_coefficient_3();
@@ -497,12 +570,12 @@ public:
             prog_param->_scaling_mod_size, prog_param->_num_q_parts,
             prog_param->_num_rot_idx, _num_prime_parts);
     }
-    SCALE_T Scale(const Ciphertext *op)
+    SCALE_T Scale(const Ciphertext &op)
     {
-        return (uint64_t)std::log2(op->scale()) / _scaling_mod_size;
+        return (uint64_t)std::log2(op.scale()) / _scaling_mod_size;
     }
 
-    LEVEL_T Level(const Ciphertext *op) { return op->coeff_modulus_size(); }
+    LEVEL_T Level(const Ciphertext &op) { return op.coeff_modulus_size(); }
 
 private:
     PHANTOM_CONTEXT(const PHANTOM_CONTEXT &) = delete;
@@ -556,10 +629,19 @@ void Prepare_context()
     Init_rtlib_timing();
     Io_init();
     PHANTOM_CONTEXT::Init_context();
+    RT_DATA_INFO *data_info = Get_rt_data_info();
+    if (data_info != nullptr)
+    {
+        Pt_mgr_init(data_info->_file_name);
+    }
 }
 
 void Finalize_context()
 {
+    if (Get_rt_data_info() != nullptr)
+    {
+        Pt_mgr_fini();
+    }
     PHANTOM_CONTEXT::Fini_context();
     Io_fini();
 }
@@ -581,7 +663,7 @@ double *Handle_output(const char *name)
 // Encode/Decode API
 void Phantom_set_output_data(const char *name, size_t idx, CIPHER data)
 {
-    PHANTOM_CONTEXT::Context()->Set_output_data(name, idx, data);
+    PHANTOM_CONTEXT::Context()->Set_output_data(name, idx, *data);
 }
 
 CIPHERTEXT Phantom_get_input_data(const char *name, size_t idx)
@@ -592,29 +674,29 @@ CIPHERTEXT Phantom_get_input_data(const char *name, size_t idx)
 void Phantom_encode_float(PLAIN pt, float *input, size_t len, SCALE_T scale,
                           LEVEL_T level)
 {
-    PHANTOM_CONTEXT::Context()->Encode_float(pt, input, len, scale, level);
+    PHANTOM_CONTEXT::Context()->Encode_float(*pt, input, len, scale, level);
 }
 
 void Phantom_decode_float(PLAIN pt, std::vector<double> &output)
 {
-    PHANTOM_CONTEXT::Context()->Decode(pt, output);
+    PHANTOM_CONTEXT::Context()->Decode(*pt, output);
 }
 
 void Phantom_encode_float_cst_lvl(PLAIN pt, float *input, size_t len,
                                   SCALE_T scale, int level)
 {
-    PHANTOM_CONTEXT::Context()->Encode_float_cst_lvl(pt, input, len, scale, level);
+    PHANTOM_CONTEXT::Context()->Encode_float_cst_lvl(*pt, input, len, scale, level);
 }
 void Phantom_encode_float_mask(PLAIN pt, float input, size_t len, SCALE_T scale,
                                LEVEL_T level)
 {
-    PHANTOM_CONTEXT::Context()->Encode_float_mask(pt, input, len, scale, level);
+    PHANTOM_CONTEXT::Context()->Encode_float_mask(*pt, input, len, scale, level);
 }
 
 void Phantom_encode_float_mask_cst_lvl(PLAIN pt, float input, size_t len,
                                        SCALE_T scale, int level)
 {
-    PHANTOM_CONTEXT::Context()->Encode_float_mask_cst_lvl(pt, input, len, scale,
+    PHANTOM_CONTEXT::Context()->Encode_float_mask_cst_lvl(*pt, input, len, scale,
                                                           level);
 }
 
@@ -624,84 +706,84 @@ void Phantom_add_ciph(CIPHER res, CIPHER op1, CIPHER op2)
     if (op1->size() == 0)
     {
         // special handling for accumulation
-        *res = *op2;
+        *res = std::move(*op2);
         return;
     }
 
-    PHANTOM_CONTEXT::Context()->Add(op1, op2, res);
+    PHANTOM_CONTEXT::Context()->Add(*res, *op1, *op2);
 }
 
 void Phantom_add_plain(CIPHER res, CIPHER op1, PLAIN op2)
 {
-    PHANTOM_CONTEXT::Context()->Add(op1, op2, res);
+    PHANTOM_CONTEXT::Context()->Add(*res, *op1, *op2);
 }
 void Phantom_add_const(CIPHER res, CIPHER op1, double op2)
 {
-    PHANTOM_CONTEXT::Context()->Add_const(op1, op2, res);
+    PHANTOM_CONTEXT::Context()->Add_const(*res, *op1, op2);
 }
 void Phantom_mul_ciph(CIPHER res, CIPHER op1, CIPHER op2)
 {
 
-    PHANTOM_CONTEXT::Context()->Mul(op1, op2, res);
+    PHANTOM_CONTEXT::Context()->Mul(*res, *op1, *op2);
 }
 void Phantom_mul_ciph_const(CIPHER res, CIPHER op1, double op2)
 {
-    PHANTOM_CONTEXT::Context()->Mul_const(op1, op2, res);
+    PHANTOM_CONTEXT::Context()->Mul_const(*res, *op1, op2);
 }
 void Phantom_mul_plain(CIPHER res, CIPHER op1, PLAIN op2)
 {
-    PHANTOM_CONTEXT::Context()->Mul(op1, op2, res);
+    PHANTOM_CONTEXT::Context()->Mul(*res, *op1, *op2);
 }
 
 void Phantom_rotate(CIPHER res, CIPHER op, int step)
 {
-    PHANTOM_CONTEXT::Context()->Rotate(op, step, res);
+    PHANTOM_CONTEXT::Context()->Rotate(*res, *op, step);
 }
 
 void Phantom_rescale(CIPHER res, CIPHER op)
 {
-    PHANTOM_CONTEXT::Context()->Rescale(op, res);
+    PHANTOM_CONTEXT::Context()->Rescale(*res, *op);
 }
 
 void Phantom_mod_switch(CIPHER res, CIPHER op)
 {
-    PHANTOM_CONTEXT::Context()->Mod_switch(op, res);
+    PHANTOM_CONTEXT::Context()->Mod_switch(*res, *op);
 }
 
 void Phantom_relin(CIPHER res, CIPHER3 op)
 {
-    PHANTOM_CONTEXT::Context()->Relin(op, res);
+    PHANTOM_CONTEXT::Context()->Relin(*res, *op);
 }
 void Phantom_bootstrap(CIPHER res, CIPHER op, int level, int slot)
 {
-    PHANTOM_CONTEXT::Context()->Bootstrap(op, res, level, slot);
+    PHANTOM_CONTEXT::Context()->Bootstrap(*res, *op, level, slot);
 }
 
-void Phantom_free_ciph(CIPHER ct)
+void Phantom_free_cipher(CIPHER ct)
 {
-    PHANTOM_CONTEXT::Context()->Free_ciph(ct);
+    PHANTOM_CONTEXT::Context()->Free_cipher(*ct);
 }
 void Phantom_free_plain(PLAIN pt)
 {
-    PHANTOM_CONTEXT::Context()->Free_plain(pt);
+    PHANTOM_CONTEXT::Context()->Free_plain(*pt);
 }
-void Phantom_free_ciph_array(CIPHER ct, size_t size)
+void Phantom_free_ciph_poly(CIPHER ct, size_t size)
 {
-    PHANTOM_CONTEXT::Context()->Free_ciph_array(ct, size);
+    PHANTOM_CONTEXT::Context()->Free_ciph_poly(ct, size);
 }
 void Phantom_copy(CIPHER res, CIPHER op) { *res = *op; }
 
 void Phantom_zero(CIPHER res) { res->zero_ciph(); }
 
-SCALE_T Phantom_scale(CIPHER res) { return PHANTOM_CONTEXT::Context()->Scale(res); }
+SCALE_T Phantom_scale(CIPHER res) { return PHANTOM_CONTEXT::Context()->Scale(*res); }
 
-LEVEL_T Phantom_level(CIPHER res) { return PHANTOM_CONTEXT::Context()->Level(res); }
+LEVEL_T Phantom_level(CIPHER res) { return PHANTOM_CONTEXT::Context()->Level(*res); }
 
 // Debug API
 void Dump_ciph(CIPHER ct, size_t start, size_t len)
 {
     std::vector<double> vec;
-    PHANTOM_CONTEXT::Context()->Decrypt(ct, vec);
+    PHANTOM_CONTEXT::Context()->Decrypt(*ct, vec);
     size_t max = std::min(vec.size(), start + len);
     for (size_t i = start; i < max; ++i)
     {
@@ -713,7 +795,7 @@ void Dump_ciph(CIPHER ct, size_t start, size_t len)
 void Dump_plain(PLAIN pt, size_t start, size_t len)
 {
     std::vector<double> vec;
-    PHANTOM_CONTEXT::Context()->Decode(pt, vec);
+    PHANTOM_CONTEXT::Context()->Decode(*pt, vec);
     size_t max = std::min(vec.size(), start + len);
     for (size_t i = start; i < max; ++i)
     {
@@ -737,7 +819,7 @@ void Dump_plain_msg(const char *name, PLAIN pt, uint32_t len)
 double *Get_msg(CIPHER ct)
 {
     std::vector<double> vec;
-    PHANTOM_CONTEXT::Context()->Decrypt(ct, vec);
+    PHANTOM_CONTEXT::Context()->Decrypt(*ct, vec);
     double *msg = (double *)malloc(sizeof(double) * vec.size());
     memcpy(msg, vec.data(), sizeof(double) * vec.size());
     return msg;
@@ -746,7 +828,7 @@ double *Get_msg(CIPHER ct)
 double *Get_msg_from_plain(PLAIN pt)
 {
     std::vector<double> vec;
-    PHANTOM_CONTEXT::Context()->Decode(pt, vec);
+    PHANTOM_CONTEXT::Context()->Decode(*pt, vec);
     double *msg = (double *)malloc(sizeof(double) * vec.size());
     memcpy(msg, vec.data(), sizeof(double) * vec.size());
     return msg;

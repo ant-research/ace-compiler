@@ -1,0 +1,17 @@
+# ACE-FHE Common Python Dependencies
+# (CUDA-independent, shared across all dev images)
+
+scikit-build-core
+pybind11
+cmake
+ninja
+PyYAML
+pytest
+pytest-benchmark
+pytest-regressions
+pandas
+ruff
+pre-commit
+
+onnx
+onnxscript

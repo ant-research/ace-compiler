@@ -7,21 +7,18 @@
 
 # Build external Phantom project dependent function
 function(build_external_phantom)
-  
-  set(PHANTOM_URL      "https://git:$ENV{CI_TOKEN}@code.alipay.com/zhanggongliang.zgl/phantom-fhe.git")
-  set(PHANTOM_URL_SSH  "git@code.alipay.com:zhanggongliang.zgl/phantom-fhe.git")
-  if(EXTERNAL_URL_SSH)
-    set(REPO_PHANTOM_URL ${PHANTOM_URL_SSH})
-  else()
-    set(REPO_PHANTOM_URL ${PHANTOM_URL})
+
+  # Default: upstream GitHub; internal override via .aci/
+  if(NOT DEFINED RT_PHANTOM_URL)
+    set(RT_PHANTOM_URL "https://github.com/zggl404/phantom-fhe.git")
   endif()
 
-  message(STATUS "Cloning External Repository   : ${REPO_PHANTOM_URL}")
+  message(STATUS "Cloning External Repository   : ${RT_PHANTOM_URL}")
 
   include(ExternalProject)
   ExternalProject_Add(
     phantom_external
-    GIT_REPOSITORY ${REPO_PHANTOM_URL}
+    GIT_REPOSITORY ${RT_PHANTOM_URL}
     GIT_TAG master
     PREFIX ${CMAKE_BINARY_DIR}/external
     UPDATE_COMMAND ""
@@ -51,7 +48,5 @@ function(build_external_phantom)
   set(phantom phantom PARENT_SCOPE)
   set(ENV{PHANTOM_INCLUDE_DIR} ${SOURCE_DIR}/include)
   set(PHANTOM_LIBS phantom ${NTL_LIBRARY} ${GMPXX_LIBRARY} ${GMP_LIBRARY} PARENT_SCOPE)
-  
-  
-endfunction()
 
+endfunction()

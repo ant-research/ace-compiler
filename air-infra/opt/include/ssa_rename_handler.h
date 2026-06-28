@@ -43,6 +43,11 @@ public:
       addr_child = addr_child->Child(0);
     }
     AIR_ASSERT(addr_child->Opcode() == air::core::OPC_ARRAY);
+
+    for (uint32_t i = 1; i < addr_child->Num_child(); ++i) {
+      visitor->template Visit<RETV>(addr_child->Child(i));
+    }
+
     air::base::NODE_PTR base = addr_child->Child(0);
     if (base->Opcode() == air::core::OPC_LDCA) {
       return RETV();

@@ -618,12 +618,12 @@ GLOB_SCOPE::New_str(const char* str) {
 
   PTR_FROM_DATA<char> ptr          = _str_tab->Allocate_array<char>(len + 1);
   STR_DATA*           str_data_ptr = (STR_DATA*)ptr.Addr();
-  char* new_str = const_cast<char*>(str_data_ptr->Str());
+  char*               new_str      = const_cast<char*>(str_data_ptr->Str());
   memcpy(new_str, str, len + 1);
   new_str[len] = '\0';
 
-  STR_PTR str_ptr = STR_PTR(STR(*this, Reinterpret_cast<STR_DATA_PTR>(ptr)));
-  _str_map[new_str]   = str_ptr->Id();
+  STR_PTR str_ptr   = STR_PTR(STR(*this, Reinterpret_cast<STR_DATA_PTR>(ptr)));
+  _str_map[new_str] = str_ptr->Id();
   return str_ptr;
 }
 
@@ -1476,13 +1476,17 @@ void GLOB_SCOPE::Print_st(std::ostream& os) const {
   }
 }
 
-void GLOB_SCOPE::Print_ir(std::ostream& os, bool rot) const {
-  FUNC_SCOPE_ITER func_scope_iter = Begin_func_scope();
-  FUNC_SCOPE_ITER end_iter        = End_func_scope();
+void GLOB_SCOPE::Print_ir(std::ostream& os, bool rot) const { os << Dump(rot); }
+
+std::string GLOB_SCOPE::Dump(bool rot) const {
+  std::stringstream ss;
+  FUNC_SCOPE_ITER   func_scope_iter = Begin_func_scope();
+  FUNC_SCOPE_ITER   end_iter        = End_func_scope();
   for (; func_scope_iter != end_iter; ++func_scope_iter) {
-    (*func_scope_iter).Print(os, rot);
-    os << std::endl;
+    (*func_scope_iter).Print(ss, rot);
+    ss << std::endl;
   }
+  return ss.str();
 }
 
 void GLOB_SCOPE::Print(std::ostream& os, bool rot) const {

@@ -34,7 +34,7 @@ typedef enum {
   LIB_SEAL,      //!< Using SEAL library
   LIB_OPENFHE,   //!< Using OpenFHE library
   LIB_PHANTOM,   //!< Using Phantom library
-  LIB_HYPERFHE,  //!< Using HyperFHE library
+  LIB_ACE,  	  //!< Using ACE GPU library
 } LIB_PROV;
 
 //! @brief Describe data type in seperated weight data file

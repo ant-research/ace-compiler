@@ -1,0 +1,155 @@
+#=============================================================================
+#
+# Copyright (c) Ant Group Co., Ltd
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+#
+#=============================================================================
+enable_language(CUDA)
+
+include(${CMAKE_CURRENT_SOURCE_DIR}/../cmake/modules/ace_library.cmake)
+
+option(ENABLE_PERFORMANCE_STATS "Enable performance statistics" ON)
+
+if(ENABLE_PERFORMANCE_STATS)
+    add_definitions(-DENABLE_PERFORMANCE_STATS)
+    message(STATUS "ENABLE_PERFORMANCE_STATS is: ${ENABLE_PERFORMANCE_STATS}")
+endif()
+
+
+build_external_ace_library()
+
+file(GLOB_RECURSE RT_ACE_LIBRARY_SRC_FILES CONFIGURE_DEPENDS src/*.cu)
+
+message(STATUS "Found CUDA files for ace: ${RT_ACE_LIBRARY_SRC_FILES}")
+
+set(BUILD_RMM_INCLUDE_DIR "${CMAKE_BINARY_DIR}/external/src/staging/include")
+include_directories(BEFORE SYSTEM "${BUILD_RMM_INCLUDE_DIR}")
+
+set(RT_ACE_LIBRARY_INCLUDE_DIRS "")
+list(APPEND RT_ACE_LIBRARY_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include")
+list(APPEND RT_ACE_LIBRARY_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/include")
+list(APPEND RT_ACE_LIBRARY_INCLUDE_DIRS "${ACE_LIBRARY_INCLUDE_DIR}")
+list(APPEND RT_ACE_LIBRARY_INCLUDE_DIRS "${CUDA_INCLUDE_DIRS}")
+include_directories(${RT_ACE_LIBRARY_INCLUDE_DIRS})
+set(RT_ACE_LIBRARY_INCLUDE_DIRS "${RT_ACE_LIBRARY_INCLUDE_DIRS}" CACHE INTERNAL "")
+
+set(RT_ACE_LIBRARY_COMPILE_DEFS
+    ACE_LIBRARY_ENABLE_BTS=1
+    LIBCUDACXX_ENABLE_EXPERIMENTAL_MEMORY_RESOURCE
+    CCCL_DISABLE_PDL
+    CUB_DISABLE_NAMESPACE_MAGIC
+    CUB_IGNORE_NAMESPACE_MAGIC_ERROR
+    THRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_CUDA
+    THRUST_DISABLE_ABI_NAMESPACE
+    THRUST_HOST_SYSTEM=THRUST_HOST_SYSTEM_CPP
+    THRUST_IGNORE_ABI_NAMESPACE_ERROR
+)
+if(ACE_LIBRARY_DATA_TYPE STREQUAL "32")
+  list(APPEND RT_ACE_LIBRARY_COMPILE_DEFS ACE_LIBRARY_32)
+else()
+  list(APPEND RT_ACE_LIBRARY_COMPILE_DEFS __DATA_WORD_SIZE_64__)
+endif()
+
+list(APPEND RT_ACE_LIBRARY_COMPILE_DEFS __NTT_4STEP_MONT__ __ACE_NTT_HAS_MONT__)
+
+set(RT_ACE_LIBRARY_NTT_COMPILE_STRATEGY "${ACE_LIBRARY_NTT_COMPILE_STRATEGY}")
+if(RT_ACE_LIBRARY_NTT_COMPILE_STRATEGY STREQUAL "")
+  set(RT_ACE_LIBRARY_NTT_COMPILE_STRATEGY "MINIMAL")
+endif()
+
+set(RT_ACE_LIBRARY_NTT_BUILD_SHUFFLE OFF)
+if(ACE_LIBRARY_NTT_ENABLE_SHUFFLE STREQUAL "ON")
+  set(RT_ACE_LIBRARY_NTT_BUILD_SHUFFLE ON)
+elseif(ACE_LIBRARY_NTT_ENABLE_SHUFFLE STREQUAL "AUTO" AND
+       (RT_ACE_LIBRARY_NTT_COMPILE_STRATEGY STREQUAL "CUDA_ALL" OR
+        RT_ACE_LIBRARY_NTT_COMPILE_STRATEGY STREQUAL "ALL") AND
+       ACE_LIBRARY_DATA_TYPE STREQUAL "64")
+  set(RT_ACE_LIBRARY_NTT_BUILD_SHUFFLE ON)
+endif()
+
+set(RT_ACE_LIBRARY_NTT_BUILD_TENSOR OFF)
+if(ACE_LIBRARY_NTT_ENABLE_TENSOR STREQUAL "ON")
+  set(RT_ACE_LIBRARY_NTT_BUILD_TENSOR ON)
+elseif(ACE_LIBRARY_NTT_ENABLE_TENSOR STREQUAL "AUTO" AND
+       RT_ACE_LIBRARY_NTT_COMPILE_STRATEGY STREQUAL "ALL")
+  set(RT_ACE_LIBRARY_NTT_BUILD_TENSOR ON)
+endif()
+
+set(RT_ACE_LIBRARY_NTT_BUILD_FP64_TENSOR OFF)
+if(ACE_LIBRARY_NTT_ENABLE_FP64_TENSOR STREQUAL "ON")
+  set(RT_ACE_LIBRARY_NTT_BUILD_FP64_TENSOR ON)
+elseif(ACE_LIBRARY_NTT_ENABLE_FP64_TENSOR STREQUAL "AUTO" AND
+       RT_ACE_LIBRARY_NTT_COMPILE_STRATEGY STREQUAL "ALL")
+  set(RT_ACE_LIBRARY_NTT_BUILD_FP64_TENSOR ON)
+endif()
+
+if(RT_ACE_LIBRARY_NTT_BUILD_SHUFFLE)
+  list(APPEND RT_ACE_LIBRARY_COMPILE_DEFS __ACE_NTT_HAS_SHUFFLE__)
+endif()
+if(RT_ACE_LIBRARY_NTT_BUILD_TENSOR)
+  list(APPEND RT_ACE_LIBRARY_COMPILE_DEFS __ACE_NTT_HAS_TENSOR__)
+endif()
+if(RT_ACE_LIBRARY_NTT_BUILD_FP64_TENSOR)
+  list(APPEND RT_ACE_LIBRARY_COMPILE_DEFS __ACE_NTT_HAS_FP64_TENSOR__)
+endif()
+
+add_library(fhert_ace_obj OBJECT ${RT_ACE_LIBRARY_SRC_FILES})
+target_compile_definitions(fhert_ace_obj PRIVATE ${RT_ACE_LIBRARY_COMPILE_DEFS})
+set_property(TARGET fhert_ace_obj PROPERTY POSITION_INDEPENDENT_CODE 1)
+set_target_properties(fhert_ace_obj PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+add_dependencies(fhert_ace_obj ace_library_external)
+
+if(BUILD_STATIC)
+  add_library(FHErt_ace STATIC $<TARGET_OBJECTS:fhert_ace_obj>)
+  set_property(TARGET FHErt_ace PROPERTY RUNTIME_OUTPUT_DIRECTORY
+               ${CMAKE_BINARY_DIR}/rtlib/lib)
+  add_dependencies(FHErt_ace rtlib_depend)
+  install(TARGETS FHErt_ace EXPORT FHETargets DESTINATION rtlib/lib)
+endif()
+
+add_custom_target(fhert_ace_all)
+
+if(BUILD_STATIC)
+  set(FHERT_ACE_LIB ${FHERT_ACE_LIB} PUBLIC
+    FHErt_ace
+    ${ACE_LIBRARY_LIBS}
+    FHErt_common
+    cufft
+    curand
+    cudart
+  )
+  add_dependencies(fhert_ace_all FHErt_ace)
+endif()
+
+set(FHERT_ACE_EGAPP "")
+if(RTLIB_BUILD_EXAMPLE)
+  file(GLOB FHERT_ACE_EXAMPLE_SRC_FILES CONFIGURE_DEPENDS example/*.cu)
+  foreach(app ${FHERT_ACE_EXAMPLE_SRC_FILES})
+    get_filename_component(exe ${app} NAME_WE)
+    add_executable(${exe} ${app})
+
+    target_compile_definitions(${exe} PRIVATE
+        ${RT_ACE_LIBRARY_COMPILE_DEFS}
+    )
+
+    set_target_properties(${exe} PROPERTIES LINKER_LANGUAGE CUDA)
+    set_target_properties(${exe} PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+
+    set_property(TARGET ${exe} PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/example)
+    set(FHERT_ACE_EGAPP ${FHERT_ACE_EGAPP} ${exe})
+    target_link_libraries(${exe}
+      ${FHERT_ACE_LIB}
+      ${NN_LIBS}
+      ${CUDA_LIBRARIES}
+    )
+  endforeach()
+
+  add_custom_target(fhert_ace_example)
+  add_dependencies(fhert_ace_example ${FHERT_ACE_EGAPP})
+  add_dependencies(fhert_ace_all fhert_ace_example)
+endif()
+
+if(RTLIB_INSTALL_APP)
+  install(TARGETS ${FHERT_ACE_UTAPP} RUNTIME DESTINATION unittest)
+  install(TARGETS ${FHERT_ACE_EGAPP} RUNTIME DESTINATION example)
+endif()

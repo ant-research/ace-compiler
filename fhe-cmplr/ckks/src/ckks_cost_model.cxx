@@ -93,7 +93,10 @@ const static CKKS_OP_COST Upscale = CKKS_OP_COST(OPC_UPSCALE, {});
 
 //! @brief Fhe_op_cost_deg65536 provides a summary of the cost of FHE operations
 //! at polynomial degree N= 2^16.
+//! `ROTATE_BATCH` currently reuses the single-rotate latency model so the
+//! opcode-indexed table stays aligned with `CKKS_OPERATOR`.
 const static std::vector<const CKKS_OP_COST*> Fhe_op_cost_deg65536 = {
+    &Rotate_deg65536,
     &Rotate_deg65536,
     &Add_deg65536,
     &Sub,
@@ -183,6 +186,7 @@ const static CKKS_OP_COST Bootstrap_deg131072 = CKKS_OP_COST(
 //! @brief Fhe_op_cost_deg131072 provides a summary of the cost of FHE
 //! operations at polynomial degree N= 2^17.
 const static std::vector<const CKKS_OP_COST*> Fhe_op_cost_deg131072 = {
+    &Rotate_deg131072,
     &Rotate_deg131072,
     &Add_deg131072,
     &Sub,

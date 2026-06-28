@@ -18,6 +18,7 @@
 #include "fhe/core/rt_timing.h"
 #include "fhe/poly/ir2c_ctx.h"
 #include "fhe/poly/opcode.h"
+#include "nn/core/attr.h"
 #include "nn/core/data_scheme.h"
 
 namespace fhe {
@@ -196,6 +197,30 @@ public:
       ctx << "))";
       return;
     }
+    if (node->Addr_datum()->Type()->Is_array() &&
+        val->Opcode() == fhe::ckks::OPC_ROTATE_BATCH) {
+      air::base::TYPE_PTR elem_type =
+          node->Addr_datum()->Type()->Cast_to_arr()->Elem_type();
+      AIR_ASSERT(ctx.Is_cipher_type(elem_type->Id()));
+      uint32_t   rot_cnt = 0;
+      const int* rot_idx = val->Attr<int>(nn::core::ATTR::RNUM, &rot_cnt);
+      AIR_ASSERT(rot_idx != nullptr && rot_cnt > 0);
+      ctx << "{ static const int32_t _rot_batch_" << node->Id().Value()
+          << "[] = {";
+      for (uint32_t i = 0; i < rot_cnt; ++i) {
+        if (i > 0) {
+          ctx << ", ";
+        }
+        ctx << rot_idx[i];
+      }
+      ctx << "}; Rotate_batch_ciph(";
+      ctx.Emit_var(node);
+      ctx << ", ";
+      visitor->template Visit<RETV>(val->Child(0));
+      ctx << ", _rot_batch_" << node->Id().Value() << ", " << rot_cnt
+          << "); }";
+      return;
+    }
     if (ctx.Is_cipher_type(node->Addr_datum()->Type_id())) {
       air::base::OPCODE opc = val->Opcode();
       switch (opc) {
@@ -215,14 +240,75 @@ public:
           return;
         }
         case ckks::OPC_BOOTSTRAP: {
-          ctx << "Bootstrap(&";
-          ctx.Emit_var(node);
-          ctx << ", ";
-          visitor->template Visit<RETV>(val->Child(0));
-
           const uint32_t* mul_lev =
               val->Attr<uint32_t>(fhe::core::FHE_ATTR_KIND::LEVEL);
-          ctx << ", " << (mul_lev == nullptr ? 0 : *mul_lev) << ")";
+          const uint32_t* slot = val->Attr<uint32_t>(nn::core::ATTR::SLOT);
+          if (ctx.Provider() == core::PROVIDER::ANT) {
+            ctx << "Eval_bootstrap_ciph(&";
+            ctx.Emit_var(node);
+            ctx << ", ";
+            visitor->template Visit<RETV>(val->Child(0));
+            ctx << ", " << (mul_lev == nullptr ? 0 : *mul_lev);
+            ctx << ", " << (slot == nullptr ? 0 : *slot);
+          } else {
+            ctx << "Bootstrap(&";
+            ctx.Emit_var(node);
+            ctx << ", ";
+            visitor->template Visit<RETV>(val->Child(0));
+            ctx << ", " << (mul_lev == nullptr ? 0 : *mul_lev);
+          }
+          ctx << ")";
+          return;
+        }
+        case ckks::OPC_BOOTSTRAP_COEFFS_TO_SLOTS: {
+          const uint32_t* slot = val->Attr<uint32_t>(nn::core::ATTR::SLOT);
+          if (ctx.Provider() == core::PROVIDER::ANT) {
+            ctx << "Eval_bootstrap_coeffs_to_slots_ciph(&";
+            ctx.Emit_var(node);
+            ctx << ", ";
+            visitor->template Visit<RETV>(val->Child(0));
+            ctx << ", " << (slot == nullptr ? 0 : *slot) << ")";
+          } else {
+            ctx << "Bootstrap(&";
+            ctx.Emit_var(node);
+            ctx << ", ";
+            visitor->template Visit<RETV>(val->Child(0));
+            ctx << ", 0)";
+          }
+          return;
+        }
+        case ckks::OPC_BOOTSTRAP_EVAL_MOD: {
+          const uint32_t* slot = val->Attr<uint32_t>(nn::core::ATTR::SLOT);
+          if (ctx.Provider() == core::PROVIDER::ANT) {
+            ctx << "Eval_bootstrap_eval_mod_ciph(&";
+            ctx.Emit_var(node);
+            ctx << ", ";
+            visitor->template Visit<RETV>(val->Child(0));
+            ctx << ", " << (slot == nullptr ? 0 : *slot) << ")";
+          } else {
+            ctx << "Bootstrap(&";
+            ctx.Emit_var(node);
+            ctx << ", ";
+            visitor->template Visit<RETV>(val->Child(0));
+            ctx << ", 0)";
+          }
+          return;
+        }
+        case ckks::OPC_BOOTSTRAP_SLOTS_TO_COEFFS: {
+          const uint32_t* slot = val->Attr<uint32_t>(nn::core::ATTR::SLOT);
+          if (ctx.Provider() == core::PROVIDER::ANT) {
+            ctx << "Eval_bootstrap_slots_to_coeffs_ciph(&";
+            ctx.Emit_var(node);
+            ctx << ", ";
+            visitor->template Visit<RETV>(val->Child(0));
+            ctx << ", " << (slot == nullptr ? 0 : *slot) << ")";
+          } else {
+            ctx << "Bootstrap(&";
+            ctx.Emit_var(node);
+            ctx << ", ";
+            visitor->template Visit<RETV>(val->Child(0));
+            ctx << ", 0)";
+          }
           return;
         }
         default:
@@ -245,17 +331,71 @@ public:
     air::base::NODE_PTR val = node->Child(0);
     if (ctx.Is_cipher_type(val->Rtype_id())) {
       if (val->Opcode() == fhe::ckks::OPC_BOOTSTRAP) {
-        ctx << "Bootstrap(&";
-        ctx.Emit_preg_id(node->Preg_id());
-        ctx << ", ";
-        visitor->template Visit<RETV>(val->Child(0));
-
         const uint32_t* mul_lev =
             val->Attr<uint32_t>(fhe::core::FHE_ATTR_KIND::LEVEL);
-        if (mul_lev == nullptr) {
-          ctx << ", " << 0;
+        const uint32_t* slot = val->Attr<uint32_t>(nn::core::ATTR::SLOT);
+        if (ctx.Provider() == core::PROVIDER::ANT) {
+          ctx << "Eval_bootstrap_ciph(&";
+          ctx.Emit_preg_id(node->Preg_id());
+          ctx << ", ";
+          visitor->template Visit<RETV>(val->Child(0));
+          ctx << ", " << (mul_lev == nullptr ? 0 : *mul_lev);
+          ctx << ", " << (slot == nullptr ? 0 : *slot);
         } else {
-          ctx << ", " << *mul_lev;
+          ctx << "Bootstrap(&";
+          ctx.Emit_preg_id(node->Preg_id());
+          ctx << ", ";
+          visitor->template Visit<RETV>(val->Child(0));
+          if (mul_lev == nullptr) {
+            ctx << ", " << 0;
+          } else {
+            ctx << ", " << *mul_lev;
+          }
+        }
+      } else if (val->Opcode() == fhe::ckks::OPC_BOOTSTRAP_COEFFS_TO_SLOTS) {
+        const uint32_t* slot = val->Attr<uint32_t>(nn::core::ATTR::SLOT);
+        if (ctx.Provider() == core::PROVIDER::ANT) {
+          ctx << "Eval_bootstrap_coeffs_to_slots_ciph(&";
+          ctx.Emit_preg_id(node->Preg_id());
+          ctx << ", ";
+          visitor->template Visit<RETV>(val->Child(0));
+          ctx << ", " << (slot == nullptr ? 0 : *slot);
+        } else {
+          ctx << "Bootstrap(&";
+          ctx.Emit_preg_id(node->Preg_id());
+          ctx << ", ";
+          visitor->template Visit<RETV>(val->Child(0));
+          ctx << ", 0";
+        }
+      } else if (val->Opcode() == fhe::ckks::OPC_BOOTSTRAP_EVAL_MOD) {
+        const uint32_t* slot = val->Attr<uint32_t>(nn::core::ATTR::SLOT);
+        if (ctx.Provider() == core::PROVIDER::ANT) {
+          ctx << "Eval_bootstrap_eval_mod_ciph(&";
+          ctx.Emit_preg_id(node->Preg_id());
+          ctx << ", ";
+          visitor->template Visit<RETV>(val->Child(0));
+          ctx << ", " << (slot == nullptr ? 0 : *slot);
+        } else {
+          ctx << "Bootstrap(&";
+          ctx.Emit_preg_id(node->Preg_id());
+          ctx << ", ";
+          visitor->template Visit<RETV>(val->Child(0));
+          ctx << ", 0";
+        }
+      } else if (val->Opcode() == fhe::ckks::OPC_BOOTSTRAP_SLOTS_TO_COEFFS) {
+        const uint32_t* slot = val->Attr<uint32_t>(nn::core::ATTR::SLOT);
+        if (ctx.Provider() == core::PROVIDER::ANT) {
+          ctx << "Eval_bootstrap_slots_to_coeffs_ciph(&";
+          ctx.Emit_preg_id(node->Preg_id());
+          ctx << ", ";
+          visitor->template Visit<RETV>(val->Child(0));
+          ctx << ", " << (slot == nullptr ? 0 : *slot);
+        } else {
+          ctx << "Bootstrap(&";
+          ctx.Emit_preg_id(node->Preg_id());
+          ctx << ", ";
+          visitor->template Visit<RETV>(val->Child(0));
+          ctx << ", 0";
         }
       } else {
         ctx << "Copy_ciph(&";

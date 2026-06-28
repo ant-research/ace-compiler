@@ -1,0 +1,84 @@
+# ============================================================
+# ACE Code Check CI
+#
+# Runs on pull requests to master to enforce code quality.
+# This is the hard gate - PRs must pass lint before merge.
+#
+# Checks:
+#   - ruff lint (Python)
+#   - ruff format (Python)
+#   - clang-format (C/C++/CUDA)
+#   - pre-commit hooks (trailing whitespace, YAML, etc.)
+#
+# Local usage:
+#   make lint          # Check all
+#   make lint-fix      # Auto-fix Python
+#   pre-commit run -a  # Run all pre-commit hooks
+# ============================================================
+
+name: Lint
+
+on:
+  pull_request:
+    branches:
+      - master
+      - 'release/*'
+  push:
+    branches:
+      - master
+
+jobs:
+  lint-python:
+    name: Python (ruff)
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install ruff
+        run: pip install ruff
+
+      - name: Ruff lint
+        run: ruff check fhe_dsl/python/ tests/ scripts/ examples/ benchmark/
+
+      - name: Ruff format check
+        run: ruff format --check fhe_dsl/python/ tests/ examples/ benchmark/
+
+  lint-cpp:
+    name: C/C++ (clang-format)
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install clang-format
+        run: sudo apt-get update && sudo apt-get install -y clang-format-14
+
+      - name: Check C/C++ formatting
+        run: |
+          files=$(find fhe_dsl/csrc -name '*.h' -o -name '*.cxx' -o -name '*.cpp' -o -name '*.cu' -o -name '*.cuh' 2>/dev/null || true)
+          if [ -n "$files" ]; then
+            echo "Checking formatting for:"
+            echo "$files"
+            echo "$files" | xargs clang-format-14 --dry-run --Werror
+          else
+            echo "No C/C++ source files found in fhe_dsl/csrc/"
+          fi
+
+  pre-commit:
+    name: Pre-commit hooks
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install pre-commit
+        run: pip install pre-commit
+
+      - name: Run pre-commit
+        run: pre-commit run --all-files

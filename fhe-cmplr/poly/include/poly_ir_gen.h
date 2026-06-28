@@ -291,6 +291,20 @@ public:
                                     air::base::NODE_PTR    opnd2,
                                     const air::base::SPOS& spos);
 
+  /**
+   * @brief Create hardware modsub node
+   *
+   * @param opnd0 operand 0
+   * @param opnd1 Operand 1
+   * @param opnd2 Operand 2 (modulus)
+   * @param spos Source position
+   * @return air::base::NODE_PTR
+   */
+  air::base::NODE_PTR New_hw_modsub(air::base::NODE_PTR    opnd0,
+                                    air::base::NODE_PTR    opnd1,
+                                    air::base::NODE_PTR    opnd2,
+                                    const air::base::SPOS& spos);
+
   //! @brief Create hardware modmul node
   //! @param opnd0 operand 0
   //! @param opnd1 Operand 1

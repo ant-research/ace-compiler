@@ -596,6 +596,15 @@ POLY Mod_down_rescale(POLY res, POLY poly) {
   return res;
 }
 
+void Chk_level(POLY res, POLY p0, POLY p1) {
+  if (Poly_level(res) != Poly_level(p0) || Num_p(res) != Num_p(p0)) {
+    printf("level not match\n");
+  }
+  if (p1 && (Poly_level(res) != Poly_level(p1) || Num_p(res) != Num_p(p1))) {
+    printf("level not match\n");
+  }
+}
+
 void Conv_poly2ntt_inplace(POLY poly) {
   FMT_ASSERT(!Is_ntt(poly), "already ntt form");
   CRT_CONTEXT* crt         = Get_crt_context();
@@ -1102,9 +1111,12 @@ void Transform_values_from_level0(POLY res, POLY poly) {
   // fill up the rest data with proper moduli
   MODULUS* q_modulus = Q_modulus();
   int64_t  old_mod   = Get_mod_val(q_modulus);
+  FMT_ASSERT(old_mod != 0, "Transform_values_from_level0: old_mod is zero");
   for (size_t i = 1; i < Poly_level(res); i++) {
     q_modulus++;
     int64_t new_mod = Get_mod_val(q_modulus);
+    FMT_ASSERT(new_mod != 0,
+               "Transform_values_from_level0: new_mod is zero");
     for (size_t val_idx = 0; val_idx < degree; val_idx++) {
       *res_data = Switch_modulus(Get_coeff_at(poly, val_idx), old_mod, new_mod);
       res_data++;
@@ -1116,20 +1128,22 @@ void Transform_value_to_rns_poly(POLY poly, VALUE_LIST* value,
                                  bool without_mod) {
   CRT_CONTEXT* crt   = Get_crt_context();
   size_t       q_cnt = Poly_level(poly);
+  size_t       p_cnt = Num_p(poly);
   IS_TRUE(LIST_LEN(value) == Get_rdgree(poly) && q_cnt <= Get_crt_num_q(crt),
           "length not match");
   Transform_to_dcrt(Get_poly_coeffs(poly), Get_poly_len(poly), value, q_cnt,
-                    Num_p(poly) ? true : false, without_mod, crt);
+                    p_cnt, without_mod, crt);
 }
 
 void Reconstruct_rns_poly_to_value(VALUE_LIST* res, POLY poly) {
   IS_TRUE(!Is_ntt(poly), "rns_poly should be intt-form");
   size_t       q_cnt = Poly_level(poly);
+  size_t       p_cnt = Num_p(poly);
   CRT_CONTEXT* crt   = Get_crt_context();
   IS_TRUE(LIST_LEN(res) == Get_rdgree(poly) && q_cnt <= Get_crt_num_q(crt),
           "length not match");
   Reconstruct_from_dcrt(res, Get_poly_coeffs(poly), Get_poly_len(poly), q_cnt,
-                        Num_p(poly) ? true : false, crt);
+                        p_cnt, crt);
 }
 
 void Sample_uniform_poly(POLY poly) {

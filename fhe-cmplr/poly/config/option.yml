@@ -53,7 +53,7 @@ group:
       value_maker: "="
     - name: fuse_mdown_rescale
       abbrev_name: fmr
-      description: Fuse moddown and rescale operation
+      description: Fuse moddown and rescale operation, eliminating intermediate NTT round-trip
     - name: fuse_mul_encode
       abbrev_name: fme
       description: Fuse multiply and encode operation
@@ -75,6 +75,12 @@ group:
       kind: int
       value: 0
       value_maker: "="
+    - name: ssapre
+      abbrev_name: pre
+      description: Run SSAPRE to eliminate redundant polynomial operations across paths
+    - name: normalize_order
+      abbrev_name: norm
+      description: Canonicalize commutative operands (add/mul) so SSAPRE finds more redundancies
     - name: prop_attr
       abbrev_name: patt
       description: Propagate attribute

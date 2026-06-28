@@ -39,6 +39,7 @@ public:
 
   void Set_next(MU_NODE_ID next) { _next = next; }
   void Set_opnd(SSA_VER_ID opnd) { _opnd = opnd; }
+  void Set_dead() { _attr._dead = 1; }
 
 private:
   MU_NODE_ATTR _attr;  //!< MU_NODE attributes
@@ -66,6 +67,7 @@ public:
 
   void Set_next(MU_NODE_ID next) { _data->Set_next(next); }
   void Set_opnd(SSA_VER_ID res) { _data->Set_opnd(res); }
+  void Set_dead() { _data->Set_dead(); }
 
   void        Print(std::ostream& os, uint32_t indent = 0) const;
   void        Print() const;
@@ -111,6 +113,7 @@ public:
   void Set_next(CHI_NODE_ID next) { _next = next; }
   void Set_result(SSA_VER_ID res) { _res = res; }
   void Set_opnd(SSA_VER_ID opnd) { _opnd = opnd; }
+  void Set_dead() { _attr._dead = 1; }
   void Set_def_stmt(base::STMT_ID def_stmt) {
     AIR_ASSERT_MSG(def_stmt != base::STMT_ID(), "Set def_stmt with invalid ID");
     _def_stmt = def_stmt;
@@ -154,6 +157,7 @@ public:
   void Set_result(SSA_VER_ID res) { _data->Set_result(res); }
   void Set_opnd(SSA_VER_ID opnd) { _data->Set_opnd(opnd); }
   void Set_def_stmt(base::STMT_ID def_stmt) { _data->Set_def_stmt(def_stmt); }
+  void Set_dead() { _data->Set_dead(); }
 
   void        Print(std::ostream& os, uint32_t indent = 0) const;
   void        Print() const;
@@ -206,6 +210,7 @@ public:
     AIR_ASSERT(idx < _size);
     _opnd[idx] = opnd;
   }
+  void Set_dead() { _attr._dead = 1; }
   void Set_def_stmt(base::STMT_ID def_stmt) {
     AIR_ASSERT_MSG(def_stmt != base::STMT_ID(), "Set def_stmt with invalid ID");
     _def_stmt = def_stmt;
@@ -251,6 +256,7 @@ public:
   void Set_result(SSA_VER_ID res) { _data->Set_result(res); }
   void Set_opnd(uint32_t idx, SSA_VER_ID opnd) { _data->Set_opnd(idx, opnd); }
   void Set_def_stmt(base::STMT_ID def_stmt) { _data->Set_def_stmt(def_stmt); }
+  void Set_dead() { _data->Set_dead(); }
   void Print(std::ostream& os, uint32_t indent = 0) const;
   void Print() const;
   std::string To_str() const;

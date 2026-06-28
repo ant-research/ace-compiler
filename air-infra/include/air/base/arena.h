@@ -76,6 +76,12 @@ public:
 
   void* Find(uint32_t base) const { return _core.Find(base); }
 
+  size_t Item_size(uint32_t id) const { return _core.Item_size(id); }
+
+  void Set_item(uint32_t id, void* ptr, size_t sz) {
+    _core.Set_item(id, ptr, sz);
+  }
+
   size_t Size() const { return _core.Size(); }
 
   size_t Mem_size() const { return _core.Mem_size(); }
@@ -83,6 +89,8 @@ public:
   void Adjust_addr(uint32_t base_id, size_t ofst) {
     _core.Adjust_addr(base_id, ofst);
   }
+
+  void Resize(uint32_t num) { _core.Resize(num); }
 
   void Free(const PTR_FROM_DATA<void>& ptr, size_t sz);
 

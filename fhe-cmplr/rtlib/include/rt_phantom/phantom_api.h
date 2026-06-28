@@ -9,7 +9,7 @@
 #include "rt_def.h"
 
 typedef double SCALE_T;
-typedef int    LEVEL_T;
+typedef size_t LEVEL_T;
 
 //! @brief Phantom API for context management
 
@@ -42,8 +42,8 @@ void Phantom_relin(CIPHER res, CIPHER3 op);
 void Phantom_bootstrap(CIPHER res, CIPHER op, int level, int slot);
 void Phantom_copy(CIPHER res, CIPHER op);
 void Phantom_zero(CIPHER res);
-void Phantom_free_ciph(CIPHER res);
-void Phantom_free_ciph_array(CIPHER3 res, size_t size);
+void Phantom_free_cipher(CIPHER res);
+void Phantom_free_ciph_poly(CIPHER res, size_t size);
 void Phantom_free_plain(PLAIN res);
 
 bool Need_bts();

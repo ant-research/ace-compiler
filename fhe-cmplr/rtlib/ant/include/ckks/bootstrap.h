@@ -566,6 +566,10 @@ void Eval_chebyshev(CKKS_BTS_CTX* bts_ctx, CIPHERTEXT* out, CIPHERTEXT* in,
 void Eval_chebyshev_ps(CKKS_BTS_CTX* bts_ctx, CIPHERTEXT* out, CIPHERTEXT* in,
                        VL_DBL* coeffs, double a, double b);
 
+//! @brief Eval approximate mod reduction using runtime-selected coefficients.
+void Eval_approx_mod(CKKS_BTS_CTX* bts_ctx, CIPHERTEXT* out, CIPHERTEXT* in,
+                     VL_DBL* coeffs, double lb, double ub);
+
 //! @brief Evaluate bootstrap
 //! @param raise_level The level of raising the modulus, when raise_level is set
 //! to 0, ciph will be raised to q_cnt

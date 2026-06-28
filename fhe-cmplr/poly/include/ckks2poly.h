@@ -137,6 +137,10 @@ public:
         case fhe::ckks::CKKS_OPERATOR::RAISE_MOD:
         case fhe::ckks::CKKS_OPERATOR::CONJUGATE:
         case fhe::ckks::CKKS_OPERATOR::MUL_MONO:
+        case fhe::ckks::CKKS_OPERATOR::ROTATE_BATCH:
+        case fhe::ckks::CKKS_OPERATOR::BOOTSTRAP_COEFFS_TO_SLOTS:
+        case fhe::ckks::CKKS_OPERATOR::BOOTSTRAP_EVAL_MOD:
+        case fhe::ckks::CKKS_OPERATOR::BOOTSTRAP_SLOTS_TO_COEFFS:
           CMPLR_ASSERT(Lower_ctx()->Is_cipher_type(tid_child),
                        "child should be ciphertext");
           return retv_cand[0];  // CIPH
@@ -211,6 +215,10 @@ public:
   template <typename RETV, typename VISITOR>
   POLY_LOWER_RETV Handle_add(VISITOR* visitor, air::base::NODE_PTR node);
 
+  //! @brief Handle CKKS_OPERATOR::SUB
+  template <typename RETV, typename VISITOR>
+  POLY_LOWER_RETV Handle_sub(VISITOR* visitor, air::base::NODE_PTR node);
+
   //! @brief Handle CKKS_OPERATOR::MUL
   template <typename RETV, typename VISITOR>
   POLY_LOWER_RETV Handle_mul(VISITOR* visitor, air::base::NODE_PTR node);
@@ -243,6 +251,10 @@ private:
   POLY_LOWER_RETV Handle_add_float(CKKS2POLY_CTX& ctx, air::base::NODE_PTR node,
                                    POLY_LOWER_RETV opnd0_pair,
                                    POLY_LOWER_RETV opnd1_pair);
+
+  POLY_LOWER_RETV Handle_sub_ciph(CKKS2POLY_CTX& ctx, air::base::NODE_PTR node,
+                                  POLY_LOWER_RETV opnd0_pair,
+                                  POLY_LOWER_RETV opnd1_pair);
 
   POLY_LOWER_RETV Handle_mul_ciph(CKKS2POLY_CTX& ctx, air::base::NODE_PTR node,
                                   POLY_LOWER_RETV opnd0_pair,
@@ -416,10 +428,23 @@ POLY_LOWER_RETV CKKS2POLY::Handle_add(VISITOR*            visitor,
   bool                  is_gen_rns_loop = Pre_handle_ckks_op(visitor, node);
 
   // visit add's two child node
-  air::base::NODE_PTR opnd0      = node->Child(0);
-  air::base::NODE_PTR opnd1      = node->Child(1);
-  POLY_LOWER_RETV     opnd0_pair = visitor->template Visit<RETV>(opnd0);
-  POLY_LOWER_RETV     opnd1_pair = visitor->template Visit<RETV>(opnd1);
+  air::base::NODE_PTR opnd0 = node->Child(0);
+  air::base::NODE_PTR opnd1 = node->Child(1);
+
+  POLY_LOWER_RETV opnd0_pair = visitor->template Visit<RETV>(opnd0);
+  POLY_LOWER_RETV opnd1_pair = visitor->template Visit<RETV>(opnd1);
+  // Normalize operand order: cipher should always be opnd0.
+  // The Python DSL may emit ADD(encode, cipher) where opnd0 is plain/encode
+  // and opnd1 is cipher.  Since addition is commutative, swap so that
+  // Handle_add_ciph/Handle_add_plain see the expected layout.
+  bool opnd0_is_ciph = lower_ctx->Is_cipher_type(opnd0->Rtype_id()) ||
+                       lower_ctx->Is_cipher3_type(opnd0->Rtype_id());
+  bool opnd1_is_ciph = lower_ctx->Is_cipher_type(opnd1->Rtype_id()) ||
+                       lower_ctx->Is_cipher3_type(opnd1->Rtype_id());
+  if (!opnd0_is_ciph && opnd1_is_ciph) {
+    std::swap(opnd0, opnd1);
+    std::swap(opnd0_pair, opnd1_pair);
+  }
 
   uint32_t event = air::base::RTM_NONE;
   if (lower_ctx->Is_cipher_type(opnd1->Rtype_id()) ||
@@ -436,8 +461,53 @@ POLY_LOWER_RETV CKKS2POLY::Handle_add(VISITOR*            visitor,
     // Handle other primitive types (e.g., from Python DSL Int32)
     retv  = Handle_add_float(ctx, node, opnd0_pair, opnd1_pair);
     event = core::RTM_FHE_ADDCP;
+  } else if (opnd1->Rtype()->Is_array()) {
+    // Handle array types (e.g., array of floats from Python DSL)
+    retv  = Handle_add_float(ctx, node, opnd0_pair, opnd1_pair);
+    event = core::RTM_FHE_ADDCP;
   } else {
     CMPLR_ASSERT(false, "invalid add opnd_1 type");
+    retv = POLY_LOWER_RETV();
+  }
+
+  retv = Post_handle_ckks_op(visitor, node, retv, is_gen_rns_loop, event);
+  return retv;
+}
+
+template <typename RETV, typename VISITOR>
+POLY_LOWER_RETV CKKS2POLY::Handle_sub(VISITOR*            visitor,
+                                      air::base::NODE_PTR node) {
+  POLY_LOWER_RETV       retv;
+  CKKS2POLY_CTX&        ctx             = visitor->Context();
+  fhe::core::LOWER_CTX* lower_ctx       = ctx.Lower_ctx();
+  bool                  is_gen_rns_loop = Pre_handle_ckks_op(visitor, node);
+
+  // visit sub's two child node
+  air::base::NODE_PTR opnd0 = node->Child(0);
+  air::base::NODE_PTR opnd1 = node->Child(1);
+
+  // Normalize operand order: cipher should always be opnd0.
+  // Multiplication is commutative, so swap if needed.
+  bool opnd0_is_cipher = lower_ctx->Is_cipher_type(opnd0->Rtype_id()) ||
+                         lower_ctx->Is_cipher3_type(opnd0->Rtype_id());
+  bool opnd1_is_cipher = lower_ctx->Is_cipher_type(opnd1->Rtype_id()) ||
+                         lower_ctx->Is_cipher3_type(opnd1->Rtype_id());
+  if (!opnd0_is_cipher && opnd1_is_cipher) {
+    std::swap(opnd0, opnd1);
+    opnd0_is_cipher = true;
+  }
+  CMPLR_ASSERT(opnd0_is_cipher,
+               "invalid sub opnd0 (must be CIPHERTEXT or CIPHERTEXT3)");
+
+  POLY_LOWER_RETV opnd0_pair = visitor->template Visit<RETV>(opnd0);
+  POLY_LOWER_RETV opnd1_pair = visitor->template Visit<RETV>(opnd1);
+
+  uint32_t event = air::base::RTM_NONE;
+  if (opnd1_is_cipher) {
+    retv  = Handle_sub_ciph(ctx, node, opnd0_pair, opnd1_pair);
+    event = core::RTM_FHE_ADDCC;  // Use ADD event for timing (sub is similar)
+  } else {
+    CMPLR_ASSERT(false, "invalid sub opnd_1 type");
     retv = POLY_LOWER_RETV();
   }
 
@@ -455,8 +525,17 @@ POLY_LOWER_RETV CKKS2POLY::Handle_mul(VISITOR*            visitor,
   air::base::NODE_PTR   opnd0           = node->Child(0);
   air::base::NODE_PTR   opnd1           = node->Child(1);
 
-  CMPLR_ASSERT(lower_ctx->Is_cipher_type(opnd0->Rtype_id()) ||
-                   lower_ctx->Is_cipher3_type(opnd0->Rtype_id()),
+  // Normalize operand order: cipher should always be opnd0.
+  // Multiplication is commutative, so swap if needed.
+  bool opnd0_is_cipher = lower_ctx->Is_cipher_type(opnd0->Rtype_id()) ||
+                         lower_ctx->Is_cipher3_type(opnd0->Rtype_id());
+  bool opnd1_is_cipher = lower_ctx->Is_cipher_type(opnd1->Rtype_id()) ||
+                         lower_ctx->Is_cipher3_type(opnd1->Rtype_id());
+  if (!opnd0_is_cipher && opnd1_is_cipher) {
+    std::swap(opnd0, opnd1);
+    opnd0_is_cipher = true;
+  }
+  CMPLR_ASSERT(opnd0_is_cipher,
                "invalid mul opnd0 (must be CIPHERTEXT or CIPHERTEXT3)");
 
   POLY_LOWER_RETV opnd0_pair = visitor->template Visit<RETV>(opnd0);
@@ -473,6 +552,23 @@ POLY_LOWER_RETV CKKS2POLY::Handle_mul(VISITOR*            visitor,
     // Handle float and other primitive types (e.g., int from Python DSL)
     retv  = Handle_mul_float(ctx, node, opnd0_pair, opnd1_pair);
     event = core::RTM_FHE_MULCP;
+  } else if (opnd1->Rtype()->Is_array()) {
+    // Handle array types (e.g., array of floats from Python DSL)
+    retv  = Handle_mul_float(ctx, node, opnd0_pair, opnd1_pair);
+    event = core::RTM_FHE_MULCP;
+  } else if (opnd1->Rtype()->Is_record()) {
+    // WORKAROUND: Check by type name instead of type ID
+    const char* type_name = opnd1->Rtype()->Cast_to_rec()->Name()->Char_str();
+    if (strcmp(type_name, "CIPHERTEXT") == 0) {
+      retv  = Handle_mul_ciph(ctx, node, opnd0_pair, opnd1_pair);
+      event = core::RTM_FHE_MULCC;
+    } else if (strcmp(type_name, "PLAINTEXT") == 0) {
+      retv  = Handle_mul_plain(ctx, node, opnd0_pair, opnd1_pair);
+      event = core::RTM_FHE_MULCP;
+    } else {
+      CMPLR_ASSERT(false, "invalid mul opnd_1 type");
+      retv = POLY_LOWER_RETV();
+    }
   } else {
     CMPLR_ASSERT(false, "invalid mul opnd_1 type");
     retv = POLY_LOWER_RETV();
@@ -625,7 +721,6 @@ POLY_LOWER_RETV CKKS2POLY::Handle_modswitch(VISITOR*            visitor,
       is_gen_rns_loop, core::RTM_FHE_MODSWITCH);
   return retv;
 }
-
 template <typename VISITOR>
 bool CKKS2POLY::Pre_handle_ckks_op(VISITOR* visitor, air::base::NODE_PTR node) {
   CKKS2POLY_CTX& ctx   = visitor->Context();

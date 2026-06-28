@@ -118,7 +118,8 @@ static GLOB_SCOPE* Stride_slice_opt(GLOB_SCOPE* glob, VECTOR_CTX& ctx,
     }
   }
 
-  delete glob;
+  // NOTE: Do NOT delete glob - it may be the singleton from GLOB_SCOPE::Get()
+  // delete glob;
   return new_glob;
 }
 
@@ -204,7 +205,8 @@ static GLOB_SCOPE* T2mv_opt(GLOB_SCOPE* glob, VECTOR_CTX& ctx,
       new_func->Set_entry_stmt(retv.Node()->Stmt());
       // new_func->Print();
     }
-    delete glob;
+    // NOTE: Do NOT delete glob - it may be the singleton from GLOB_SCOPE::Get()
+    // delete glob;
     return new_glob;
   }
   return glob;
@@ -237,7 +239,8 @@ static GLOB_SCOPE* Mv2v_opt(GLOB_SCOPE* glob, VECTOR_CTX& ctx,
       AIR_ASSERT(retv != air::base::Null_ptr && retv->Is_entry());
       new_func->Set_entry_stmt(retv->Stmt());
     }
-    delete glob;
+    // NOTE: Do NOT delete glob - it may be the singleton from GLOB_SCOPE::Get()
+    // delete glob;
     return new_glob;
   }
   return glob;
@@ -269,7 +272,8 @@ static GLOB_SCOPE* Lower_to_vector(GLOB_SCOPE* glob, VECTOR_CTX& ctx,
     new_func->Set_entry_stmt(retv->Stmt());
   }
 
-  delete glob;
+  // NOTE: Do NOT delete glob - it may be the singleton from GLOB_SCOPE::Get()
+  // delete glob;
   return new_glob;
 }
 

@@ -45,6 +45,10 @@ void Init_ciph_same_scale_ciph3(CIPHER res, CIPHER3 ciph);
 //! which is used for add_ciph() & sub_ciph() for ciphertext3
 void Init_ciph3_same_scale_ciph3(CIPHER3 res, CIPHER3 ciph1, CIPHER3 ciph2);
 
+//! @brief Backward-compatible alias for Init_ciph3_same_scale_ciph3.
+//! Some generated dataset code still emits Init_ciph3_same_scale(...).
+void Init_ciph3_same_scale(CIPHER3 res, CIPHER3 ciph1, CIPHER3 ciph2);
+
 //! @brief Initialize ciphertext from ciph1 & ciph2 with scale up,
 //! which is used for mul_ciph()
 void Init_ciph_up_scale(CIPHER res, CIPHER ciph1, CIPHER ciph2);
@@ -151,6 +155,9 @@ CIPHER Rescale_ciph(CIPHER res, CIPHER ciph);
 //! @brief Upscale a ciphertext to a given mod_size
 CIPHER Upscale_ciph(CIPHER res, CIPHER ciph, uint32_t mod_size);
 
+//! @brief Raise ciphertext modulus to target mod_size (compat alias of upscale).
+CIPHER Raise_mod(CIPHER res, CIPHER ciph, uint32_t mod_size);
+
 //! @brief Downscale a ciphertext to given waterline
 CIPHER Downscale_ciph(CIPHER res, CIPHER ciph, uint32_t waterline);
 
@@ -160,10 +167,46 @@ void Modswitch_ciph(CIPHER ciph);
 //! @brief Rotate a ciphertext with given rotation idx
 CIPHER Rotate_ciph(CIPHER res, CIPHER ciph, int32_t rot_idx);
 
+//! @brief Rotate one ciphertext by many rotation indices while sharing the
+//! expensive rotate precompute across the batch.
+void Rotate_batch_ciph(CIPHER res_arr, CIPHER ciph, const int32_t* rot_idx,
+                       uint32_t count);
+
+//! @brief Conjugate ciphertext using current evaluator context.
+CIPHER Conjugate_ciph(CIPHER res, CIPHER ciph);
+
+//! @brief Multiply ciphertext by X^power monomial.
+CIPHER Mul_mono_ciph(CIPHER res, CIPHER ciph, uint32_t power);
+
 //! @brief Perform bootstrap
 //! @param level_after_bts The level avaiable after bootstrap, which is used to
 //! set raise level, when the level is set to 0, ciph will be raised to q_cnt
 CIPHER Bootstrap(CIPHER res, CIPHER ciph, uint32_t level_after_bts);
+
+//! @brief Evaluate full bootstrap math path via Eval_bootstrap with explicit
+//! precom handling (full rtlib-equivalent behavior).
+//! @param level_after_bts The level available after bootstrap.
+//! @param num_slots Target slots for bootstrap precom; 0 means use ciph slots.
+CIPHER Eval_bootstrap_ciph(CIPHER res, CIPHER ciph, uint32_t level_after_bts,
+                           uint32_t num_slots);
+
+//! @brief Bootstrap stage op: coeffs-to-slots with context/precom plumbing.
+//! Chooses LT-vs-FFT path based on precom level budgets.
+//! @param num_slots Target slots for precom lookup; 0 means use ciph slots.
+CIPHER Eval_bootstrap_coeffs_to_slots_ciph(CIPHER res, CIPHER ciph,
+                                           uint32_t num_slots);
+
+//! @brief Bootstrap stage op: EvalMod approximation with default ANT coeffs.
+//! Coefficients are selected from runtime params/hamming weight.
+//! @param num_slots Target slots for precom lookup; 0 means use ciph slots.
+CIPHER Eval_bootstrap_eval_mod_ciph(CIPHER res, CIPHER ciph,
+                                    uint32_t num_slots);
+
+//! @brief Bootstrap stage op: slots-to-coeffs with context/precom plumbing.
+//! Chooses LT-vs-FFT path based on precom level budgets.
+//! @param num_slots Target slots for precom lookup; 0 means use ciph slots.
+CIPHER Eval_bootstrap_slots_to_coeffs_ciph(CIPHER res, CIPHER ciph,
+                                           uint32_t num_slots);
 
 //! @brief TO BEREMOVE just for bootstrap example
 CIPHER Encrypt(CIPHER res, PLAIN plain);

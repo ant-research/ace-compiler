@@ -9,6 +9,12 @@
 #ifndef AIR_DRIVER_PASS_MANAGER_H
 #define AIR_DRIVER_PASS_MANAGER_H
 
+#include <cstring>
+#include <string>
+
+#include "air/util/binary/elf_info.h"
+#include "air/util/option.h"
+
 namespace air {
 namespace driver {
 
@@ -73,7 +79,34 @@ public:
    */
   template <typename DRIVER>
   R_CODE Run(DRIVER* driver) {
-    return Forward<0>([driver](auto&& pass) -> R_CODE {
+    // Get resume info from config (already analyzed in Parse_options)
+    const char* resume_phase = driver->Resume_phase();
+    bool        is_resume    = driver->Is_resume();
+    std::string ifile_str;
+    if (driver->Ifile() != nullptr) {
+      ifile_str = std::string(driver->Ifile());
+    }
+
+    return Forward<0>([driver, resume_phase, is_resume,
+                       &ifile_str](auto&& pass) -> R_CODE {
+      // Handle IR resume: skip passes based on metadata phase
+      if (is_resume && Should_skip_pass(pass.Name(), resume_phase)) {
+        CMPLR_WARN_MSG(driver->Tfile(),
+                       "%s PASS is skipped for IR resume (phase: %s).",
+                       pass.Name(), resume_phase);
+        return R_CODE::NORMAL;
+      }
+
+      // Load IR at the first pass after the resume point
+      if (is_resume && Should_load_ir(pass.Name(), resume_phase)) {
+        driver->Read_ir(ifile_str);
+      }
+
+      // Read AIR from ELF before phase runs (explicit -b2ir option)
+      if (!pass.Read_ir().empty()) {
+        driver->Read_ir(pass.Read_ir());
+      }
+
       if (pass.Enable() == false) {
         CMPLR_WARN_MSG(driver->Tfile(), "%s PASS is disabled.", pass.Name());
         return R_CODE::NORMAL;
@@ -93,9 +126,6 @@ public:
       if (driver->Verify() || pass.Verify_ir()) {
         driver->Verify_ir();
       }
-      if (pass.Trace_stat()) {
-        driver->Perf_start();
-      }
       R_CODE ret_code = pass.Run();
       if (driver->Trace() || pass.Trace_st_after()) {
         driver->Tstream() << "#### SymTab trace after " << pass.Name()
@@ -110,9 +140,6 @@ public:
         driver->Tstream() << "#### Mempool after " << pass.Name() << std::endl;
         driver->Trace_mp_info();
       }
-      if (pass.Trace_stat()) {
-        driver->Perf_taken(driver->Exe_name(), pass.Name(), "--");
-      }
 
       // Write AIR to ELF with Keep
       if (driver->Keep()) {
@@ -122,17 +149,25 @@ public:
         std::string kfile = driver->Ifile();
         kfile.append(".");
         kfile.append(lower);
-        driver->Write_ir(kfile);
+        driver->Write_ir(kfile, pass.Name());
       }
 
       // Write AIR to ELF after phase
       if (!pass.Write_ir().empty()) {
-        driver->Write_ir(pass.Write_ir());
+        driver->Write_ir(pass.Write_ir(), pass.Name());
       }
 
-      // Read AIR from ELF before phase
-      if (!pass.Read_ir().empty()) {
-        driver->Read_ir(pass.Read_ir());
+      // Dump IR if --dump matches current phase
+      // Generate dump file in current working directory (like GCC -save-temps)
+      if (driver->Dump_enabled() &&
+          Match_dump_phase(pass.Name(), driver->Dump())) {
+        std::string dump_file = driver->Ifile_basename() + ".dump.";
+        std::string lower     = pass.Name();
+        std::transform(lower.begin(), lower.end(), lower.begin(),
+                       [](unsigned char c) { return std::tolower(c); });
+        dump_file.append(lower);
+        dump_file.append(BFILE_SUFFIX);
+        driver->Write_ir(dump_file, pass.Name());
       }
 
       // Verify AIR after each phase
@@ -216,6 +251,40 @@ private:
 
   // all passes managed by this pass manager
   std::tuple<PASSES...> _passes;
+
+  //! @brief Check if a pass should be skipped based on IR resume phase
+  //! @param pass_name Name of the current pass
+  //! @param ir_phase Phase abbreviation stored in IR file (e.g., "O2A")
+  //! @return true if pass should be skipped
+  static bool Should_skip_pass(const char*        pass_name,
+                               const std::string& ir_phase) {
+    int ir_phase_idx = util::Get_phase_index(ir_phase.c_str());
+    int pass_idx     = util::Get_phase_index(pass_name);
+
+    // Skip if pass is before or at the IR phase
+    return (ir_phase_idx >= 0 && pass_idx >= 0 && pass_idx <= ir_phase_idx);
+  }
+
+  //! @brief Check if IR should be loaded before this pass
+  //! @param pass_name Name of the current pass
+  //! @param ir_phase Phase abbreviation stored in IR file
+  //! @return true if IR should be loaded before this pass
+  static bool Should_load_ir(const char*        pass_name,
+                             const std::string& ir_phase) {
+    int ir_phase_idx = util::Get_phase_index(ir_phase.c_str());
+    int pass_idx     = util::Get_phase_index(pass_name);
+
+    // Load IR at the pass immediately after the IR phase
+    return (ir_phase_idx >= 0 && pass_idx == ir_phase_idx + 1);
+  }
+
+  //! @brief Check if current pass matches the dump phase
+  //! @param pass_name Name of the current pass (e.g., "ONNX2AIR")
+  //! @param dump_phase User-specified dump phase (pass name)
+  //! @return true if pass matches dump phase
+  static bool Match_dump_phase(const char* pass_name, const char* dump_phase) {
+    return strcmp(pass_name, dump_phase) == 0;
+  }
 };
 
 }  // namespace driver

@@ -202,8 +202,17 @@ RETV TENSOR2SIHE_IMPL::Handle_relu(VISITOR* visitor, NODE_PTR node) {
 
   // 2.2 Gen call stmt
   PREG_PTR relu_ret_var     = func_scope->New_preg(cipher_type);
-  double   relu_value_range = ctx.Relu_vr(node->Attr("name"));
-  ctx.Trace(TD_RELU_VR, "Relu range for ", node->Attr("name"), " is [-",
+  // Determine relu value range: CLI per-name override > AIR node attr > CLI default
+  const char*  node_name        = node->Attr("name");
+  double       relu_value_range = ctx.Relu_vr(node_name);
+  if (!ctx.Has_relu_vr(node_name)) {
+    // No CLI per-name override, check AIR node attribute (set by frontend)
+    const double* vr_attr = node->Attr<double>("relu_vr");
+    if (vr_attr != nullptr) {
+      relu_value_range = *vr_attr;
+    }
+  }
+  ctx.Trace(TD_RELU_VR, "Relu range for ", node_name, " is [-",
             relu_value_range, ", ", relu_value_range, "]\n");
   PREG_PTR scaled_opnd = bs_tmp;
   // Normalize the ReLU parameter to fit within the [-1,1], if it extends beyond

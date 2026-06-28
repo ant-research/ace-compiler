@@ -23,10 +23,13 @@ namespace opt {
 
 //! @brief HSSA statement Kind
 enum HSTMT_KIND {
-  SK_INVALID,  //!< invalid statement
-  SK_ASSIGN,   //!< assignment statement
-  SK_NARY,     //!< nary operation statement
-  SK_CALL,     //!< call statement
+  SK_INVALID,    //!< invalid statement
+  SK_BLK_ENTRY,  //!< block entry statement
+  SK_ASSIGN,     //!< assignment statement
+  SK_NARY,       //!< nary operation statement
+  SK_IF,         //!< if statement
+  SK_DO_LOOP,    //!< do loop statement
+  SK_CALL,       //!< call statement
 };
 
 //! @brief HSSA statement attribute
@@ -156,6 +159,66 @@ private:
   HEXPR_ID _kids[0];  //!< kids array
 };
 
+//! @brief DO_LOOP_DATA holds the data for do loop statement
+class DO_LOOP_DATA : public HSTMT_DATA {
+public:
+  DO_LOOP_DATA(air::base::NODE_PTR node)
+      : HSTMT_DATA(node, SK_DO_LOOP),
+        _entry(HSTMT_ID()),
+        _exit(HSTMT_ID()),
+        _cond(HEXPR_ID()),
+        _body(HSTMT_ID()),
+        _incr(HEXPR_ID()) {}
+
+  DO_LOOP_DATA(air::base::NODE_PTR node, HSTMT_ID init, HEXPR_ID cond,
+               HSTMT_ID body, HEXPR_ID incr)
+      : HSTMT_DATA(node, SK_DO_LOOP) {
+    _entry = init;
+    _exit  = HSTMT_ID();
+    _cond  = cond;
+    _body  = body;
+    _incr  = incr;
+  }
+
+  DO_LOOP_DATA(air::base::NODE_PTR node, HSTMT_PTR init, HEXPR_PTR cond,
+               HSTMT_PTR body, HEXPR_PTR incr, HPHI_PTR hphi);
+
+  HSTMT_ID Entry(void) const { return _entry; }
+  HSTMT_ID Exit(void) const { return _exit; }
+  HSTMT_ID Body(void) const { return _body; }
+  HEXPR_ID Cond(void) const { return _cond; }
+  HEXPR_ID Incr(void) const { return _incr; }
+
+  void Print(HCONTAINER* cont, std::ostream& os, uint32_t indent) const;
+
+private:
+  HSTMT_ID _entry;  //!< entry statements
+  HSTMT_ID _exit;   //!< exit statements
+  HEXPR_ID _cond;   //!< loop condition expression
+  HSTMT_ID _body;   //!< body statements
+  HEXPR_ID _incr;   //!< loop increment expression
+};
+
+//! @brief IF_DATA holds the data for if statement
+class IF_DATA : public HSTMT_DATA {
+public:
+  IF_DATA(air::base::NODE_PTR node)
+      : HSTMT_DATA(node, SK_IF), _cond(HEXPR_ID()) {}
+
+  IF_DATA(air::base::NODE_PTR node, HEXPR_PTR cond)
+      : HSTMT_DATA(node, SK_IF), _cond(cond->Id()) {}
+
+  IF_DATA(air::base::OPCODE opcode, HEXPR_PTR cond)
+      : HSTMT_DATA(opcode, SK_IF), _cond(cond->Id()) {}
+
+  HEXPR_ID Cond(void) const { return _cond; }
+
+  void Print(HCONTAINER* cont, std::ostream& os, uint32_t indent) const;
+
+private:
+  HEXPR_ID _cond;  //!< condition expression
+};
+
 //! @brief CALL_DATA holds the data for call statement
 class CALL_DATA : public HSTMT_DATA {
 public:
@@ -239,6 +302,16 @@ public:
     return air::base::Static_cast<NARY_DATA_PTR>(_data);
   }
 
+  DO_LOOP_DATA_PTR Cast_to_do_loop(void) const {
+    AIR_ASSERT(Kind() == SK_DO_LOOP);
+    return air::base::Static_cast<DO_LOOP_DATA_PTR>(_data);
+  }
+
+  IF_DATA_PTR Cast_to_if(void) const {
+    AIR_ASSERT(Kind() == SK_IF);
+    return air::base::Static_cast<IF_DATA_PTR>(_data);
+  }
+
   CALL_DATA_PTR Cast_to_call(void) const {
     AIR_ASSERT(Kind() == SK_CALL);
     return air::base::Static_cast<CALL_DATA_PTR>(_data);
@@ -257,6 +330,10 @@ public:
   //! @brief replace expr with new_expr in current statement
   //! @return true if replaced, otherwise returns false
   bool Replace_expr(HEXPR_ID expr, HEXPR_ID new_expr);
+
+  //! @brief check if current statement is structured control flow
+  //! @return true if do_loop or if statement
+  bool Is_scf(void) const { return (Kind() == SK_DO_LOOP || Kind() == SK_IF); }
 
   //! @brief check if current statement dominate stmt
   //! @return true if dominate, otherwise returns false

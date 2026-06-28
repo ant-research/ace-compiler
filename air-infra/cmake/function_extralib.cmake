@@ -74,7 +74,7 @@ function(find_pybind11_lib MESSAGE)
     message(FATAL_ERROR "pybind11 not found. Please make sure pybind11 is installed.")
   endif()
 
-  include_directories(${pybind11_INCLUDE_DIRS}/include)
+  include_directories(${pybind11_INCLUDE_DIRS})
   set(pybind11_LIBRARIES ${pybind11_LIBRARIES} PARENT_SCOPE)
 endfunction()
 

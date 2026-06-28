@@ -8,27 +8,24 @@
 # Build external benchmark project dependent function
 function(build_external_benchmark)
 
-  set(BENCH_URL      "https://git:$ENV{CI_TOKEN}@code.alipay.com/opencc/benchmark.git")
-  set(BENCH_URL_SSH  "git@code.alipay.com:opencc/benchmark.git")
-  if(EXTERNAL_URL_SSH)
-    set(REPO_BENCH_URL ${BENCH_URL_SSH})
-  else()
-    set(REPO_BENCH_URL ${BENCH_URL})
+  # Default: upstream GitHub; internal override via .aci/
+  if(NOT DEFINED BENCH_URL)
+    set(BENCH_URL "https://github.com/google/benchmark.git")
   endif()
 
-  message(STATUS "Cloning External Repository   : ${REPO_BENCH_URL}")
+  message(STATUS "Cloning External Repository   : ${BENCH_URL}")
 
   include(ExternalProject)
 
   ExternalProject_Add(
     googlebenchmark
-    GIT_REPOSITORY ${REPO_BENCH_URL}
+    GIT_REPOSITORY ${BENCH_URL}
     GIT_TAG v1.8.0
     PREFIX ${CMAKE_BINARY_DIR}/external
     CMAKE_ARGS  -DCMAKE_GENERATOR=${CMAKE_GENERATOR}
-                -DCMAKE_BUILD_TYPE=Release 
-                -DBENCHMARK_DOWNLOAD_DEPENDENCIES=OFF 
-                -DBENCHMARK_ENABLE_TESTING=OFF 
+                -DCMAKE_BUILD_TYPE=Release
+                -DBENCHMARK_DOWNLOAD_DEPENDENCIES=OFF
+                -DBENCHMARK_ENABLE_TESTING=OFF
                 -DBENCHMARK_ENABLE_GTEST_TESTS=OFF
     UPDATE_COMMAND ""
     BUILD_ALWAYS OFF
@@ -53,7 +50,7 @@ function(build_external_benchmark)
 endfunction()
 
 if(NOT TARGET benchmark)
-	build_external_benchmark()
+  build_external_benchmark()
   add_dependencies(rtlib_depend benchmark)
   set(BM_LIBS "benchmark;pthread" CACHE STRING "Global common libs of benchmark")
 endif()
