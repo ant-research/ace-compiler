@@ -1,15 +1,3 @@
-backend-test:°
-A
-dataresult"ArgMax*
-keepdims *
-select_last_index 1test_argmax_default_axis_random_select_last_indexZ
-data
-
-
-
-b
-result
-
-
-
-B
+version https://git-lfs.github.com/spec/v1
+oid sha256:b7a03953501b8c4107d1124f1c515f17481d8ce6c925317ce75a9618a0270569
+size 199

@@ -1,25 +1,3 @@
-backend-test:ÿ
-d
-input
-targetloss"NegativeLogLikelihoodLoss*
-ignore_indexûÿÿÿÿÿÿÿÿ *
-	reduction"none 0test_nllloss_NCd1d2d3_none_no_weight_negative_iiZ#
-input
-
-
-
-
-
-Z 
-target
-
-
-
-
-b
-loss
-
-
-
-
-B
+version https://git-lfs.github.com/spec/v1
+oid sha256:daf7c9d37abd9aa608da2ebeaa154fbeffa9038db3cf6e2004a76fbea4040191
+size 278

@@ -1,16 +1,3 @@
-backend-test:‰
-!
-data
-indicesoutput"GatherNDtest_gathernd_example_int32Z
-data
-
-
-Z
-indices
-
-
-b
-output
-
-
-B
+version https://git-lfs.github.com/spec/v1
+oid sha256:b9135024d5ff9c69d7873ff8c7034c3bbd830c18064223fc461bada423131319
+size 160

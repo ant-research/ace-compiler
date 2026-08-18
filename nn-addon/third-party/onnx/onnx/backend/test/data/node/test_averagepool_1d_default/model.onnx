@@ -1,14 +1,3 @@
-backend-test:y
-(
-xy"AveragePool*
-kernel_shape@ test_averagepool_1d_defaultZ
-x
-
-
-
- b
-y
-
-
-
-B	
+version https://git-lfs.github.com/spec/v1
+oid sha256:e309a4f9b3adfccea26e5fe08b7c6e970ab719076bb7a67ea2dd2492da9c1b89
+size 143

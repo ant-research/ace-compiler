@@ -1,18 +1,3 @@
-backend-test:¡
-E
-xy"AveragePool*
-auto_pad"
-SAME_LOWER *
-kernel_shape@@ test_averagepool_2d_same_lowerZ
-x
-
-
-
- 
- b
-y
-
-
-
- 
- B	
+version https://git-lfs.github.com/spec/v1
+oid sha256:5ba905929d5accaf1b8e66fb3febcc28af79e070f1b1da6ff65511079b21c553
+size 184

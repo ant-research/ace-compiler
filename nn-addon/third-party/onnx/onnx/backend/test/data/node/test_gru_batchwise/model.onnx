@@ -1,33 +1,3 @@
-backend-test:Ò
-9
-X
-W
-RYY_h"GRU*
-hidden_size *
-layout test_gru_batchwiseZ
-X
-
-
-
-Z
-W
-
-
-
-Z
-R
-
-
-
-b
-Y
-
-
-
-
-b
-Y_h
-
-
-
-B
+version https://git-lfs.github.com/spec/v1
+oid sha256:4d67670a5e403eb3312967fa0ea856c4439a7bd54b4391ac61b5260bedb1fbf6
+size 233

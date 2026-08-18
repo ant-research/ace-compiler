@@ -1,15 +1,3 @@
-backend-test:–
-7
-datareduced"ReduceL2*
-axes@ *
-keepdims  test_reduce_l2_keep_dims_exampleZ
-data
-
-
-
-b
-reduced
-
-
-
-B	
+version https://git-lfs.github.com/spec/v1
+oid sha256:d3a0f14afecdb651980ac7057029a5d660f6584d166a3166ad8af44fd2947df3
+size 173

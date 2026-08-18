@@ -1,16 +1,3 @@
-backend-test:™
-9
-datareduced"
-ReduceMean*
-axes@ *
-keepdims !test_reduce_mean_keepdims_exampleZ
-data
-
-
-
-b
-reduced
-
-
-
-B	
+version https://git-lfs.github.com/spec/v1
+oid sha256:5a5e02422f30e7071be0158ce398c1c72d05b7eb849215debb421bbabbec19cb
+size 176

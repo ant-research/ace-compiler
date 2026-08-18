@@ -1,12 +1,3 @@
-backend-test:r
- 
-inputoutput"Cast*	
-to test_cast_BFLOAT16_to_FLOATZ
-input
-
-
-b
-output
-
-
-B
+version https://git-lfs.github.com/spec/v1
+oid sha256:86574e827069da5503f4355dd34632fbfe295f1faecbe1de0efbd5164cca1171
+size 136

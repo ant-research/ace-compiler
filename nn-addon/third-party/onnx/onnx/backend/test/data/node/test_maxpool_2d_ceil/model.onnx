@@ -1,18 +1,3 @@
-backend-test:œ
-J
-xy"MaxPool*
-	ceil_mode *
-kernel_shape@@ *
-strides@@ test_maxpool_2d_ceilZ
-x
-
-
-
-
-b
-y
-
-
-
-
-B
+version https://git-lfs.github.com/spec/v1
+oid sha256:48fad221d019290d1469b6fad401ebd1f27186cb17ed36ea4d71f94041d6aeb7
+size 179

@@ -1,20 +1,3 @@
-backend-test:˜
-1
-x
-yz"Einsum*
-equation"bij, bjk -> bik test_einsum_batch_matmulZ
-x
-
-
-
-Z
-y
-
-
-
-b
-z
-
-
-
-B
+version https://git-lfs.github.com/spec/v1
+oid sha256:def932088f639ee295fb60a72bd346aea113efd220e343318d97aea991f53984
+size 175

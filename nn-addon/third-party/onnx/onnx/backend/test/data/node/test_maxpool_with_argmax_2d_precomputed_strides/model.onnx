@@ -1,24 +1,3 @@
-backend-test:Û
-Q
-xyz"MaxPool*
-kernel_shape@@ *
-storage_order *
-strides@@ /test_maxpool_with_argmax_2d_precomputed_stridesZ
-x
-
-
-
-
-b
-y
-
-
-
-
-b
-z
-
-
-
-
-B	
+version https://git-lfs.github.com/spec/v1
+oid sha256:65b3aee8c58131b1bff315aa89a77e136717872b2cb67a001181ab54da73d7a3
+size 242

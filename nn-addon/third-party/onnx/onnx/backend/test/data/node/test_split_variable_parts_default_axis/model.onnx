@@ -1,20 +1,3 @@
-backend-test:­
-)
-input
-splitoutput_1output_2"Split&test_split_variable_parts_default_axisZ
-input
-
-
-Z
-split
-
-
-b
-output_1
-
-
-b
-output_2
-
-
-B
+version https://git-lfs.github.com/spec/v1
+oid sha256:5b2d3068df4df333302f24581596724ff5196c94ef9c9a50fc251822ed5d8992
+size 196

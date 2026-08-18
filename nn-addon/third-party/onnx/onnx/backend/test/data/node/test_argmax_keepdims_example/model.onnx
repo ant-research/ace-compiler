@@ -1,13 +1,3 @@
-backend-test:†
-4
-dataresult"ArgMax*
-axis *
-keepdims test_argmax_keepdims_exampleZ
-data
-
-
-b
-result
-
-
-B	
+version https://git-lfs.github.com/spec/v1
+oid sha256:62ac02a5ae785dddf3c4c4c55fd8af68ce109f78046e07958239b4c54ed786af
+size 157

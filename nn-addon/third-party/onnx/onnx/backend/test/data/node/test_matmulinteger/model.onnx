@@ -1,26 +1,3 @@
-backend-test:Á
-4
-A
-B
-a_zero_point
-b_zero_pointY"MatMulIntegertest_matmulintegerZ
-A
-
-
-Z
-B
-
-
-Z
-a_zero_point
-
-
-Z
-b_zero_point
-
-
-b
-Y
-
-
-B
+version https://git-lfs.github.com/spec/v1
+oid sha256:ebfb02da758d1beb5451c4237a57d92d597f33fed55eb0f38fe88ffa5042dba1
+size 216

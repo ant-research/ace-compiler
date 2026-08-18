@@ -1,52 +1,3 @@
-backend-test:þ
-„cSoftmaxCrossEntropyLoss_test_sce_NCd1d2d3_none_no_weight_negative_ii_log_prob_expanded_functionaxes"Constant*
-value*: 
-
-xdSoftmaxCrossEntropyLoss_test_sce_NCd1d2d3_none_no_weight_negative_ii_log_prob_expanded_functionX_Max"	ReduceMax*
-axes@ 
-Ô
-x
-dSoftmaxCrossEntropyLoss_test_sce_NCd1d2d3_none_no_weight_negative_ii_log_prob_expanded_functionX_MaxdSoftmaxCrossEntropyLoss_test_sce_NCd1d2d3_none_no_weight_negative_ii_log_prob_expanded_functionX_Sub"Sub
-Ñ
-dSoftmaxCrossEntropyLoss_test_sce_NCd1d2d3_none_no_weight_negative_ii_log_prob_expanded_functionX_SubdSoftmaxCrossEntropyLoss_test_sce_NCd1d2d3_none_no_weight_negative_ii_log_prob_expanded_functionX_Exp"Exp
-»
-dSoftmaxCrossEntropyLoss_test_sce_NCd1d2d3_none_no_weight_negative_ii_log_prob_expanded_functionX_Exp
-cSoftmaxCrossEntropyLoss_test_sce_NCd1d2d3_none_no_weight_negative_ii_log_prob_expanded_functionaxescSoftmaxCrossEntropyLoss_test_sce_NCd1d2d3_none_no_weight_negative_ii_log_prob_expanded_functionX_RS"	ReduceSum
-¶
-dSoftmaxCrossEntropyLoss_test_sce_NCd1d2d3_none_no_weight_negative_ii_log_prob_expanded_functionX_Exp
-cSoftmaxCrossEntropyLoss_test_sce_NCd1d2d3_none_no_weight_negative_ii_log_prob_expanded_functionX_RSdSoftmaxCrossEntropyLoss_test_sce_NCd1d2d3_none_no_weight_negative_ii_log_prob_expanded_functionX_Div"Div
-Ñ
-dSoftmaxCrossEntropyLoss_test_sce_NCd1d2d3_none_no_weight_negative_ii_log_prob_expanded_functionX_DivdSoftmaxCrossEntropyLoss_test_sce_NCd1d2d3_none_no_weight_negative_ii_log_prob_expanded_functionX_Log"Log
-z
-dSoftmaxCrossEntropyLoss_test_sce_NCd1d2d3_none_no_weight_negative_ii_log_prob_expanded_functionX_Loglog_prob"Identity
-»
-dSoftmaxCrossEntropyLoss_test_sce_NCd1d2d3_none_no_weight_negative_ii_log_prob_expanded_functionX_Log
-yz"NegativeLogLikelihoodLoss*
-	reduction"none *
-ignore_indexûÿÿÿÿÿÿÿÿ >test_sce_NCd1d2d3_none_no_weight_negative_ii_log_prob_expandedZ
-x
-
-
-
-
-
-Z
-y
-
-
-
-
-b
-z
-
-
-
-
-b&
-log_prob
-
-
-
-
-
-B
+version https://git-lfs.github.com/spec/v1
+oid sha256:227c08eff02bf08d6f3f2df8ea870ec43a21afe7704b584c7d97c23b2adf8ed2
+size 2069

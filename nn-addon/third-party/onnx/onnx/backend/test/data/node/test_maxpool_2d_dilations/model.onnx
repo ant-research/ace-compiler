@@ -1,18 +1,3 @@
-backend-test:£
-L
-xy"MaxPool*
-	dilations@@ *
-kernel_shape@@ *
-strides@@ test_maxpool_2d_dilationsZ
-x
-
-
-
-
-b
-y
-
-
-
-
-B
+version https://git-lfs.github.com/spec/v1
+oid sha256:fefbf50d899b78a10acc3a068aa0918c1d64a1563f3477e97495c60be81e9918
+size 186

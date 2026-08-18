@@ -1,17 +1,3 @@
-backend-test:“
-=
-xy"AveragePool*
-kernel_shape@@ *
-pads@@@@ test_averagepool_2d_padsZ
-x
-
-
-
-
-b
-y
-
-
-
-
-B	
+version https://git-lfs.github.com/spec/v1
+oid sha256:e19145f47440a37b629f8dd197cc0b33dd74ea465b7dc784044cef955b2b0203
+size 170

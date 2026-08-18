@@ -1,16 +1,3 @@
-backend-test:˜
-9
-datareduced"
-ReduceProd*
-axes@ *
-keepdims  test_reduce_prod_keepdims_randomZ
-data
-
-
-
-b
-reduced
-
-
-
-B	
+version https://git-lfs.github.com/spec/v1
+oid sha256:08dbf72eff83eeb5af458740948107512f3672af1281ac5be6c0ccc06386e0d6
+size 175

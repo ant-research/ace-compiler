@@ -1,24 +1,3 @@
-backend-test:°
-9
-x
-Wy"Conv*
-kernel_shape@@ *
-pads@@@@ test_basic_conv_with_paddingZ
-x
-
-
-
-
-Z
-W
-
-
-
-
-b
-y
-
-
-
-
-B	
+version https://git-lfs.github.com/spec/v1
+oid sha256:6c40cafb38520a9d5a5bc1e71b9576a98b095f20ae890a365406bfdb4a567ed0
+size 199

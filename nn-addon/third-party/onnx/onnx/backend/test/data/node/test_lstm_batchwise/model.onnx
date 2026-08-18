@@ -1,33 +1,3 @@
-backend-test:Ô
-:
-X
-W
-RYY_h"LSTM*
-hidden_size *
-layout test_lstm_batchwiseZ
-X
-
-
-
-Z
-W
-
-
-
-Z
-R
-
-
-
-b
-Y
-
-
-
-
-b
-Y_h
-
-
-
-B
+version https://git-lfs.github.com/spec/v1
+oid sha256:52acc142f80c0e012912d0ae15f5cca5a29d066f6afbb3bb4a643088ef4b534b
+size 235

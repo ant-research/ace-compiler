@@ -1,15 +1,3 @@
-backend-test:£
->
-datareduced"ReduceSumSquare*
-axes@ *
-keepdims &test_reduce_sum_square_keepdims_randomZ
-data
-
-
-
-b
-reduced
-
-
-
-B	
+version https://git-lfs.github.com/spec/v1
+oid sha256:26b98da92c9145deac1c745c1b72d06a415f0a2fb4ee3355a923e08ce8c4cfaf
+size 186

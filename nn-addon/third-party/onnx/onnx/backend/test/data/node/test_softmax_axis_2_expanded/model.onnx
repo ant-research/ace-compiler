@@ -1,29 +1,3 @@
-backend-test:«
-R1Softmax_test_softmax_axis_2_expanded_functionaxes"Constant*
-value*: 
-f
-x8Softmax_test_softmax_axis_2_expanded_functionX_ReduceMax"	ReduceMax*
-axes@ *
-keepdims 
-v
-x
-8Softmax_test_softmax_axis_2_expanded_functionX_ReduceMax2Softmax_test_softmax_axis_2_expanded_functionX_Sub"Sub
-m
-2Softmax_test_softmax_axis_2_expanded_functionX_Sub2Softmax_test_softmax_axis_2_expanded_functionX_Exp"Exp
-½
-2Softmax_test_softmax_axis_2_expanded_functionX_Exp
-1Softmax_test_softmax_axis_2_expanded_functionaxes8Softmax_test_softmax_axis_2_expanded_functionX_ReduceSum"	ReduceSum*
-keepdims 
-v
-2Softmax_test_softmax_axis_2_expanded_functionX_Exp
-8Softmax_test_softmax_axis_2_expanded_functionX_ReduceSumy"Divtest_softmax_axis_2_expandedZ
-x
-
-
-
-b
-y
-
-
-
-B
+version https://git-lfs.github.com/spec/v1
+oid sha256:d365b819e13c2c133c497e33436ad339d4c323fbff4013625f13cd3cdb364350
+size 834

@@ -1,15 +1,3 @@
-backend-test:»
-G
-datareduced"ReduceSumSquare*
-axes@þÿÿÿÿÿÿÿÿ *
-keepdims 5test_reduce_sum_square_negative_axes_keepdims_exampleZ
-data
-
-
-
-b
-reduced
-
-
-
-B
+version https://git-lfs.github.com/spec/v1
+oid sha256:724f8aa5fabd8e5196cce25b7fc736b6e75379ab8339835fe2c9332e39a875b9
+size 210

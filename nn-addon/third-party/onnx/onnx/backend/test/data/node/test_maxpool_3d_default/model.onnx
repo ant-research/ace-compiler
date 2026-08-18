@@ -1,18 +1,3 @@
-backend-test:…
-(
-xy"MaxPool*
-kernel_shape@@@ test_maxpool_3d_defaultZ
-x
-
-
-
- 
- 
- b
-y
-
-
-
-
-
-B	
+version https://git-lfs.github.com/spec/v1
+oid sha256:0a2ffb7c94220586425c6629893a0ecb8bff2a2b70abf1a0cd30468444734c83
+size 156

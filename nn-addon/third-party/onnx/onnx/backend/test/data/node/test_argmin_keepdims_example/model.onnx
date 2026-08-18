@@ -1,13 +1,3 @@
-backend-test:†
-4
-dataresult"ArgMin*
-axis *
-keepdims test_argmin_keepdims_exampleZ
-data
-
-
-b
-result
-
-
-B	
+version https://git-lfs.github.com/spec/v1
+oid sha256:663c832d06c9fbcac1f0a2fd90d9a975cf0658145d09f2898bdd5e3bcae21e94
+size 157

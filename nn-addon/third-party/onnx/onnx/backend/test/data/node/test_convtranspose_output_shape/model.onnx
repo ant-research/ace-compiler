@@ -1,26 +1,3 @@
-backend-test:»
-A
-X
-WY"ConvTranspose*
-output_shape@
-@ *
-strides@@ test_convtranspose_output_shapeZ
-X
-
-
-
-
-Z
-W
-
-
-
-
-b
-Y
-
-
-
-
-
-B	
+version https://git-lfs.github.com/spec/v1
+oid sha256:761cb699ae4f39f5663e4ca3362d6455fd6b2e803b2eb19a3d473a74304fe92f
+size 210

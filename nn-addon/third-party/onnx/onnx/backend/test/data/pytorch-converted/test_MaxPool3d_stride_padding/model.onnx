@@ -1,20 +1,3 @@
-pytorch0.3:©
-S
-01"MaxPool*
-kernel_shape@@@ *
-pads@@@@@@ *
-strides@@@ torch-jit-exportZ
-0
-
-
-
-
-
-b
-1
-
-
-
-
-
-B
+version https://git-lfs.github.com/spec/v1
+oid sha256:63ed68a3e9628f4ea8a587ca130bbae437bf13fc27d7f335d2cc91c990fe3ab5
+size 192

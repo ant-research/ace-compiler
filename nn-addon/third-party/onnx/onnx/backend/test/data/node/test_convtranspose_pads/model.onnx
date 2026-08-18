@@ -1,24 +1,3 @@
-backend-test:¯
-=
-X
-WY"ConvTranspose*
-pads@@@@ *
-strides@@ test_convtranspose_padsZ
-X
-
-
-
-
-Z
-W
-
-
-
-
-b
-Y
-
-
-
-
-B	
+version https://git-lfs.github.com/spec/v1
+oid sha256:62ae2a5b6125b28656b5cb4b29f61361b6e7646a6fe2865688280e9525b44b54
+size 198

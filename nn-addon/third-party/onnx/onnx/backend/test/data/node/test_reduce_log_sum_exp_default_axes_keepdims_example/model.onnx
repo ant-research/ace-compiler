@@ -1,14 +1,3 @@
-backend-test:¥
-1
-datareduced"ReduceLogSumExp*
-keepdims 5test_reduce_log_sum_exp_default_axes_keepdims_exampleZ
-data
-
-
-
-b
-reduced
-
-
-
-B	
+version https://git-lfs.github.com/spec/v1
+oid sha256:43d90936a529ea573a071748af6499854a0b171d86fa06c8129c7578b807d1dd
+size 188

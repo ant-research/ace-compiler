@@ -1,41 +1,3 @@
-backend-test:ª
-
-dCSoftmaxCrossEntropyLoss_test_sce_none_weights_expanded_functionaxes"Constant*
-value*: 
-a
-xDSoftmaxCrossEntropyLoss_test_sce_none_weights_expanded_functionX_Max"	ReduceMax*
-axes@ 
-”
-x
-DSoftmaxCrossEntropyLoss_test_sce_none_weights_expanded_functionX_MaxDSoftmaxCrossEntropyLoss_test_sce_none_weights_expanded_functionX_Sub"Sub
-‘
-DSoftmaxCrossEntropyLoss_test_sce_none_weights_expanded_functionX_SubDSoftmaxCrossEntropyLoss_test_sce_none_weights_expanded_functionX_Exp"Exp
-Û
-DSoftmaxCrossEntropyLoss_test_sce_none_weights_expanded_functionX_Exp
-CSoftmaxCrossEntropyLoss_test_sce_none_weights_expanded_functionaxesCSoftmaxCrossEntropyLoss_test_sce_none_weights_expanded_functionX_RS"	ReduceSum
-Ö
-DSoftmaxCrossEntropyLoss_test_sce_none_weights_expanded_functionX_Exp
-CSoftmaxCrossEntropyLoss_test_sce_none_weights_expanded_functionX_RSDSoftmaxCrossEntropyLoss_test_sce_none_weights_expanded_functionX_Div"Div
-‘
-DSoftmaxCrossEntropyLoss_test_sce_none_weights_expanded_functionX_DivDSoftmaxCrossEntropyLoss_test_sce_none_weights_expanded_functionX_Log"Log
-€
-DSoftmaxCrossEntropyLoss_test_sce_none_weights_expanded_functionX_Log
-y
-wz"NegativeLogLikelihoodLoss*
-	reduction"none test_sce_none_weights_expandedZ
-x
-
-
-Z
-y
-
-
-Z
-w
-
-
-b
-z
-
-
-B
+version https://git-lfs.github.com/spec/v1
+oid sha256:55eb42495e35a55f9fa46d5d5597c858580208564c9f327fd9a7632f5dc4ff41
+size 1345

@@ -1,18 +1,3 @@
-backend-test:¤
-N
-xy"AveragePool*
-	ceil_mode *
-kernel_shape@@ *
-strides@@ test_averagepool_2d_ceilZ
-x
-
-
-
-
-b
-y
-
-
-
-
-B
+version https://git-lfs.github.com/spec/v1
+oid sha256:017b90b2612e82303d72eb00aae131ec9e29542e5331c9787efc5eb54d78c887
+size 187

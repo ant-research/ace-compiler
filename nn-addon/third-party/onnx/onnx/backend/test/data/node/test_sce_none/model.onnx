@@ -1,17 +1,3 @@
-backend-test:€
-8
-x
-yz"SoftmaxCrossEntropyLoss*
-	reduction"none test_sce_noneZ
-x
-
-
-Z
-y
-
-
-b
-z
-
-
-B
+version https://git-lfs.github.com/spec/v1
+oid sha256:9d5ab00c07719d2156ef6c8d573bc4d3a6c483c11062d375f2295bee642b813a
+size 151

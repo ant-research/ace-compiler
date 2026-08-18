@@ -1,14 +1,3 @@
-backend-test:–
-+
-datareduced"	ReduceMax*
-keepdims ,test_reduce_max_default_axes_keepdim_exampleZ
-data
-
-
-
-b
-reduced
-
-
-
-B	
+version https://git-lfs.github.com/spec/v1
+oid sha256:441846e0b50ae6afac0c0d6f0a0c96ae2852cf27edab2fd9b05e6fcbca37d427
+size 173

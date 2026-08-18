@@ -1,15 +1,3 @@
-backend-test:­
-A
-datareduced"	ReduceMin*
-axes@þÿÿÿÿÿÿÿÿ *
-keepdims -test_reduce_min_negative_axes_keepdims_randomZ
-data
-
-
-
-b
-reduced
-
-
-
-B
+version https://git-lfs.github.com/spec/v1
+oid sha256:256d8c1b76ba1c48b8416da2d2d9395772daa6085f4409205f88c79d54e45558
+size 196

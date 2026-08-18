@@ -1,14 +1,3 @@
-backend-test: 
-j
-xy"StringNormalizer*
-case_change_action"UPPER *
-is_case_sensitive *
-	stopwordsJmonday StringNormalizerZ
-x
-
-
-b
-y
-
-
-B
+version https://git-lfs.github.com/spec/v1
+oid sha256:c515d502a1cdf7befd5e4b4e2fe337286c5f474c14994390751ad7f203f75e9e
+size 183

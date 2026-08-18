@@ -1,18 +1,3 @@
-backend-test:™
-A
-xy"MaxPool*
-auto_pad"
-SAME_LOWER *
-kernel_shape@@ test_maxpool_2d_same_lowerZ
-x
-
-
-
- 
- b
-y
-
-
-
- 
- B	
+version https://git-lfs.github.com/spec/v1
+oid sha256:f9789851fab2c94d04262129f6a0bf2397b260c9db5e0f7b975f7c3c5e789e88
+size 176

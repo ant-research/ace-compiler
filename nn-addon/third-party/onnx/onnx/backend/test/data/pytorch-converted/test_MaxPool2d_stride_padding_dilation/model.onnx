@@ -1,25 +1,3 @@
-model:¤
-_
-XY"MaxPool*
-	dilations@
-@
- *
-kernel_shape@<@P *
-pads@
-@@
-@ *
-strides@
-@
- graphZ
-X
-
-
-
-è
-èb
-Y
-
-
-
-+
-B
+version https://git-lfs.github.com/spec/v1
+oid sha256:07d74ed26c95a5990f39335113f29258d199d1adb300ba8fa112292048c15a0f
+size 180

@@ -1,33 +1,3 @@
-backend-test:ß
-p
-boxes
-scores
-max_output_boxes_per_class
-iou_threshold
-score_thresholdselected_indices"NonMaxSuppression&test_nonmaxsuppression_suppress_by_IOUZ
-boxes
-
-
-
-Z
-scores
-
-
-
-Z(
-max_output_boxes_per_class
-
-
-Z
-iou_threshold
-
-
-Z
-score_threshold
-
-
-b"
-selected_indices
-
-
-B
+version https://git-lfs.github.com/spec/v1
+oid sha256:46b551a252278f7a8f1b3e66088f717bab4f9a15a11863e923675417ca6b516c
+size 374

@@ -1,14 +1,3 @@
-backend-test:“
-3
-datareduced"ReduceLogSum*
-axes@þÿÿÿÿÿÿÿÿ !test_reduce_log_sum_negative_axesZ
-data
-
-
-
-b
-reduced
-
-
-
-B
+version https://git-lfs.github.com/spec/v1
+oid sha256:336955ad94ea8f44d35ebb3412c4a147ca450f6fe881bc2f569a3a8ee223346c
+size 170

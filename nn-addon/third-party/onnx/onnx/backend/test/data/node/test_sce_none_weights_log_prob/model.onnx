@@ -1,26 +1,3 @@
-backend-test:Ë
-E
-x
-y
-wzlog_prob"SoftmaxCrossEntropyLoss*
-	reduction"none test_sce_none_weights_log_probZ
-x
-
-
-Z
-y
-
-
-Z
-w
-
-
-b
-z
-
-
-b
-log_prob
-
-
-B
+version https://git-lfs.github.com/spec/v1
+oid sha256:ef9268b452d4aca017869b0a716f3dae5c9b36cd82cf4dd548c4a255a64a7098
+size 226

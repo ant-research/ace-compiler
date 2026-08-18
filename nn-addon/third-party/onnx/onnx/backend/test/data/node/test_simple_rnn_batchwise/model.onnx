@@ -1,33 +1,3 @@
-backend-test:Ù
-9
-X
-W
-RYY_h"RNN*
-hidden_size *
-layout test_simple_rnn_batchwiseZ
-X
-
-
-
-Z
-W
-
-
-
-Z
-R
-
-
-
-b
-Y
-
-
-
-
-b
-Y_h
-
-
-
-B
+version https://git-lfs.github.com/spec/v1
+oid sha256:ebaf97461ff4c003d94dce4e6f0147a1fbebeec40b41c4690c833c17b0b582e7
+size 240

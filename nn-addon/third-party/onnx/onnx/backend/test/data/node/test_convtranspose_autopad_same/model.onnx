@@ -1,25 +1,3 @@
-backend-test:¿
-E
-X
-WY"ConvTranspose*
-auto_pad"
-SAME_LOWER *
-strides@@ test_convtranspose_autopad_sameZ
-X
-
-
-
-
-Z
-W
-
-
-
-
-b
-Y
-
-
-
-
-B
+version https://git-lfs.github.com/spec/v1
+oid sha256:286cea5ffab2a8dbd0821664b71b5549d3c971739e1098a367b0618f8a597088
+size 214

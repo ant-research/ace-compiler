@@ -1,21 +1,3 @@
-backend-test:‘
-%
-data_0
-data_1
-data_2result"Mintest_min_exampleZ
-data_0
-
-
-Z
-data_1
-
-
-Z
-data_2
-
-
-b
-result
-
-
-B	
+version https://git-lfs.github.com/spec/v1
+oid sha256:6db4349f149527f365eac15d63580c8dbb51819bc63a15c4724c9f9b4a4da507
+size 168

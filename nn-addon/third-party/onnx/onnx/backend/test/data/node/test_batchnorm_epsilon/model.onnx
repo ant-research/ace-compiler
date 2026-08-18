@@ -1,37 +1,3 @@
-backend-test:á
-A
-x
-s
-bias
-mean
-vary"BatchNormalization*
-epsilon
-×#< test_batchnorm_epsilonZ
-x
-
-
-
-
-Z
-s
-
-
-Z
-bias
-
-
-Z
-mean
-
-
-Z
-var
-
-
-b
-y
-
-
-
-
-B
+version https://git-lfs.github.com/spec/v1
+oid sha256:4da6b9a4d46fa689d78ee41259fd4913b509a14f6206d1fe47c35308c9295d37
+size 248

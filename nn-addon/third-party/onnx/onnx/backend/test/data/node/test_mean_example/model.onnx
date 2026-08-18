@@ -1,21 +1,3 @@
-backend-test:“
-&
-data_0
-data_1
-data_2result"Meantest_mean_exampleZ
-data_0
-
-
-Z
-data_1
-
-
-Z
-data_2
-
-
-b
-result
-
-
-B	
+version https://git-lfs.github.com/spec/v1
+oid sha256:f7b695531b67f4dbc1869a0872be569979ba85f50b6b13953d67de443f793718
+size 170

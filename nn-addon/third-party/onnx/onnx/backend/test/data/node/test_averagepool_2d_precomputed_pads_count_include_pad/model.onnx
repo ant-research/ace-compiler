@@ -1,18 +1,3 @@
-backend-test:Ë
-W
-xy"AveragePool*
-count_include_pad *
-kernel_shape@@ *
-pads@@@@ 6test_averagepool_2d_precomputed_pads_count_include_padZ
-x
-
-
-
-
-b
-y
-
-
-
-
-B	
+version https://git-lfs.github.com/spec/v1
+oid sha256:a73159ff198f6a4e62b155d12b65b6b3c4e75dd6ba98a41add453502029d8e31
+size 226

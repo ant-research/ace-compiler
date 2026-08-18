@@ -1,13 +1,3 @@
-backend-test:¸
-P
-xy"StringNormalizer*
-case_change_action"UPPER *
-	stopwordsJmonday :test_strnormalizer_export_monday_insensintive_upper_twodimZ
-x
-
-
-b
-y
-
-
-B
+version https://git-lfs.github.com/spec/v1
+oid sha256:0f51b3a270fd4b309aabea740b0d9997ba6fd28cc85d73ecf83579ab4aeaf5c6
+size 207

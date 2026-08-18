@@ -1,15 +1,3 @@
-backend-test:»
-G
-datareduced"ReduceLogSumExp*
-axes@þÿÿÿÿÿÿÿÿ *
-keepdims 5test_reduce_log_sum_exp_negative_axes_keepdims_randomZ
-data
-
-
-
-b
-reduced
-
-
-
-B
+version https://git-lfs.github.com/spec/v1
+oid sha256:e835a245ef9b580dda384ca61fa27a2b04e983f2c9aa3586f84910dac58bfd5a
+size 210

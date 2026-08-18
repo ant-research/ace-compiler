@@ -1,25 +1,3 @@
-backend-test:¶
--
-x
-y_scale
-y_zero_pointy"QuantizeLineartest_quantizelinear_axisZ
-x
-
-
-
-
-Z
-y_scale
-
-
-Z
-y_zero_point
-
-
-b
-y
-
-
-
-
-B
+version https://git-lfs.github.com/spec/v1
+oid sha256:d20751683c42dd87562b6c20b058b82e932cbd6ffb067f9024df82e9fb6284c3
+size 205

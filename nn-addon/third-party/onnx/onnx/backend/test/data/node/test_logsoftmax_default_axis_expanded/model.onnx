@@ -1,32 +1,3 @@
-backend-test:Õ
-g=LogSoftmax_test_logsoftmax_default_axis_expanded_functionaxes"Constant*
-value*:
-ÿÿÿÿÿÿÿÿÿ 
-{
-xDLogSoftmax_test_logsoftmax_default_axis_expanded_functionX_ReduceMax"	ReduceMax*
-axes@ÿÿÿÿÿÿÿÿÿ *
-keepdims 
-Ž
-x
-DLogSoftmax_test_logsoftmax_default_axis_expanded_functionX_ReduceMax>LogSoftmax_test_logsoftmax_default_axis_expanded_functionX_Sub"Sub
-…
->LogSoftmax_test_logsoftmax_default_axis_expanded_functionX_Sub>LogSoftmax_test_logsoftmax_default_axis_expanded_functionX_Exp"Exp
-á
->LogSoftmax_test_logsoftmax_default_axis_expanded_functionX_Exp
-=LogSoftmax_test_logsoftmax_default_axis_expanded_functionaxesDLogSoftmax_test_logsoftmax_default_axis_expanded_functionX_ReduceSum"	ReduceSum*
-keepdims 
-‹
-DLogSoftmax_test_logsoftmax_default_axis_expanded_functionX_ReduceSum>LogSoftmax_test_logsoftmax_default_axis_expanded_functionX_Log"Log
-ˆ
->LogSoftmax_test_logsoftmax_default_axis_expanded_functionX_Sub
->LogSoftmax_test_logsoftmax_default_axis_expanded_functionX_Logy"Sub%test_logsoftmax_default_axis_expandedZ
-x
-
-
-
-b
-y
-
-
-
-B
+version https://git-lfs.github.com/spec/v1
+oid sha256:fc4f1326957064f4e8e861000db7dcc85504549654ad0eefef4f6a2de19586b7
+size 1132
