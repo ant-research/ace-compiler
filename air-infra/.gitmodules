@@ -1,0 +1,14 @@
+[submodule "third-party/benchmark"]
+	path = third-party/benchmark
+	url = https://code.alipay.com/opencc/benchmark.git
+	branch = 2dd015dfef425c866d9a43f2c67d8b52d709acb6
+[submodule "third-party/googletest"]
+	path = third-party/googletest
+	url = https://code.alipay.com/opencc/googletest.git
+	branch = v1.13.0
+[submodule "third-party/gperftools"]
+	path = third-party/gperftools
+	url = https://code.alipay.com/opencc/gperftools.git
+[submodule "third-party/jsoncpp"]
+	path = third-party/jsoncpp
+	url = https://code.alipay.com/air-infra/jsoncpp.git

@@ -1,0 +1,5 @@
+# IRGenPackageConfig.cmake.in
+
+@PACKAGE_INIT@
+
+set(IRGenPackage_DIR /usr/local/irgen/)

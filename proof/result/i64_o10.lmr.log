@@ -1,0 +1,44 @@
+FAST_DOT_PROD=1
+/app/hpao_cmplr/bin/fhe_cmplr /app/model/i64_o10.onnx -o /app/ae_tmp/i64_o10.onnx.c -VEC:conv_fast -VEC:ms=32768 -CKKS:N=65536 -P2C:df=/app/ae_tmp/i64_o10.onnx.weight -CKKS:sk_hw=192 -O2A:ts -FHE_SCHEME:ts -VEC:ts -SIHE:ts -FHE_SCHEME:ts -POLY:ts -P2C:ts -CKKS:ts:q0=60:sf=56 -POLY:ts -P2C:ts -P2C:fp -SIHE:relu_vr_def=10
+[/app/hpao_cmplr/bin/fhe_cmplr][ONNX2AIR][--] : phase_time = 0.000181 / 0.000335(s)
+[/app/hpao_cmplr/bin/fhe_cmplr][SCHEME_INFO_ANALYZE][--] : phase_time = 0.000014 / 0.000356(s)
+[/app/hpao_cmplr/bin/fhe_cmplr][VECTOR][--] : phase_time = 0.000142 / 0.000502(s)
+[/app/hpao_cmplr/bin/fhe_cmplr][SIHE][--] : phase_time = 0.000071 / 0.000578(s)
+[/app/hpao_cmplr/bin/fhe_cmplr][CKKS][--] : phase_time = 0.000204 / 0.000786(s)
+[/app/hpao_cmplr/bin/fhe_cmplr][POLY][--] : phase_time = 0.000423 / 0.001214(s)
+[/app/hpao_cmplr/bin/fhe_cmplr][POLY2C][--] : phase_time = 0.000680 / 0.001898(s)
+COMPILE RETV:0
+COMPILE CMD TIME:0.006163s
+/app/hpao_cmplr i64_o10.onnx /app/test/i64_o10.c i64_o10.onnx.c
+ckks_param: _provider = 0, _poly_degree = 65536, _sec_level = 0, mul_depth = 3, _first_mod_size = 60, _scaling_mod_size = 56, _num_q_parts = 2, _num_p = 2, _num_rot_idx = 14,_hamming_wieght = 192
+input(tensor): [
+ -0.024126 -0.017732 -0.067313 -0.007498 -0.028770 0.088074 0.056380 0.034815 -0.075764 0.057769 -0.053486 -0.054548 0.050169 -0.060533 0.079026 -0.095372 -0.077286 -0.076967 -0.022974 -0.083648 -0.009177 -0.095899 0.072110 -0.043327 0.069495 0.031415 0.021480 0.077757 0.029268 -0.079692 0.004341 -0.064555 0.012299 0.012440 0.083517 0.087584 -0.013908 -0.017324 0.093191 0.080438 -0.079949 -0.012274 0.055703 0.032590 0.050027 -0.010353 -0.072800 0.046870 -0.088685 -0.062158 -0.027067 0.031948 0.047162 -0.092273 -0.073095 -0.093942 0.061076 -0.063864 0.069272 0.070051 -0.075426 -0.008897 0.029550 -0.086013
+]
+Total memory size for keys: rot_key_cnt = 14, rot_key_size = 176164128 bytes, total_key_size = 199233232 bytes
+Total memory size for weight plain: cnt = 12, size = 17826656 bytes
+RTLib functions         	       Count	      Elapse
+--------------------    	    --------	    --------
+FINALIZE_CONTEXT        	           1	    0.002113 sec
+PREPARE_CONTEXT         	           1	    0.936843 sec
+ENCODE_ARRAY            	          13	    0.082440 sec
+NTT                     	         407	    0.475816 sec
+INTT                    	         100	    0.127376 sec
+MAIN_GRAPH              	           1	    0.633798 sec
+ HW_ADD                  	         119	    0.009189 sec
+ HW_MUL                  	          64	    0.018482 sec
+ HW_ROT                  	          78	    0.005688 sec
+ COPY_POLY               	           1	    0.000000 sec
+ PRECOMP                 	          14	    0.220656 sec
+ MOD_DOWN                	          28	    0.230658 sec
+ FAST_DOT_PROD           	          28	    0.053348 sec
+ RESCALE_POLY            	           4	    0.013672 sec
+ COPY_CIPH               	           3	    0.001276 sec
+ INIT_CIPH_SM_SC         	          29	    0.001708 sec
+ INIT_CIPH_UP_SC         	          11	    0.002397 sec
+ INIT_CIPH_DN_SC         	           2	    0.000134 sec
+ PT_ENCODE               	          12	    0.073569 sec
+MAIN_GRAPH              	   sub total	    0.630779 sec
+1.63s 262784KB
+Exit 0 - Check log: /app/ae_result/hpao/i64_o10.lmr.log
+LINK_EXEC RETV:0
+LINK_EXEC CMD TIME:2.200099s

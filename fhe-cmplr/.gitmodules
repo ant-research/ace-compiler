@@ -1,0 +1,15 @@
+[submodule "third-party/benchmark"]
+	path = third-party/benchmark
+	url = https://code.alipay.com/opencc/benchmark.git
+	branch = 2dd015dfef425c866d9a43f2c67d8b52d709acb6
+[submodule "third-party/googletest"]
+	path = third-party/googletest
+	url = https://code.alipay.com/opencc/googletest.git
+	branch = v1.13.0
+[submodule "third-party/uthash"]
+	path = third-party/uthash
+	url = https://code.alipay.com/fhe-cmplr/uthash.git
+	branch = master
+[submodule "third-party/BLAKE2"]
+	path = third-party/BLAKE2
+	url = https://code.alipay.com/fhe-cmplr/BLAKE2.git

@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>PassManager.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="air-pass-manager-design-and-implementation">AIR Pass Manager Design and Implementation</h1>
+<p><strong>Important</strong>: Markdown file (.md) is the master copy. PDF file (.pdf) is exported from markdown file only for review.</p>
+<h2 id="revision-history">Revision History</h2>
+<table>
+<thead>
+<tr>
+<th>Version</th>
+<th>Author</th>
+<th>Date</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0.1</td>
+<td>jianxin.lai</td>
+<td>2023.07.31</td>
+<td>Initial version.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="introduction">Introduction</h2>
+<p>Pass, Pass Manager and Driver are the way that AIR Compiler Infrastructure organizes the whole compilation pipeline. AIR Pass and Pass Manager is <strong>NOT</strong> aiming to provide the flexibility to run the compilation pipeline in arbitrary phase ordering. <strong>Instead</strong>, AIR Pass and Pass Manager provides abilities to developers to organize their compilation pipeline to construct compilers.</p>
+<p>AIR Pass and Pass Manager assumes the developer knows the design principle of phase ordering, dependencies between passes and the proper insertion point of the new pass in developing. AIR Pass does <strong>NOT</strong> provide interface to describe the preconditions and side-effects of the pass to assemble the pipeline automatically based on the dependencies of passes. AIR Pass Manager works with a fixed pipeline specified by developers. AIR Pass Manager provides facilities to assemble passes, control pass behavior according to the options, trace and validate input and output, measure CPU and memory usage of the pass, and so on.</p>
+<p>AIR Pass Manager is designed for multiple compiler constructions with statically-assembled pipeline. With this design, Modules (Components) are basic building blocks, wrapped by Pass, then assembled by Pass Manager to construct the compilation pipeline. Driver is designed to host the compilation pipeline and all related data structures shared among the passes in the pipeline.</p>
+<pre><code class="language-mermaid"><div class="mermaid">flowchart LR
+A[[Module A]]
+B[[Module B]]
+C[[Module C]]
+E[[Module E]]
+D[[Module D]]
+A1-.->A
+B1-.->B
+A2-.->B
+B2-.->C
+A3-.->C
+B3-.->D
+A4-.->A
+A-.->E
+D-.->E
+subgraph Compiler Driver A
+A0[(Input)]==>A1((Pass 1))==>A2((Pass 2))==>A3((Pass 3))==>A4((Pass 4))==>A5[(Output)]
+end
+subgraph Compiler Driver B
+B0[(Input)]==>B1((Pass 1))==>B2((Pass 2))==>B3((Pass 3))==>B4[(Output)]
+end
+</div></code></pre>
+<h2 id="air-pass">AIR Pass</h2>
+<p>AIR Pass is designed to wrap modules to perform analysis or transformations on AIR, then assembled by Pass Manager to construct the compilation pipeline.</p>
+<p>AIR pass runs on different scope from a sub-range of a function to whole program.</p>
+<pre><code class="language-mermaid"><div class="mermaid">classDiagram
+PASS_BASE <|-- CONCRETE_PASS
+class PASS_BASE {
+    -OPTIONS _opts
+    +Init()
+    +Pre_run()
+    +Run()
+    +Post_run()
+    +Fini()
+}
+class CONCRETE_PASS {
+    +Run()
+}
+</div></code></pre>
+<h2 id="air-pass-manager">AIR Pass Manager</h2>
+<p>AIR Pass Manager is designed to assemble passes to construct a pipeline to process the IR. The pipeline assembled by Pass Manager can be used to construct the compiler, or as a pass of another pipeline. Each pass's Init(), Pre_run() and Run() methods will be invoked in the same order as they were added to the template arguments. Post_run() and Fini() methods will be invoked in reverse order.</p>
+<pre><code class="language-mermaid"><div class="mermaid">classDiagram
+class PASS_MANAGER~...PASS~ {
+    +Init()
+    +Pre_run()
+    +Run()
+    +Post_run()
+    +Fini()
+}
+</div></code></pre>
+<p>A new wrapper class PIPELINE_TO_PASS is introduced to convert a pipeline organized by PASS_MANAGER into a Pass which can be assembled by another Pass Manager.</p>
+<h2 id="air-driver">AIR Driver</h2>
+<p>AIR Driver is designed to contain the compilation pipeline and related data structures shared among the passes in the pipeline. The driver can be instantiated and invoke by main() as the top level driver of the compiler, or can also be wrapped by class DRIVER_TO_PASS to be assembled by upper level Pass Manager. The difference between PIPELINE_TO_PASS and DRIVER_TO_PASS is passes in PIPELINE_TO_PASS doesn't have their own shared data structures. For example:</p>
+<pre><code class="language-mermaid"><div class="mermaid">classDiagram
+DRIVER_BASE <|-- WOPT_DRIVER
+class DRIVER_BASE {
+    +Init()
+    +Pre_run()
+    +Run()
+    +Post_run()
+    +Fini()
+    -OPTIONS *_opts
+    -CONTAINER *_container
+}
+
+class WOPT_DRIVER {
+    -Build_cfg()
+    -Build_ssa()
+    -CFG *_cfg
+    -SSA *_ssa
+}
+</div></code></pre>
+<h2 id="memory-pool-usage-convension">Memory pool usage convension</h2>
+<p>For memory pool used internally by a module, the pool instance is owned by the module. If memory pool shared by a few modules inside the same pass, the pool instance should be placed in the pass. For information produced/consumed among several modules or passes, a standalone information manager should be introduced (for example, alias manager, du manager, etc). This information manager owns the memory pool to save information. The manager instance is owned by the common ancester Pass, Pass manager or Driver of these passes or modules.</p>
+<h2 id="option-handling">Option handling</h2>
+<p>There is only 1 option handler instance to parse command line options and handle environment variables. This single instance is placed in top level Driver and can be used by all nested passes, pipelines and sub-drivers.</p>
+<h2 id="error-handling-tracing-ir-b2a-and-ir-b2c">Error handling, Tracing, IR b2a and IR b2c</h2>
+<p>There is 1 output device instance for error handling, tracing, IR b2a, IR b2c respectively. These output instances are also placed in top level Driver. So that they can interact with Option handler to control their behavior according to the options. These instances can also be used by all nested passes, pipelines and sub-drivers.</p>
+<h2 id="pass-and-pass-manager-example">Pass and Pass Manager Example</h2>
+<p>In this example, we assume a compiler with 3 stages: source to IR, IR lowering, IR to source.</p>
+<h3 id="modules">Modules</h3>
+<p>So we have the following modules:</p>
+<ul>
+<li>
+<p>IR repository</p>
+<p>Provide interface to manipulate IR, include creating symbols/types/IR nodes, retrieve Symbol/Type/IR node according to their indices.</p>
+<pre class="hljs"><code><div><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CONTAINER</span> {</span>
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-function">SYMPTR  <span class="hljs-title">New_symbol</span><span class="hljs-params">(...)</span></span>;
+    <span class="hljs-function">TYPEPTR <span class="hljs-title">New_type</span><span class="hljs-params">(...)</span></span>;
+    <span class="hljs-function">NODEPTR <span class="hljs-title">New_node</span><span class="hljs-params">(...)</span></span>;
+};
+</div></code></pre>
+</li>
+<li>
+<p>Source File Parser</p>
+<p>Parse input source file to contruct in-memory Abstract Syntax Tree (AST).</p>
+<pre class="hljs"><code><div><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">LANG_PARSER</span> {</span>
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Parse</span><span class="hljs-params">()</span></span>;
+};
+</div></code></pre>
+</li>
+<li>
+<p>AST to IR translator</p>
+<p>Traverse AST and translate AST nodes into IR. This module invoke CONTAINER interfaces to create IR.</p>
+<pre class="hljs"><code><div><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AST_TO_IR</span> {</span>
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Convert</span><span class="hljs-params">()</span></span>;
+};
+</div></code></pre>
+</li>
+<li>
+<p>IR Lowering</p>
+<p>Traverse IR and lower IR structures and operations. This module invoke CONTAINER interfaces to traverse IR nodes and lower to next level.</p>
+<pre class="hljs"><code><div><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">IR_LOWERING</span> {</span>
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Lower</span><span class="hljs-params">()</span></span>;
+};
+</div></code></pre>
+</li>
+<li>
+<p>IR to source</p>
+<p>Traverse IR and generate source from IR. This module invoke CONTAINER interfaces to traverse IR nodes and generates source from nodes.</p>
+<pre class="hljs"><code><div><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">IR_TO_SRC</span> {</span>
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">IR_to_src</span><span class="hljs-params">()</span></span>;
+}
+</div></code></pre>
+</li>
+</ul>
+<h3 id="passes">Passes</h3>
+<p>On top of these modules, we may have passes to wrap the modules. In this example, we implement 4 passes to invoke parser, AST to IR, IR lowering and IR to source respectively.</p>
+<ul>
+<li>
+<p>Parse Pass</p>
+<p>This pass is built on top of LANG_PARSER module, which parse input source file into Abstract Syntax Tree (AST).</p>
+<pre class="hljs"><code><div><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">LANG_PARSE_PASS</span> :</span> <span class="hljs-keyword">public</span> PASS_BASE {
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Init</span><span class="hljs-params">()</span> </span>{ _parser.Init(); }
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Fini</span><span class="hljs-params">()</span> </span>{ _parser.Fini(); }
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Run</span><span class="hljs-params">()</span>  </span>{ _parser.Parse(); }
+<span class="hljs-keyword">private</span>:
+    LANG_PARSER _parser;
+};
+</div></code></pre>
+</li>
+<li>
+<p>AST to IR Pass</p>
+<p>This pass is built on top of AST_TO_IR module, which traverse AST to generate IR.</p>
+<pre class="hljs"><code><div><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AST_TO_IR_PASS</span> :</span> <span class="hljs-keyword">public</span> PASS_BASE {
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Init</span><span class="hljs-params">()</span> </span>{ _ast_to_ir.Init(); }
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Fini</span><span class="hljs-params">()</span> </span>{ _ast_to_ir.Fini(); }
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Run</span><span class="hljs-params">()</span>  </span>{ _ast_to_ir.Convert(); }
+<span class="hljs-keyword">private</span>:
+    AST_TO_IR _ast_to_ir;       
+};
+</div></code></pre>
+</li>
+<li>
+<p>IR Lowering Pass</p>
+<p>This pass is built on top of IR_LOWERING module, which traverse IR and lower nodes to next level.</p>
+<pre class="hljs"><code><div><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">IR_LOWERING_PASS</span> :</span> <span class="hljs-keyword">public</span> PASS_BASE {
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Init</span><span class="hljs-params">()</span> </span>{ _ir_lowering.Init(); }
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Fini</span><span class="hljs-params">()</span> </span>{ _ir_lowering.Fini(); }
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Run</span><span class="hljs-params">()</span>  </span>{ _ir_lowering.Lower(); }
+<span class="hljs-keyword">private</span>:
+    IR_LOWERING _ir_lowering;       
+};
+</div></code></pre>
+</li>
+<li>
+<p>IR to source pass</p>
+<p>This pass is built on top of IR_TO_SRC module, which traverse IR and generate source code from nodes.</p>
+<pre class="hljs"><code><div><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">IR_TO_SRC_PASS</span> :</span> <span class="hljs-keyword">public</span> PASS_BASE {
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Init</span><span class="hljs-params">()</span> </span>{ _ir_to_src.Init(); }
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Fini</span><span class="hljs-params">()</span> </span>{ _ir_to_src.Fini(); }
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Run</span><span class="hljs-params">()</span>  </span>{ _ir_to_src.IR_to_src(); }
+<span class="hljs-keyword">private</span>:
+    IR_TO_SRC _ir_to_src;   
+};
+</div></code></pre>
+</li>
+</ul>
+<h3 id="pass-manager">Pass Manager</h3>
+<p>In this example, we demonstrate two different approaches to organize the compilation pipeline. 4-stage straightline pipeline (Parse - AST to IR - Lower - IR to source) and 3-stage pipeline (Frontend - Lower - IR to source) with first stage made up by a 2-stage pipeline (Parse - AST to IR).</p>
+<ul>
+<li>
+<p>4-stage pipeline</p>
+<p>Set up a straightline 4-stage pipeline with PASS_MANAGER to invoke 4 passes above directly.</p>
+<pre class="hljs"><code><div><span class="hljs-keyword">typedef</span> PASS_MANAGER&lt;LANG_PARSER_PASS,
+                     AST_TO_IR_PASS,
+                     IR_LOWERING_PASS,
+                     IR_TO_SRC_PASS&gt; MAIN_PIPELINE;
+</div></code></pre>
+</li>
+<li>
+<p>3-stage pipeline with first stage made-up by a 2-stage pipeline</p>
+<p>Set up a straight line 2-stage pipeline with PASS_MANAGER as FRONT_END_PASS, then set up a straight line 3-stage pipeline as MAIN_PIPELINE.</p>
+<pre class="hljs"><code><div><span class="hljs-keyword">typedef</span> PASS_MANAGER&lt;LANG_PARSER_PASS,
+                     AST_TO_IR_PASS&gt; FRONT_END_PIPELINE;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FRONT_END_DRIVER</span> :</span> <span class="hljs-keyword">public</span> DRIVER_BASE {
+<span class="hljs-keyword">public</span>:
+   FRONT_END_PIPELINE _pipeline;
+   AST_TO_SYM_MAP     _sym_map;
+   AST_TO_TY_MAP      _ty_map;
+};
+<span class="hljs-keyword">typedef</span> PASS_MANAGER&lt;DRIVER_TO_PASS&lt;FRONT_END_DRIVER&gt;,
+                     IR_LOWERING_PASS,
+                     IR_TO_SRC_PASS&gt; MAIN_PIPELINE;
+</div></code></pre>
+</li>
+</ul>
+<h3 id="main-driver">Main Driver</h3>
+<p>Once the main pipeline is set up, it can be integrated into DRIVER to drive the whole compilation process.</p>
+<pre class="hljs"><code><div><span class="hljs-comment">// Driver class interface</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DRIVER</span> {</span>
+<span class="hljs-keyword">public</span>:
+    DRIVER(<span class="hljs-keyword">int</span> argc, <span class="hljs-keyword">char</span>* argv);
+    <span class="hljs-comment">// initialize the compiler</span>
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Init</span><span class="hljs-params">()</span></span>;
+    <span class="hljs-comment">// run main compilation pipeline</span>
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Run</span><span class="hljs-params">()</span></span>;
+    <span class="hljs-comment">// finalize the compiler</span>
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Fini</span><span class="hljs-params">()</span></span>;
+<span class="hljs-keyword">private</span>:
+    OPTIONS       _opts;  <span class="hljs-comment">// parse command line options</span>
+    MAIN_PIPELINE _main;  <span class="hljs-comment">// compilation pipeline</span>
+};
+
+<span class="hljs-comment">// Driver class implementation</span>
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">DRIVER::Init</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-comment">// Parse options</span>
+    _opts.Init();
+    <span class="hljs-comment">// Init pass manager and all passes in the pipeline</span>
+    _main.Init();
+}
+
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">DRIVER::Run</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-comment">// run main pipeline</span>
+    _main.Run();
+}
+
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">DRIVER::Fini</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-comment">// finalize main pipeline</span>
+    _main.Fini();
+    <span class="hljs-comment">// finalize options</span>
+    _opts.Fini();
+}
+
+<span class="hljs-comment">// Finally we can define main()</span>
+<span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-keyword">int</span> argc, <span class="hljs-keyword">char</span>* argv[])</span> </span>{
+    <span class="hljs-function">DRIVER <span class="hljs-title">driver</span><span class="hljs-params">(argc, argv)</span></span>;
+    driver.Init();
+    driver.Pre_run();
+    driver.Run();
+    driver.Post_run();
+    driver.Fini();
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+</div></code></pre>
+<h2 id="a-complex-example">A Complex Example</h2>
+<p>Consider a more complex scenario. We have a basic compiler infrastructure with the following modules:</p>
+<ul>
+<li>IR Base. Defines IR data structures.</li>
+<li>IR Core. Defines core types and operators.</li>
+<li>IR Lowering. Lower high level types and operators to low level.</li>
+<li>IR a2b. Generate IR binary form from ascii form.</li>
+<li>IR to C. Generate C code from IR.</li>
+</ul>
+<p>Based on these modules, we can assemble a simple compiler with 3 stages include IR a2b, IR Lowering and IR to C.</p>
+<p>An enhanced compiler with extended IR (XIR) definitions, front end, multiple optimization and lowering phases and IR to C modules:</p>
+<ul>
+<li>XIR Core. Defines extended types and operators.</li>
+<li>XIR Lowering. Lower high level types and operators to low level.</li>
+<li>XIR Opt. Optimization on XIR.</li>
+<li>XIR Frontend (FE). Front end parse XIR Lang and generate XIR.</li>
+<li>XIR to C. Generate C code from XIR.</li>
+</ul>
+<p>Base modules are re-used by class composition. XIR Core references IR Core to operate core types and operators, as well as XIR Lowering and XIR to C. Based on XIR modules, we can assemble a extended compiler with 5 stages include XIR FE, XIR Lowering, XIR Optimization, XIR Lowering, XIR to C.</p>
+<pre><code class="language-mermaid"><div class="mermaid">flowchart LR
+A[[IR Base]]
+B[[IR Core]]
+C[[IR Lowering]]
+D[[IR a2b]]
+E[[IR to C]]
+H[[XIR Core]]
+I[[XIR Lowering]]
+J[[XIR Opt]]
+K[[XIR FE]]
+L[[XIR to C]]
+
+E ~~~ C
+K ~~~ J
+L ~~~ K
+D ~~~ E
+
+B--oH
+C--oI
+E--oL
+
+C & D & E -.-> B -.-> A
+I & J & K & L -.-> H
+
+A1-.->D
+A2-.->C
+A3-.->E
+B1-.->K
+B2-.->I
+B3-.->J
+B4-.->I
+B5-.->L
+subgraph Basic Compiler A with 3-stage pipeline
+A0[(ascii)]==>A1((IR a2b))==>A2((IR Lower))==>A3((IR to C))==>A5[(C code)]
+end
+subgraph X Compiler B with 5-stage pipeline
+B0[(X Lang)]==>B1(((XIR FE)))==>B2((XIR lower))==>B3((XIR Opt))==>B4((XIR Lower))==>B5((XIR to C))==>B6[(C code)]
+end
+</div></code></pre>
+<h2 id="files">Files</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Location</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PassManager.md</td>
+<td>air-infra/docs</td>
+<td>This document</td>
+</tr>
+<tr>
+<td>pass.h</td>
+<td>air-infra/include/air/driver</td>
+<td>Pass header file, #include &quot;air/driver/pass.h&quot;</td>
+</tr>
+<tr>
+<td>pass_mgr.h</td>
+<td>air-infra/include/air/driver</td>
+<td>Pass Manager header file, #include &quot;air/driver/pass_mgr.h&quot;</td>
+</tr>
+<tr>
+<td>driver.h</td>
+<td>air-infra/include/air/driver</td>
+<td>Driver header file, #include &quot;air/driver/driver.h&quot;</td>
+</tr>
+<tr>
+<td>pass.cxx</td>
+<td>air-infra/driver/src</td>
+<td>Pass source file</td>
+</tr>
+<tr>
+<td>pass_mgr.cxx</td>
+<td>air-infra/driver/src ｜Pass Manager source file</td>
+<td></td>
+</tr>
+<tr>
+<td>driver.cxx</td>
+<td>air-infra/driver/src ｜Driver source file</td>
+<td></td>
+</tr>
+<tr>
+<td>pass.cxx</td>
+<td>air-infra/driver/unittest</td>
+<td>Google test based unit test</td>
+</tr>
+<tr>
+<td>pass_mgr.cxx</td>
+<td>air-infra/driver/unittest</td>
+<td>Google test based unit test</td>
+</tr>
+<tr>
+<td>driver.cxx</td>
+<td>air-infra/driver/unittest</td>
+<td>Google test based unit test</td>
+</tr>
+</tbody>
+</table>
+
+</body>
+</html>

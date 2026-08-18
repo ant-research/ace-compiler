@@ -1,0 +1,223 @@
+//-*-c++-*-
+//=============================================================================
+//
+// Copyright (c) Ant Group Co., Ltd
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//=============================================================================
+
+#ifndef AIR_UTIL_MEM_POOL_H
+#define AIR_UTIL_MEM_POOL_H
+
+#include <stddef.h>
+
+#include "air/util/mem_block.h"
+
+namespace air {
+
+namespace util {
+
+/**
+ * @brief General memory pool
+ *
+ * @tparam BLK_SIZE Size in byte for underlying memory block
+ */
+template <uint32_t BLK_SIZE>
+class MEM_POOL {
+public:
+  /**
+   * @brief Construct a new general memory pool object
+   *
+   */
+  MEM_POOL() : _mem_block(nullptr), _mem_large_block(nullptr) {}
+
+  /**
+   * @brief Destroy the general memory pool object. All blocks are freed.
+   *
+   */
+  ~MEM_POOL() {
+    Free_block(_mem_block, (MEM_BLOCK<BLK_SIZE>*)nullptr);
+    Free_block(_mem_large_block, (MEM_LARGE_BLOCK*)nullptr);
+  }
+
+  /**
+   * @brief Allocate n bytes from the pool
+   *
+   * @param n Size in byte to be allocated
+   * @return char* Pointer to the allocated buffer
+   */
+  char* Allocate(size_t n) {
+    if (n > MEM_BLOCK<BLK_SIZE>::MAX_AVAIL_SIZE) {
+      // create a large block
+      MEM_LARGE_BLOCK* blk = MEM_LARGE_BLOCK::Create(n);
+      AIR_ASSERT(blk != nullptr);
+      blk->Prev(_mem_large_block);
+      _mem_large_block = blk;
+      return blk->Address();
+    } else {
+      char* buf;
+      if (_mem_block && (buf = _mem_block->Allocate(n)) != nullptr) {
+        // allocated memory from current memory block
+        return buf;
+      }
+      // create a new block to allocate memory
+      MEM_BLOCK<BLK_SIZE>* blk = MEM_BLOCK<BLK_SIZE>::Create();
+      AIR_ASSERT(blk != nullptr);
+      blk->Prev(_mem_block);
+      _mem_block = blk;
+      return blk->Allocate(n);
+    }
+  }
+
+  /**
+   * @brief Deallocate memory (actually do nothing)
+   *
+   * @param p Pointer to the buffer to be deallocated
+   * @param n Size in byte of the buffer
+   */
+  void Deallocate(char* p, size_t n) {
+#ifdef MPOOL_DEBUG
+    if (n == 0 || n > MEM_BLOCK<BLK_SIZE>::MAX_AVAIL_SIZE) {
+      MEM_LARGE_BLOCK* blk  = _mem_large_block;
+      MEM_LARGE_BLOCK* prev = nullptr;
+      while (blk) {
+        if (blk->Address() == p) {
+          if (prev == NULL) {
+            _mem_large_block = blk->Prev();
+          } else {
+            prev->Prev(blk->Prev());
+          }
+          MEM_LARGE_BLOCK::Destroy(blk);
+          return;
+        }
+        prev = blk;
+        blk  = blk->Prev();
+      }
+      AIR_ASSERT(n == 0);
+    }
+    MEM_BLOCK<BLK_SIZE>* blk = _mem_block;
+    while (blk) {
+      if (blk->Contains(p)) {
+        blk->Deallocate(p, n);
+        return;
+      }
+      blk = blk->Prev();
+    }
+    AIR_ASSERT_MSG(false, "deallocate not find the pointer");
+#endif
+  }
+
+protected:
+  // Free blocks from mem_blk to prev_blk. Reset mem_blk to prev_blk
+  template <typename MEM_BLOCK>
+  void Free_block(MEM_BLOCK*& mem_blk, MEM_BLOCK* prev_blk) {
+    MEM_BLOCK* mb_ptr = mem_blk;
+    while (mb_ptr != prev_blk) {
+      MEM_BLOCK* to_free = mb_ptr;
+      mb_ptr             = mb_ptr->Prev();
+      MEM_BLOCK::Destroy(to_free);
+    }
+    mem_blk = prev_blk;
+  }
+
+  // Linked list for all normal blocks
+  MEM_BLOCK<BLK_SIZE>* _mem_block;
+
+  // Linked list for all large blocks
+  MEM_LARGE_BLOCK* _mem_large_block;
+
+};  // class MEM_POOL
+
+/**
+ * @brief Stacked memory pool with Push()/Pop() to ease memory management in
+ * compiler pipeline. Before entering a new pass, call Push() to make a mark and
+ * after exiting the pass, call Pop() so that all new memory allocated in the
+ * pass can be deallocated at once.
+ *
+ * @tparam BLK_SIZE
+ */
+template <uint32_t BLK_SIZE>
+class STACKED_MEM_POOL : public MEM_POOL<BLK_SIZE> {
+public:
+  /**
+   * @brief Construct a new stacked memory pool object
+   *
+   */
+  STACKED_MEM_POOL() : _marker(nullptr) {}
+
+  /**
+   * @brief Destroy the stacked memory pool object
+   *
+   */
+  ~STACKED_MEM_POOL() { AIR_ASSERT(_marker == nullptr); }
+
+  /**
+   * @brief Push a mark to save current memory pool status so that when Pop()
+   * is called, the status can be restored and memory allocated since the mark
+   * can be deallocated at once.
+   *
+   */
+  void Push() {
+    uint32_t cur_watermark           = _mem_block ? _mem_block->Watermark() : 0;
+    MEM_BLOCK<BLK_SIZE>* cur_mem_blk = _mem_block;
+    MEM_LARGE_BLOCK*     cur_large_blk = _mem_large_block;
+    MARKER* marker = (MARKER*)MEM_POOL<BLK_SIZE>::Allocate(sizeof(MARKER));
+    AIR_ASSERT(marker != NULL);
+    marker->_prev            = _marker;
+    marker->_mem_block       = cur_mem_blk;
+    marker->_mem_large_block = cur_large_blk;
+    marker->_watermark       = cur_watermark;
+    marker->_magic           = MEM_BLOCK_MAGIC::MARKER;
+    _marker                  = marker;
+  }
+
+  /**
+   * @brief Find out the previous mark generated by Push(), deallocate all
+   * memory allocated since the mark. Restore the whole memory pool to the
+   * mark.
+   *
+   */
+  void Pop() {
+    AIR_ASSERT(_marker != nullptr);
+    MARKER*              prev_marker    = _marker->_prev;
+    MEM_BLOCK<BLK_SIZE>* prev_mem_blk   = _marker->_mem_block;
+    MEM_LARGE_BLOCK*     prev_large_blk = _marker->_mem_large_block;
+    uint32_t             cur_watermark  = _marker->_watermark;
+    AIR_ASSERT(_marker->_magic == MEM_BLOCK_MAGIC::MARKER);
+    Free_block(_mem_large_block, prev_large_blk);
+    Free_block(_mem_block, prev_mem_blk);
+    if (prev_mem_blk) {
+      AIR_ASSERT(prev_mem_blk == _mem_block);
+      prev_mem_blk->Watermark(cur_watermark);
+    }
+    _marker = prev_marker;
+  }
+
+protected:
+  // Mark to save and restore the status of the memory pool
+  struct MARKER {
+    // Previous marker generated by Push()
+    MARKER* _prev;
+    // Pointer to current normal block when Push() is called
+    MEM_BLOCK<BLK_SIZE>* _mem_block;
+    // Pointer to current large block when Push() is called
+    MEM_LARGE_BLOCK* _mem_large_block;
+    // Watermark of current normal block when Push() is called
+    uint32_t _watermark;
+    // Magic number for debug purpose
+    uint32_t _magic;
+  };  // MARKER
+
+  using MEM_POOL<BLK_SIZE>::_mem_block;
+  using MEM_POOL<BLK_SIZE>::_mem_large_block;
+  using MEM_POOL<BLK_SIZE>::Free_block;
+
+  // Pointer to latest marker
+  MARKER* _marker;
+};  // class STACKED_MEM_POOL
+
+}  // namespace util
+
+}  // namespace air
+
+#endif  // AIR_UTIL_MEM_POOL_H

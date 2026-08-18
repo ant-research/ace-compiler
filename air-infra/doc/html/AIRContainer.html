@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>AIRContainer.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="air-code-design-and-implementation">AIR Code Design and Implementation</h1>
+<pre><code class="language-mermaid"><div class="mermaid">graph BT
+    FS(class FUNC_SCOPE) -. pointer member of .-> C(class CONTAINER)
+    GS(class GLOB_SCOPE) -. pointer member of .-> C
+    SL(class STMT_LIST) -. pointer member of .-> C
+    NP(typedef NODE_PTR) -- member of --> SL
+    NS(class NODE) -. template initialized .-> NP
+    NDP(typedef NODE_DATA_PTR) -- member of --> NS
+    C -. pointer member of .-> NS
+    N(class NODE_DATA) -. template initialized .-> NDP
+    O(enum OPCODE) -- member of --> N
+    SPI(typedef SPOS_ID) -- member of --> N
+</div></code></pre>
+<h2 id="container">Container</h2>
+<p>An AIR container holds codes in AIR form as its data, provides manipulation APIs
+like new, delete, get etc., can be an input (and output if not changed
+in place) of lowering or optimzation.</p>
+<p>A container class has a statement list for codes of a function,
+a function scope for the (local) symbol table of the function
+and a global scope for the global symbol table.</p>
+<pre class="hljs"><code><div>class CONTAINER {
+public:
+  FUNC_SCOPE* Func_scope(void) const { return _func; }
+  GLOB_SCOPE* Glob_scope(void) const { return _glob; }
+  STMT_LIST*  Stmt_list(void) const { return _stmt_list; }
+  STMT_PTR    Begin_stmt(void) const;
+  STMT_PTR    End_stmt(void) const;
+  NODE_PTR    Node(NODE_ID node) const;
+  STMT_PTR    Stmt(STMT_ID stmt) const;
+
+  NODE_PTR New_void(CONST_SPOS_PTR spos);
+  NODE_PTR New_stmt_block(CONST_SPOS_PTR spos);
+  STMT_PTR New_if_then_else(CONST_NODE_PTR cond, NODE_PTR then_b,
+                            NODE_PTR else_b, CONST_SPOS_PTR spos);
+  STMT_PTR New_do_loop(NODE_PTR comp, NODE_PTR incr, NODE_PTR body,
+                       CONST_SPOS_PTR spos);
+  ...
+
+  NODE_PTR New_cust_node(air::core::OPCODE op, uint32_t num_opnd,
+                         CONST_SPOS_PTR spos);
+  void     New_cust_opnd(NODE_PTR cust, uint32_t num, CONST_NODE_PTR arg);
+  STMT_PTR New_cust_stmt(air::core::OPCODE op, CONST_TMP_VAR_PTR retv,
+                         uint32_t num_opnd, CONST_SPOS_PTR spos);
+  void     New_cust_arg(STMT_PTR cust, uint32_t num, CONST_NODE_PTR arg);
+  bool     Verify_cust_stmt(CONST_STMT_PTR cust);
+
+  void Print(FILE* f = stdout);
+
+private:
+  FUNC_SCOPE* _func;
+  GLOB_SCOPE* _glob;
+  STMT_LIST*  _stmt_list;
+};
+</div></code></pre>
+<h2 id="statement-list">Statement List</h2>
+<p>A statement list holds code statements in AIR form stored in a NODE_PTR and APIs manipulating statements like get, set, insert etc.</p>
+<pre class="hljs"><code><div>class STMT_LIST {
+public:
+  STMT_LIST(NODE_PTR code);
+
+  CONTAINER* Container(void) const;
+  NODE_PTR   Node(void) const { return _node; }
+
+  STMT_PTR Begin_stmt(void) const;
+  STMT_ID  Begin_stmt_id(void) const;
+  STMT_PTR End_stmt(void) const;
+  STMT_ID  End_stmt_id(void) const;
+
+  void Begin_stmt(STMT_PTR stmt);
+  void Begin_stmt(STMT_ID stmt);
+  void End_stmt(STMT_PTR stmt);
+  void End_stmt(STMT_ID stmt);
+
+  bool Is_empty(void) const;
+
+  STMT_PTR Insert(STMT_PTR pos, STMT_PTR stmt);
+  STMT_PTR Remove(STMT_PTR pos);
+  STMT_PTR Append(STMT_PTR stmt);
+  STMT_PTR Erase(STMT_PTR pos);
+
+  void Print(FILE* f = stdout);
+
+private:
+  NODE_PTR _node;
+};
+</div></code></pre>
+<p>A statement list starts with a code block NODE.</p>
+<pre><code class="language-mermaid"><div class="mermaid">graph TD
+N(NODE) -- OP_block --> B(Code Block NODE)
+B --> BSI(Begin STMT ID)
+B --> ESI(End STMT ID)
+B --> PSI(Parent STMT ID)
+</div></code></pre>
+<h2 id="node">Node</h2>
+<p>An AIR node represents an AIR operation like call, sub, add etc.
+It is accessed via a smart pointer NODE_PTR that points to NODE,
+where raw data (via NODE_DATA_PTR) and the container that it resides are stored.</p>
+<p>NODE_DATA_PTR is a smart pointer to NODE_DATA that stores information of
+its operation like opcode, operands, source position and result type.</p>
+<pre class="hljs"><code><div>typedef PTR&lt;NODE&gt;          NODE_PTR;
+
+class NODE {
+public:
+  NODE_ID     Id(void) const;
+  CONTAINER*  Container(void) const;
+  FUNC_SCOPE* Func_scope(void);
+  GLOB_SCOPE* Glob_scope(void);
+  const char* Name(void) const;
+  ...
+  void Print(FILE* f = stdout);
+
+private:
+  CONTAINER*    _cont;
+  NODE_DATA_PTR _data;
+};
+
+typedef PTR_FROM_DATA&lt;NODE_DATA&gt; NODE_DATA_PTR;
+
+class NODE_DATA {
+public:
+  friend class NODE;
+  friend class STMT;
+  friend class STMT_DATA;
+  friend class CONTAINTER;
+
+private:
+  NODE_DATA();
+  NODE_DATA(air::core::OPCODE opc, SPOS_ID sid, TYPE_ID tid);
+  ...
+
+  struct COMM {
+    union {
+      struct {
+        uint32_t _opcode : 8;
+        uint32_t _padding : 24;
+      } _opcode;
+      ...
+    }
+    SPOS_ID _spos;
+  } _comm;
+};
+</div></code></pre>
+<h2 id="node-id-and-statement-id">Node ID and Statement ID</h2>
+<p>The IDs of NODE and STMT are built to be strongly typed from uint32_t.</p>
+<pre class="hljs"><code><div>template &lt;typename T&gt;
+class ID {
+public:
+  explicit ID(uint32_t id = Null_prim_id) : _id(id) {}
+  uint32_t Value(void) const { return _id; }
+
+  bool operator==(ID&lt;T&gt; o) const { return _id == o._id; }
+  bool operator!=(ID&lt;T&gt; o) const { return !(*this == o); }
+  bool operator&lt;(ID&lt;T&gt; o) const { return _id &lt; o._id; }
+  bool operator!() const { return _id == Null_prim_id; }
+
+  template &lt;typename F&gt;
+  ID(ID&lt;F&gt; id);
+
+  typedef T DOMAIN_TYPE;
+
+private:
+  template &lt;typename F&gt;
+  T* Check_iconv();
+
+  uint32_t _id;
+};
+
+typedef ID&lt;NODE_DATA&gt; NODE_ID;
+typedef ID&lt;STMT_DATA&gt; STMT_ID;
+</div></code></pre>
+<h2 id="statement">Statement</h2>
+<p>AIR statement data structure, besides NODE data, it holds links to its previous and next statements. Similar to AIR node, a statement is accessed via STMTPTR. A NODE can represent an expression or a statement, and statements in AIR are: control flow, call, store, label, region and pragma.</p>
+<pre class="hljs"><code><div>typedef PTR&lt;STMT&gt;          STMT_PTR;
+
+class STMT {
+public:
+  STMT_ID     Id() const;
+  CONTAINER*  Container() const;
+  FUNC_SCOPE* Func_scope() const;
+  GLOB_SCOPE* Glob_scope() const;
+  ...
+
+  void Print(FILE* f = stdout);
+
+private:
+  CONTAINER*    _cont;
+  STMT_DATA_PTR _data;
+};
+
+typedef PTR_FROM_DATA&lt;STMT_DATA&gt; STMT_DATA_PTR;
+
+class STMT_DATA {
+public:
+  friend class NODE;
+  friend class STMT;
+  friend class CONTAINER;
+
+private:
+  STMT_DATA() : _prev(Null_id), _next(Null_id), _data() {}
+  STMT_DATA(air::core::OPCODE opc, SPOS_ID sid)
+      : _prev(Null_id), _next(Null_id), _data(opc, sid, TYPE_ID()) {}
+
+  STMT_DATA(const STMT_DATA&amp; node)
+      : _prev(node._prev), _next(node._next), _data(node._data) {}
+  STMT_ID   _prev;
+  STMT_ID   _next;
+  NODE_DATA _data;
+};
+</div></code></pre>
+<h2 id="symbol-table-id">Symbol Table ID</h2>
+<p>Similar to node id, but used for symbol table related data. Take TYPE as an example:</p>
+<pre class="hljs"><code><div>typedef ID_BASE&lt;TYPE&gt; TYPE_ID;
+
+template &lt;typename T&gt;
+class ID_BASE {
+public:
+  explicit ID_BASE(uint32_t id = NULL_ST_ID) : _id(id) {}
+  ID_BASE(uint32_t idx, uint32_t scope) { _id = (scope &lt;&lt; ID_WIDTH) + idx; }
+  bool Is_null() const { return (_id == Null_st_id); }
+  ...
+private:
+  uint32_t _id;
+};
+
+class TYPE {
+public:
+  TYPE_ID Id() const { return TYPE_ID(_type.Id().Value(), 0); }
+  ...
+protected:
+  TYPE(GLOB_SCOPE* glob, TYPE_DATA_PTR type) : _glob(glob), _type(type) {}
+  bool Is_null() const { return Id().Is_null(); }
+  ...
+  GLOB_SCOPE*   _glob;
+  TYPE_DATA_PTR _type;
+};
+
+typedef PTR_FROM_DATA&lt;TYPE_DATA&gt; TYPE_DATA_PTR;
+
+template &lt;typename T&gt;
+class PTR_FROM_DATA {
+public:
+  // id is assigned by mempool allocate API
+  PTR_FROM_DATA(T* obj, ID&lt;T&gt; id) : _obj(obj), _id(id) {}
+  ID&lt;T&gt; Id() const { return _id; }
+  bool Is_null() const { return !_obj; }
+  ...
+private:
+  T*    _obj;
+  ID&lt;T&gt; _id;
+};
+
+template &lt;typename T&gt;
+class ID {
+public:
+  explicit ID(uint32_t id = Null_prim_id) : _id(id) {}
+  ...
+private:
+  uint32_t _id;
+};
+
+typedef PTR&lt;TYPE&gt; TYPE_PTR;
+
+template &lt;typename T&gt;
+class PTR : public PTR_TO_CONST&lt;T&gt; {
+public:
+  explicit PTR(const T&amp; ptr) : BASE_TYPE(ptr) {}
+  FWD_TYPE* operator-&gt;() const { return const_cast&lt;FWD_TYPE*&gt;(&amp;this-&gt;_ptr); }
+  ...
+}
+
+template &lt;class T&gt;
+class PTR_TO_CONST {
+public:
+  explicit PTR_TO_CONST(const T&amp; ptr) : _ptr(ptr) {}
+  FWD_TYPE* operator-&gt;() const { return const_cast&lt;FWD_TYPE*&gt;(&amp;_ptr); }
+  ...
+protected:
+  bool Is_null() const { return _ptr.Is_null(); }
+  T    _ptr;
+};
+</div></code></pre>
+<h2 id="opcode">OPCODE</h2>
+<p>Meta info is maintained in AIR where built-in opcodes are loaded and users can
+declare a new domain and add domain-specific opcodes to it. Up to 6-bits numbers of domain
+(including built-in one) are allowed and each can define up to 10-bits numbers of opcodes
+for each domain.</p>
+<p>The following are built-in opcodes:</p>
+<h3 id="ldid">$ldid$</h3>
+<blockquote>
+<p>An $ldid$ NODE uses fields ${sym_id, field_id, offset, rtype, spos}$</p>
+<ul>
+<li>Use ${ldid, sym_id, -1, 0, rtype, spos}$, to load a symbol</li>
+<li>Use ${ldid, sym_id, field_id, offset, field_type, spos}$, to load a field of a structure</li>
+</ul>
+</blockquote>
+<h2 id="source-position">Source Position</h2>
+<pre class="hljs"><code><div>class SPOS_DATA {
+public:
+  SPOS_DATA(FILEID f, uint32_t line, uint32_t col, uint32_t count);
+  FILEID   File(void) const;
+  uint32_t Line(void) const;
+  uint32_t Col(void) const;
+  uint32_t Count(void) const;
+  ...
+
+  void Print(FILE* f = stdout);
+};
+</div></code></pre>
+<h2 id="file-table-entry">File Table Entry</h2>
+<pre class="hljs"><code><div></div></code></pre>
+<h2 id="function-scope">Function Scope</h2>
+<pre class="hljs"><code><div>class FUNC_SCOPE : public SCOPE_BASE {
+public:
+  ~FUNC_SCOPE();
+
+  GLOB_SCOPE&amp; Glob_scope() const;
+  FUNC_SCOPE* Parent_func_scope() const;
+  FUNC_ID     Id() const;
+  FUNC_PTR    Ptr() const;
+  const char* Entry_str() const;
+  uint32_t    Scope_level() const;
+  CONTAINER&amp;  Container() const { return *_cont; };
+  uint32_t    Block_id() const;
+  void        Block_id(uint32_t id);
+
+  ADDR_DATUM_PTR  New_var(CONST_TYPE_PTR type,
+                          CONST_NAME_PTR name = CONST_NAME_PTR(),
+                          CONST_SPOS_PTR spos = CONST_SPOS_PTR());
+  ...
+  void Print(FILE* f = stdout);
+
+private:
+  FUNC_ID     _id;
+  LABEL_TAB*  _label_tab;
+  FUNC_SCOPE* _parent;
+  GLOB_SCOPE* _glob_scope;
+  CONTAINER*  _cont;
+};
+</div></code></pre>
+<h2 id="global-scope">Global Scope</h2>
+<pre class="hljs"><code><div>class GLOB_SCOPE : public SCOPE_BASE {
+public:
+  uint32_t  Id();
+  NAME_PTR  New_name(CONST_TYPE_PTR type, CONST_STR_PTR name);
+  SYM_PTR   New_var(CONST_TYPE_PTR type, CONST_NAME_PTR name = CONST_NAME_PTR(),
+                    CONST_SPOS_PTR spos = CONST_SPOS_PTR());
+  ...
+  void Print(FILE* f = stdout);
+
+  // Add write checker in all iterator
+  FILE_ITR       Begin_file(void);
+  FILE_ITR       End_file(void);
+  STR_ITR        Begin_str(void);
+  STR_ITR        End_str(void);
+  NAME_ITR       Begin_name(void);
+  NAME_ITR       End_name(void);
+  TYPE_ITR       Begin_type(void);
+  TYPE_ITR       End_type(void);
+  CONSTANT_ITR   Begin_const(void);
+  CONSTANT_ITR   End_const(void);
+  FUNC_SCOPE_ITR Begin_func_scope(void);
+  FUNC_SCOPE_ITR End_func_scope(void);
+  FUNC_ITR       Begin_func(void);
+  FUNC_ITR       End_func(void);
+
+private:
+  AUX_TAB*      _aux_tab;
+  NAME_TAB*     _name_tab;
+  TYPE_TAB*     _type_tab;
+  CONSTANT_TAB* _const_tab;
+  PARAM_TAB*    _param_tab;
+  SPOS_TAB*     _spos_tab;
+  STR_TAB*      _str_tab;
+  FILE_TAB*     _file_tab;
+};
+</div></code></pre>
+<h2 id="type">Type</h2>
+<p>A type data consists of its kind, name, source position (if there is) and attributes of
+different types.</p>
+<pre class="hljs"><code><div>typedef PTR_FROM_DATA&lt;TYPE_DATA&gt;        TYPE_DATA_PTR;
+
+class TYPE_DATA {
+public:
+  TYPE_DATA(GENERIC_TYPE_TRAIT kind);
+
+  GENERIC_TYPE_TRAIT Kind() const;
+
+  SPOS_ID Spos() const { return _spos; }
+  NAME_ID Name() const { return _name; }
+
+protected:
+  NAME_ID  _name;
+  SPOS_ID  _spos;
+  union {
+    struct {
+      uint32_t _kind : 8;
+      uint32_t _rec_scoped : 1;
+      uint32_t _implicit : 1;
+      uint32_t _strongly_typed : 3;
+      uint32_t _reserved : 3;
+      uint32_t _padding : 16;
+    } _info;
+
+    struct {
+      uint32_t _com_bits : 16;
+      uint32_t _encoding : 8;
+      uint32_t _reserved : 8;
+    } _prim_info;
+
+  } _u;
+};
+</div></code></pre>
+<h2 id="constant">Constant</h2>
+<h2 id="todo-list">TODO List</h2>
+<ol>
+<li>Ir_b2a</li>
+<li>Ir_a2b</li>
+<li>Ir_b2c</li>
+<li>InitObj</li>
+<li>Write out MAPs (no Pointers)</li>
+<li>IR Backward compatibility</li>
+</ol>
+
+</body>
+</html>

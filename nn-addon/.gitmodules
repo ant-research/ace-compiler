@@ -1,0 +1,12 @@
+[submodule "third-party/benchmark"]
+	path = third-party/benchmark
+	url = https://code.alipay.com/opencc/benchmark.git
+	branch = 2dd015dfef425c866d9a43f2c67d8b52d709acb6 #  v1.8.0
+[submodule "third-party/onnx"]
+	path = third-party/onnx
+	url = https://code.alipay.com/air-infra/onnx.git
+	branch = 33fd7f9e3e59d892faf2c20f8c6818bd816a4245   # feat-ACI_v1.9.0
+[submodule "third-party/googletest"]
+	path = third-party/googletest
+	url = https://code.alipay.com/opencc/googletest.git
+	branch = v1.13.0
