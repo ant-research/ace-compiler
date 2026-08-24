@@ -26,7 +26,7 @@ To support artifact evaluation, we provide detailed instructions, including envi
 **Hardware Setup:**  
 - Intel Xeon Platinum 8369B CPU @ 2.70 GHz  
 - 1 TB memory
-- 100 GB free disk space
+- 300 GB free disk space
 
 **Software Requirements:**  
 - x86_64 Linux (64-bit) with Docker enabled
