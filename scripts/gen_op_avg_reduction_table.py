@@ -5,8 +5,8 @@ optimization, comparing baseline (ANT-ACE) vs. individual optimizations.
 Metrics:
   HPAO-MU:  reduction in poly.modup calls  (PRECOMP count)
   HPAO-MD:  reduction in poly.moddown calls (MOD_DOWN count)
-  HPAO-FM:  reduction in poly.encode time   (PT_ENCODE time)
-  HPAO-FM:  reduction in eligible poly.mul time (HW_MUL time)
+  HPAO-FM:  reduction in poly.encode + eligible poly.mul execution time
+            (PT_ENCODE + PT_GET + HW_MUL + MULP_FAST vs PT_ENCODE + HW_MUL)
   HPAO-LM:  reduction in poly.mul/poly.add time (DOT_PROD + BS_DOT_PROD time)
 
 Usage:
@@ -209,29 +209,24 @@ def compute_reductions(models, data):
             reductions.append(red * 100)
     rows.append(("HPAO-MD", r"\texttt{poly.moddown} calls", reductions))
 
-    # HPAO-FM row 1: reduction in poly.encode execution time
-    # Baseline: PT_ENCODE time; FM: PT_ENCODE + PT_GET time
+    # HPAO-FM (merged): reduction in poly.encode/poly.mul execution time
+    # Baseline: PT_ENCODE + HW_MUL time;
+    # FM: PT_ENCODE + PT_GET + HW_MUL + MULP_FAST time
     reductions = []
     for m in models:
         base = data["base"].get(m)
         opt = data["fm_cte"].get(m)
-        if base and opt and base["pt_encode_time"] > 0:
-            fm_encode = opt["pt_encode_time"] + opt["pt_get_time"]
-            red = 1.0 - fm_encode / base["pt_encode_time"]
-            reductions.append(red * 100)
-    rows.append(("HPAO-FM", r"\texttt{poly.encode} execution time", reductions))
-
-    # HPAO-FM row 2: reduction in eligible poly.mul execution time
-    # Baseline: HW_MUL time; FM: HW_MUL + MULP_FAST time
-    reductions = []
-    for m in models:
-        base = data["base"].get(m)
-        opt = data["fm_cte"].get(m)
-        if base and opt and base["hw_mul_time"] > 0:
-            fm_mul = opt["hw_mul_time"] + opt["mulp_fast_time"]
-            red = 1.0 - fm_mul / base["hw_mul_time"]
-            reductions.append(red * 100)
-    rows.append(("HPAO-FM", r"eligible \texttt{poly.mul} execution time", reductions))
+        if base and opt:
+            base_total = base["pt_encode_time"] + base["hw_mul_time"]
+            opt_total = (opt["pt_encode_time"] + opt["pt_get_time"]
+                         + opt["hw_mul_time"] + opt["mulp_fast_time"])
+            if base_total > 0:
+                red = 1.0 - opt_total / base_total
+                reductions.append(red * 100)
+    rows.append(("HPAO-FM",
+                 r"\texttt{poly.encode} + eligible \texttt{poly.mul} "
+                 r"execution time",
+                 reductions))
 
     # HPAO-LM: reduction in poly.mul/poly.add time (DOT_PROD + BS_DOT_PROD)
     reductions = []
@@ -253,8 +248,9 @@ def compute_reductions(models, data):
 PLAIN_EFFECTS = {
     r"\texttt{poly.modup} calls": "poly.modup calls",
     r"\texttt{poly.moddown} calls": "poly.moddown calls",
-    r"\texttt{poly.encode} execution time": "poly.encode execution time",
-    r"eligible \texttt{poly.mul} execution time": "eligible poly.mul execution time",
+    (r"\texttt{poly.encode} + eligible \texttt{poly.mul} "
+     r"execution time"):
+        "poly.encode + eligible poly.mul execution time",
     r"\texttt{poly.mul}/\texttt{poly.add} execution time": "poly.mul/poly.add execution time",
 }
 
@@ -277,7 +273,7 @@ def fmt_pct(val):
 def print_plain_table(rows):
     """Print a plain-text summary table with both arithmetic and geometric means."""
     headers = ["Opt.", "Measured Effect", "Arith. Mean", "Geom. Mean"]
-    widths = [8, 45, 12, 12]
+    widths = [8, 50, 12, 12]
     fmt = "  ".join(f"{{:<{w}}}" for w in widths)
     print(fmt.format(*headers))
     print("  ".join("-" * w for w in widths))
@@ -300,7 +296,7 @@ def print_latex_table(rows):
         r"\begin{table}[t]",
         r"    \centering",
         r"    \caption{Average operator-level improvements across all evaluated "
-        r"model variants (8 models $\times$ 2 polynomial ReLU settings). "
+        r"model variants (7 models $\times$ 2 polynomial ReLU settings). "
         r"For \HPAOLM, the reported result includes both compiler- and "
         r"bootstrap-level lazy-reduction optimizations.}",
         r"    \label{tab:op-summary}",

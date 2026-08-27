@@ -26,14 +26,14 @@ To support artifact evaluation, we provide detailed instructions, including envi
 **Hardware Setup:**  
 - Intel Xeon Platinum 8369B CPU @ 2.70 GHz  
 - 1 TB memory
-- 300 GB free disk space
+- 500 GB free disk space
 
 **Software Requirements:**  
 - x86_64 Linux (64-bit) with Docker enabled
 - Detailed in the [*Dockerfile*](https://github.com/ant-research/ace-compiler/blob/hpao/Dockerfile) for Docker container version 26.1.3
 - Docker image based on Ubuntu 24.04
 
-Encrypted inference is both compute-intensive and memory-intensive. A computer with at least **512GB** of memory is required to perform artifact evaluation for our work.
+Encrypted inference is both compute-intensive and memory-intensive. A computer with at least **1 TB** of memory is required to perform artifact evaluation for our work.
 
 ## Repository Overview
 - **air-infra:** Contains the base components of the ACE compiler with HPAO support.
