@@ -41,6 +41,7 @@ WORKDIR /app
 
 # Copy ace-compiler, scripts and set permissions
 COPY README.md .
+COPY cifar100.md .
 COPY air-infra ace-compiler/air-infra/
 COPY nn-addon ace-compiler/nn-addon/
 COPY fhe-cmplr ace-compiler/fhe-cmplr/
@@ -54,4 +55,5 @@ RUN chmod +x /app/scripts/build_cmplr.sh \
         /app/scripts/run_micro.sh \
         /app/scripts/run_perf.sh \
         /app/scripts/perf_common.sh \
-        /app/scripts/micro_common.sh
+        /app/scripts/micro_common.sh \
+        /app/scripts/apply_cifar100.sh

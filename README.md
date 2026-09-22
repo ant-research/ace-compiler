@@ -43,6 +43,7 @@ Encrypted inference is both compute-intensive and memory-intensive. A computer w
 - **scripts:** Scripts for building and running HPAO and tests, and for generating all figures and tables.
 - **test:** Test related.
 - **README.md:** This [*README*](https://github.com/ant-research/ace-compiler/blob/hpao/README.md) file.
+- **cifar100.md:** Instructions for optionally running the inference pipeline with a CIFAR-100 input image.
 - **Dockerfile:** Used to build the Docker image for running all tests.
 - **requirements.txt:** Specifies Python package requirements.
 
@@ -105,3 +106,19 @@ Here is what you can expect from each file:
   ![Figure8](proof/Figure8.png)
 
 *Note: The appearance of the generated PDF files may vary slightly depending on the hardware environment used.*
+
+### 3. (Optional) Running with CIFAR-100 Input
+
+By default the test drivers use a CIFAR-10 input image. Since CIFAR-10 and
+CIFAR-100 share image dimensions (3 × 32 × 32) and model architectures, you
+can optionally rerun the inference pipeline with a CIFAR-100 input:
+```
+/app/scripts/apply_cifar100.sh            # download CIFAR-100 and patch test drivers
+/app/scripts/run_full.sh > hpao_cifar100.log 2>&1 &
+/app/scripts/apply_cifar100.sh --restore  # revert to original CIFAR-10 inputs
+```
+
+This swap only changes the input data (run times are essentially
+data-independent in FHE). See [*cifar100.md*](cifar100.md) for details,
+including manual dataset download, `--data-dir`, `--dry-run`, and tips for
+skipping the microbenchmarks/build steps to save time.
