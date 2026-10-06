@@ -1,29 +1,47 @@
 # Test Content
 
-## Preparing a DOCKER environment to Build and Test 
+## Preparing a DOCKER environment to Build and Test
 
-- Pull the pre-built docker image from Docker Hub
+Pull the pre-built docker image from Docker Hub (the same image the
+`delivery/final-202610` GitHub Actions workflow builds and pushes from
+this repo — see `.github/workflows/build-image.yml`):
 
-    Run on CPU for testing 7.1, 7.2, 7.3
-    Run on Accelerator for testing 7.4
+```
+docker pull opencc/ace:final-202610
+```
 
-    ```
-    docker pull opencc/ace:20250524
-    ```
+Or build the image locally:
 
-- If you want to Build Docker Image locally, you can execute the following command
+```
+docker build . -t opencc/ace:final-202610
+```
 
-    ```
-    docker build . -t opencc/ace:20250524
-    ```
+Start a container once per test item — the `--name` differs per item so
+the containers do not collide. CPU test items (§1 / §2 / §3 / §5):
+
+```
+docker run -it -d --name test_7.x opencc/ace:final-202610 bash
+docker exec -it test_7.x bash
+```
+
+GPU test item (§4.1) — pass through the GPU:
+
+```
+docker run -it -d --name test_7.4 --gpus '"device=1"' opencc/ace:final-202610 bash
+docker exec -it test_7.4 bash
+```
+
+The image does NOT pre-build any FHE baseline — it installs the pip
+deps and tools only. Run the per-baseline build scripts
+(`scripts/build_cnn.py` / `build_cnn_gpu.py` / `build_cnn_fpga.py`)
+inside the container before the inference step.
 
 ## 1. Testing the Inference Performance of Neural Networks for Fully Homomorphic Encryption
 
 - Setup
 
     ```
-    docker pull opencc/ace:20250524
-    docker run -it -d --name test_7.1 opencc/ace:20250524 bash
+    docker run -it -d --name test_7.1 opencc/ace:final-202610 bash
     docker exec -it test_7.1 bash
     ```
 
@@ -46,8 +64,7 @@
 - Setup
 
     ```
-    docker pull opencc/ace:20250524
-    docker run -it -d --name test_7.2 opencc/ace:20250524 bash
+    docker run -it -d --name test_7.2 opencc/ace:final-202610 bash
     docker exec -it test_7.2 bash
     ```
 
@@ -68,8 +85,7 @@
 - Setup
 
     ```
-    docker pull opencc/ace:20250524
-    docker run -it -d --name test_7.3 opencc/ace:20250524 bash
+    docker run -it -d --name test_7.3 opencc/ace:final-202610 bash
     docker exec -it test_7.3 bash
     ```
 
@@ -93,27 +109,26 @@
 - Setup
 
     ```
-    docker pull opencc/ace:20250524
-    docker run -it -d --name test_7.4 --gpus '"device=1"' opencc/ace:20250524 bash
+    docker run -it -d --name test_7.4 --gpus '"device=1"' opencc/ace:final-202610 bash
     docker exec -it test_7.4 bash
     ```
 
     H20
     ```
-    root@99c62073fab2:/app# nvidia-smi 
-    Sun Jun 29 18:40:19 2025       
+    root@99c62073fab2:/app# nvidia-smi
+    Sun Jun 29 18:40:19 2025
     +-----------------------------------------------------------------------------------------+
     | NVIDIA-SMI 550.144.03             Driver Version: 550.144.03     CUDA Version: 12.4     |
     |-----------------------------------------+------------------------+----------------------+
-    | GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+    | GPU  Name                 Persistence-M | Bus-Id          Disp. A | Volatile Uncorr. ECC |
     | Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
     |                                         |                        |               MIG M. |
-    |=========================================+========================+======================|
+    |=========================================+=========================================================+
     |   0  NVIDIA H20                     Off |   00000000:26:00.0 Off |                    0 |
     | N/A   40C    P0             74W /  500W |       4MiB /  97871MiB |      0%      Default |
     |                                         |                        |             Disabled |
     +-----------------------------------------+------------------------+----------------------+
-                                                                                            
+
     +-----------------------------------------------------------------------------------------+
     | Processes:                                                                              |
     |  GPU   GI   CI        PID   Type   Process name                              GPU Memory |
@@ -130,15 +145,15 @@
     +-----------------------------------------------------------------------------------------+
     | NVIDIA-SMI 570.144                Driver Version: 570.144        CUDA Version: 12.8     |
     |-----------------------------------------+------------------------+----------------------+
-    | GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+    | GPU  Name                 Persistence-M | Bus-Id          Disp. A | Volatile Uncorr. ECC |
     | Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
     |                                         |                        |               MIG M. |
-    |=========================================+========================+======================|
+    |=========================================+=========================================================+
     |   0  NVIDIA A100 80GB PCIe          Off |   00000000:36:00.0 Off |                    0 |
     | N/A   44C    P0             45W /  300W |       0MiB /  81920MiB |      0%      Default |
     |                                         |                        |             Disabled |
     +-----------------------------------------+------------------------+----------------------+
-                                                                                            
+
     +-----------------------------------------------------------------------------------------+
     | Processes:                                                                              |
     |  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
@@ -182,7 +197,7 @@
 
 ## 5. Runtime library unit tests (7.5)
 
-Runtime-library unit tests (examples built by the ace-compiler's `RTLIB_BUILD_EXAMPLE`): polynomial computation per backend. 
+Runtime-library unit tests (examples built by the ace-compiler's `RTLIB_BUILD_EXAMPLE`): polynomial computation per backend.
 
 ```
 # CPU — build rtlib examples standalone into release_rtlib/ (does not touch the main ace-compiler release/)
