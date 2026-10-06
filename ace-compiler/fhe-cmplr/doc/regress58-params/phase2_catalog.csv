@@ -1,0 +1,92 @@
+method,relpath,option,param_type,group,case,onnx_size
+,base/relu.onnx,,NO_CTI_PARAM-uncovered,base,relu,132
+,cnn/gap_hw8.onnx,,NO_CTI_PARAM-uncovered,cnn,gap_hw8,164
+,cnn/resnet_gap.onnx,,NO_CTI_PARAM-bare,cnn,resnet_gap,167
+,op/mult.onnx,,NO_CTI_PARAM-uncovered,op,mult,184
+,cnn/avg_pool_s2_c6_h26.onnx,,NO_CTI_PARAM-uncovered,cnn,avg_pool_s2_c6_h26,212
+,cnn/avg_pool_s2_h10.onnx,,NO_CTI_PARAM-uncovered,cnn,avg_pool_s2_h10,212
+,cnn/avg_pool_s2_h4.onnx,,NO_CTI_PARAM-uncovered,cnn,avg_pool_s2_h4,212
+,base/max_pool.onnx,,NO_CTI_PARAM-uncovered,base,max_pool,217
+,cnn/resnet_reshape.onnx,,NO_CTI_PARAM-bare,cnn,resnet_reshape,230
+,base/relu_avg_pool.onnx,,NO_CTI_PARAM-uncovered,base,relu_avg_pool,254
+,base/small_relu_gemm.onnx,,NO_CTI_PARAM-uncovered,base,small_relu_gemm,325
+,base/small_gemm_relu.onnx,,NO_CTI_PARAM-uncovered,base,small_gemm_relu,339
+,mvp/8_4_mvm.onnx,,NO_CTI_PARAM-bare,mvp,8_4_mvm,377
+,cnn/conv3_p0_s1.onnx,,NO_CTI_PARAM-uncovered,cnn,conv3_p0_s1,465
+,base/conv2d_relu.onnx,,NO_CTI_PARAM-uncovered,base,conv2d_relu,698
+,cnn/conv_p2_s2.onnx,,NO_CTI_PARAM-uncovered,cnn,conv_p2_s2,825
+,cnn/conv_p0_s2.onnx,,NO_CTI_PARAM-uncovered,cnn,conv_p0_s2,881
+,cnn/conv_p1_s1.onnx,,NO_CTI_PARAM-uncovered,cnn,conv_p1_s1,1201
+,cnn/conv_32x32x112x3_g.onnx,,NO_CTI_PARAM-uncovered,cnn,conv_32x32x112x3_g,1587
+,cnn/conv_32x32x16x3_g.onnx,,NO_CTI_PARAM-uncovered,cnn,conv_32x32x16x3_g,1587
+,cnn/conv_p1_s1_g32.onnx,,NO_CTI_PARAM-uncovered,cnn,conv_p1_s1_g32,1587
+,cnn/resnet_1conv2d.onnx,,NO_CTI_PARAM-bare,cnn,resnet_1conv2d,2097
+,cnn/conv_3x16x32x3.onnx,-VEC:ms=32768:ssf:conv_parl:sharding:rtt -SIHE:relu_vr_def=100:rtt -CKKS:hw=192:q0=60:sf=56:N=65536:pots:rtt -POLY:rtt,cti-param,cnn,conv_3x16x32x3,2097
+,cnn/conv_p0_s1.onnx,,NO_CTI_PARAM-uncovered,cnn,conv_p0_s1,2129
+,cnn/conv_p1s1_relu.onnx,,NO_CTI_PARAM-uncovered,cnn,conv_p1s1_relu,2154
+,op/conv_p1s1_relu.onnx,,NO_CTI_PARAM-uncovered,op,conv_p1s1_relu,2154
+,cnn/conv2_p1_s1.onnx,,NO_CTI_PARAM-uncovered,cnn,conv2_p1_s1,2641
+,cnn/conv2_p0_s1.onnx,,NO_CTI_PARAM-uncovered,cnn,conv2_p0_s1,2737
+,cnn/resnet_gap_reshape_gemm.onnx,,NO_CTI_PARAM-bare,cnn,resnet_gap_reshape_gemm,3117
+,cnn/gemm10_84.onnx,,NO_CTI_PARAM-uncovered,cnn,gemm10_84,3708
+,cnn/conv_p1_s2.onnx,,NO_CTI_PARAM-uncovered,cnn,conv_p1_s2,4977
+,cnn/conv_16x16x32x3.onnx,-VEC:ms=32768:ssf:conv_parl:sharding:rtt -SIHE:relu_vr_def=100:rtt -CKKS:hw=192:q0=60:sf=56:N=65536:pots:rtt -POLY:rtt,cti-param,cnn,conv_16x16x32x3,9585
+,cnn/resnet_block1_2convs.onnx,,NO_CTI_PARAM-bare,cnn,resnet_block1_2convs,9778
+,conv/stride-1x1-conv2d_1x8x56x56_seq_N8192.onnx,,NO_CTI_PARAM-uncovered,conv,stride-1x1-conv2d_1x8x56x56_seq_N8192,12006
+,cnn/resnet_stride2_conv.onnx,,NO_CTI_PARAM-bare,cnn,resnet_stride2_conv,18870
+,cnn/conv_16x32x16x3.onnx,,NO_CTI_PARAM-uncovered,cnn,conv_16x32x16x3,18870
+,cnn/resnet_block1.onnx,,NO_CTI_PARAM-bare,cnn,resnet_block1,19171
+,cnn/resnet_block1_with_relu.onnx,,NO_CTI_PARAM-uncovered,cnn,resnet_block1_with_relu,19265
+,gemm/gemm_784_10x784.onnx,,NO_CTI_PARAM-uncovered,gemm,gemm_784_10x784,31654
+,cnn/conv_32x32x16x3.onnx,-VEC:ms=32768:ssf:conv_parl:sharding:rtt -SIHE:relu_vr_def=100:rtt -CKKS:hw=192:q0=60:sf=56:N=65536:pots:rtt -POLY:rtt,cti-param,cnn,conv_32x32x16x3,37302
+,cnn/conv_3x224x64x7_s2.onnx,,NO_CTI_PARAM-uncovered,cnn,conv_3x224x64x7_s2,38200
+,cnn/gemm10_1024.onnx,,NO_CTI_PARAM-uncovered,cnn,gemm10_1024,41313
+,cnn/resnet_block2.onnx,,NO_CTI_PARAM-bare,cnn,resnet_block2,58585
+,cnn/resnet20_cifar10_no_relu_first_part.onnx,,NO_CTI_PARAM-bare,cnn,resnet20_cifar10_no_relu_first_part,59910
+,cnn/conv_32x64x8x3.onnx,,NO_CTI_PARAM-uncovered,cnn,conv_32x64x8x3,74294
+,cnn/resnet_block1_block2.onnx,,NO_CTI_PARAM-bare,cnn,resnet_block1_block2,77677
+,cnn/conv_64x64x56x3.onnx,-VEC:ms=32768:ssf:conv_parl:sharding:rtt -SIHE:relu_vr_def=100:rtt -CKKS:hw=192:q0=60:sf=56:N=65536:pots:rtt -POLY:rtt,cti-param,cnn,conv_64x64x56x3,148022
+,cnn/conv_64x64x8x3.onnx,-VEC:ms=32768:ssf:conv_parl:sharding:rtt -SIHE:relu_vr_def=100:rtt -CKKS:hw=192:q0=60:sf=56:N=65536:pots:rtt -POLY:rtt,cti-param,cnn,conv_64x64x8x3,148022
+,cnn/resnet_block2_hw16.onnx,,NO_CTI_PARAM-uncovered,cnn,resnet_block2_hw16,231001
+,cnn/lenet_no_relu.onnx,-VEC:dmo:cf:sss:mf:ms=16384 -CKKS:q0=60:sf=59:N=32768,cti-param,cnn,lenet_no_relu,249469
+,cnn/lenet.onnx,,NO_CTI_PARAM-bare,cnn,lenet,249679
+,cnn/lenet_ax2.onnx,-VEC:mf -CKKS:q0=60:sf=59:N=32768,cti-param,cnn,lenet_ax2,251794
+,cnn/resnet20_cifar10_no_relu_first_two_part.onnx,,NO_CTI_PARAM-bare,cnn,resnet20_cifar10_no_relu_first_two_part,268125
+,cnn/conv_128x128x28x3.onnx,-VEC:ms=32768:ssf:conv_parl:sharding:rtt -SIHE:relu_vr_def=100:rtt -CKKS:hw=192:q0=60:sf=56:N=65536:pots:rtt -POLY:rtt,cti-param,cnn,conv_128x128x28x3,590651
+,cnn/gemv_512x512.onnx,,NO_CTI_PARAM-uncovered,cnn,gemv_512x512,1050942
+,cnn/resnet20_cifar10_no_relu.onnx,,NO_CTI_PARAM-bare,cnn,resnet20_cifar10_no_relu,1094697
+,cnn/resnet20_cifar10.onnx,,NO_CTI_PARAM-bare,cnn,resnet20_cifar10,1096862
+,ace/resnet20_cifar10_pre.onnx,-SIHE:relu_vr_def=2:relu_mul_depth=13 -CKKS:hw=192:q0=60:sf=56,cti-param,ace,resnet20_cifar10_pre,1096863
+,cnn/resnet32_cifar10_train.onnx,,NO_CTI_PARAM-uncovered,cnn,resnet32_cifar10_train,1096944
+,ace/resnet32_cifar10_pre.onnx,-SIHE:relu_vr_def=2:relu_mul_depth=13 -CKKS:hw=192:q0=60:sf=56,cti-param,ace,resnet32_cifar10_pre,1878525
+,ace/resnet32_cifar100_pre.onnx,-SIHE:relu_vr_def=2:relu_mul_depth=13 -CKKS:hw=192:q0=60:sf=56,cti-param,ace,resnet32_cifar100_pre,1901929
+,cnn/gemv_512x1000.onnx,,NO_CTI_PARAM-uncovered,cnn,gemv_512x1000,2052318
+,cnn/conv_256x256x14x3.onnx,-VEC:ms=32768:ssf:conv_parl:sharding:rtt -SIHE:relu_vr_def=100:rtt -CKKS:hw=192:q0=60:sf=56:N=65536:pots:rtt -POLY:rtt,cti-param,cnn,conv_256x256x14x3,2360638
+,ace/resnet44_cifar10_pre.onnx,-SIHE:relu_vr_def=2:relu_mul_depth=13 -CKKS:hw=192:q0=60:sf=56,cti-param,ace,resnet44_cifar10_pre,2660188
+,alinm/squeezenet_cifar10.onnx,,NO_CTI_PARAM-bare,alinm,squeezenet_cifar10,3317174
+,ace/resnet56_cifar10_pre.onnx,-SIHE:relu_vr_def=2:relu_mul_depth=13 -CKKS:hw=192:q0=60:sf=56,cti-param,ace,resnet56_cifar10_pre,3441850
+,cnn/gemm1024_1024.onnx,,NO_CTI_PARAM-uncovered,cnn,gemm1024_1024,4198721
+,ace/resnet110_cifar10_train.onnx,-SIHE:relu_vr_def=2:relu_mul_depth=13 -CKKS:hw=192:q0=60:sf=56,cti-param,ace,resnet110_cifar10_train,6960156
+,mvp/32768_64_mvm.onnx,,NO_CTI_PARAM-uncovered,mvp,32768_64_mvm,8389109
+,mvp/2048_1024_mvm.onnx,,NO_CTI_PARAM-bare,mvp,2048_1024_mvm,8392950
+,cnn/gemm2048_1024.onnx,,NO_CTI_PARAM-uncovered,cnn,gemm2048_1024,8393025
+,cnn/conv_512x512x7x3.onnx,-VEC:ms=32768:ssf:conv_parl:sharding:rtt -SIHE:relu_vr_def=100:rtt -CKKS:hw=192:q0=60:sf=56:N=65536:pots:rtt -POLY:rtt,cti-param,cnn,conv_512x512x7x3,9439550
+,alinm/mobilenet_cifar10.onnx,,NO_CTI_PARAM-bare,alinm,mobilenet_cifar10,12839868
+,cnn/gemv_1000x4096.onnx,,NO_CTI_PARAM-uncovered,cnn,gemv_1000x4096,16388321
+,mvp/4096_1024_mvm.onnx,,NO_CTI_PARAM-bare,mvp,4096_1024_mvm,16781558
+,cnn/gemv_1024x4096.onnx,,NO_CTI_PARAM-uncovered,cnn,gemv_1024x4096,16781633
+,mvp/8192_1024_mvm.onnx,,NO_CTI_PARAM-bare,mvp,8192_1024_mvm,33558774
+,alinm/vgg11_cifar10.onnx,,NO_CTI_PARAM-bare,alinm,vgg11_cifar10,36908727
+,alinm/vgg13_cifar10.onnx,,NO_CTI_PARAM-bare,alinm,vgg13_cifar10,37647852
+,cnn/resnet18.onnx,,NO_CTI_PARAM-bare,cnn,resnet18,46748549
+,alinm/vgg16_cifar10.onnx,,NO_CTI_PARAM-bare,alinm,vgg16_cifar10,58888256
+,resbm/VGG16.onnx,,NO_CTI_PARAM-uncovered,resbm,VGG16,58888256
+,mvp/32768_512_mvm.onnx,,NO_CTI_PARAM-uncovered,mvp,32768_512_mvm,67111160
+,mvp/16384_1024_mvm.onnx,,NO_CTI_PARAM-bare,mvp,16384_1024_mvm,67113208
+,cnn/gemv_4096x4096.onnx,-VEC:ms=32768:ssf:conv_parl:sharding:rtt -SIHE:relu_vr_def=100:rtt -CKKS:hw=192:q0=60:sf=56:N=65536:pots:rtt -POLY:rtt,cti-param,cnn,gemv_4096x4096,67125571
+,alinm/vgg19_cifar10.onnx,,NO_CTI_PARAM-bare,alinm,vgg19_cifar10,80128660
+,alinm/alexnet_cifar10.onnx,,NO_CTI_PARAM-bare,alinm,alexnet_cifar10,93094144
+,resbm/AlexNet.onnx,,NO_CTI_PARAM-uncovered,resbm,AlexNet,93094144
+,cnn/gemv_4096x9216.onnx,,NO_CTI_PARAM-uncovered,cnn,gemv_4096x9216,151011651
+,cnn/gemv_4096x25088.onnx,-VEC:ms=32768:ssf:conv_parl:sharding:rtt -SIHE:relu_vr_def=100:rtt -CKKS:hw=192:q0=60:sf=56:N=65536:pots:rtt -POLY:rtt,cti-param,cnn,gemv_4096x25088,411058504
+,mvp/16384_8192_mvm.onnx,,NO_CTI_PARAM-uncovered,mvp,16384_8192_mvm,536903933

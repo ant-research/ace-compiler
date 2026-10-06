@@ -1,0 +1,170 @@
+domain:
+  id: 4
+  name: CKKS
+
+opcodes:
+  - name: rotate
+    args:
+      - name: a
+        type: CIPHER
+        desc: Ciphertext to be rotated
+      - name: b
+        type: int
+        desc: Rotation index
+    prop: [EXPR, ATTR, LIB_CALL]
+    desc: Performs ciphertext rotation at specified rotation index
+  - name: add
+    args:
+      - name: a
+        type: CIPHER
+        desc: First operand to be added
+      - name: b
+        type: CIPHER|PLAIN|FLOAT
+        desc: Second operand to be added
+    prop: [EXPR, ATTR, LIB_CALL]
+    desc: Performs ciphertext addition with ciphertext, plaintext or float value
+  - name: sub
+    args:
+      - name: a
+        type: CIPHER
+        desc: First operand
+      - name: b
+        type: CIPHER|PLAIN|FLOAT
+        desc: Second operand
+    prop: [EXPR, ATTR, LIB_CALL]
+    desc: Performs ciphertext subtraction with ciphertext, plaintext or float value
+  - name: mul
+    args:
+      - name: a
+        type: CIPHER
+        desc: First operand
+      - name: b
+        type: CIPHER|PLAIN|FLOAT
+        desc: Second operand
+    prop: [EXPR, ATTR, LIB_CALL]
+    desc: Performs ciphertext multiplication with ciphertext, plaintext or float value
+  - name: neg
+    args:
+      - name: a
+        type: CIPHER
+        desc: Input ciphertext
+    prop: [EXPR, ATTR, LIB_CALL]
+    desc: Performs negation to the ciphertext
+  - name: encode
+    args:
+      - name: data
+        type: VECTOR
+        desc: Data to be encoded
+      - name: len
+        type: int
+        desc: Data length
+      - name: sdegree
+        type: int
+        desc: Encoding scale degree
+      - name: level
+        type: int
+        desc: Encoding level
+    prop: [EXPR, ATTR, LIB_CALL]
+    desc: Encodes a data array at the specified level and scaling degree
+  - name: rescale
+    args:
+      - name: a
+        type: CIPHER|CIPHER3
+        desc: Ciphertext or ciphertext3 to be rescaled
+    prop: [EXPR, ATTR, LIB_CALL]
+    desc: Switches the input's modulus from $q_1...q_k$ down to $q_1...q_{k-1}$, and scales the message down accordingly
+  - name: upscale
+    args:
+      - name: a
+        type: CIPHER
+        desc: Ciphertext to be upscaled
+      - name: b
+        type: int
+        desc: scale bits
+    prop: [EXPR, ATTR, LIB_CALL]
+    desc: Increases a ciphertext's scaling factor with specified scale bits.
+  - name: modswitch
+    args:
+      - name: a
+        type: CIPHER
+        desc: Input Ciphertext
+    prop: [EXPR, ATTR, LIB_CALL]
+    desc: Drop the last modular $q_k$, where the orignal modulus are $q_1...q_k$
+  - name: relin
+    args:
+      - name: a
+        type: CIPHER3
+        desc: Input ciphertext3
+    prop: [EXPR, ATTR, LIB_CALL]
+    desc: Performs relinearization operation to convert 3-dimensional ciphertext to 2-dimension
+  - name: bootstrap
+    args:
+      - name: a
+        type: CIPHER
+        desc: Input ciphertext
+      - name: b
+        type: int
+        desc: Level after bootstrap
+    prop: [EXPR, ATTR, LIB_CALL]
+    desc: Performs bootstrap to refersh the computation of a ciphertext, b can be set to adjust the level avaiable after bootstrap
+  - name: scale
+    args:
+      - name: a
+        type: CIPHER
+        desc: Input ciphertext
+    prop: [EXPR, ATTR]
+    desc: Get the ciphertext's scaling degree
+  - name: level
+    args:
+      - name: a
+        type: CIPHER
+        desc: Input ciphertext
+    prop: [EXPR, ATTR]
+    desc: Get the ciphertext's level
+  - name: batch_size
+    args:
+      - name: a
+        type: CIPHER
+        desc: Input ciphertext
+    prop: [EXPR, ATTR]
+    desc: Get the ciphertext's slot size
+  - name: raise_mod
+    args:
+      - name: a
+        type: CIPHER
+        desc: Input ciphertext
+      - name: b
+        type: int
+        desc: Level after raise
+    prop: [EXPR, ATTR]
+    desc: Raise ciphertext modulus to specialized level
+  - name: mul_mono
+    args:
+      - name: a
+        type: CIPHER
+        desc: Input ciphertext
+      - name: b
+        type: int
+        desc: power value
+    prop: [EXPR, ATTR]
+    desc: Multiplies a ciphertext with monomial
+  - name: conjugate
+    args:
+      - name: a
+        type: CIPHER
+        desc: Input ciphertext
+    prop: [EXPR, ATTR]
+    desc: Conjugates a ciphertext
+  - name: free
+    args:
+      - name: a
+        type: CIPHER
+        desc: Input ciphertext
+    prop: [STMT, LIB_CALL]
+    desc: Frees the ciphertext
+
+
+namespace:
+  decl: ckks,fhe
+
+guard: FHE_CKKS_OPCODE_H

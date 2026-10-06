@@ -1,0 +1,12 @@
+#--index-url https://download.pytorch.org/whl/cpu
+torch==2.0.1
+torchvision==0.15.2
+
+#--extra-index-url https://pypi.org/simple
+onnx==1.14.1
+onnxruntime==1.15.1
+
+PyYAML==5.3.1
+numpy==1.24.4
+psutil
+matplotlib

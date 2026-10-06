@@ -1,0 +1,60 @@
+diff --git a/clang-tools-extra/clang-tidy/readability/IdentifierNamingCheck.cpp b/clang-tools-extra/clang-tidy/readability/IdentifierNamingCheck.cpp
+index b2b287573187..ae99c5892bec 100644
+--- a/clang-tools-extra/clang-tidy/readability/IdentifierNamingCheck.cpp
++++ b/clang-tools-extra/clang-tidy/readability/IdentifierNamingCheck.cpp
+@@ -21,6 +21,7 @@
+ #include "llvm/Support/Regex.h"
+ #include "llvm/Support/YAMLParser.h"
+ #include <optional>
++#include <regex>
+ 
+ #define DEBUG_TYPE "clang-tidy"
+ 
+@@ -836,14 +837,14 @@ bool IdentifierNamingCheck::matchesStyle(
+     const IdentifierNamingCheck::NamingStyle &Style,
+     const IdentifierNamingCheck::HungarianNotationOption &HNOption,
+     const NamedDecl *Decl) const {
+-  static llvm::Regex Matchers[] = {
+-      llvm::Regex("^.*$"),
+-      llvm::Regex("^[a-z][a-z0-9_]*$"),
+-      llvm::Regex("^[a-z][a-zA-Z0-9]*$"),
+-      llvm::Regex("^[A-Z][A-Z0-9_]*$"),
+-      llvm::Regex("^[A-Z][a-zA-Z0-9]*$"),
+-      llvm::Regex("^[A-Z]([a-z0-9]*(_[A-Z])?)*"),
+-      llvm::Regex("^[a-z]([a-z0-9]*(_[A-Z])?)*"),
++  static std::regex Matchers[] = {
++      std::regex("^.*$"),
++      std::regex("^[a-z][a-z0-9_]*$"),
++      std::regex("^[a-z][a-zA-Z0-9]*$"),
++      std::regex("^[A-Z][A-Z0-9_]*$"),
++      std::regex("^[A-Z][a-zA-Z0-9]*$"),
++      std::regex("^[A-Z][a-z0-9_]*$"),
++      std::regex("^[a-z]([a-z0-9]*(_[A-Z])?)*"),
+   };
+ 
+   if (!Name.consume_front(Style.Prefix))
+@@ -861,7 +862,8 @@ bool IdentifierNamingCheck::matchesStyle(
+   if (Name.startswith("_") || Name.endswith("_"))
+     return false;
+ 
+-  if (Style.Case && !Matchers[static_cast<size_t>(*Style.Case)].match(Name))
++  if (Style.Case &&
++      !std::regex_match(Name.data(), Matchers[static_cast<size_t>(*Style.Case)]))
+     return false;
+ 
+   return true;
+@@ -948,9 +950,12 @@ std::string IdentifierNamingCheck::fixupWithCase(
+ 
+   case IdentifierNamingCheck::CT_CamelSnakeCase:
+     for (auto const &Word : Words) {
+-      if (&Word != &Words.front())
++      if (&Word != &Words.front()) {
+         Fixup += "_";
+-      Fixup += toupper(Word.front());
++        Fixup += tolower(Word.front());
++      } else {
++        Fixup += toupper(Word.front());
++      }
+       Fixup += Word.substr(1).lower();
+     }
+     break;

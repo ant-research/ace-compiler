@@ -1,0 +1,7 @@
+#### log for: /app/scripts/resbm_expert.py -n 100
+-------- Unencrypted Accuracy for 100 Images --------
+AlexNet: Unencrypted Accuracy = 86.0%
+ResNet-20: Unencrypted Accuracy = 89.0%
+SqueezeNet: Unencrypted Accuracy = 93.0%
+VGG16: Unencrypted Accuracy = 96.0%
+-------- Done --------

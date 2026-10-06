@@ -1,0 +1,57 @@
+__pycache__/
+*.pyc
+
+# ace-compiler build artifacts (build dirs, deps, conf)
+ace-compiler/release/
+ace-compiler/release_omp/
+ace-compiler/release_gpu/
+ace-compiler/release_rtlib/
+ace-compiler/*/build*/
+*.conf
+
+# ACE compiler install prefixes (build outputs of build_cmplr*.sh)
+/ace_cmplr/
+/ace_cmplr_gpu/
+/ace_cmplr_omp/
+
+# root-level test run logs (perf*.py / *.py 写到 cwd 的 .log)
+/*.log
+
+# cpu baseline (= FHE-MP-CNN, with 0001 patch applied) — source tracked, ignore builds.
+# Seal-modified-3.6.6 source IS tracked (build_cnn.py needs it for build_seal);
+# its thirdparty/ (FetchContent msgsl/zlib/zstd -build/-src/-subbuild) is rebuilt
+# at build time, so ignored.
+baselines/cpu/cnn_ckks/build/
+baselines/cpu/cnn_ckks/build_cnn/
+baselines/cpu/cnn_ckks/cpu-ckks/single-key/seal-modified-3.6.6/thirdparty/
+baselines/cpu/cnn_ckks/result/
+baselines/cpu/build_seal/
+baselines/cpu/pretrained_parameters/
+baselines/cpu/testFile/
+baselines/cpu/testFile_cifar100/
+baselines/cpu/result/
+baselines/cpu/.git/
+/cifar/
+
+# Generated/copied by build_target_gpu.sh / ace_compile_gpu.py under rtlib/phantom/example/
+# (eg_rtphantom_*.{cu,inc}, relu.{cu,inc}, resnet_cifar.main.inc are upstream source, kept tracked)
+ace-compiler/fhe-cmplr/rtlib/phantom/example/*_gpu.cu
+ace-compiler/fhe-cmplr/rtlib/phantom/example/*_gpu.onnx.inc
+ace-compiler/fhe-cmplr/rtlib/phantom/example/*_gpu.onnx.msg
+
+# root-level ACE compile outputs (should land in /tmp/ace_cmplr*, but guard)
+/*.ace
+/*.c
+/*.weight
+
+# baselines/fpga (FPGA adaptation copy, keep source, ignore builds)
+baselines/fpga/cnn_ckks/build_cnn/
+baselines/fpga/cnn_ckks/cpu-ckks/single-key/seal-modified-3.6.6/
+baselines/fpga/cnn_ckks/build_fpga/
+baselines/fpga/cnn_ckks/build/
+baselines/fpga/cnn_ckks/result/
+baselines/fpga/result/
+baselines/fpga/testFile/
+baselines/fpga/testFile_cifar100/
+baselines/fpga/pretrained_parameters/
+baselines/gpu/build_cpu/

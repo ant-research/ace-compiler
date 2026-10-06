@@ -1,0 +1,74 @@
+#!/bin/sh
+
+#=============================================================================
+#
+# Copyright (c) Ant Group Co., Ltd
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+#
+#=============================================================================
+
+# Gets the commit message file path
+commit_msg_file=$1
+
+# Define the commit message template
+error_template=$(cat << 'EOF'
+
+Commit message Example:
+
+feat(module): "Title ..."
+
+body:
+- "changes ..."
+
+testcase:
+- unittest:  "howto ..."
+- benchmark: "howto ..."
+- example:   "howto ..."
+- test:      "howto ..."
+
+(<footer>)
+EOF
+)
+
+YELLOW='\033[0;33m'
+RESET='\033[0m'
+
+# Reading commit messages
+commit_msg=$(cat "$commit_msg_file")
+error_flag=0
+
+# Check the commit message encoding
+if echo "$commit_msg" | awk '/[\x{4E00}-\x{9FFF}]/ {exit 0} {exit 1}'; then
+   echo "${YELLOW}hint: Commit-msg should be encoded in ASCII.${RESET}"
+   error_flag=1
+fi
+
+# Separate the header and body of the commit message
+commit_title=$(echo "$commit_msg" | head -n 1)
+commit_body=$(echo "$commit_msg" | tail -n +2)
+
+# Defines the allowed commit information prefix
+allowed_prefixes="^(fix|feat|chore|docs|style|refactor|refine|perf|test|revert|ci|build):"
+# Checking Commit message header format
+if ! echo "$commit_title" | grep -qE "$allowed_prefixes"; then
+    echo "${YELLOW}hint: Commit-msg title should: fix|feat|chore|docs|style|refactor|refine|perf|test|revert|ci|build: subject${RESET}"
+    error_flag=1
+fi
+
+# Defines the list of keywords that need to be matched in the message body
+required_keywords="body testcase"
+# Checking that Commit message body contains all keywords
+for keyword in $required_keywords; do
+    if ! echo "$commit_body" | grep -q "$keyword"; then
+        echo "${YELLOW}hint: Commit-msg body Should retain keywords: $keyword${RESET}"
+        error_flag=1
+    fi
+done
+
+# If any check fails, output a warning but do not block the commit
+if [ "$error_flag" -ne 0 ]; then
+    echo "${YELLOW}hint: Commit-msg format failed, Please modify follow the template format.${RESET}"
+    # echo "${YELLOW}hint: This commit message is not accepted. Please rewrite again.${RESET}"
+    echo "$error_template"
+    # exit 1
+fi

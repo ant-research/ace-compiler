@@ -1,0 +1,554 @@
+//-*-c++-*-
+//=============================================================================
+//
+// Copyright (c) Ant Group Co., Ltd
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//=============================================================================
+
+#ifndef FHE_CKKS_IR2PY_CTX_H
+#define FHE_CKKS_IR2PY_CTX_H
+
+#include <iomanip>
+#include <limits>
+#include <string>
+#include <type_traits>
+#include <unordered_set>
+#include <vector>
+
+#include "air/base/ir2c_ctx.h"
+#include "air/base/st_decl.h"
+#include "fhe/ckks/ckks_opcode.h"
+#include "fhe/ckks/ir2c_ctx.h"
+#include "fhe/ckks/ckks2py_config.h"
+
+namespace fhe {
+
+namespace ckks {
+
+//! @brief Context to convert CKKS IR to Python (non-ant backend).
+//!
+//! Mirrors fhe::ckks::IR2C_CTX but overrides the C-syntax Emit_* helpers to
+//! emit Python. Phase 1.1 adds the statement / block / function-structure
+//! overrides:
+//!   - statements end with a bare newline (no C `;`),
+//!   - function bodies open with `:` + indentation (no C `{`) and close with
+//!     nothing (no C `}`),
+//!   - `def name(params):` instead of a C function definition,
+//!   - no forward declarations (`Emit_func_sig` is a no-op),
+//!   - an `import` preamble instead of `#include`,
+//!   - scalar locals are bound inline by their first `ST` assignment (no
+//!     declaration emitted); local ARRAYS are pre-bound to `[None] * N`
+//!     because a Python `arr[i] = ...` (emitted by Handle_ist for a CORE
+//!     store into a cipher-array element, e.g. the BlockingRot replicate
+//!     accumulator `*_block_*`) raises NameError unless `arr` already names a
+//!     list -- the Python analogue of the C `CIPHERTEXT arr[N];` decl. The
+//!     program entry's cipher inputs load via `get_input_data`.
+//!   - scalar global constants as `name = value`, and (Phase 2.2) array
+//!     constants as Python lists `_cst_<id> = [v0, v1, ...]`, mirroring the C
+//!     `Emit_constant_array` (air-infra ir2c_util.h:110-170) but with list
+//!     syntax and the same "only emit used array constants" guard.
+//!
+//! Note on dispatch: the visitor calls driver-facing helpers (Emit_func_def /
+//! Begin_func_body / End_func_body / Emit_local_var / Emit_global_constants /
+//! Emit_global_include / Emit_need_bts) through the *concrete* IR2PY_CTX type
+//! (the driver member), so overriding them here takes effect directly. The
+//! per-statement terminators (End_stmt / Begin_stmt / Begin_block / End_block)
+//! are called from the block *handler* through a base-typed CTX reference, so
+//! they are routed through IR2PY_CORE::Handle_block (which binds the derived
+//! CTX type) -- see ir2py_core.h.
+class IR2PY_CTX : public fhe::ckks::IR2C_CTX {
+public:
+  //! The Python backend is always driven by a CKKS2PY_CONFIG (constructed only
+  //! on the `-CKKS2PY` path -- see ckks2py_pass.cxx / ckks2py_driver.h), so the ctx
+  //! binds the derived config type and captures `_py_rt_module` up front for
+  //! Emit_global_include. This keeps the real-runtime import out of the default
+  //! C path (byte-identical when no -CKKS2PY:rt= is given; the pass is
+  //! inactive and the default C path runs).
+  IR2PY_CTX(std::ostream& os, const fhe::core::LOWER_CTX& lower_ctx,
+            const fhe::ckks::CKKS2PY_CONFIG& cfg)
+      : fhe::ckks::IR2C_CTX(os, lower_ctx, cfg),
+        _py_rt_module(cfg.Py_rt_module()) {}
+
+  //! @brief The emitted rtlib_py module, falling back to "rt_ref" when none
+  //! was set (for raw emits that bypass Update_options; the normal pass path
+  //! sets a non-empty module via Update_options before emission).
+  const std::string Py_rt_or_default() const {
+    return _py_rt_module.empty() ? std::string("rt_ref") : _py_rt_module;
+  }
+
+  //! @brief The emitted 'provider' string for get_context_params().
+  //!
+  //! When a crypto library is present (lib given, or rt is an openfhe-family
+  //! module), this is the original Provider_name. When rt has no crypto
+  //! library (rt_ref and similar), this is the rtlib_py module name (falling
+  //! back to "rt_ref" for a raw emit with no module set).
+  const std::string Provider_tag() {
+    if (Provider() != fhe::core::PROVIDER::INVALID) {
+      return std::string(fhe::core::Provider_name(Provider()));
+    }
+    return Py_rt_or_default();
+  }
+
+  //! @brief Emit the Python file preamble (imports) instead of C #include.
+  //!
+  //! Phase 2.0: the runtime is a **pure-Python** `rtlib-py` provider
+  //! (`rt_ref` by default), NOT a pybind11/ctypes wrapper over C rtlib. The
+  //! emitted module imports it for real so a runner no longer has to inject
+  //! the runtime names into its namespace. The submodule name comes from
+  //! CKKS2PY_CONFIG::_py_rt_module (decoupled from the crypto provider); Phase
+  //! 3 swaps it to `rt_openfhe` without touching this template. Only reached
+  //! on the `-CKKS2PY` path, so the default C output stays byte-identical.
+  void Emit_global_include() {
+    _ir2c_util
+        << "# Auto-generated by fhe_cmplr (ckks IR -> Python, non-ant "
+           "backend). Do not edit.\n";
+    _ir2c_util << "# Runtime = pure-Python rtlib-py provider (rt_ref by "
+                  "default; -CKKS2PY:rt=<module> to swap).\n";
+    _ir2c_util << "# Functional runtime API (return-value style; &dst "
+                  "out-params are hidden):\n";
+    _ir2c_util << "#   get_input_data(name, idx); set_output_data(name, "
+                  "idx, val)\n";
+    _ir2c_util << "#   add_ciph / sub_ciph / mul_ciph / neg_ciph / "
+                  "rotate_ciph / relin /\n";
+    _ir2c_util << "#   rescale_ciph / mod_switch / copy_ciph / zero_ciph / "
+                  "free_ciph /\n";
+    _ir2c_util << "#   encode_float / level / sc_degree\n";
+    // Real import of the rtlib-py runtime provider. `from rtlib_py.<module>
+    // import *` binds the frozen public API (see rtlib_py/common/contract.py)
+    // into the module namespace; the module defines its OWN Main_graph /
+    // get_context_params / get_input_count / get_output_count.
+    _ir2c_util << "from rtlib_py." << Py_rt_or_default() << " import *\n";
+    _ir2c_util << "\n";
+  }
+
+  //! @brief Emit `def name(params)` (no trailing `:`/newline) instead of a C
+  //! function definition. The closing `:` + newline come from Begin_func_body,
+  //! mirroring the C split (Emit_func_def emits `name()`, Begin_func_body emits
+  //! ` {`). Program entries take no Python parameters (cipher inputs arrive
+  //! via get_input_data, mirroring C's `bool main()`); other functions emit
+  //! their formal parameter names.
+  void Emit_func_def(air::base::FUNC_SCOPE* func) {
+    air::base::FUNC_PTR decl  = func->Owning_func();
+    const char*         name  = decl->Name()->Char_str();
+    _ir2c_util << std::string(Level() * 2, ' ') << "def " << name << "(";
+    if (!decl->Entry_point()->Is_program_entry()) {
+      for (int i = 0; i < func->Formal_cnt(); ++i) {
+        if (i > 0) {
+          _ir2c_util << ", ";
+        }
+        Emit_var(func->Formal(i));
+      }
+    }
+    _ir2c_util << ")";
+  }
+
+  //! @brief Python has no forward declarations.
+  void Emit_func_sig(air::base::FUNC_PTR func) { (void)func; }
+
+  //! @brief Open a function body with `:` + newline (no C ` {`).
+  void Begin_func_body(air::base::NODE_PTR node) {
+    (void)node;
+    _ir2c_util << ":" << std::endl;
+  }
+
+  //! @brief Close a function body (no C `}`). Level is back to 0 (the body
+  //! block entered/exited 0 -> 1 -> 0 transparently).
+  void End_func_body(air::base::NODE_PTR node) { (void)node; }
+
+  //! @brief Enter a nested block: adjust the indent level only (no C `{`).
+  //!
+  //! The base air::base::IR2C_CTX::Begin_block emits `{` whenever Level()>0.
+  //! Phase 1.1 function bodies sit at level 0, so this is byte-identical to the
+  //! inherited behaviour there (neither emits a brace, both do Level()++). The
+  //! override is required so that Phase 1.2 control-flow bodies (`if`/`for`
+  //! ...), visited as BLOCK nodes at level>0, do not leak C `{` into the
+  //! Python output. Begin_stmt (inherited) still uses Level()*2 for indent, so
+  //! the level adjust is kept.
+  void Begin_block(air::base::NODE_PTR node) { (void)node; Level()++; }
+
+  //! @brief Leave a nested block: adjust the indent level only (no C `}`).
+  void End_block(air::base::NODE_PTR node) { (void)node; Level()--; }
+
+  //! @brief End a statement with a bare newline (no C `;`). Comment/pragma
+  //! nodes carry their own trailing newline (see IR2PY_CORE::Handle_comment /
+  //! Handle_pragma), so nothing is appended for them.
+  void End_stmt(air::base::NODE_PTR node) {
+    if (node->Is_comment() || node->Is_pragma()) {
+      return;
+    }
+    _ir2c_util << "\n";
+  }
+
+  //! @brief Emit per-function local pre-bindings. Scalar locals in Python are
+  //! bound inline by their first `ST` assignment, so no scalar declarations are
+  //! emitted (unlike the C path's `Type var;`). Two things ARE emitted:
+  //!   1. For the program entry, each cipher input loads via the runtime
+  //!      binding (mirrors the non-ant C Get_input_data calls in
+  //!      fhe::poly::IR2C_CTX::Emit_local_var).
+  //!   2. Every local ARRAY is pre-bound to `[None] * N`: a Python
+  //!      `arr[i] = ...` (emitted by Handle_ist for a CORE store into a
+  //!      cipher-array element, e.g. the BlockingRot replicate accumulator
+  //!      `*_block_*` in Conv/Gemm/Matvec) raises NameError unless `arr`
+  //!      already names a list. This is the Python analogue of the C
+  //!      `CIPHERTEXT arr[N];` decl emitted by air::base::IR2C_UTIL::Emit_local
+  //!      _var (ir2c_util.h:360-365, reached via IR2C_CTX::Emit_local_var).
+  //!      No C-memset zero-init: Python fills elements before use, and a `[None]`
+  //!      placeholder surfaces any use-before-write as a real error.
+  void Emit_local_var(air::base::FUNC_SCOPE* func) {
+    air::base::ENTRY_PTR entry = func->Owning_func()->Entry_point();
+    if (entry->Is_program_entry()) {
+      uint32_t num_args = entry->Type()->Cast_to_sig()->Num_param();
+      for (uint32_t i = 0; i < num_args; ++i) {
+        air::base::ADDR_DATUM_PTR parm = func->Formal(i);
+        Emit_get_input_data(parm);
+      }
+    }
+    // Pre-bind local arrays (the Python analogue of the C `CIPHERTEXT arr[N];`
+    // decl). Formals are emitted in the signature / loaded above; array
+    // entry-inputs are pre-bound inside Emit_get_input_data. Scalars are bound
+    // inline by their first ST, so they are skipped here.
+    for (auto it = func->Begin_addr_datum(); it != func->End_addr_datum();
+         ++it) {
+      if ((*it)->Is_formal()) {
+        continue;
+      }
+      if ((*it)->Type()->Is_array()) {
+        uint64_t elem_count = (*it)->Type()->Cast_to_arr()->Elem_count();
+        _ir2c_util << "  ";
+        Emit_var(*it);
+        _ir2c_util << " = [None] * " << elem_count << "\n";
+      }
+    }
+  }
+
+  //! @brief `Need_bts()` is NOT emitted for the Python backend (Phase 2.1,
+  //! plan decision #4). The C-side ``Need_bts()`` (`poly/ir2c_ctx.h:119-133`)
+  //! is a bootstrap key-budget probe emitted ONLY for SEAL/PHANTOM/ACE;
+  //! OPENFHE does not emit it, and the plaintext reference runtime (`rt_ref`)
+  //! has no key budget to probe. Kept a no-op: a future metadata need can
+  //! revive it as ``def need_bts(): return <bool>``, but Phase 2 defaults to
+  //! no-op (mirrors the OPENFHE C path, which is the default when no
+  //! -CKKS2PY:rt= is given).
+  void Emit_need_bts() {}
+
+  //! @brief Emit global constants as Python module-level bindings. Scalar
+  //! (FLOAT) constants become `name = value`; array constants become Python
+  //! lists `_cst_<id> = [v0, v1, ...]` (Phase 2.2, plan rule 6), mirroring the
+  //! C `Emit_constant_array` (air-infra ir2c_util.h:110-170). Python has no
+  //! forward declarations, so the `decl_only` pass is a no-op.
+  //!
+  //! Array-constant guard. The C path prunes to "only USED array constants" by
+  //! reading the base `_cst_used` set (filled by the air-core LDC/LDCA handlers
+  //! during body emission, read back in IR2C_UTIL::Emit_constant_array). The
+  //! Python backend cannot read that private set -- IR2PY_CTX inherits
+  //! IR2C_CTX, not IR2C_UTIL, and there is no friend (see plan
+  //! air_infra_is_cst_used_removal_plan.md) -- so instead it applies a
+  //! self-contained lightweight guard in the ARRAY branch:
+  //!   1. skip arrays offlined to the `-CKKS2PY:df=` data file (tracked in
+  //!      `_offlined_cst` via Mark_offlined_cst, called from
+  //!      Try_emit_offline_encode after RT_DATA_WRITER::Append) -- their bytes
+  //!      live in the C side data file and the body references them by index;
+  //!   2. skip element types Emit_py_array cannot render (Is_py_emittable_elem
+  //!      false) instead of asserting.
+  //! Accepted trade-off vs the C strictly-used pruning (plan section accepted trade-off): an
+  //! UNUSED array whose element type IS emittable is emitted as a dead
+  //! module-level list (harmless; the CKKS2PY gates check execution results, not
+  //! .py text diff). The binding is module-level; Python resolves the global
+  //! at `Main_graph()` call time, so declaring it after the `def` is well-formed.
+  void Emit_global_constants(air::base::GLOB_SCOPE* glob, bool decl_only) {
+    if (decl_only) {
+      return;
+    }
+    for (air::base::CONSTANT_ITER it = glob->Begin_const();
+         it != glob->End_const(); ++it) {
+      air::base::CONSTANT_PTR cst = *it;
+      if (cst->Kind() == air::base::CONSTANT_KIND::FLOAT) {
+        Emit_constant_id(cst->Id());
+        _ir2c_util << " = ";
+        Emit_scalar_init(cst);
+        _ir2c_util << "\n";
+      } else if (cst->Kind() == air::base::CONSTANT_KIND::ARRAY) {
+        // Phase 2.2: array constant -> Python list. Self-contained guard
+        // (see method doc above): skip arrays already offlined to the
+        // `-CKKS2PY:df=` data file -- their bytes live there and the body
+        // references them by index via load_data_entry, so re-emitting them
+        // as a Python list would duplicate the weights.
+        if (_offlined_cst.count(cst->Id().Value()) ||
+            !_used_cst.count(cst->Id().Value())) {
+          // rtpy-df B: use-prune dead arrays. Skip if offlined to the
+          // -CKKS2PY:df= data file (bytes live there, body refs by index) OR not
+          // referenced by name in the body (dead -- e.g. original conv kernels
+          // left unused after per-slot replication). Used-inline arrays
+          // (rotate-index `_cst_N[iv]`, whole-array `encode_float(_cst_N, ...)`)
+          // ARE in _used_cst and emitted. Mirrors air-infra's _cst_used data-gate
+          // (ir2c_util.h:113); Python self-tracks _used_cst
+          // (IR2PY_CORE::Handle_ldc/Handle_ldca) since _cst_used is private +
+          // air-infra read-only. FLOAT scalars are ungated (handled below; they
+          // are body-literals, dead but tiny).
+          continue;
+        }
+        air::base::ARRAY_TYPE_PTR arr_type = cst->Type()->Cast_to_arr();
+        air::base::TYPE_PTR      elem_type = arr_type->Elem_type();
+        // Flatten a (multi-dim) array to its scalar element type, mirroring
+        // Emit_constant_array (ir2c_util.h:131-133).
+        if (elem_type->Is_array()) {
+          elem_type = elem_type->Cast_to_arr()->Elem_type();
+        }
+        // Skip element types Emit_py_array cannot render -- silently, instead
+        // of the C-side assert. This replaces the air-infra Is_cst_used guard
+        // (which could not be read from here; see method doc). Downside: an
+        // array whose element type IS emittable is still emitted even when
+        // unused (a dead `_cst_N = [...]` list) -- harmless (gates check
+        // execution, not .py text). The defensive AIR_ASSERT_MSG in
+        // Emit_py_array's default branch stays as a backstop but is unreachable
+        // for this sole caller after the pre-filter.
+        if (!elem_type->Is_prim() ||
+            !Is_py_emittable_elem(elem_type->Cast_to_prim())) {
+          continue;
+        }
+        Emit_constant_id(cst->Id());
+        _ir2c_util << " = ";
+        Emit_py_array(cst, elem_type->Cast_to_prim());
+        _ir2c_util << "\n";
+      }
+    }
+  }
+
+  //! @brief Record that array constant `id` was offlined to the `-CKKS2PY:df=` data
+  //! file (its bytes appended via RT_DATA_WRITER::Append). Called from
+  //! IR2PY_HANDLER::Try_emit_offline_encode immediately after a successful
+  //! Append; Emit_global_constants then skips re-emitting the array as a Python
+  //! list (the body references it by index via load_data_entry instead). Only
+  //! reached on the `-CKKS2PY:df=` path: with df= off, Try_emit_offline_encode
+  //! returns false at the `_rt_data_writer == nullptr` guard before any Append,
+  //! so no id is ever marked here.
+  void Mark_offlined_cst(air::base::CONSTANT_ID id) {
+    _offlined_cst.insert(id.Value());
+  }
+
+  //! @brief Record that array constant `id` was referenced by name in the body
+  //! (via IR2PY_CORE::Handle_ldc/Handle_ldca visiting an LDC/LDCA of it).
+  //! Emit_global_constants then use-prunes arrays NOT in `_used_cst` (dead),
+  //! mirroring air-infra's private `_cst_used` (ir2c_util.h:113) which Python
+  //! cannot read (rtpy-df B). Only reached on the -CKKS2PY path where the body is
+  //! emitted; default-C never populates this.
+  void Mark_used_cst(air::base::CONSTANT_ID id) {
+    _used_cst.insert(id.Value());
+  }
+
+private:
+  //! rtlib_py submodule imported by Emit_global_include (captured from the
+  //! CKKS2PY_CONFIG at construction; default "rt_ref").
+  std::string _py_rt_module;
+
+  //! Array constant ids offlined to the `-CKKS2PY:df=` data file (default empty).
+  //! Populated by Mark_offlined_cst (one insert per successful offline Append);
+  //! consulted by Emit_global_constants to skip re-emitting those arrays as
+  //! Python lists.
+  std::unordered_set<uint32_t> _offlined_cst;
+
+  //! Array constant ids referenced by name in the body (rtpy-df B). Populated
+  //! by Mark_used_cst (IR2PY_CORE::Handle_ldc/Handle_ldca on an ARRAY-kind
+  //! LDC/LDCA during body emission); consulted by Emit_global_constants to
+  //! use-prune dead arrays (those neither offlined nor referenced -- e.g.
+  //! original conv kernels abandoned after per-slot replication). Air-infra's
+  //! equivalent `_cst_used` is private in IR2C_UTIL + read-only tree, so Python
+  //! self-tracks. Default empty (only -CKKS2PY emits a body to populate it).
+  std::unordered_set<uint32_t> _used_cst;
+
+  //! @brief Whether `Emit_py_array` can render an array whose flat element type
+  //! is `prim`. MUST be kept in sync with the switch in Emit_py_array: every
+  //! encoding the switch handles -- INT_S32/U32/S64/U64, FLOAT_32/64, COMPLEX_
+  //! 32/64 -- returns true; all others return false. Emit_global_constants uses
+  //! this to pre-filter, so the defensive AIR_ASSERT_MSG in Emit_py_array's
+  //! default branch is unreachable for its sole caller.
+  static bool Is_py_emittable_elem(air::base::PRIM_TYPE_PTR prim) {
+    switch (prim->Encoding()) {
+      case air::base::PRIMITIVE_TYPE::INT_S32:
+      case air::base::PRIMITIVE_TYPE::INT_U32:
+      case air::base::PRIMITIVE_TYPE::INT_S64:
+      case air::base::PRIMITIVE_TYPE::INT_U64:
+      case air::base::PRIMITIVE_TYPE::FLOAT_32:
+      case air::base::PRIMITIVE_TYPE::FLOAT_64:
+      case air::base::PRIMITIVE_TYPE::COMPLEX_32:
+      case air::base::PRIMITIVE_TYPE::COMPLEX_64:
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  //! @brief Emit `name = get_input_data("name", 0)` (scalar) or a Python
+  //! `for ... in range(...)` fill loop (array), mirroring the non-ant C path's
+  //! Emit_get_input_data but in functional Python style (lowercase, no `&`,
+  //! no `;`).
+  void Emit_get_input_data(air::base::ADDR_DATUM_PTR var) {
+    if (var->Type()->Is_array()) {
+      uint64_t elem_count = var->Type()->Cast_to_arr()->Elem_count();
+      // Pre-bind the list: the fill loop below does `var[input_idx] = ...`,
+      // which NameErrors unless `var` already names a list -- the Python
+      // analogue of the C `CIPHERTEXT arr[N];` decl for an array cipher input.
+      _ir2c_util << "  ";
+      Emit_var(var);
+      _ir2c_util << " = [None] * " << elem_count << "\n";
+      _ir2c_util << "  for input_idx in range(" << elem_count << "):\n";
+      _ir2c_util << "    ";
+      Emit_var(var);
+      _ir2c_util << "[input_idx] = get_input_data(\""
+                 << var->Name()->Char_str() << "\", input_idx)\n";
+    } else {
+      _ir2c_util << "  ";
+      Emit_var(var);
+      _ir2c_util << " = get_input_data(\"" << var->Name()->Char_str()
+                 << "\", 0)\n";
+    }
+  }
+
+  //! @brief Emit one scalar element of an array constant: floats promoted to
+  //! double at `double` max_digits10+1 (Python `float` is a C double -- no
+  //! float32 -- so the literal round-trips the IDENTICAL value the C path
+  //! reaches after its native-ElemT round-trip), ints in decimal.
+  template <typename ElemT>
+  void Emit_py_elem(ElemT v) {
+    if constexpr (std::is_floating_point_v<ElemT>) {
+      _ir2c_util
+          << std::setprecision(std::numeric_limits<double>::max_digits10 + 1)
+          << static_cast<double>(v);
+    } else {
+      _ir2c_util << v;
+    }
+  }
+
+  //! @brief Recursively emit a (possibly multi-dimensional) array constant as a
+  //! NESTED Python list preserving the array's dimension structure. The C path
+  //! carries the dims on the TYPE (`extern T _cst_N[D0][D1]...`, air-infra
+  //! ir2c_util.h Emit_constant_array) and emits a flat `{...}` init; C's
+  //! `_cst_N[k]` then decays to a sub-VECTOR (a row). Python has no type, so the
+  //! nesting MUST be in the literal: `_cst_N = [[row0], [row1], ...]` so an
+  //! outer-dim subscript `_cst_N[k]` yields the sub-list -- what
+  //! `encode_float(buf, len, ...)` then consumes as a whole weight row. A 1-D
+  //! array nests one level == the same flat `[v0, v1, ...]`, so faithful 1-D
+  //! plains are unaffected. `flat_off` is the row-major offset into the flat
+  //! stream; `type` is the array type at the current nesting level.
+  template <typename ElemT>
+  void Emit_py_array_nested(const ElemT*             cptr,
+                             air::base::ARRAY_TYPE_PTR arr_type,
+                             size_t                   flat_off) {
+    // The array's dims live in arr_type->Shape() (e.g. [9, 32768]) -- a SINGLE
+    // ARRAY_TYPE carries all dims (air-infra Emit_arb iterates Begin_dim..
+    // End_dim of one ARRAY_TYPE), NOT a nested Elem_type chain. Nest the literal
+    // by these dims so an outer-dim subscript `_cst_N[k]` yields the sub-list
+    // (a whole row), mirroring C's `extern T _cst_N[D0][D1]...` type.
+    Emit_py_nested_shape(cptr, arr_type->Shape(), 0, flat_off);
+  }
+
+  //! @brief Recursive shape-driven nesting: emit a `[[...] x shape[0]]` (or a
+  //! flat `[v0..vD-1]` at the innermost dim) consuming the flat row-major
+  //! stream at `flat_off`. `stride` = product of inner dims, advances flat_off.
+  //!
+  //! Line-wrapping (G(a) fix, 2026-08-07): each element is followed by a
+  //! newline + indent instead of a bare `", "`, so a multi-million-element
+  //! weight constant (e.g. conv_512x512x7x3 = 2.4M floats) does NOT land on a
+  //! single ~48MB source line -- which raised CPython `OverflowError: Parser
+  //! column offset overflow - source line is too big` at exec/compile. Python
+  //! list literals ignore whitespace between elements, so nesting/subscript
+  //! semantics (`_cst_N[k]` yields the sub-list row, the E1 fix) are preserved.
+  template <typename ElemT>
+  void Emit_py_nested_shape(const ElemT*                cptr,
+                             const std::vector<int64_t>& shape,
+                             size_t                      dim_idx,
+                             size_t                      flat_off) {
+    _ir2c_util << "[";
+    int64_t d = shape[dim_idx];
+    size_t  stride = 1;
+    for (size_t j = dim_idx + 1; j < shape.size(); ++j) {
+      stride *= (size_t)shape[j];
+    }
+    std::string ind((dim_idx + 1) * 2, ' ');
+    for (int64_t i = 0; i < d; ++i) {
+      if (i > 0) {
+        _ir2c_util << ",\n" << ind;
+      }
+      if (dim_idx + 1 == shape.size()) {
+        Emit_py_elem(cptr[flat_off + (size_t)i]);
+      } else {
+        Emit_py_nested_shape(cptr, shape, dim_idx + 1,
+                              flat_off + (size_t)i * stride);
+      }
+    }
+    _ir2c_util << "]";
+  }
+
+  //! @brief Emit an array constant as a Python literal: a NESTED list for
+  //! scalar-element (INT/FLOAT) arrays (mirrors the C `[D0][D1]...` type so a
+  //! subscript yields a sub-list -- the conv/gemm weight-row fix), or a FLAT
+  //! list for COMPLEX arrays (the consumer `encode_dcmplx` reads flat real/
+  //! imag pairs; nesting would break it, and the weight use that needs nesting
+  //! is FLOAT, not complex).
+  template <typename ElemT>
+  void Emit_py_array_elems(air::base::CONSTANT_PTR cst, bool is_complex) {
+    if (is_complex) {
+      const ElemT* cptr = cst->Array_ptr<ElemT>();
+      uint32_t     size = cst->Array_byte_len() / sizeof(ElemT);
+      _ir2c_util << "[";
+      for (uint32_t i = 0; i < size; ++i) {
+        if (i > 0) {
+          // G(a) fix: line-wrap (see Emit_py_nested_shape) so a giant flat
+          // complex array is not one huge source line.
+          _ir2c_util << ",\n  ";
+        }
+        Emit_py_elem(cptr[i]);
+      }
+      _ir2c_util << "]";
+      return;
+    }
+    Emit_py_array_nested(cst->Array_ptr<ElemT>(), cst->Type()->Cast_to_arr(),
+                          0);
+  }
+
+  //! @brief Dispatch `Emit_py_array_elems` by the array's primitive element
+  //! encoding, mirroring C's `Emit_constant_array` element-type switch
+  //! (air-infra ir2c_util.h:134-165). COMPLEX arrays are emitted as flat
+  //! real/imag pairs (pairs of the underlying float/double), as the C path
+  //! does; their Python consumer (`encode_dcmplx`) reads them flat.
+  void Emit_py_array(air::base::CONSTANT_PTR  cst,
+                     air::base::PRIM_TYPE_PTR prim) {
+    switch (prim->Encoding()) {
+      case air::base::PRIMITIVE_TYPE::INT_S32:
+        Emit_py_array_elems<int32_t>(cst, false);
+        break;
+      case air::base::PRIMITIVE_TYPE::INT_U32:
+        Emit_py_array_elems<uint32_t>(cst, false);
+        break;
+      case air::base::PRIMITIVE_TYPE::INT_S64:
+        Emit_py_array_elems<int64_t>(cst, false);
+        break;
+      case air::base::PRIMITIVE_TYPE::INT_U64:
+        Emit_py_array_elems<uint64_t>(cst, false);
+        break;
+      case air::base::PRIMITIVE_TYPE::FLOAT_32:
+        Emit_py_array_elems<float>(cst, false);
+        break;
+      case air::base::PRIMITIVE_TYPE::FLOAT_64:
+        Emit_py_array_elems<double>(cst, false);
+        break;
+      case air::base::PRIMITIVE_TYPE::COMPLEX_32:
+        Emit_py_array_elems<float>(cst, true);
+        break;
+      case air::base::PRIMITIVE_TYPE::COMPLEX_64:
+        Emit_py_array_elems<double>(cst, true);
+        break;
+      default:
+        AIR_ASSERT_MSG(false,
+                       "unsupported array element type for Python emit");
+        break;
+    }
+  }
+};
+
+}  // namespace ckks
+
+}  // namespace fhe
+
+#endif  // FHE_CKKS_IR2PY_CTX_H
