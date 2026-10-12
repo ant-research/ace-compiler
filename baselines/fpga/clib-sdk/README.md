@@ -6,15 +6,22 @@
 
 ```text
 clib-sdk/
-├── include/clib.h         唯一公开头文件
-├── lib/libclib.a          静态计算库
-├── tools/                Makefile 自动调用的 ANT 配套工具和规则
+├── include/clib.h         原生 clib 公开接口
+├── include/seal/          SEAL API 子集（可选）
+├── lib/                  libclib.a，以及可选的 libclib_seal.a
+├── tools/                所有应用共用的 ANT 工具和运行规则
 ├── apps/new-app/         MVM → Bootstrap 新应用模板
 ├── apps/resnet20/        conv → Bootstrap → ReLU → conv，数据在自己的 data/ 中
+├── apps/lenet/           CIFAR-10 LeNet（AvgPool），完整网络应用
+├── apps/fhe-mp-cnn/      SEAL 转接的完整 ResNet20/ResNet32 应用
+├── cmake/SEAL/           SEAL::seal CMake 导入目标
+├── licenses/             第三方许可和来源说明
 └── docs/                 API、应用开发和 ANT 说明
 ```
 
 应用模板中有 `main.cpp`、`config.mk`、`Makefile` 和 `README.md`。Makefile 已经处理编译、静态库链接和工具调用，无需修改。
+
+应用专用的源码、数据、工具和测试放在对应 `apps/<应用>/` 中。源码仓库顶层的 `tests/` 只维护 SDK 公共测试及统一入口，`tools/relu/` 是多个应用共享的 ReLU 开发工具；应用的训练、导出和专用验收位于自己的 `tools/`、`tests/`。发行包只带运行必需的脚本，不带训练工具、测试代码和测试专用数据。`cmake/SEAL/` 是所有外部 CMake 应用共用的接口，`licenses/` 随相关代码交付；普通 `make` 无需操作这两个目录。
 
 运行环境：Linux x86-64，C++17 编译器、Make、Python 3、OpenMP 和 GMP。随包二进制使用 GCC 12 构建。仓库内的 `sdk/` 另外包含内部 `src/`、`tests/` 和构建入口；维护者先在该目录执行 `make build`，再按下文运行应用。发布包已构建完成。
 
@@ -39,6 +46,31 @@ make
 ```
 
 该例使用 **N=1024、Q=62**，执行 ResNet20 `layer3.1` 的 `conv1＋BN → Bootstrap → 多项式 ReLU → conv2＋BN`，输出停在残差相加之前。输入、输出均为 64×8×8，各阶段会打印验证结果。
+
+该旧例在本次新生成材料的回归中出现自举精度失败，尚未修复；历史材料通过不代表新材料必然通过。具体结果见 [验证记录](docs/VALIDATION.md)。
+
+完整 LeNet 应用使用 **N=65536、Q=58、P=62**，包括两层卷积、两次 AvgPool、三层全连接和四次多项式 ReLU。从 SDK 根目录运行：
+
+```bash
+cd apps/lenet
+make
+```
+
+网络代码全部在 [apps/lenet/main.cpp](apps/lenet/main.cpp)，只调用现有 `clib.h`。训练权重和固定样本已经提供；完整测试集明文准确率为 62.26%。当前 Q58 版本的三个固定样本均已通过完整密文验收；每个样本检查 19 组输出的全部 32768 槽。实测耗时、短链选择和八次自举的安排见 [LeNet 说明](apps/lenet/README.md)。
+
+通过 SEAL 转接运行完整 ResNet20（N65536/Q58），从 SDK 根目录执行：
+
+```bash
+cd apps/fhe-mp-cnn
+make
+```
+
+支持 ResNet32/CIFAR-100，选择方法见 [FHE-MP-CNN 说明](apps/fhe-mp-cnn/README.md)。
+该应用还需要 NTL/GMP 开发库和 NumPy。其真实分类结果由 ANT 解密后报告，SEAL 的 shadow 输出仅作参考。
+
+原生 clib 的另一种卷积打包示例在 `apps/resnet20_eva`，进入目录执行 `make`。
+它使用 N8192/Q62，计算止于 layer0 + stage1，具体见 [EVA 说明](apps/resnet20_eva/README.md)。
+SEAL 接口边界见 [转接说明](docs/SEAL.md)，远程代码差异见 [迁移记录](docs/MIGRATION.md)。
 
 第一次 `make` 会准备 ANT 材料；后续 `make` 会复用未改变的材料，重新计算并验证。
 
@@ -201,13 +233,15 @@ ANT 的调用已由 Makefile 处理。需要单独了解工具接口时，见 [A
 | `work/encoded/` | 当前编码明文、输入密文和用于直接比较的槽位数值 |
 | `result/` | 输出密文、解密数值、验证报告和性能 CSV |
 
+FHE-MP-CNN 将 `work/`、`result/` 再按模型和样本分目录，具体路径见应用 README。
+
 `Save_output` 中的名称决定输出名称。例如 `"answer"` 对应 `answer.ct` 和 `answer.json`；原始模板则输出 `mvm` 和 `bootstrap` 两组结果。
 
 ## 四、其它
 
 ### 参数、公开接口和线程
 
-应用只需包含 `clib.h`，链接 `libclib.a`；模板 Makefile 已处理。不需要内部 `rt_iie.hh`，也不需要自己维护 `param.hh`。参数由 ANT 材料加载，同一份静态库支持运行时 N=1024、8192、65536，无需按应用重新编译库。当前实测结果及新材料的精度限制见 [验证记录](docs/VALIDATION.md)。
+原生 clib 应用只需包含 `clib.h`，链接 `libclib.a`；模板 Makefile 已处理。不需要内部 `rt_iie.hh`，也不需要自己维护 `param.hh`。参数由 ANT 材料加载，同一份静态库支持运行时 N=1024、8192、65536，无需按应用重新编译库。当前实测结果及新材料的精度限制见 [验证记录](docs/VALIDATION.md)。
 
 当前上下文 Q 支持 32～62 的偶数，Q/P 各不超过 62，DS=1。每次 `Rescale_ciph` 消耗两个物理 Q limbs。ResNet20 示例的层级为 `输入 Q4 → conv1 Q2 → Bootstrap Q32 → ReLU Q8 → conv2 Q6`，其中 ReLU 深度为 12，消耗 24 个物理 limbs。
 
@@ -215,7 +249,7 @@ ANT 的调用已由 Makefile 处理。需要单独了解工具接口时，见 [A
 
 ### 耗时、复用与清理
 
-性能数据的时间单位全部是**秒**：`stages.csv` 记录阶段墙钟时间，`breakdown.csv` 记录公开 API 的调用次数和累计耗时，`runtime.csv` 记录参数与线程信息。`end_to_end_without_open` 不包含上下文加载，也不包含导出和 ANT 材料准备时间。
+SDK 性能 CSV 的时间单位是**秒**（FHE-MP-CNN 来源文本日志中的 `ms` 是毫秒）：`stages.csv` 记录阶段墙钟时间，`breakdown.csv` 记录公开 API 的调用次数和累计耗时，`runtime.csv` 记录参数与线程信息。`end_to_end_without_open` 不包含上下文加载，也不包含导出和 ANT 材料准备时间。
 
 改完应用或数据后重新 `make`。只改权重、输入数值会复用上下文；修改 N/Q、旋转集合或库构建版本后，会准备新上下文，成功后替换本应用的旧上下文。工作目录只保留当前版本。
 

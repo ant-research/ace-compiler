@@ -31,3 +31,10 @@ make
 - `sample0.exact_relu`、`sample0.exact_conv2`：使用精确 ReLU 的参考，用于检查近似误差。
 
 R=9 来自 CIFAR-10 训练集前 32 个样本的范围校准。第一层权重和偏置除以 R，第二层权重乘以 R。运行现有示例不需要 PyTorch，也不需要重新导出模型。
+
+
+维护者文件（仅源码仓库提供）：权重导出位于 `tools/export_resnet20.py`；
+独立参考、第二样本和边界验收位于 `tests/`。在本应用目录执行
+`python3 tests/run.py --case numeric` 准备并验证基础样本，随后可执行
+`python3 tests/run.py --case second-sample` 或 `--case boundary`。
+共享 ReLU 调度工具及系数位于 SDK 的 `tools/relu/`，不参与普通应用的 `make`。

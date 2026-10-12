@@ -1,104 +1,60 @@
-// FHE-MP-CNN (homomorphic ResNet on CIFAR, cpu-ckks/single-key/cnn) as a
-// clib-sdk application, following the apps/ convention (README §使用流程,
-// docs/APPLICATION.md): main() hands argv straight to clib::Run_application
-// and Main_graph runs the inference graph. The Makefile invokes
-//
-//   .build/app --clib-mode export|run --N 65536 --Q 62 --work work --output result
-//
-// so the SDK owns the mode/context/argument handling; this file only picks
-// up the model selection (CNN_LAYERS/CNN_DATASET/CNN_START/CNN_END, exported
-// by config.mk) and runs the graph.
-//
-// The graph implementation is not written against clib directly: the CNN is
-// existing SEAL-3.6 code (the clib-adapted staged copy prepared by
-// scripts/build_cnn_clib.py; see config.mk for how the staged sources are
-// linked into this application). Main_graph adopts the clib context into
-// the SEAL compatibility layer (../../../clib-seal, seal::adopt_clib_context),
-// after which every SEAL-level encode/encrypt/evaluate of the CNN reaches
-// the real clib backend:
-//
-//   export mode | Encrypt_input / Encode_plain record the declarations and
-//               | op/rotation requirements for ANT
-//   run mode    | the same declarations load the ANT material and every
-//               | seal::Evaluator operation executes the real clib kernel
-//
-// The final per-image logits are declared as verifiable outputs by the CNN
-// itself (seal::Ciphertext::save_output -> clib::Save_output, injected at
-// the staged final decrypt), so `make verify` decrypts them offline and
-// checks them with the declared 2.0 tolerance.
-//
-// Data locations follow the SDK convention (not the CNN's original
-// "../../"-relative layout): weights/test images are read under
-// CNN_DATA_ROOT (the absolute path of config.mk DATA_DIR, like every app's
-// CLIB_APP_DATA_DIR) and the model's own report files are written under
-// CNN_RESULT_DIR (this app's result/, created below). Both macros are
-// passed by config.mk's build rules.
-
+// One SEAL application graph, exported and executed by the clib driver.
 #include "seal/seal.h"
 #include "clib.h"
-
 #include <cstdlib>
 #include <filesystem>
-#include <iostream>
+#include <fstream>
+#include <cmath>
 #include <stdexcept>
 #include <string>
+#include <iostream>
 
-using namespace std;
-
-// Model selection (environment, exported by config.mk).
-static long g_layers = 20;
-static long g_dataset = 10;
-static long g_start = 0;
-static long g_end = 0;
-
-static const char *env_or(const char *name, const char *fallback)
-{
-    const char *value = getenv(name);
-    return (value != nullptr && value[0] != '\0') ? value : fallback;
+void ResNet_cifar10_seal_sparse(size_t, size_t, size_t);
+void ResNet_cifar100_seal_sparse(size_t, size_t, size_t);
+static long layers=20, dataset=10, sample=0;
+static long option(const char* name, long fallback) {
+    const char* s=std::getenv(name);
+    if (!s) return fallback;
+    size_t used=0; long value=std::stol(s, &used);
+    if (s[used]) throw std::invalid_argument(std::string("invalid ")+name);
+    return value;
 }
-
-// The staged CNN graph entry points (cpu-ckks/single-key/cnn/infer_seal.h);
-// declared here so this translation unit does not pull the CNN's NTL-using
-// headers (NTL lives on the link line only for the staged objects).
-void ResNet_cifar10_seal_sparse(size_t layer_num, size_t start_image_id, size_t end_image_id);
-void ResNet_cifar100_seal_sparse(size_t layer_num, size_t start_image_id, size_t end_image_id);
-
-// clib application graph: Run_application created the context, so adopt it
-// and let the SEAL-compatible layer evaluate the CNN on the real backend.
-static void Main_graph(clib::CONTEXT ctx)
-{
-    seal::adopt_clib_context(ctx);
-
-    cout << "model: ResNet-" << g_layers << endl;
-    cout << "dataset: CIFAR-" << g_dataset << endl;
-    cout << "start image: " << g_start << endl;
-    cout << "end image: " << g_end << endl;
-
-    // The report writes inside the CNN expect the app's result/ to exist.
-    error_code ec;
-    filesystem::create_directories(CNN_RESULT_DIR, ec);
-
-    if (g_dataset == 10) ResNet_cifar10_seal_sparse(g_layers, g_start, g_end);
-    else if (g_dataset == 100) ResNet_cifar100_seal_sparse(g_layers, g_start, g_end);
-    else throw invalid_argument("dataset number is not correct");
-
-    seal::release_clib_context();
+static void validate_data() {
+    const auto root=std::filesystem::path(CNN_DATA_ROOT);
+    for (const auto& entry:std::filesystem::recursive_directory_iterator(root)) {
+        if (!entry.is_regular_file() || entry.path().extension()!=".txt") continue;
+        std::ifstream in(entry.path()); double x; size_t count=0;
+        while (in>>x) { if (!std::isfinite(x)) throw std::runtime_error("nonfinite data: "+entry.path().string()); ++count; }
+        if (!in.eof() || !count) throw std::runtime_error("invalid/empty data: "+entry.path().string());
+        if (entry.path().filename()=="test_values.txt" && count!=3*3072)
+            throw std::runtime_error("expected exactly three input samples");
+        if (entry.path().filename()=="test_label.txt" && count!=3)
+            throw std::runtime_error("expected exactly three labels");
+    }
 }
-
-int main(int argc, char **argv)
-{
-    g_layers = atol(env_or("CNN_LAYERS", "20"));
-    g_dataset = atol(env_or("CNN_DATASET", "10"));
-    g_start = atol(env_or("CNN_START", "0"));
-    g_end = atol(env_or("CNN_END", "0"));
-
-    if (g_start < 0 || g_start >= 10000) throw invalid_argument("start number is not correct");
-    if (g_end < 0 || g_end >= 10000) throw invalid_argument("end number is not correct");
-    if (g_start > g_end) throw invalid_argument("start number is larger than end number");
-    if (g_dataset == 10 || g_dataset == 100) {
-        if (g_layers != 20 && g_layers != 32 && g_layers != 44 && g_layers != 56 && g_layers != 110)
-            throw invalid_argument("layer number is not valid");
-    } else throw invalid_argument("dataset number is not correct");
-
-    return clib::Run_application(argc, argv, Main_graph);
+static void Main_graph(clib::CONTEXT ctx) {
+    const auto info=clib::Context_info(ctx);
+    if(info.ring_degree!=65536 || info.q_limbs!=58) throw std::runtime_error("FHE-MP-CNN requires N65536/Q58");
+    seal::ClibSession session(ctx);
+    validate_data();
+    clib::Begin_stage(ctx, "resnet");
+    if (dataset==10) ResNet_cifar10_seal_sparse(layers,sample,sample);
+    else ResNet_cifar100_seal_sparse(layers,sample,sample);
+    clib::End_stage(ctx);
+}
+int main(int argc,char** argv) {
+    try {
+        layers=option("CNN_LAYERS",20); dataset=option("CNN_DATASET",10);
+        sample=option("CNN_START",0);
+        if (!((layers==20 && dataset==10)||(layers==32 && dataset==100)))
+            throw std::invalid_argument("supported models: ResNet20/CIFAR-10 and ResNet32/CIFAR-100");
+        if (sample<0 || sample>2 || option("CNN_END",sample)!=sample)
+            throw std::invalid_argument("select one fixed sample: 0, 1 or 2");
+        // Upstream text reports are references, kept alongside the actual ANT outputs.
+        for(int i=1;i+1<argc;++i) if(std::string(argv[i])=="--output") {
+            std::filesystem::create_directories(argv[i+1]);
+            setenv("CNN_RESULT_DIR",argv[i+1],1);
+        }
+        return clib::Run_application(argc,argv,Main_graph);
+    } catch(const std::exception& e) { std::cerr<<e.what()<<'\n'; return 1; }
 }

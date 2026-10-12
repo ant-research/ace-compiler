@@ -1,0 +1,17 @@
+seed=0
+epochs=30
+best_epoch=26
+train_count=45000
+validation_count=5000
+validation_accuracy=0.633200
+test_count=10000
+test_accuracy=0.622600
+seconds=52.628
+normalization=(pixel/255-0.5)/0.5
+calibration_count=256
+calibration_from=train_split_first_256
+relu_ranges=[8.0, 16.0, 16.0, 16.0]
+calibration_maxima=[3.780462113294351, 7.240579363937291, 10.478147724264376, 8.722287153700785]
+sample=0 label=3 torch_top1=5 polynomial_top1=5 polynomial_max_abs_error=0.0307438275 relu_input_maxima=[2.714971655838293, 3.215730981492489, 3.0545178783482783, 3.7944218048440943]
+sample=1 label=8 torch_top1=1 polynomial_top1=1 polynomial_max_abs_error=0.0425743761 relu_input_maxima=[2.3830335918571155, 3.390880338229312, 7.4562069804046605, 5.300436200505825]
+sample=2 label=8 torch_top1=8 polynomial_top1=8 polynomial_max_abs_error=0.0539117369 relu_input_maxima=[2.1548384420407944, 2.003262820668278, 4.96454054429444, 3.9575409735272142]

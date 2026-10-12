@@ -58,6 +58,8 @@ JSON
 
 当前固定 DS=1、DNUM=1、H=80。ANT 使用 first_mod_size=60、scaling_mod_size=52 生成上下文；DS 会拆分逻辑模数，因此这两个位数不是单个物理 limb 的位数。实际 Q/P 模数、P 数量和 scale 以 ANT 生成材料为准，Q/P 各自不超过 62。
 
+参数范围检查不代表所有 N/Q 组合都能生成。当前 N65536/Q62 在 27-bit 素数上限下报 `not enough distinct NTT primes within the P bit limit`。LeNet 应用使用 N65536/Q58/P62：Q/P 素数互异、均不超过 27 bit，P 的乘积大于 Q 的乘积。当前 SDK 自举消耗 30 个物理 limbs，Q58 每次最多输出 Q28；LeNet 显式请求 Q24，并在每个 ReLU 中间再执行一次自举，总计八次；不能只把配置中的 Q 改成 62。
+
 工具还会在离线阶段运行自举，收集该参数下 ANT 编码的自举标量。这属于材料准备时间。
 
 | 输出路径 | 内容 | 谁使用 |

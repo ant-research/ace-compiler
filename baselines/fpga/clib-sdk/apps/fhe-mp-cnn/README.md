@@ -1,85 +1,68 @@
-# 跑 FHE-MP-CNN 全同态 ResNet
+# FHE-MP-CNN：完整 ResNet 推理
 
-在包含本仓库的 SDK 目录中执行：
+在仓库根目录执行：
 
 ```bash
-cd apps/fhe-mp-cnn
+cd soft/clib/sdk/apps/fhe-mp-cnn
 make
 ```
 
-程序在 clib 真实后端上完整执行 FHE-MP-CNN 的同态 ResNet 推理：明文密文声明
-（`Encrypt_input` / `Encode_plain`）、卷积、多项式近似 ReLU、Bootstrap、批归一化和
-残差相加，最后把每张图的 logits 声明为可验证输出（`Save_output`），由 ANT 解密并
-按声明的 2.0 容差验证。看到 `PASS fc_logits_*` 即通过，文件在 `result/`。
+如果使用解压后的发行包，进入 `clib-sdk/apps/fhe-mp-cnn` 执行 `make` 即可。
+需要 C++17 编译器、OpenMP、Python 3、NumPy，以及 NTL/GMP 开发库（Ubuntu：`libntl-dev libgmp-dev`）。
 
-首次运行会依次执行编译、导出需求、准备 ANT 上下文、编码加密、计算与验证；
-再次 `make` 复用未改变的材料重新计算。**N=65536 时 ANT 上下文准备（258 个旋转
-密钥的自举/求值密钥）是单线程长任务，可能耗时数小时到数天**，中途不要打断
-（打断后需从头开始）；`make` 各步骤没有设置超时。
+默认运行 **ResNet20 / CIFAR-10 / 样本 0 / N65536 / Q58**。
+`make` 依次完成编译、导出、ANT context、编码/加密、密文计算、ANT 解密核对和分类报告。
 
-## 与其它应用的不同点
+这是完整 CPU 同态推理，运行成本较高。本机默认 ResNet20 的 context 约 45 GiB、
+编码材料约 23 GiB、导出数据约 0.9 GiB；计算进程观测内存约 44 GiB。
+这些材料由首次 `make` 生成，不包含在发行 ZIP 中。实测时间见 SDK 的 `docs/VALIDATION.md`。
+ResNet32 的对应材料约为 52.7 GiB context、36.0 GiB 编码数据和 1.4 GiB 导出数据。
 
-其它应用在 `main.cpp` 里手写 clib 算子；本应用包的是既有的 SEAL 3.6 代码
-（`baselines/fpga/cnn_ckks`）。`config.mk` 在标准配置之外多做两件事：
-
-1. **源码装配**：`scripts/build_cnn_clib.py --stage-only` 把 cnn_ckks 暂存并在
-   暂存副本上打齐 clib 适配补丁（每逻辑层双素数链、逐周期第二次 Bootstrap、
-   `save_output`、clib 版 Bootstrapper、数据根宏）。`config.mk` 把这些源文件
-   连同 SEAL 兼容层（`baselines/fpga/clib-seal`）一起编进本应用的构建；
-   `main.cpp` 只负责按应用约定把图交给 `Run_application`。
-2. **数据布局**：权重和测试图片不在本目录，而是 `DATA_DIR` 指向仓库中 gpu
-   路线携带的原始数据（`pretrained_parameters/`、`testFile/`、
-   `testFile_cifar100/`），编译期以 `-DCNN_DATA_ROOT` 传入绝对路径（作用同其它
-   应用的 `CLIB_APP_DATA_DIR`）；CNN 自己的报告文件写入本应用 `result/`
-   （`-DCNN_RESULT_DIR`）。ReLU 的 minimax 组合多项式系数文件 `d13.txt`
-   （上游 FHE-MP-CNN 随库携带的离线产物，缺失时 CNN 会静默退化成无 ReLU 的
-   线性网络）也在 `$(DATA_DIR)/result/` 下，`DATA_FILES` 会检查它存在。
-
-## 模型与图片选择
-
-`config.mk` 中导出以下变量（也可在 make 命令行覆盖）：
-
-```make
-export CNN_LAYERS ?= 20     # ResNet 深度：2020/32100 两种见下
-export CNN_DATASET ?= 10     # 数据集：10 或 100
-export CNN_START ?= 0        # 起始图片 id
-export CNN_END ?= 0          # 结束图片 id（每张图片一次完整推理）
-```
-
-仅支持有预训练数据的组合：**ResNet-20/CIFAR-10**（默认）与
-**ResNet-32/CIFAR-100**（对应 `CNN_LAYERS=32 CNN_DATASET=100`，注意此时
-旋转/自举需求不同，ANT 会准备新的上下文）。切换组合后建议 `make distclean`。
-
-## 分步命令与数据检查
+另外两个固定样本及第二个模型：
 
 ```bash
-make build     # 编译 .build/app（首次会自动暂存并适配 CNN 源码）
-make export    # 导出明文/输入/旋转与计算需求（2351 objects, 258 rotations @ resnet20）
-make context   # ANT 准备参数与密钥（长任务，勿设超时）
-make encode    # ANT 编码与加密
-make run       # 真实后端计算
-make verify    # 解密 logits 并按 2.0 容差验证
+make SAMPLE=1
+make SAMPLE=2
+make MODEL=32              # ResNet32 / CIFAR-100 / 样本 0
+make MODEL=32 SAMPLE=1
+make MODEL=32 SAMPLE=2
 ```
 
-本应用的导出与 cmake 旁路（`scripts/run_cnn_clib.py`，`build/cnn-ckks/cnn`）
-逐对象一致，两条路线可共享同一套导出结果。
+## 输入与输出
 
-每一步自动补齐前置步骤。`DATA_FILES` 在导出前检查权重/测试文件是否存在，
-缺文件时 Make 直接报错；换模型时它与 `DATA_DIR` 一起在 `config.mk` 的
-`ifeq` 分支中选择。
+`data/` 已包含两个模型的完整权重、每个数据集前三个样本和原始 `d13.txt` ReLU 系数。
+无需外部数据目录，不在构建时下载或修改源代码。
+`main.cpp` 是应用入口，`src/` 是迁入并适配的 FHE-MP-CNN 实现。
 
-`make clean` 只删除编译产物，保留暂存源码（在
-`build/cnn-ckks-src`，为 cmake 旁路共用）与密钥材料；`make distclean`
-额外删除本应用的 `work/` 与 `result/`。
+中间材料在 `work/resnet<模型>/sample<编号>/`，最终结果在对应的 `result/` 目录：
 
-## 层级调度（为什么每个周期有两次 Bootstrap）
+- `fc_logits_<编号>.json`：ANT 实际解密的槽位，前 10 或 100 项是 logits。
+- `verification.json`：真实密文与图中参考值的误差，最终容限为绝对误差 2.0。
+- `classification.json`：真实解密 top-1、标签、独立 NumPy 参考 top-1 及三者误差。
+- `layer0_relu_<编号>.json`：首层激活的实际解密检查点。
+- `runtime.csv`、`breakdown.csv`、`stages.csv`：SDK 实际耗时，单位秒；context 加载与计算分开记录。
+- 上游文本报告里的 shadow/reference 是明文镜像，不是真实解密结果。
 
-FHE-MP-CNN 一个周期在两次刷新间消耗 16 个逻辑层级（近似 ReLU 14 + 卷积 2），
-而 clib 的 Q=62 Bootstrap 最多刷新到 32 limbs（15 个逻辑层级）。暂存补丁在
-周期内 ReLU 后再自举一次，把周期拆成 14 | 2 两个都能放下的口袋——纯层级
-重排，数值不变（对应的 SEAL 式 scale 账本也会在每次 Bootstrap 处重置）。细节见
-`scripts/build_cnn_clib.py` 与 `baselines/fpga/clib-seal/Bootstrapper.cpp`。
+只查看导出内容可运行 `make export`。重新运行 `make` 会检查并复用匹配的材料。
+`make clean` 删除编译产物；`make distclean` 删除所选模型/样本的材料与结果。
 
-仓库侧的 `scripts/run_cnn_clib.py` 驱动的是同一套导出/上下文/计算/验证流程的
-cmake 构建版本（`build/cnn-ckks/cnn`），两者的暂存源码完全一致；本应用目录
-是 SDK 约定下的正式入口。
+## Q 与自举
+
+保留原来的 15/15/27 ReLU 多项式和系数。
+Q58 的自举出口是 Q28。循环内先自举，再计算前两段 15 次多项式，
+在第三段 27 次多项式之前执行第二次自举，最后完成 ReLU。
+第二段多项式后先乘 `1/256` 并 rescale，再降到 Q2 自举，最后用整数乘法恢复 256 倍。
+该归一化控制当前 ANT EvalMod 的输入幅度；恢复不消耗层级，原多项式和数学输出不变。
+原来 ReLU 后的第二次自举已移到这里，没有增加第三次。
+单张图 ResNet20 为 36 次自举，ResNet32 为 60 次。
+
+此迁移保留上游的数学行为：全连接实现读取 bias，但没有把它加到结果中。
+独立参考也按实际代码核对；它不等同于补上 bias 后的训练框架模型。
+分类是否正确以实际报告为准，数值核对通过不代表一定分类正确。
+
+使用方法和已验证范围见 SDK 的 `docs/VALIDATION.md`；接口说明见 `docs/SEAL.md`。
+
+
+维护者检查（仅源码仓库提供）：在本应用目录执行 `python3 tests/run.py`，
+默认只导出并检查独立网络参考。`--activation` 运行小规模 ReLU 密文回归；`--full` 才执行完整密文验收。
+测试使用 `soft/clib/build/sdk/` 下的独立工作副本，不覆盖本应用的材料和结果。

@@ -3,18 +3,23 @@ CXX ?= g++
 CXXFLAGS ?= -O2 -std=c++17
 SDK_DIR := $(abspath $(SDK_DIR))
 DATA_DIR ?= .
+APP_SOURCES ?= main.cpp
+APP_OBJECTS ?=
+APP_LIBS ?=
+APP_HEADERS ?=
 APP := .build/app
-WORK := work
-OUTPUT := result
+WORK ?= work
+OUTPUT ?= result
 TOOL := $(SDK_DIR)/tools/clib-ant-tool
 .NOTPARALLEL:
 .PHONY: all build export context encode run verify clean distclean
 all: verify
 build: $(APP)
-$(APP): main.cpp config.mk $(SDK_DIR)/include/clib.h $(SDK_DIR)/lib/libclib.a
+$(APP): $(APP_SOURCES) $(APP_OBJECTS) $(APP_HEADERS) $(APP_LIBS) config.mk $(SDK_DIR)/include/clib.h $(SDK_DIR)/lib/libclib.a
 	@mkdir -p .build
-	$(CXX) $(CXXFLAGS) -DCLIB_APP_DATA_DIR='"$(abspath $(DATA_DIR))"' -I"$(SDK_DIR)/include" main.cpp "$(SDK_DIR)/lib/libclib.a" -fopenmp -lm -o "$@"
+	$(CXX) $(CXXFLAGS) -DCLIB_APP_DATA_DIR='"$(abspath $(DATA_DIR))"' -I"$(SDK_DIR)/include" $(APP_SOURCES) $(APP_OBJECTS) $(APP_LIBS) "$(SDK_DIR)/lib/libclib.a" $(LDLIBS) -fopenmp -lm -o "$@"
 export: build $(DATA_FILES)
+	@mkdir -p "$(OUTPUT)"
 	@echo "[1/5] Export application requirements"
 	@"$(APP)" --clib-mode export --N "$(N)" --Q "$(Q)" --work "$(WORK)" --output "$(OUTPUT)"
 context: export
