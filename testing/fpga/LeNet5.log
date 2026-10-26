@@ -1,0 +1,347 @@
+[hekit] compiling LeNet5 with provider iie
+model: LeNet5
+weights/input: seeded random (seed=0); no training or downloads
+input_shape: (1, 3, 32, 32), calibration_shape: (32, 3, 32, 32)
+conv2d_lowering_timing: node=conv1_1 weight_shape=(6, 3, 5, 5) clear_input_shape=(1, 3, 32, 32) clear_output_shape=(1, 6, 28, 28) block_shape=(6144, 3072) estimated_entries=352800 diagonal_count=200 diagonalize_seconds=0.120 append_seconds=0.268
+conv2d_lowering_timing: node=conv2_4 weight_shape=(16, 6, 5, 5) clear_input_shape=(1, 6, 14, 14) clear_output_shape=(1, 16, 10, 10) block_shape=(1600, 1568) estimated_entries=240000 diagonal_count=2024 diagonalize_seconds=1.032 append_seconds=1.034
+[hekit] IIE hardware layout: CB_NUM=8 CORE_NUM=64 coefficients_per_line=8 parallelism=512
+[hekit] IIE param: LOG_N=16 LOG_COL=9 LOG_BATCHSIZE=7 batch_size=128
+compile_timing:
+  prepare: 0.001823s
+  fit: 0.539878s
+  plan_packing: 0.004790s
+  lower_to_ckks: 3.302476s
+  static_search: 0.000064s
+  r_search_rotate_decompose: 0.000016s
+  r_search: 0.000007s
+  hekit_ckks_pass: 90.426339s
+  emit_ace_json: 1.979863s
+  ace_ckks_pass_import: 0.001169s
+  final_bootstrap_lowering: 9.959892s
+  cost_evaluation: 0.081686s
+  search_stub: 0.000039s
+  preserve_programs: 0.000007s
+  codegen: 1167.938653s
+  debug_artifacts: 11.144777s
+  runtime_reference: 1.389021s
+  total: 1286.770524s
+ckks_nodes: 3385
+ckks_ir: /home/B/caiming/fheacc-software-platform/soft/hekit/hekit/hekit_ace_cases/LeNet5/selected/program.hekit_ckks.json
+case_dir: /home/B/caiming/fheacc-software-platform/soft/hekit/hekit/hekit_ace_cases/LeNet5/selected
+generated: /home/B/caiming/fheacc-software-platform/soft/hekit/hekit/hekit_ace_cases/LeNet5/selected/generated.cc
+[hekit] validated layout: CB_NUM=8 CORE_NUM=64 PARALLELISM=512 LOG_COL=9 LOG_BATCHSIZE=7 batch_size=128
+[hekit] staged generated code and context in /home/B/caiming/fheacc-software-platform/soft/clib/tests/tests/LeNet5
+cc -g -O0 -fopenmp -DRTLIB_SUPPORT_LINUX -I/home/B/caiming/fheacc-software-platform/soft/hekit/ace_cmplr/rtlib/include -I/home/B/caiming/fheacc-software-platform/soft/hekit/ace_cmplr/rtlib/include/ant -I/home/B/caiming/fheacc-software-platform/soft/hekit/ace_cmplr/include -I/home/B/caiming/fheacc-software-platform/soft/hekit/ace-compiler/ace-compiler/fhe-cmplr/include -I/home/B/caiming/fheacc-software-platform/soft/hekit/ace-compiler/ace-compiler/air-infra/include -I/home/B/caiming/fheacc-software-platform/soft/hekit/ace-compiler/ace-compiler/nn-addon/include encr.c generated.c -L/home/B/caiming/fheacc-software-platform/soft/hekit/ace_cmplr/rtlib/lib -lFHErt_ant -lFHErt_common -lgmp -lm -fopenmp -o LeNet5_enc.ace
+cc -g -O0 -fopenmp -DRTLIB_SUPPORT_LINUX -I/home/B/caiming/fheacc-software-platform/soft/hekit/ace_cmplr/rtlib/include -I/home/B/caiming/fheacc-software-platform/soft/hekit/ace_cmplr/rtlib/include/ant -I/home/B/caiming/fheacc-software-platform/soft/hekit/ace_cmplr/include -I/home/B/caiming/fheacc-software-platform/soft/hekit/ace-compiler/ace-compiler/fhe-cmplr/include -I/home/B/caiming/fheacc-software-platform/soft/hekit/ace-compiler/ace-compiler/air-infra/include -I/home/B/caiming/fheacc-software-platform/soft/hekit/ace-compiler/ace-compiler/nn-addon/include -DHEKIT_REPORT_SCRIPT=\"/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/report_decrypt_result.py\" decr.c -L/home/B/caiming/fheacc-software-platform/soft/hekit/ace_cmplr/rtlib/lib -lFHErt_ant -lFHErt_common -lgmp -lm -fopenmp -o LeNet5_dec.ace
+mkdir -p ../bin
+cp -f LeNet5_enc.ace ../bin/LeNet5_enc.ace
+cp -f LeNet5_dec.ace ../bin/LeNet5_dec.ace
+rm -rf soft/clib/tests/tests/LeNet5/golden/plain/
+rm -rf soft/clib/tests/tests/LeNet5/golden/key/
+rm -rf soft/hekit/hekit/hekit_ace_cases/LeNet5/
+src/clib_profile.o src/define.o src/evk_map.o src/poly_op.o src/cipher_op.o src/cipher2_api.o src/rf_live_log.o src/hekit_bootstrap.o src/hardware_image_writer.o src/bootstrap.o src/memsystem.o src/assem.o src/config.o src/encode.o tests/LeNet5/LeNet5.o src/golden/common.o src/golden/autom.o src/golden/crb.o src/golden/ntt.o xuantie-lib/lib/clib/vtimer.o xuantie-lib/lib/clib/uart.o xuantie-lib/lib/clib/intc.o xuantie-lib/lib/clib/fputc.o xuantie-lib/lib/newlib_wrap/printf.o xuantie-lib/lib/newlib_wrap/vasprintf.o xuantie-lib/lib/newlib_wrap/__thead_printf.o xuantie-lib/lib/crt0.o
+rm -rf src/clib_profile.o src/define.o src/evk_map.o src/poly_op.o src/cipher_op.o src/cipher2_api.o src/rf_live_log.o src/hekit_bootstrap.o src/hardware_image_writer.o src/bootstrap.o src/memsystem.o src/assem.o src/config.o src/encode.o tests/LeNet5/LeNet5.o src/golden/common.o src/golden/autom.o src/golden/crb.o src/golden/ntt.o xuantie-lib/lib/clib/vtimer.o xuantie-lib/lib/clib/uart.o xuantie-lib/lib/clib/intc.o xuantie-lib/lib/clib/fputc.o xuantie-lib/lib/newlib_wrap/printf.o xuantie-lib/lib/newlib_wrap/vasprintf.o xuantie-lib/lib/newlib_wrap/__thead_printf.o xuantie-lib/lib/crt0.o tests/LeNet5/bin/LeNet5_gm
+src/clib_profile.o src/define.o src/evk_map.o src/poly_op.o src/cipher_op.o src/cipher2_api.o src/rf_live_log.o src/hekit_bootstrap.o src/hardware_image_writer.o src/bootstrap.o src/memsystem.o src/assem.o src/config.o src/encode.o tests/LeNet5/LeNet5.o src/golden/common.o src/golden/autom.o src/golden/crb.o src/golden/ntt.o
+mkdir -p tests/LeNet5/bin
+mkdir -p tests/LeNet5/data
+mkdir -p tests/LeNet5/nttw/ntt
+mkdir -p tests/LeNet5/nttw/intt
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.a3GkHC" --kind "compile" --name "clib_profile.cc" --source "src/clib_profile.cc" --target "src/clib_profile.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DMONT -Itests/LeNet5/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/clib_profile.cc -o src/clib_profile.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.a3GkHC" --kind "compile" --name "define.cc" --source "src/define.cc" --target "src/define.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DMONT -Itests/LeNet5/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/define.cc -o src/define.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.a3GkHC" --kind "compile" --name "evk_map.cc" --source "src/evk_map.cc" --target "src/evk_map.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DMONT -Itests/LeNet5/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/evk_map.cc -o src/evk_map.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.a3GkHC" --kind "compile" --name "poly_op.cc" --source "src/poly_op.cc" --target "src/poly_op.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DMONT -Itests/LeNet5/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/poly_op.cc -o src/poly_op.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.a3GkHC" --kind "compile" --name "cipher_op.cc" --source "src/cipher_op.cc" --target "src/cipher_op.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DMONT -Itests/LeNet5/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/cipher_op.cc -o src/cipher_op.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.a3GkHC" --kind "compile" --name "cipher2_api.cc" --source "src/cipher2_api.cc" --target "src/cipher2_api.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DMONT -Itests/LeNet5/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/cipher2_api.cc -o src/cipher2_api.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.a3GkHC" --kind "compile" --name "rf_live_log.cc" --source "src/rf_live_log.cc" --target "src/rf_live_log.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DMONT -Itests/LeNet5/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/rf_live_log.cc -o src/rf_live_log.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.a3GkHC" --kind "compile" --name "hekit_bootstrap.cc" --source "src/hekit_bootstrap.cc" --target "src/hekit_bootstrap.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DMONT -Itests/LeNet5/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/hekit_bootstrap.cc -o src/hekit_bootstrap.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.a3GkHC" --kind "compile" --name "hardware_image_writer.cc" --source "src/hardware_image_writer.cc" --target "src/hardware_image_writer.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DMONT -Itests/LeNet5/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/hardware_image_writer.cc -o src/hardware_image_writer.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.a3GkHC" --kind "compile" --name "bootstrap.cc" --source "src/bootstrap.cc" --target "src/bootstrap.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DMONT -Itests/LeNet5/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/bootstrap.cc -o src/bootstrap.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.a3GkHC" --kind "compile" --name "memsystem.cc" --source "src/memsystem.cc" --target "src/memsystem.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DMONT -Itests/LeNet5/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/memsystem.cc -o src/memsystem.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.a3GkHC" --kind "compile" --name "assem.cc" --source "src/assem.cc" --target "src/assem.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DMONT -Itests/LeNet5/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/assem.cc -o src/assem.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.a3GkHC" --kind "compile" --name "config.cc" --source "src/config.cc" --target "src/config.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DMONT -Itests/LeNet5/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/config.cc -o src/config.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.a3GkHC" --kind "compile" --name "encode.cc" --source "src/encode.cc" --target "src/encode.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DMONT -Itests/LeNet5/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/encode.cc -o src/encode.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.a3GkHC" --kind "compile" --name "LeNet5.cc" --source "tests/LeNet5/LeNet5.cc" --target "tests/LeNet5/LeNet5.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DMONT -Itests/LeNet5/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c tests/LeNet5/LeNet5.cc -o tests/LeNet5/LeNet5.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.a3GkHC" --kind "compile" --name "common.cc" --source "src/golden/common.cc" --target "src/golden/common.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DMONT -Itests/LeNet5/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/golden/common.cc -o src/golden/common.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.a3GkHC" --kind "compile" --name "autom.cc" --source "src/golden/autom.cc" --target "src/golden/autom.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DMONT -Itests/LeNet5/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/golden/autom.cc -o src/golden/autom.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.a3GkHC" --kind "compile" --name "crb.cc" --source "src/golden/crb.cc" --target "src/golden/crb.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DMONT -Itests/LeNet5/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/golden/crb.cc -o src/golden/crb.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.a3GkHC" --kind "compile" --name "ntt.cc" --source "src/golden/ntt.cc" --target "src/golden/ntt.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DMONT -Itests/LeNet5/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/golden/ntt.cc -o src/golden/ntt.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.a3GkHC" --kind "link" --name "golden_link" --target "tests/LeNet5/bin/LeNet5_gm" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DMONT src/clib_profile.o src/define.o src/evk_map.o src/poly_op.o src/cipher_op.o src/cipher2_api.o src/rf_live_log.o src/hekit_bootstrap.o src/hardware_image_writer.o src/bootstrap.o src/memsystem.o src/assem.o src/config.o src/encode.o tests/LeNet5/LeNet5.o src/golden/common.o src/golden/autom.o src/golden/crb.o src/golden/ntt.o -Itests/LeNet5/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -o tests/LeNet5/bin/LeNet5_gm
+rm -f src/clib_profile.o src/define.o src/evk_map.o src/poly_op.o src/cipher_op.o src/cipher2_api.o src/rf_live_log.o src/hekit_bootstrap.o src/hardware_image_writer.o src/bootstrap.o src/memsystem.o src/assem.o src/config.o src/encode.o tests/LeNet5/LeNet5.o src/golden/common.o src/golden/autom.o src/golden/crb.o src/golden/ntt.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.a3GkHC" --kind "runtime" --name "golden_main" --target "tests/LeNet5/bin/LeNet5_gm" -- bash -c 'ulimit -s 32768 -n 65535 && OMP_NUM_THREADS=32 ./tests/LeNet5/bin/LeNet5_gm LeNet5'
+[Info:] benchmark name is : LeNet5
+------------- params --------------
+-- N : 65536
+-- col : 512
+-- batchsize : 128
+-- L : 58
+-- K : 60
+-- CB NUM : 8
+-----------------------------------
+[Info:] IIE DS scaleup q0=130809857 q1=132120577 delta0=1125148641920990.4 integer=15
+[INFO:] complete main graph compute
+[INFO:] complete traceToInst.py
+Wrote mb_instr.hex/.depth and 8 CB hex/.depth files to './'
+[INFO:] complete transInstrToAccFormat.py
+trace contract audit: ./instr_trace.txt
+  ops=8627238 rf_bank_num=3 poly_len=128 strict=False liveness=False
+  summary: errors=0 warns=0 -> PASS
+Finished splitting 64 NTT files and 64 INTT files into merged CB outputs under /home/B/caiming/fheacc-software-platform/soft/clib/tests/tests/LeNet5/nttw/ntt_intt_merged using /home/B/caiming/fheacc-software-platform/soft/clib/tests/tests/LeNet5/include/param.hh (CB_NUM=8, L=58, K=60, NTT depth=138, INTT depth=138, INTT offset multiplier=1, log=/home/B/caiming/fheacc-software-platform/soft/clib/tests/tests/LeNet5/nttw/ntt_intt_merged/transNttWinFormat.log)
+work dictory is /home/B/caiming/fheacc-software-platform/soft/clib/tests/tests/LeNet5/data
+ntt_trace trans end
+[INFO:] complete transNttTraeFormat.py
+✅ [GOLDEN MODEL] Finished processing benchmark: LeNet5
+make decrypt
+[decrypt] post-run correction: de-Montgomery applied once to ciphertext coefficients (R=17179869184), then decrypted again; original log: LeNet5.log.before-demont-20261025-214722.bak
+[decrypt] result_path=soft/clib/tests/tests/LeNet5/data/tmp_result.demont.json
+output: decrypted=[0.011080771, -0.011274671, 0.0066218702, 0.080216295, 0.047824352, -0.082006588, 0.10722394, -0.13077312, ...] len=32768
+output: expected_name=output
+output: expected=[0.011038174, -0.011291058, 0.0066727942, 0.080238246, 0.047849736, -0.082026271, 0.10726754, -0.13080535, ...] len=10
+output: compared_prefix_len=10, decrypted_len=32768
+output: max_abs_error=5.624965e-05, max_rel_error=7.631575e-03, atol=1.000e-04, rtol=1.000e-04, status=OK
+rm -rf soft/clib/tests/tests/LeNet5/plain/
+rm -rf soft/clib/tests/tests/LeNet5/key/
+
+========== make soft timing breakdown ==========
+benchmark=LeNet5 release_mode=2 LOG_N=16 N=65536 L=58 K=60
+Root pipeline (stages are contained in total):
+  geneC                          34m 01.45s
+  gene_encr_dec                      1.54 s
+  hekit_refresh_input_cipher        10.17 s
+  gene_riscv                     1h 00m 26.89s
+Compilation and link:
+  wall span                     2m 50.00s
+  compile task wall sum         2m 48.64s
+  compile user CPU              2m 00.43s
+  compile system CPU                4.30 s
+  peak child RSS                   547.8 MiB
+  link task wall sum               0.194 s
+  Slowest translation units:
+      74.541 s  tests/LeNet5/LeNet5.cc
+      18.248 s  src/poly_op.cc
+      11.753 s  src/cipher2_api.cc
+      10.333 s  src/clib_profile.cc
+       7.614 s  src/bootstrap.cc
+       5.137 s  src/hardware_image_writer.cc
+       4.505 s  src/config.cc
+       4.358 s  src/evk_map.cc
+       4.089 s  src/golden/crb.cc
+       4.076 s  src/hekit_bootstrap.cc
+Model runtime:
+  golden_main                    55m 15.37s
+Python post-processing:
+  traceToInst                       31.11 s
+  transInstrToAccFormat             15.13 s
+  check_trace_contract              27.79 s
+  transNttWinFormat                  1.26 s
+  transNttTraceFormat               0.053 s
+Total (not added to the nested stages above):
+  make_soft                      1h 34m 40.28s
+Result: SUCCESS
+TSV: /home/B/caiming/fheacc-software-platform/soft/clib/tests/tests/LeNet5/data/make_soft_timing.tsv
+================================================
+
+========== accelerator cycle profile ==========
+profile=/home/B/caiming/fheacc-software-platform/soft/clib/tests/tests/LeNet5/data/clib_profile.md
+[accelerator cycle summary]
+
+category device total_cycles total_exe_cycles total_mem_cycles total_sync_cycles total_crb_cycles
+0 CB0 151800128 68836334 30141778 52822016 0
+0 CB1 151660560 68696766 30141778 52822016 0
+0 CB2 148602154 67095808 29413418 52092928 0
+0 CB3 148446570 66940224 29413418 52092928 0
+0 CB4 136578666 61568747 27619199 47390720 0
+0 CB5 136393338 61383419 27619199 47390720 0
+0 CB6 123232990 56201764 21461178 45570048 0
+0 CB7 123100286 56069060 21461178 45570048 0
+0 MB 6499287172 0 0 4431872 6494855300
+1000 CB0 9833030 4256800 2749990 2826240 0
+1000 CB1 9827310 4251080 2749990 2826240 0
+1000 CB2 9176640 3959255 2565225 2652160 0
+1000 CB3 9176640 3959255 2565225 2652160 0
+1000 CB4 8616170 3730475 2407615 2478080 0
+1000 CB5 8616170 3730475 2407615 2478080 0
+1000 CB6 8616170 3730475 2407615 2478080 0
+1000 CB7 8616170 3730475 2407615 2478080 0
+1000 MB 329975475 0 0 40960 329934515
+1001 CB0 11182240 5526035 3004045 2652160 0
+1001 CB1 11182240 5526035 3004045 2652160 0
+1001 CB2 11182240 5526035 3004045 2652160 0
+1001 CB3 11182240 5526035 3004045 2652160 0
+1001 CB4 10487690 5192775 2816835 2478080 0
+1001 CB5 10487690 5192775 2816835 2478080 0
+1001 CB6 10479520 5186175 2815265 2478080 0
+1001 CB7 10473800 5180455 2815265 2478080 0
+1001 MB 324715975 0 0 40960 324675015
+1002 CB0 11182240 5526035 3004045 2652160 0
+1002 CB1 11182240 5526035 3004045 2652160 0
+1002 CB2 11182240 5526035 3004045 2652160 0
+1002 CB3 11182240 5526035 3004045 2652160 0
+1002 CB4 10479520 5186175 2815265 2478080 0
+1002 CB5 10473800 5180455 2815265 2478080 0
+1002 CB6 9689850 4784210 2601640 2304000 0
+1002 CB7 9689850 4784210 2601640 2304000 0
+1002 MB 319456475 0 0 40960 319415515
+1100 CB0 9586560 4708905 2573655 2304000 0
+1100 CB1 9586560 4708905 2573655 2304000 0
+1100 CB2 9578390 4702305 2572085 2304000 0
+1100 CB3 9572670 4696585 2572085 2304000 0
+1100 CB4 8094170 3967080 2171250 1955840 0
+1100 CB5 8094170 3967080 2171250 1955840 0
+1100 CB6 8094170 3967080 2171250 1955840 0
+1100 CB7 8094170 3967080 2171250 1955840 0
+1100 MB 272120975 0 0 40960 272080015
+1101 CB0 9578390 4702305 2572085 2304000 0
+1101 CB1 9572670 4696585 2572085 2304000 0
+1101 CB2 8788720 4300340 2358460 2129920 0
+1101 CB3 8788720 4300340 2358460 2129920 0
+1101 CB4 8094170 3967080 2171250 1955840 0
+1101 CB5 8094170 3967080 2171250 1955840 0
+1101 CB6 8094170 3967080 2171250 1955840 0
+1101 CB7 8094170 3967080 2171250 1955840 0
+1101 MB 266861475 0 0 40960 266820515
+1102 CB0 7182960 3046820 2006220 2129920 0
+1102 CB1 7182960 3046820 2006220 2129920 0
+1102 CB2 7182960 3046820 2006220 2129920 0
+1102 CB3 7182960 3046820 2006220 2129920 0
+1102 CB4 6622490 2818040 1848610 1955840 0
+1102 CB5 6622490 2818040 1848610 1955840 0
+1102 CB6 6614320 2811440 1847040 1955840 0
+1102 CB7 6608600 2805720 1847040 1955840 0
+1102 MB 261601975 0 0 40960 261561015
+1400 CB0 17286045 8544000 2608285 6133760 0
+1400 CB1 17257445 8515400 2608285 6133760 0
+1400 CB2 16888200 8317210 2529390 6041600 0
+1400 CB3 16865320 8294330 2529390 6041600 0
+1400 CB4 15856685 7835485 2409680 5611520 0
+1400 CB5 15810925 7789725 2409680 5611520 0
+1400 CB6 15314050 7512525 2282165 5519360 0
+1400 CB7 15279730 7478205 2282165 5519360 0
+1400 MB 655423820 0 0 942080 654481740
+1401 CB0 17286045 8544000 2608285 6133760 0
+1401 CB1 17257445 8515400 2608285 6133760 0
+1401 CB2 16888200 8317210 2529390 6041600 0
+1401 CB3 16865320 8294330 2529390 6041600 0
+1401 CB4 15856685 7835485 2409680 5611520 0
+1401 CB5 15810925 7789725 2409680 5611520 0
+1401 CB6 15314050 7512525 2282165 5519360 0
+1401 CB7 15279730 7478205 2282165 5519360 0
+1401 MB 655423820 0 0 942080 654481740
+1410 CB0 14067485 7084780 2200625 4782080 0
+1410 CB1 14044605 7061900 2200625 4782080 0
+1410 CB2 13769310 6908775 2139895 4720640 0
+1410 CB3 13746430 6885895 2139895 4720640 0
+1410 CB4 12921135 6503070 2035345 4382720 0
+1410 CB5 12881095 6463030 2035345 4382720 0
+1410 CB6 12486260 6237415 1927565 4321280 0
+1410 CB7 12457660 6208815 1927565 4321280 0
+1410 MB 497609885 0 0 819200 496790685
+1411 CB0 14067485 7084780 2200625 4782080 0
+1411 CB1 14044605 7061900 2200625 4782080 0
+1411 CB2 13769310 6908775 2139895 4720640 0
+1411 CB3 13746430 6885895 2139895 4720640 0
+1411 CB4 12921135 6503070 2035345 4382720 0
+1411 CB5 12881095 6463030 2035345 4382720 0
+1411 CB6 12486260 6237415 1927565 4321280 0
+1411 CB7 12457660 6208815 1927565 4321280 0
+1411 MB 497609885 0 0 819200 496790685
+1420 CB0 1110950 511230 128680 471040 0
+1420 CB1 1105230 505510 128680 471040 0
+1420 CB2 1011280 460445 110515 440320 0
+1420 CB3 1011280 460445 110515 440320 0
+1420 CB4 957340 438705 109035 409600 0
+1420 CB5 957340 438705 109035 409600 0
+1420 CB6 957340 438705 109035 409600 0
+1420 CB7 957340 438705 109035 409600 0
+1420 MB 53263465 0 0 40960 53222505
+1421 CB0 1011280 460445 110515 440320 0
+1421 CB1 1011280 460445 110515 440320 0
+1421 CB2 1011280 460445 110515 440320 0
+1421 CB3 1011280 460445 110515 440320 0
+1421 CB4 957340 438705 109035 409600 0
+1421 CB5 957340 438705 109035 409600 0
+1421 CB6 949250 432185 107465 409600 0
+1421 CB7 943530 426465 107465 409600 0
+1421 MB 52604645 0 0 40960 52563685
+1422 CB0 1011280 460445 110515 440320 0
+1422 CB1 1011280 460445 110515 440320 0
+1422 CB2 1011280 460445 110515 440320 0
+1422 CB3 1011280 460445 110515 440320 0
+1422 CB4 949250 432185 107465 409600 0
+1422 CB5 943530 426465 107465 409600 0
+1422 CB6 849580 381400 89300 378880 0
+1422 CB7 849580 381400 89300 378880 0
+1422 MB 51945825 0 0 40960 51904865
+1430 CB0 1110950 511230 128680 471040 0
+1430 CB1 1105230 505510 128680 471040 0
+1430 CB2 1011280 460445 110515 440320 0
+1430 CB3 1011280 460445 110515 440320 0
+1430 CB4 957340 438705 109035 409600 0
+1430 CB5 957340 438705 109035 409600 0
+1430 CB6 957340 438705 109035 409600 0
+1430 CB7 957340 438705 109035 409600 0
+1430 MB 53263465 0 0 40960 53222505
+1431 CB0 1011280 460445 110515 440320 0
+1431 CB1 1011280 460445 110515 440320 0
+1431 CB2 1011280 460445 110515 440320 0
+1431 CB3 1011280 460445 110515 440320 0
+1431 CB4 957340 438705 109035 409600 0
+1431 CB5 957340 438705 109035 409600 0
+1431 CB6 949250 432185 107465 409600 0
+1431 CB7 943530 426465 107465 409600 0
+1431 MB 52604645 0 0 40960 52563685
+1432 CB0 1011280 460445 110515 440320 0
+1432 CB1 1011280 460445 110515 440320 0
+1432 CB2 1011280 460445 110515 440320 0
+1432 CB3 1011280 460445 110515 440320 0
+1432 CB4 949250 432185 107465 409600 0
+1432 CB5 943530 426465 107465 409600 0
+1432 CB6 849580 381400 89300 378880 0
+1432 CB7 849580 381400 89300 378880 0
+1432 MB 51945825 0 0 40960 51904865
+1500 CB0 94592298 45501910 21387092 27703296 0
+1500 CB1 94521370 45430982 21387092 27703296 0
+1500 CB2 92301294 44310618 20819860 27170816 0
+1500 CB3 92244094 44253418 20819860 27170816 0
+1500 CB4 85359826 41067589 19261581 25030656 0
+1500 CB5 85261442 40969205 19261581 25030656 0
+1500 CB6 83457132 40000266 18784610 24672256 0
+1500 CB7 83377052 39920186 18784610 24672256 0
+1500 MB 3142203091 0 0 2236416 3139966675
+1501 CB0 292760 187650 23190 81920 0
+1501 CB1 292760 187650 23190 81920 0
+1501 CB2 261880 164440 15520 81920 0
+1501 CB3 256160 158720 15520 81920 0
+1501 CB4 234940 142030 10990 81920 0
+1501 CB5 234940 142030 10990 81920 0
+1501 CB6 234940 142030 10990 81920 0
+1501 CB7 234940 142030 10990 81920 0
+1501 MB 81920 0 0 81920 0
+1502 CB0 32197510 15308870 8758080 8130560 0
+1502 CB1 32191790 15303150 8758080 8130560 0
+1502 CB2 31541120 15011325 8573315 7956480 0
+1502 CB3 31541120 15011325 8573315 7956480 0
+1502 CB4 29583380 14109425 8039715 7434240 0
+1502 CB5 29577660 14103705 8039715 7434240 0
+1502 CB6 28785540 13700860 7824520 7260160 0
+1502 CB7 28779820 13695140 7824520 7260160 0
+1502 MB 974147925 0 0 122880 974025045
+1503 CB0 26403910 12472430 7193560 6737920 0
+1503 CB1 26398190 12466710 7193560 6737920 0
+1503 CB2 25606070 12063865 6978365 6563840 0
+1503 CB3 25600350 12058145 6978365 6563840 0
+1503 CB4 22855630 10763720 6224390 5867520 0
+1503 CB5 22855630 10763720 6224390 5867520 0
+1503 CB6 22847460 10757120 6222820 5867520 0
+1503 CB7 22841740 10751400 6222820 5867520 0
+1503 MB 800584425 0 0 122880 800461545
+1504 CB0 75990 28930 6100 40960 0
+1504 CB1 75990 28930 6100 40960 0
+1504 CB2 67900 22410 4530 40960 0
+1504 CB3 62180 16690 4530 40960 0
+1504 CB4 40960 0 0 40960 0
+1504 CB5 40960 0 0 40960 0
+1504 CB6 40960 0 0 40960 0
+1504 CB7 40960 0 0 40960 0
+1504 MB 40960 0 0 40960 0
+
+================================================

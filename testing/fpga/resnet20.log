@@ -1,0 +1,369 @@
+[hekit] compiling resnet20 with provider iie
+conv2d_lowering_timing: node=conv1_1 weight_shape=(16, 3, 3, 3) clear_input_shape=(1, 3, 32, 32) clear_output_shape=(1, 16, 32, 32) block_shape=(16384, 3072) estimated_entries=442368 diagonal_count=144 diagonalize_seconds=0.084 append_seconds=0.257
+conv2d_lowering_timing: node=conv1_4 weight_shape=(16, 16, 3, 3) clear_input_shape=(1, 16, 32, 32) clear_output_shape=(1, 16, 32, 32) block_shape=(16384, 16384) estimated_entries=2359296 diagonal_count=144 diagonalize_seconds=0.434 append_seconds=0.281
+conv2d_lowering_timing: node=conv2_6 weight_shape=(16, 16, 3, 3) clear_input_shape=(1, 16, 32, 32) clear_output_shape=(1, 16, 32, 32) block_shape=(16384, 16384) estimated_entries=2359296 diagonal_count=144 diagonalize_seconds=0.416 append_seconds=0.213
+conv2d_lowering_timing: node=conv1_9 weight_shape=(16, 16, 3, 3) clear_input_shape=(1, 16, 32, 32) clear_output_shape=(1, 16, 32, 32) block_shape=(16384, 16384) estimated_entries=2359296 diagonal_count=144 diagonalize_seconds=0.423 append_seconds=0.316
+conv2d_lowering_timing: node=conv2_11 weight_shape=(16, 16, 3, 3) clear_input_shape=(1, 16, 32, 32) clear_output_shape=(1, 16, 32, 32) block_shape=(16384, 16384) estimated_entries=2359296 diagonal_count=144 diagonalize_seconds=0.409 append_seconds=0.389
+conv2d_lowering_timing: node=conv1_14 weight_shape=(16, 16, 3, 3) clear_input_shape=(1, 16, 32, 32) clear_output_shape=(1, 16, 32, 32) block_shape=(16384, 16384) estimated_entries=2359296 diagonal_count=144 diagonalize_seconds=0.418 append_seconds=0.490
+conv2d_lowering_timing: node=conv2_16 weight_shape=(16, 16, 3, 3) clear_input_shape=(1, 16, 32, 32) clear_output_shape=(1, 16, 32, 32) block_shape=(16384, 16384) estimated_entries=2359296 diagonal_count=144 diagonalize_seconds=0.410 append_seconds=0.696
+conv2d_lowering_timing: node=conv1_20 weight_shape=(32, 16, 3, 3) clear_input_shape=(1, 16, 32, 32) clear_output_shape=(1, 32, 16, 16) block_shape=(8192, 16384) estimated_entries=1179648 diagonal_count=128 diagonalize_seconds=0.633 append_seconds=0.671
+conv2d_lowering_timing: node=conv2_22 weight_shape=(32, 32, 3, 3) clear_input_shape=(1, 32, 16, 16) clear_output_shape=(1, 32, 16, 16) block_shape=(8192, 8192) estimated_entries=2359296 diagonal_count=392 diagonalize_seconds=1.256 append_seconds=0.889
+conv2d_lowering_timing: node=0_23 weight_shape=(32, 16, 1, 1) clear_input_shape=(1, 16, 32, 32) clear_output_shape=(1, 32, 16, 16) block_shape=(8192, 16384) estimated_entries=131072 diagonal_count=32 diagonalize_seconds=0.076 append_seconds=1.133
+conv2d_lowering_timing: node=conv1_26 weight_shape=(32, 32, 3, 3) clear_input_shape=(1, 32, 16, 16) clear_output_shape=(1, 32, 16, 16) block_shape=(8192, 8192) estimated_entries=2359296 diagonal_count=392 diagonalize_seconds=1.263 append_seconds=1.259
+conv2d_lowering_timing: node=conv2_28 weight_shape=(32, 32, 3, 3) clear_input_shape=(1, 32, 16, 16) clear_output_shape=(1, 32, 16, 16) block_shape=(8192, 8192) estimated_entries=2359296 diagonal_count=392 diagonalize_seconds=1.249 append_seconds=1.277
+conv2d_lowering_timing: node=conv1_31 weight_shape=(32, 32, 3, 3) clear_input_shape=(1, 32, 16, 16) clear_output_shape=(1, 32, 16, 16) block_shape=(8192, 8192) estimated_entries=2359296 diagonal_count=392 diagonalize_seconds=1.248 append_seconds=1.644
+conv2d_lowering_timing: node=conv2_33 weight_shape=(32, 32, 3, 3) clear_input_shape=(1, 32, 16, 16) clear_output_shape=(1, 32, 16, 16) block_shape=(8192, 8192) estimated_entries=2359296 diagonal_count=392 diagonalize_seconds=1.257 append_seconds=1.776
+conv2d_lowering_timing: node=conv1_37 weight_shape=(64, 32, 3, 3) clear_input_shape=(1, 32, 16, 16) clear_output_shape=(1, 64, 8, 8) block_shape=(4096, 8192) estimated_entries=1179648 diagonal_count=324 diagonalize_seconds=2.800 append_seconds=1.977
+conv2d_lowering_timing: node=conv2_39 weight_shape=(64, 64, 3, 3) clear_input_shape=(1, 64, 8, 8) clear_output_shape=(1, 64, 8, 8) block_shape=(4096, 4096) estimated_entries=2359296 diagonal_count=900 diagonalize_seconds=5.272 append_seconds=2.744
+conv2d_lowering_timing: node=0_40 weight_shape=(64, 32, 1, 1) clear_input_shape=(1, 32, 16, 16) clear_output_shape=(1, 64, 8, 8) block_shape=(4096, 8192) estimated_entries=131072 diagonal_count=100 diagonalize_seconds=0.309 append_seconds=2.429
+conv2d_lowering_timing: node=conv1_43 weight_shape=(64, 64, 3, 3) clear_input_shape=(1, 64, 8, 8) clear_output_shape=(1, 64, 8, 8) block_shape=(4096, 4096) estimated_entries=2359296 diagonal_count=900 diagonalize_seconds=5.264 append_seconds=3.394
+conv2d_lowering_timing: node=conv2_45 weight_shape=(64, 64, 3, 3) clear_input_shape=(1, 64, 8, 8) clear_output_shape=(1, 64, 8, 8) block_shape=(4096, 4096) estimated_entries=2359296 diagonal_count=900 diagonalize_seconds=5.307 append_seconds=3.877
+conv2d_lowering_timing: node=conv1_48 weight_shape=(64, 64, 3, 3) clear_input_shape=(1, 64, 8, 8) clear_output_shape=(1, 64, 8, 8) block_shape=(4096, 4096) estimated_entries=2359296 diagonal_count=900 diagonalize_seconds=5.335 append_seconds=3.896
+conv2d_lowering_timing: node=conv2_50 weight_shape=(64, 64, 3, 3) clear_input_shape=(1, 64, 8, 8) clear_output_shape=(1, 64, 8, 8) block_shape=(4096, 4096) estimated_entries=2359296 diagonal_count=900 diagonalize_seconds=5.299 append_seconds=4.472
+[hekit] IIE hardware layout: CB_NUM=8 CORE_NUM=64 coefficients_per_line=8 parallelism=512
+[hekit] IIE param: LOG_N=16 LOG_COL=9 LOG_BATCHSIZE=7 batch_size=128
+compile_timing:
+  prepare: 0.022072s
+  fit: 0.522003s
+  plan_packing: 0.004702s
+  lower_to_ckks: 75.675125s
+  static_search: 0.000058s
+  r_search_rotate_decompose: 0.000014s
+  r_search: 0.000006s
+  hekit_ckks_pass: 270.891313s
+  emit_ace_json: 7.055223s
+  ace_ckks_pass_import: 0.005955s
+  final_bootstrap_lowering: 30.715063s
+  cost_evaluation: 0.190070s
+  search_stub: 0.000043s
+  preserve_programs: 0.000007s
+  codegen: 1581.340684s
+  debug_artifacts: 38.008897s
+  runtime_reference: 3.860223s
+  total: 2008.291489s
+model: resnet20
+input_shape: (1, 3, 32, 32)
+calibration_shape: (32, 3, 32, 32)
+sample_index: 0, label: 3 (cat)
+checkpoint: /home/B/caiming/fheacc-software-platform/soft/hekit/examples/resnet20/resnet20_cifar10.pt
+logN: 16, slots: 32768
+ckks_nodes: 8665
+ckks_ir: /home/B/caiming/fheacc-software-platform/soft/hekit/hekit/hekit_ace_cases/resnet20/selected/program.hekit_ckks.json
+case_dir: /home/B/caiming/fheacc-software-platform/soft/hekit/hekit/hekit_ace_cases/resnet20/selected
+generated: /home/B/caiming/fheacc-software-platform/soft/hekit/hekit/hekit_ace_cases/resnet20/selected/generated.cc
+[hekit] validated layout: CB_NUM=8 CORE_NUM=64 PARALLELISM=512 LOG_COL=9 LOG_BATCHSIZE=7 batch_size=128
+[hekit] staged generated code and context in /home/B/caiming/fheacc-software-platform/soft/clib/tests/tests/resnet20
+cc -g -O0 -fopenmp -DRTLIB_SUPPORT_LINUX -I/home/B/caiming/fheacc-software-platform/soft/hekit/ace_cmplr/rtlib/include -I/home/B/caiming/fheacc-software-platform/soft/hekit/ace_cmplr/rtlib/include/ant -I/home/B/caiming/fheacc-software-platform/soft/hekit/ace_cmplr/include -I/home/B/caiming/fheacc-software-platform/soft/hekit/ace-compiler/ace-compiler/fhe-cmplr/include -I/home/B/caiming/fheacc-software-platform/soft/hekit/ace-compiler/ace-compiler/air-infra/include -I/home/B/caiming/fheacc-software-platform/soft/hekit/ace-compiler/ace-compiler/nn-addon/include encr.c generated.c -L/home/B/caiming/fheacc-software-platform/soft/hekit/ace_cmplr/rtlib/lib -lFHErt_ant -lFHErt_common -lgmp -lm -fopenmp -o resnet20_enc.ace
+cc -g -O0 -fopenmp -DRTLIB_SUPPORT_LINUX -I/home/B/caiming/fheacc-software-platform/soft/hekit/ace_cmplr/rtlib/include -I/home/B/caiming/fheacc-software-platform/soft/hekit/ace_cmplr/rtlib/include/ant -I/home/B/caiming/fheacc-software-platform/soft/hekit/ace_cmplr/include -I/home/B/caiming/fheacc-software-platform/soft/hekit/ace-compiler/ace-compiler/fhe-cmplr/include -I/home/B/caiming/fheacc-software-platform/soft/hekit/ace-compiler/ace-compiler/air-infra/include -I/home/B/caiming/fheacc-software-platform/soft/hekit/ace-compiler/ace-compiler/nn-addon/include -DHEKIT_REPORT_SCRIPT=\"/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/report_decrypt_result.py\" decr.c -L/home/B/caiming/fheacc-software-platform/soft/hekit/ace_cmplr/rtlib/lib -lFHErt_ant -lFHErt_common -lgmp -lm -fopenmp -o resnet20_dec.ace
+mkdir -p ../bin
+cp -f resnet20_enc.ace ../bin/resnet20_enc.ace
+cp -f resnet20_dec.ace ../bin/resnet20_dec.ace
+rm -rf soft/clib/tests/tests/resnet20/golden/plain/
+rm -rf soft/clib/tests/tests/resnet20/golden/key/
+rm -rf soft/hekit/hekit/hekit_ace_cases/resnet20/
+src/clib_profile.o src/define.o src/evk_map.o src/poly_op.o src/cipher_op.o src/cipher2_api.o src/rf_live_log.o src/hekit_bootstrap.o src/hardware_image_writer.o src/bootstrap.o src/memsystem.o src/assem.o src/config.o src/encode.o tests/resnet20/resnet20.o src/golden/common.o src/golden/autom.o src/golden/crb.o src/golden/ntt.o xuantie-lib/lib/clib/vtimer.o xuantie-lib/lib/clib/uart.o xuantie-lib/lib/clib/intc.o xuantie-lib/lib/clib/fputc.o xuantie-lib/lib/newlib_wrap/printf.o xuantie-lib/lib/newlib_wrap/vasprintf.o xuantie-lib/lib/newlib_wrap/__thead_printf.o xuantie-lib/lib/crt0.o
+rm -rf src/clib_profile.o src/define.o src/evk_map.o src/poly_op.o src/cipher_op.o src/cipher2_api.o src/rf_live_log.o src/hekit_bootstrap.o src/hardware_image_writer.o src/bootstrap.o src/memsystem.o src/assem.o src/config.o src/encode.o tests/resnet20/resnet20.o src/golden/common.o src/golden/autom.o src/golden/crb.o src/golden/ntt.o xuantie-lib/lib/clib/vtimer.o xuantie-lib/lib/clib/uart.o xuantie-lib/lib/clib/intc.o xuantie-lib/lib/clib/fputc.o xuantie-lib/lib/newlib_wrap/printf.o xuantie-lib/lib/newlib_wrap/vasprintf.o xuantie-lib/lib/newlib_wrap/__thead_printf.o xuantie-lib/lib/crt0.o tests/resnet20/bin/resnet20_gm
+src/clib_profile.o src/define.o src/evk_map.o src/poly_op.o src/cipher_op.o src/cipher2_api.o src/rf_live_log.o src/hekit_bootstrap.o src/hardware_image_writer.o src/bootstrap.o src/memsystem.o src/assem.o src/config.o src/encode.o tests/resnet20/resnet20.o src/golden/common.o src/golden/autom.o src/golden/crb.o src/golden/ntt.o
+mkdir -p tests/resnet20/bin
+mkdir -p tests/resnet20/data
+mkdir -p tests/resnet20/nttw/ntt
+mkdir -p tests/resnet20/nttw/intt
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.GjQlMJ" --kind "compile" --name "clib_profile.cc" --source "src/clib_profile.cc" --target "src/clib_profile.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DMONT -Itests/resnet20/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/clib_profile.cc -o src/clib_profile.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.GjQlMJ" --kind "compile" --name "define.cc" --source "src/define.cc" --target "src/define.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DMONT -Itests/resnet20/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/define.cc -o src/define.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.GjQlMJ" --kind "compile" --name "evk_map.cc" --source "src/evk_map.cc" --target "src/evk_map.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DMONT -Itests/resnet20/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/evk_map.cc -o src/evk_map.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.GjQlMJ" --kind "compile" --name "poly_op.cc" --source "src/poly_op.cc" --target "src/poly_op.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DMONT -Itests/resnet20/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/poly_op.cc -o src/poly_op.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.GjQlMJ" --kind "compile" --name "cipher_op.cc" --source "src/cipher_op.cc" --target "src/cipher_op.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DMONT -Itests/resnet20/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/cipher_op.cc -o src/cipher_op.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.GjQlMJ" --kind "compile" --name "cipher2_api.cc" --source "src/cipher2_api.cc" --target "src/cipher2_api.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DMONT -Itests/resnet20/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/cipher2_api.cc -o src/cipher2_api.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.GjQlMJ" --kind "compile" --name "rf_live_log.cc" --source "src/rf_live_log.cc" --target "src/rf_live_log.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DMONT -Itests/resnet20/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/rf_live_log.cc -o src/rf_live_log.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.GjQlMJ" --kind "compile" --name "hekit_bootstrap.cc" --source "src/hekit_bootstrap.cc" --target "src/hekit_bootstrap.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DMONT -Itests/resnet20/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/hekit_bootstrap.cc -o src/hekit_bootstrap.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.GjQlMJ" --kind "compile" --name "hardware_image_writer.cc" --source "src/hardware_image_writer.cc" --target "src/hardware_image_writer.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DMONT -Itests/resnet20/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/hardware_image_writer.cc -o src/hardware_image_writer.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.GjQlMJ" --kind "compile" --name "bootstrap.cc" --source "src/bootstrap.cc" --target "src/bootstrap.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DMONT -Itests/resnet20/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/bootstrap.cc -o src/bootstrap.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.GjQlMJ" --kind "compile" --name "memsystem.cc" --source "src/memsystem.cc" --target "src/memsystem.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DMONT -Itests/resnet20/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/memsystem.cc -o src/memsystem.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.GjQlMJ" --kind "compile" --name "assem.cc" --source "src/assem.cc" --target "src/assem.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DMONT -Itests/resnet20/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/assem.cc -o src/assem.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.GjQlMJ" --kind "compile" --name "config.cc" --source "src/config.cc" --target "src/config.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DMONT -Itests/resnet20/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/config.cc -o src/config.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.GjQlMJ" --kind "compile" --name "encode.cc" --source "src/encode.cc" --target "src/encode.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DMONT -Itests/resnet20/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/encode.cc -o src/encode.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.GjQlMJ" --kind "compile" --name "resnet20.cc" --source "tests/resnet20/resnet20.cc" --target "tests/resnet20/resnet20.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DMONT -Itests/resnet20/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c tests/resnet20/resnet20.cc -o tests/resnet20/resnet20.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.GjQlMJ" --kind "compile" --name "common.cc" --source "src/golden/common.cc" --target "src/golden/common.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DMONT -Itests/resnet20/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/golden/common.cc -o src/golden/common.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.GjQlMJ" --kind "compile" --name "autom.cc" --source "src/golden/autom.cc" --target "src/golden/autom.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DMONT -Itests/resnet20/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/golden/autom.cc -o src/golden/autom.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.GjQlMJ" --kind "compile" --name "crb.cc" --source "src/golden/crb.cc" --target "src/golden/crb.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DMONT -Itests/resnet20/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/golden/crb.cc -o src/golden/crb.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.GjQlMJ" --kind "compile" --name "ntt.cc" --source "src/golden/ntt.cc" --target "src/golden/ntt.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DMONT -Itests/resnet20/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/golden/ntt.cc -o src/golden/ntt.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.GjQlMJ" --kind "link" --name "golden_link" --target "tests/resnet20/bin/resnet20_gm" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DMONT src/clib_profile.o src/define.o src/evk_map.o src/poly_op.o src/cipher_op.o src/cipher2_api.o src/rf_live_log.o src/hekit_bootstrap.o src/hardware_image_writer.o src/bootstrap.o src/memsystem.o src/assem.o src/config.o src/encode.o tests/resnet20/resnet20.o src/golden/common.o src/golden/autom.o src/golden/crb.o src/golden/ntt.o -Itests/resnet20/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -o tests/resnet20/bin/resnet20_gm
+rm -f src/clib_profile.o src/define.o src/evk_map.o src/poly_op.o src/cipher_op.o src/cipher2_api.o src/rf_live_log.o src/hekit_bootstrap.o src/hardware_image_writer.o src/bootstrap.o src/memsystem.o src/assem.o src/config.o src/encode.o tests/resnet20/resnet20.o src/golden/common.o src/golden/autom.o src/golden/crb.o src/golden/ntt.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.GjQlMJ" --kind "runtime" --name "golden_main" --target "tests/resnet20/bin/resnet20_gm" -- bash -c 'ulimit -s 32768 -n 65535 && OMP_NUM_THREADS=32 ./tests/resnet20/bin/resnet20_gm resnet20'
+[Info:] benchmark name is : resnet20
+------------- params --------------
+-- N : 65536
+-- col : 512
+-- batchsize : 128
+-- L : 58
+-- K : 60
+-- CB NUM : 8
+-----------------------------------
+[Info:] IIE DS scaleup q0=130809857 q1=132120577 delta0=1125148641920990.4 integer=15
+[INFO:] complete main graph compute
+[INFO:] complete traceToInst.py
+Wrote mb_instr.hex/.depth and 8 CB hex/.depth files to './'
+[INFO:] complete transInstrToAccFormat.py
+trace contract audit: ./instr_trace.txt
+  ops=35560423 rf_bank_num=3 poly_len=128 strict=False liveness=False
+  summary: errors=0 warns=0 -> PASS
+Finished splitting 64 NTT files and 64 INTT files into merged CB outputs under /home/B/caiming/fheacc-software-platform/soft/clib/tests/tests/resnet20/nttw/ntt_intt_merged using /home/B/caiming/fheacc-software-platform/soft/clib/tests/tests/resnet20/include/param.hh (CB_NUM=8, L=58, K=60, NTT depth=138, INTT depth=138, INTT offset multiplier=1, log=/home/B/caiming/fheacc-software-platform/soft/clib/tests/tests/resnet20/nttw/ntt_intt_merged/transNttWinFormat.log)
+work dictory is /home/B/caiming/fheacc-software-platform/soft/clib/tests/tests/resnet20/data
+ntt_trace trans end
+[INFO:] complete transNttTraeFormat.py
+✅ [GOLDEN MODEL] Finished processing benchmark: resnet20
+make decrypt
+[decrypt] post-run correction: de-Montgomery applied once to ciphertext coefficients (R=17179869184), then decrypted again; original log: resnet20.log.before-demont-20261025-210014.bak
+[decrypt] result_path=soft/clib/tests/tests/resnet20/data/tmp_result.demont.json
+output: decrypted=[-1.5842074, -1.1220994, -0.26099515, 2.8038049, -0.93061192, 2.9960491, -1.2871566, 1.3268987, ...] len=32768
+output: expected_name=output
+output: expected=[-1.5841394, -1.1219741, -0.26132676, 2.80371, -0.93075495, 2.9960875, -1.2873431, 1.32707, ...] len=10
+output: compared_prefix_len=10, decrypted_len=32768
+output: max_abs_error=3.699895e-04, max_rel_error=1.268959e-03, atol=1.000e-04, rtol=1.000e-04, status=OK
+rm -rf soft/clib/tests/tests/resnet20/plain/
+rm -rf soft/clib/tests/tests/resnet20/key/
+
+========== make soft timing breakdown ==========
+benchmark=resnet20 release_mode=2 LOG_N=16 N=65536 L=58 K=60
+Root pipeline (stages are contained in total):
+  geneC                          1h 00m 55.75s
+  gene_encr_dec                     10.08 s
+  hekit_refresh_input_cipher         9.46 s
+  gene_riscv                     3h 23m 24.55s
+Compilation and link:
+  wall span                     7m 41.37s
+  compile task wall sum         7m 39.88s
+  compile user CPU              7m 28.48s
+  compile system CPU                6.65 s
+  peak child RSS                  1427.5 MiB
+  link task wall sum               0.326 s
+  Slowest translation units:
+     403.517 s  tests/resnet20/resnet20.cc
+      12.976 s  src/clib_profile.cc
+      10.133 s  src/cipher2_api.cc
+       5.912 s  src/bootstrap.cc
+       5.162 s  src/hardware_image_writer.cc
+       4.347 s  src/hekit_bootstrap.cc
+       2.622 s  src/config.cc
+       2.396 s  src/golden/crb.cc
+       1.975 s  src/golden/ntt.cc
+       1.746 s  src/memsystem.cc
+Model runtime:
+  golden_main                    3h 09m 18.81s
+Python post-processing:
+  traceToInst                    2m 11.76s
+  transInstrToAccFormat          1m 02.80s
+  check_trace_contract           1m 53.71s
+  transNttWinFormat                  1.49 s
+  transNttTraceFormat               0.050 s
+Total (not added to the nested stages above):
+  make_soft                      4h 24m 40.13s
+Result: SUCCESS
+TSV: /home/B/caiming/fheacc-software-platform/soft/clib/tests/tests/resnet20/data/make_soft_timing.tsv
+================================================
+
+========== accelerator cycle profile ==========
+profile=/home/B/caiming/fheacc-software-platform/soft/clib/tests/tests/resnet20/data/clib_profile.md
+[accelerator cycle summary]
+
+category device total_cycles total_exe_cycles total_mem_cycles total_sync_cycles total_crb_cycles
+0 CB0 614243257 283860628 118191397 212191232 0
+0 CB1 613652953 283270324 118191397 212191232 0
+0 CB2 599596489 276001636 114889317 208705536 0
+0 CB3 598886065 275291212 114889317 208705536 0
+0 CB4 550059197 252912180 106945161 190201856 0
+0 CB5 549098237 251951220 106945161 190201856 0
+0 CB6 505756945 234033219 88812750 182910976 0
+0 CB7 505238713 233514987 88812750 182910976 0
+0 MB 25474123039 0 0 20086784 25454036255
+1000 CB0 43265332 18729920 12099956 12435456 0
+1000 CB1 43240164 18704752 12099956 12435456 0
+1000 CB2 40377216 17420722 11286990 11669504 0
+1000 CB3 40377216 17420722 11286990 11669504 0
+1000 CB4 37911148 16414090 10593506 10903552 0
+1000 CB5 37911148 16414090 10593506 10903552 0
+1000 CB6 37911148 16414090 10593506 10903552 0
+1000 CB7 37911148 16414090 10593506 10903552 0
+1000 MB 1451892090 0 0 180224 1451711866
+1001 CB0 49201856 24314554 13217798 11669504 0
+1001 CB1 49201856 24314554 13217798 11669504 0
+1001 CB2 49201856 24314554 13217798 11669504 0
+1001 CB3 49201856 24314554 13217798 11669504 0
+1001 CB4 46145836 22848210 12394074 10903552 0
+1001 CB5 46145836 22848210 12394074 10903552 0
+1001 CB6 46109888 22819170 12387166 10903552 0
+1001 CB7 46084720 22794002 12387166 10903552 0
+1001 MB 1428750290 0 0 180224 1428570066
+1002 CB0 49201856 24314554 13217798 11669504 0
+1002 CB1 49201856 24314554 13217798 11669504 0
+1002 CB2 49201856 24314554 13217798 11669504 0
+1002 CB3 49201856 24314554 13217798 11669504 0
+1002 CB4 46109888 22819170 12387166 10903552 0
+1002 CB5 46084720 22794002 12387166 10903552 0
+1002 CB6 42635340 21050524 11447216 10137600 0
+1002 CB7 42635340 21050524 11447216 10137600 0
+1002 MB 1405608490 0 0 180224 1405428266
+1100 CB0 42180864 20719182 11324082 10137600 0
+1100 CB1 42180864 20719182 11324082 10137600 0
+1100 CB2 42144916 20690142 11317174 10137600 0
+1100 CB3 42119748 20664974 11317174 10137600 0
+1100 CB4 35614348 17455152 9553500 8605696 0
+1100 CB5 35614348 17455152 9553500 8605696 0
+1100 CB6 35614348 17455152 9553500 8605696 0
+1100 CB7 35614348 17455152 9553500 8605696 0
+1100 MB 1197332290 0 0 180224 1197152066
+1101 CB0 42144916 20690142 11317174 10137600 0
+1101 CB1 42119748 20664974 11317174 10137600 0
+1101 CB2 38670368 18921496 10377224 9371648 0
+1101 CB3 38670368 18921496 10377224 9371648 0
+1101 CB4 35614348 17455152 9553500 8605696 0
+1101 CB5 35614348 17455152 9553500 8605696 0
+1101 CB6 35614348 17455152 9553500 8605696 0
+1101 CB7 35614348 17455152 9553500 8605696 0
+1101 MB 1174190490 0 0 180224 1174010266
+1102 CB0 31605024 13406008 8827368 9371648 0
+1102 CB1 31605024 13406008 8827368 9371648 0
+1102 CB2 31605024 13406008 8827368 9371648 0
+1102 CB3 31605024 13406008 8827368 9371648 0
+1102 CB4 29138956 12399376 8133884 8605696 0
+1102 CB5 29138956 12399376 8133884 8605696 0
+1102 CB6 29103008 12370336 8126976 8605696 0
+1102 CB7 29077840 12345168 8126976 8605696 0
+1102 MB 1151048690 0 0 180224 1150868466
+1400 CB0 76058598 37593600 11476454 26988544 0
+1400 CB1 75932758 37467760 11476454 26988544 0
+1400 CB2 74308080 36595724 11129316 26583040 0
+1400 CB3 74207408 36495052 11129316 26583040 0
+1400 CB4 69769414 34476134 10602592 24690688 0
+1400 CB5 69568070 34274790 10602592 24690688 0
+1400 CB6 67381820 33055110 10041526 24285184 0
+1400 CB7 67230812 32904102 10041526 24285184 0
+1400 MB 2883864808 0 0 4145152 2879719656
+1401 CB0 76058598 37593600 11476454 26988544 0
+1401 CB1 75932758 37467760 11476454 26988544 0
+1401 CB2 74308080 36595724 11129316 26583040 0
+1401 CB3 74207408 36495052 11129316 26583040 0
+1401 CB4 69769414 34476134 10602592 24690688 0
+1401 CB5 69568070 34274790 10602592 24690688 0
+1401 CB6 67381820 33055110 10041526 24285184 0
+1401 CB7 67230812 32904102 10041526 24285184 0
+1401 MB 2883864808 0 0 4145152 2879719656
+1410 CB0 61896934 31173032 9682750 21041152 0
+1410 CB1 61796262 31072360 9682750 21041152 0
+1410 CB2 60584964 30398610 9415538 20770816 0
+1410 CB3 60484292 30297938 9415538 20770816 0
+1410 CB4 56852994 28613508 8955518 19283968 0
+1410 CB5 56676818 28437332 8955518 19283968 0
+1410 CB6 54939544 27444626 8481286 19013632 0
+1410 CB7 54813704 27318786 8481286 19013632 0
+1410 MB 2189483494 0 0 3604480 2185879014
+1411 CB0 61896934 31173032 9682750 21041152 0
+1411 CB1 61796262 31072360 9682750 21041152 0
+1411 CB2 60584964 30398610 9415538 20770816 0
+1411 CB3 60484292 30297938 9415538 20770816 0
+1411 CB4 56852994 28613508 8955518 19283968 0
+1411 CB5 56676818 28437332 8955518 19283968 0
+1411 CB6 54939544 27444626 8481286 19013632 0
+1411 CB7 54813704 27318786 8481286 19013632 0
+1411 MB 2189483494 0 0 3604480 2185879014
+1420 CB0 4888180 2249412 566192 2072576 0
+1420 CB1 4863012 2224244 566192 2072576 0
+1420 CB2 4449632 2025958 486266 1937408 0
+1420 CB3 4449632 2025958 486266 1937408 0
+1420 CB4 4212296 1930302 479754 1802240 0
+1420 CB5 4212296 1930302 479754 1802240 0
+1420 CB6 4212296 1930302 479754 1802240 0
+1420 CB7 4212296 1930302 479754 1802240 0
+1420 MB 234359246 0 0 180224 234179022
+1421 CB0 4449632 2025958 486266 1937408 0
+1421 CB1 4449632 2025958 486266 1937408 0
+1421 CB2 4449632 2025958 486266 1937408 0
+1421 CB3 4449632 2025958 486266 1937408 0
+1421 CB4 4212296 1930302 479754 1802240 0
+1421 CB5 4212296 1930302 479754 1802240 0
+1421 CB6 4176700 1901614 472846 1802240 0
+1421 CB7 4151532 1876446 472846 1802240 0
+1421 MB 231460438 0 0 180224 231280214
+1422 CB0 4449632 2025958 486266 1937408 0
+1422 CB1 4449632 2025958 486266 1937408 0
+1422 CB2 4449632 2025958 486266 1937408 0
+1422 CB3 4449632 2025958 486266 1937408 0
+1422 CB4 4176700 1901614 472846 1802240 0
+1422 CB5 4151532 1876446 472846 1802240 0
+1422 CB6 3738152 1678160 392920 1667072 0
+1422 CB7 3738152 1678160 392920 1667072 0
+1422 MB 228561630 0 0 180224 228381406
+1430 CB0 4888180 2249412 566192 2072576 0
+1430 CB1 4863012 2224244 566192 2072576 0
+1430 CB2 4449632 2025958 486266 1937408 0
+1430 CB3 4449632 2025958 486266 1937408 0
+1430 CB4 4212296 1930302 479754 1802240 0
+1430 CB5 4212296 1930302 479754 1802240 0
+1430 CB6 4212296 1930302 479754 1802240 0
+1430 CB7 4212296 1930302 479754 1802240 0
+1430 MB 234359246 0 0 180224 234179022
+1431 CB0 4449632 2025958 486266 1937408 0
+1431 CB1 4449632 2025958 486266 1937408 0
+1431 CB2 4449632 2025958 486266 1937408 0
+1431 CB3 4449632 2025958 486266 1937408 0
+1431 CB4 4212296 1930302 479754 1802240 0
+1431 CB5 4212296 1930302 479754 1802240 0
+1431 CB6 4176700 1901614 472846 1802240 0
+1431 CB7 4151532 1876446 472846 1802240 0
+1431 MB 231460438 0 0 180224 231280214
+1432 CB0 4449632 2025958 486266 1937408 0
+1432 CB1 4449632 2025958 486266 1937408 0
+1432 CB2 4449632 2025958 486266 1937408 0
+1432 CB3 4449632 2025958 486266 1937408 0
+1432 CB4 4176700 1901614 472846 1802240 0
+1432 CB5 4151532 1876446 472846 1802240 0
+1432 CB6 3738152 1678160 392920 1667072 0
+1432 CB7 3738152 1678160 392920 1667072 0
+1432 MB 228561630 0 0 180224 228381406
+1500 CB0 415941330 200046588 94091990 121802752 0
+1500 CB1 415638170 199743428 94091990 121802752 0
+1500 CB2 405900708 194837632 91603236 119459840 0
+1500 CB3 405649028 194585952 91603236 119459840 0
+1500 CB4 375363750 180572738 84747876 110043136 0
+1500 CB5 374934750 180143738 84747876 110043136 0
+1500 CB6 366999208 175887580 82645452 108466176 0
+1500 CB7 366646856 175535228 82645452 108466176 0
+1500 MB 13825601850 0 0 9748480 13815853370
+1501 CB0 1288144 825660 102036 360448 0
+1501 CB1 1288144 825660 102036 360448 0
+1501 CB2 1152272 723536 68288 360448 0
+1501 CB3 1127104 698368 68288 360448 0
+1501 CB4 1033736 624932 48356 360448 0
+1501 CB5 1033736 624932 48356 360448 0
+1501 CB6 1033736 624932 48356 360448 0
+1501 CB7 1033736 624932 48356 360448 0
+1501 MB 360448 0 0 360448 0
+1502 CB0 141669044 67359028 38535552 35774464 0
+1502 CB1 141643876 67333860 38535552 35774464 0
+1502 CB2 138780928 66049830 37722586 35008512 0
+1502 CB3 138780928 66049830 37722586 35008512 0
+1502 CB4 130166872 62081470 35374746 32710656 0
+1502 CB5 130141704 62056302 35374746 32710656 0
+1502 CB6 126656376 60283784 34427888 31944704 0
+1502 CB7 126631208 60258616 34427888 31944704 0
+1502 MB 4286250870 0 0 540672 4285710198
+1503 CB0 116177204 54878692 31651664 29646848 0
+1503 CB1 116152036 54853524 31651664 29646848 0
+1503 CB2 112666708 53081006 30704806 28880896 0
+1503 CB3 112641540 53055838 30704806 28880896 0
+1503 CB4 100564772 47360368 27387316 25817088 0
+1503 CB5 100564772 47360368 27387316 25817088 0
+1503 CB6 100528824 47331328 27380408 25817088 0
+1503 CB7 100503656 47306160 27380408 25817088 0
+1503 MB 3522571470 0 0 540672 3522030798
+1504 CB0 334356 127292 26840 180224 0
+1504 CB1 334356 127292 26840 180224 0
+1504 CB2 298760 98604 19932 180224 0
+1504 CB3 273592 73436 19932 180224 0
+1504 CB4 180224 0 0 180224 0
+1504 CB5 180224 0 0 180224 0
+1504 CB6 180224 0 0 180224 0
+1504 CB7 180224 0 0 180224 0
+1504 MB 180224 0 0 180224 0
+
+================================================

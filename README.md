@@ -178,22 +178,39 @@ inside the container before the inference step.
 
 ### 4.2 FPGA accelerator (baselines/fpga, interface adaptation / CPU verification path)
 
-`baselines/fpga` is a copy of `baselines/cpu` with the underlying SEAL `Evaluator` calls replaced by a `fhe::*` interface layer (aligned to `rt_iie.h`'s high-level wrappers), intended for later FPGA-accelerator hookup. Currently it runs on the CPU verification path — `fhe::*` forwards to SEAL.
+The IIE FPGA accelerator supports running compiler-generated programs and handwritten FHE-MP-CNN programs. Compiler test models include LR, LeNet5, ResNet20, and ResNet32; handwritten implementation test models include ResNet20 and ResNet32.
 
-- Build
+- Baseline verification
 
-    ```
-    python3 /app/scripts/build_cnn_fpga.py   # build the fpga baseline (fhe_ops-adapted cnn_ckks); needs modified SEAL 3.6.6 installed at /usr/local (from build_cnn.py in §1)
-    ```
+Follow the instructions in `baselines/fpga/README.md` in the delivery repository to complete board configuration and FPGA loading. Run the following commands in the root directory of the `fheacc-software-platform` repository to generate hardware instructions and data for the compiler test models:
 
-- Inference (ResNet-20 single image)
+```bash
+make soft TEST_NAME=lr       RELEASE_MODE=2
+make soft TEST_NAME=LeNet5   RELEASE_MODE=2
+make soft TEST_NAME=resnet20 RELEASE_MODE=2
+make soft TEST_NAME=resnet32 RELEASE_MODE=2
+```
 
-    ```
-    cd /app/baselines/fpga/cnn_ckks/build_fpga
-    ./cnn 20 10 0 0
-    ```
+The artifacts for each model are located in `soft/clib/tests/tests/<TEST_NAME>/`, where `data/` contains the instructions and HBM image, and `nttw/ntt_intt_merged/` contains the NTT window data. `RELEASE_MODE=2` also runs the CPU Golden model for numerical verification.
 
-    `fhe::hadd_inplace` / `hsub` / `pmult` / `rescale` / `rotate` / `relin` / `modswitch` etc. forward to the SEAL Evaluator; the inferred result matches `baselines/cpu`. A single ResNet-20 image takes ~25-40 min (CPU SEAL bootstrap).
+Generate the hardware package for the handwritten FHE-MP-CNN test model via the SDK app:
+
+```bash
+cd soft/clib/sdk/apps/resnet20
+make hardware MODEL=20 SAMPLE=0 RELEASE_MODE=2
+# First load and test the generated resnet20/ hardware package, then generate the next model.
+make hardware MODEL=32 SAMPLE=0 RELEASE_MODE=2
+```
+
+Both models are output to the `resnet20/` hardware package directory under the app directory; the second export overwrites the first. The hardware package name is determined by the app directory name, while the actual network is selected by `MODEL=20` or `MODEL=32`. If only hardware artifacts and cycle estimates are needed, `RELEASE_MODE=1` can be used; this mode does not perform Golden numerical verification.
+
+Use the on-board loader to load the corresponding instruction stream, initial HBM data, and NTT window data. Run the accelerator, read back the output, and compare it with the corresponding Golden result. When performing decryption comparison, if the output is still in Montgomery representation, a de-Montgomery conversion should be performed first; the decryption tool of the SDK hardware package will handle the output format based on what is recorded in the package.
+
+- FPGA performance testing
+
+**The elapsed time includes input data loading, FPGA computation, and result readback.** Compiler-generated code and handwritten implementations use the same timing scope. Save the on-board run logs and timing data to the `testing/` directory of the delivery repository.
+
+The measured results are in the accompanying `report.md`, whose content corresponds to `testing/report.md` in the repository. These data are FPGA measured elapsed times; the run time of `make soft` and the cycle estimates in `clib_profile.md` are different metrics.
 
 ## 5. Runtime library unit tests (7.5)
 
