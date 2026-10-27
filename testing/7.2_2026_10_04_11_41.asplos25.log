@@ -1,0 +1,145 @@
+#### log for: /app/scripts/resbm.py
+-------- ACE(OpenMP) Compilation --------
+alexnet_cifar10:
+                 ACE: Time = 2.41(s), Memory = 1.41(GB)
+                 GCC: Time = 8.85(s), Memory = 0.46(GB)
+-------- Done --------
+-------- ACE Accuracy --------
+Available CPU: 64, Required CPU: 10, Process: 6
+Adjust to Process: 1, due to task number and memory required
+alexnet_cifar10: Accuracy = 100.0%, Time = 2671.44(s), Memory = 275.6(GB)
+                 INFO: infer images [0, 9] from cifar-10 /app/cifar/cifar-10-batches-bin/test_batch.bin.
+                 ckks_param: _provider = 0, _poly_degree = 131072, mul_depth = 31, input_lev = 14, _first_mod_size = 60, _scaling_mod_size = 57, _num_q_parts = 3, _num_p = 11, _num_rot_idx = 688,_hamming_weight = 192
+                 Result: [-1.2076, 19.8055, -4.1477, -2.9963, -5.8883, -5.6220, -1.9600, -4.9767, -0.2483, 7.2406], expected=1.
+                 [INFO] infer image 9 success
+                 Result: [10.8591, 2.0215, 1.6678, -0.5175, -2.3191, -5.7199, -3.5929, -4.1209, 2.5636, -0.8424], expected=0.
+                 [INFO] infer image 3 success
+                 Result: [1.9333, 2.2904, -3.5246, -3.2383, -1.3996, -3.8257, -2.1124, -3.9440, 14.2483, -0.4280], expected=8.
+                 [INFO] infer image 2 success
+                 Result: [-3.8567, -3.0467, 2.1653, -0.5520, 1.4702, -4.0015, 19.5139, -5.5048, -3.1037, -3.0847], expected=6.
+                 [INFO] infer image 4 success
+                 Result: [1.1750, 4.7348, -3.5205, -4.1496, -5.5344, -2.0978, -2.6260, -4.3630, 17.2096, -0.8287], expected=8.
+                 [INFO] infer image 1 success
+                 Result: [-1.5451, -2.3689, -1.3378, -0.2449, -2.1215, 2.4520, 11.5038, -3.2213, -2.3424, -0.7745], expected=6.
+                 [INFO] infer image 7 success
+                 Result: [-4.0463, -1.8391, -1.2434, 0.9955, -2.9237, -1.4989, 19.2162, -1.2626, -3.6830, -3.7152], expected=6.
+                 [INFO] infer image 5 success
+                 Result: [-2.7358, 13.1343, -3.9001, 2.4651, -4.9367, -1.1775, -3.7080, -3.9958, -1.1252, 5.9789], expected=1.
+                 [INFO] infer image 6 success
+                 Result: [-3.5590, -4.5869, -2.6142, 11.8328, 5.1667, 2.7258, 0.4929, -1.2764, -4.2600, -3.9222], expected=3.
+                 [INFO] infer image 8 success
+                 Result: [-3.3337, 3.0014, -4.6749, 12.2727, -3.7961, 9.0012, -2.7088, -4.3774, -1.5890, -3.7961], expected=3.
+                 [INFO] infer image 0 success
+                 [RESULT] infer 10 images, pass 10 1.000, fail 0 0.000.
+                 Total memory size for keys: rot_key_cnt = 796, rot_key_size = 215344229792 bytes, total_key_size = 215772049336 bytes
+                 Total memory size for weight plain: cnt = 95158, size = 271274510792 bytes
+Spent time = 2671.45(s), Accumulated time = 2671.44(s)
+-------- Done --------
+-------- ACE(OpenMP) Compilation --------
+resnet20_cifar10:
+                  ACE: Time = 1.17(s), Memory = 0.69(GB)
+                  GCC: Time = 10.44(s), Memory = 0.65(GB)
+-------- Done --------
+-------- ACE Accuracy --------
+Available CPU: 64, Required CPU: 10, Process: 6
+Adjust to Process: 1, due to task number and memory required
+resnet20_cifar10: Accuracy = 100.0%, Time = 1302.84(s), Memory = 54.1(GB)
+                  INFO: infer images [0, 9] from cifar-10 /app/cifar/cifar-10-batches-bin/test_batch.bin.
+                  ckks_param: _provider = 0, _poly_degree = 65536, mul_depth = 30, input_lev = 17, _first_mod_size = 60, _scaling_mod_size = 57, _num_q_parts = 3, _num_p = 11, _num_rot_idx = 196,_hamming_weight = 192
+                  Result: [-2.6913, -2.2515, -2.5297, 21.6247, -3.1334, 2.0376, -3.0390, -2.7265, -5.0244, -2.2668], expected=3.
+                  [INFO] infer image 0 success
+                  Result: [1.2534, 4.7702, -1.6586, -2.2238, -3.4987, -3.7700, -2.5206, -2.3118, 8.9756, 0.9839], expected=8.
+                  [INFO] infer image 2 success
+                  Result: [6.9962, -1.0009, 0.4380, -2.1687, -3.9463, -3.8881, -2.7088, -2.7804, 4.9346, 4.1243], expected=0.
+                  [INFO] infer image 3 success
+                  Result: [1.5646, 3.6985, -3.5977, -1.5345, -3.7318, -3.8961, -1.9646, -3.8994, 15.7268, -2.3660], expected=8.
+                  [INFO] infer image 1 success
+                  Result: [1.8845, -3.8359, 5.1726, 0.4059, -1.7775, -2.9969, 11.6912, -4.5850, -4.0555, -1.9037], expected=6.
+                  [INFO] infer image 7 success
+                  Result: [-1.0807, -3.5176, -3.4268, 14.9625, 0.3548, 6.2000, -2.2961, -3.1250, -4.4758, -3.5954], expected=3.
+                  [INFO] infer image 8 success
+                  Result: [-4.0784, -1.4319, -2.1720, -1.3227, -0.6754, 2.1113, 14.5008, -1.5730, -2.1397, -3.2193], expected=6.
+                  [INFO] infer image 5 success
+                  Result: [-0.6949, 9.0921, -3.0702, -0.1320, -3.1355, -2.6660, -1.1228, -1.1002, 0.9650, 1.8642], expected=1.
+                  [INFO] infer image 9 success
+                  Result: [-0.0006, 8.2537, -2.5427, -1.5479, -2.3178, 0.9367, -3.0169, -0.6414, -2.7445, 3.6211], expected=1.
+                  [INFO] infer image 6 success
+                  Result: [-3.2475, -1.0120, 2.9002, -1.4328, -1.7117, -2.7984, 16.4288, -3.4786, -2.1698, -3.4785], expected=6.
+                  [INFO] infer image 4 success
+                  [RESULT] infer 10 images, pass 10 1.000, fail 0 0.000.
+                  Total memory size for keys: rot_key_cnt = 226, rot_key_size = 29859327920 bytes, total_key_size = 30067995080 bytes
+                  Total memory size for weight plain: cnt = 63630, size = 113445300064 bytes
+Spent time = 1302.85(s), Accumulated time = 1302.84(s)
+-------- Done --------
+-------- ACE(OpenMP) Compilation --------
+squeezenet_cifar10:
+                    ACE: Time = 3.90(s), Memory = 2.56(GB)
+                    GCC: Time = 11.65(s), Memory = 0.72(GB)
+-------- Done --------
+-------- ACE Accuracy --------
+Available CPU: 64, Required CPU: 10, Process: 6
+Adjust to Process: 1, due to task number and memory required
+squeezenet_cifar10: Accuracy = 100.0%, Time = 3870.14(s), Memory = 315.4(GB)
+                    INFO: infer images [0, 9] from cifar-10 /app/cifar/cifar-10-batches-bin/test_batch.bin.
+                    ckks_param: _provider = 0, _poly_degree = 131072, mul_depth = 29, input_lev = 16, _first_mod_size = 60, _scaling_mod_size = 57, _num_q_parts = 3, _num_p = 10, _num_rot_idx = 910,_hamming_weight = 192
+                    Result: [-1.5426, -3.8340, 7.9989, 10.3035, -4.9056, 1.2427, 4.4073, -4.4695, -1.5364, -7.6645], expected=3.
+                    [INFO] infer image 0 success
+                    Result: [-6.6685, -3.2202, 5.8565, 2.4722, -0.1996, -4.7971, 20.5992, -7.1234, -3.1562, -3.7630], expected=6.
+                    [INFO] infer image 4 success
+                    Result: [12.5952, 0.3742, 2.2569, -2.2661, -5.2283, -7.3380, -4.9361, -2.5174, 4.6837, 2.3757], expected=0.
+                    [INFO] infer image 3 success
+                    Result: [4.4193, 7.1157, -4.6476, -5.7258, -6.3637, -8.7311, -4.0454, -5.8960, 21.6462, 2.2282], expected=8.
+                    [INFO] infer image 1 success
+                    Result: [1.8712, 13.8639, -0.0921, -3.2826, -9.5065, -0.9006, -2.0528, 1.3143, -3.4758, 2.2607], expected=1.
+                    [INFO] infer image 6 success
+                    Result: [-4.2904, -3.7959, -0.7185, 2.2795, -0.3594, -2.4465, 15.5090, 3.6648, -7.3921, -2.4506], expected=6.
+                    [INFO] infer image 5 success
+                    Result: [2.4250, -4.1992, 0.3118, 9.5666, 0.5531, -2.6305, 5.4848, -1.3146, -5.1014, -5.0957], expected=3.
+                    [INFO] infer image 8 success
+                    Result: [0.6112, -4.1250, 2.9757, 0.2788, -3.4476, -1.8439, 14.8431, -2.8662, -5.7340, -0.6922], expected=6.
+                    [INFO] infer image 7 success
+                    Result: [-2.3339, 12.8639, -0.7224, -3.6998, -7.8128, -6.6745, -0.0635, 2.5887, 0.8127, 5.0413], expected=1.
+                    [INFO] infer image 9 success
+                    Result: [3.5640, 8.4228, -3.2823, -6.4695, -5.0618, -6.2583, -1.0673, -3.8360, 10.6451, 3.3432], expected=8.
+                    [INFO] infer image 2 success
+                    [RESULT] infer 10 images, pass 10 1.000, fail 0 0.000.
+                    Total memory size for keys: rot_key_cnt = 1005, rot_key_size = 252916876920 bytes, total_key_size = 253315336336 bytes
+                    Total memory size for weight plain: cnt = 65979, size = 250863975504 bytes
+Spent time = 3870.15(s), Accumulated time = 3870.14(s)
+-------- Done --------
+-------- ACE(OpenMP) Compilation --------
+vgg16_cifar10:
+               ACE: Time = 6.92(s), Memory = 4.24(GB)
+               GCC: Time = 6.63(s), Memory = 0.42(GB)
+-------- Done --------
+-------- ACE Accuracy --------
+Available CPU: 64, Required CPU: 10, Process: 6
+Adjust to Process: 1, due to task number and memory required
+vgg16_cifar10: Accuracy = 100.0%, Time = 4177.17(s), Memory = 556.9(GB)
+               INFO: infer images [0, 9] from cifar-10 /app/cifar/cifar-10-batches-bin/test_batch.bin.
+               ckks_param: _provider = 0, _poly_degree = 131072, mul_depth = 29, input_lev = 16, _first_mod_size = 60, _scaling_mod_size = 57, _num_q_parts = 3, _num_p = 10, _num_rot_idx = 1914,_hamming_weight = 192
+               Result: [0.0092, 0.0644, -1.1202, -0.9635, -1.9555, -1.6100, -1.1958, -1.4976, 9.0412, -0.7721], expected=8.
+               [INFO] infer image 2 success
+               Result: [-1.3526, -1.5058, -0.9020, -0.0823, -0.9139, -1.1894, 9.1076, -1.5501, -1.0071, -0.6045], expected=6.
+               [INFO] infer image 5 success
+               Result: [-0.0740, -0.0843, -1.2445, -0.7272, -1.8984, -1.5006, -1.0958, -1.3836, 8.7663, -0.7579], expected=8.
+               [INFO] infer image 1 success
+               Result: [-1.1802, -1.3227, -0.8865, 9.4244, -1.3182, 0.2686, -0.8391, -1.2211, -1.5638, -1.3614], expected=3.
+               [INFO] infer image 0 success
+               Result: [-1.5380, -1.3340, -0.8639, 9.4219, -1.1354, 0.4200, -1.1538, -1.2989, -1.2505, -1.2675], expected=3.
+               [INFO] infer image 8 success
+               Result: [-1.4987, -1.1125, -0.6947, -0.4774, 0.1653, -1.0534, 8.6328, -1.7231, -0.9940, -1.2442], expected=6.
+               [INFO] infer image 4 success
+               Result: [-0.9743, 8.9931, -1.4973, -1.0413, -1.9320, -1.5234, -0.9221, -1.0531, -0.4667, 0.4170], expected=1.
+               [INFO] infer image 9 success
+               Result: [9.7757, -1.7736, -0.1566, -0.9236, -1.3535, -1.9721, -1.2613, -1.4921, -0.0501, -0.7927], expected=0.
+               [INFO] infer image 3 success
+               Result: [-1.1004, 9.1105, -1.5759, -0.5985, -2.0651, -1.3374, -1.0483, -1.1616, -0.7044, 0.4811], expected=1.
+               [INFO] infer image 6 success
+               Result: [-0.8424, -1.8426, 0.0047, -1.0002, -0.9091, -0.9110, 9.1769, -1.7556, -1.3123, -0.6085], expected=6.
+               [INFO] infer image 7 success
+               [RESULT] infer 10 images, pass 10 1.000, fail 0 0.000.
+               Total memory size for keys: rot_key_cnt = 1995, rot_key_size = 502058875080 bytes, total_key_size = 502457334496 bytes
+               Total memory size for weight plain: cnt = 352141, size = 788685566416 bytes
+Spent time = 4177.18(s), Accumulated time = 4177.17(s)
+-------- Done --------

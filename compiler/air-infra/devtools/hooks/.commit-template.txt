@@ -1,0 +1,23 @@
+type(scope): subject
+
+body:
+- *
+
+testcase:
+- *
+
+# Notes for git commit message
+#
+# <type> : Required
+# fix|feat|chore|docs|style|refactor|refine|perf|test|revert|ci|build
+#
+# <scope> : Optional
+# the scope of the commit impact, such as: glob, module, data, ir
+#
+# <subject> : Required
+# A short description of the commit, no more than 50 characters long
+#
+# <body> : Required
+#
+# <testcase> : Required
+#

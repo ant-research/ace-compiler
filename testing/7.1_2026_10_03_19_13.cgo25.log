@@ -1,0 +1,390 @@
+#### log for: /app/scripts/cgo25_ae.py -a
+-------- ACE Compilation --------
+resnet20_cifar10:
+                  ACE: Time = 0.98(s), Memory = 0.68(GB)
+                  GCC: Time = 5.74(s), Memory = 0.53(GB)
+resnet32_cifar10:
+                  ACE: Time = 1.27(s), Memory = 1.02(GB)
+                  GCC: Time = 8.20(s), Memory = 0.83(GB)
+resnet32_cifar100:
+                   ACE: Time = 1.28(s), Memory = 1.02(GB)
+                   GCC: Time = 8.31(s), Memory = 0.85(GB)
+resnet44_cifar10:
+                  ACE: Time = 1.58(s), Memory = 1.36(GB)
+                  GCC: Time = 10.81(s), Memory = 1.04(GB)
+resnet56_cifar10:
+                  ACE: Time = 1.87(s), Memory = 1.70(GB)
+                  GCC: Time = 14.38(s), Memory = 1.35(GB)
+resnet110_cifar10:
+                   ACE: Time = 3.25(s), Memory = 3.22(GB)
+                   GCC: Time = 25.34(s), Memory = 0.89(GB)
+-------- Done --------
+-------- ACE Performance --------
+resnet20_cifar10:
+                  Exec: Time = 1476.2(s), Memory = 43.3(GB), Accuracy = 0.0%
+                        INFO: infer images [0, 0] from cifar-10 /app/cifar/cifar-10-batches-bin/test_batch.bin.
+                        ckks_param: _provider = 0, _poly_degree = 65536, mul_depth = 34, input_lev = 35, _first_mod_size = 60, _scaling_mod_size = 56, _num_q_parts = 3, _num_p = 12, _num_rot_idx = 196,_hamming_weight = 192
+                        Result: [-1161.5893, 2038.6625, 1218.2479, 135.4130, -339.4528, -142.5624, 1957.1285, -485.7221, 52.2008, 1016.9178], expected=3.
+                        [INFO] infer image 0 failed
+                        [RESULT] infer 1 images, pass 0 0.000, fail 1 1.000.
+                        Total memory size for keys: rot_key_cnt = 226, rot_key_size = 33414000560 bytes, total_key_size = 33647833544 bytes
+                        Total memory size for weight plain: cnt = 6517, size = 15660427496 bytes
+                        RTLib functions                    Count          Elapse
+                        --------------------            --------        --------
+                        NN                                     -               -
+                         NN_ADD                                9        0.002320 sec
+                         NN_CONV                              21      192.388877 sec
+                         NN_FLATTEN                            1        0.000483 sec
+                         NN_GEMM                               1        0.930696 sec
+                         NN_GLOBAL_AVGPOOL                     1        1.514885 sec
+                         NN_RELU                              19     1056.925631 sec
+                        NN                             sub total     1251.762890 sec
+                        FHE                                    -               -
+                         FHE_ADDCC                          7541       13.334056 sec
+                         FHE_ADDCP                           212        0.741768 sec
+                         FHE_MULCC                           779        8.166143 sec
+                         FHE_MULCP                          6686        5.927109 sec
+                         FHE_RELIN                           779      129.416231 sec
+                         FHE_RESCALE                        1503       69.311513 sec
+                         FHE_ROTATE                         1166      121.594663 sec
+                        FHE                            sub total      348.491483 sec
+                        FINALIZE_CONTEXT                       1        0.025774 sec
+                        PREPARE_CONTEXT                        1      223.072004 sec
+                        ENCODE_ARRAY                        6896       97.105692 sec
+                        ENCODE_VALUE                         381        0.301756 sec
+                        NTT                               349702      443.035974 sec
+                        INTT                              101849      136.587277 sec
+                        MAIN_GRAPH                             1     1251.763036 sec
+                         HW_ADD                           177740       13.573197 sec
+                         HW_MUL                           178280       37.588294 sec
+                         HW_ROT                             8668        0.773444 sec
+                         COPY_POLY                         11970       19.248386 sec
+                         EXTEND                             1632       19.131701 sec
+                         PRECOMP                             867      199.339127 sec
+                         MOD_DOWN                           5240      282.615662 sec
+                         DECOMP_MODUP                       4392      281.919597 sec
+                         DOT_PROD                           4794      143.073670 sec
+                         MULP                              15510      172.876423 sec
+                         RESCALE_POLY                       5451      137.292587 sec
+                         COPY_CIPH                           810        0.947716 sec
+                         INIT_CIPH_SM_SC                    9698        1.463394 sec
+                         INIT_CIPH_UP_SC                    7465        2.375307 sec
+                         INIT_CIPH_DN_SC                    1503        1.203656 sec
+                         BOOTSTRAP                            17      830.701562 sec
+                          BS_SETUP                             1       26.649457 sec
+                          BS_KEYGEN                            1       25.662164 sec
+                          BS_EVAL                             17      830.701536 sec
+                           BS_COEFF_TO_SLOT                   17      298.412544 sec
+                           BS_APPROX_MOD                      17      340.202961 sec
+                           BS_SLOT_TO_COEFF                   17      172.782425 sec
+                          BS_EVAL                      sub total      811.397930 sec
+                         BOOTSTRAP                     sub total      883.013157 sec
+                         PT_ENCODE                          6898       71.481680 sec
+                        MAIN_GRAPH                     sub total     2215.605404 sec
+resnet32_cifar10:
+                  Exec: Time = 2213.3(s), Memory = 43.7(GB), Accuracy = 0.0%
+                        INFO: infer images [0, 0] from cifar-10 /app/cifar/cifar-10-batches-bin/test_batch.bin.
+                        ckks_param: _provider = 0, _poly_degree = 65536, mul_depth = 34, input_lev = 35, _first_mod_size = 60, _scaling_mod_size = 56, _num_q_parts = 3, _num_p = 12, _num_rot_idx = 196,_hamming_weight = 192
+                        Result: [-399.8492, 52.3549, 959.0714, -500.7099, -950.5443, -1408.9988, -591.3046, -1278.1330, 87.6011, 852.8633], expected=3.
+                        [INFO] infer image 0 failed
+                        [RESULT] infer 1 images, pass 0 0.000, fail 1 1.000.
+                        Total memory size for keys: rot_key_cnt = 226, rot_key_size = 33414000560 bytes, total_key_size = 33647833544 bytes
+                        Total memory size for weight plain: cnt = 10873, size = 24110166536 bytes
+                        RTLib functions                    Count          Elapse
+                        --------------------            --------        --------
+                        NN                                     -               -
+                         NN_ADD                               15        0.002937 sec
+                         NN_CONV                              33      272.524309 sec
+                         NN_FLATTEN                            1        0.000478 sec
+                         NN_GEMM                               1        0.890260 sec
+                         NN_GLOBAL_AVGPOOL                     1        1.395123 sec
+                         NN_RELU                              31     1717.216862 sec
+                        NN                             sub total     1992.029969 sec
+                        FHE                                    -               -
+                         FHE_ADDCC                         12567       20.072223 sec
+                         FHE_ADDCP                           344        1.114930 sec
+                         FHE_MULCC                          1271       12.578565 sec
+                         FHE_MULCP                         11150        9.131564 sec
+                         FHE_RELIN                          1271      197.793962 sec
+                         FHE_RESCALE                        2439      105.813669 sec
+                         FHE_ROTATE                         1734      164.255547 sec
+                        FHE                            sub total      510.760461 sec
+                        FINALIZE_CONTEXT                       1        0.024193 sec
+                        PREPARE_CONTEXT                        1      219.911857 sec
+                        ENCODE_ARRAY                       11252      134.402260 sec
+                        ENCODE_VALUE                         621        0.459559 sec
+                        NTT                               514978      643.599685 sec
+                        INTT                              163373      215.611041 sec
+                        MAIN_GRAPH                             1     1992.030135 sec
+                         HW_ADD                           266912       19.324121 sec
+                         HW_MUL                           269528       53.092143 sec
+                         HW_ROT                            11908        0.924380 sec
+                         COPY_POLY                         19274       31.434649 sec
+                         EXTEND                             2784       32.376677 sec
+                         PRECOMP                            1479      332.489297 sec
+                         MOD_DOWN                           8344      444.871440 sec
+                         DECOMP_MODUP                       7084      450.570219 sec
+                         DOT_PROD                           8178      232.499490 sec
+                         MULP                              25974      246.761047 sec
+                         RESCALE_POLY                       8991      219.271330 sec
+                         COPY_CIPH                          1122        1.233317 sec
+                         INIT_CIPH_SM_SC                   15916        2.105453 sec
+                         INIT_CIPH_UP_SC                   12421        3.471121 sec
+                         INIT_CIPH_DN_SC                    2439        1.832845 sec
+                         BOOTSTRAP                            29     1370.798553 sec
+                          BS_SETUP                             1       26.439981 sec
+                          BS_KEYGEN                            1       25.492805 sec
+                          BS_EVAL                             29     1370.798516 sec
+                           BS_COEFF_TO_SLOT                   29      489.240407 sec
+                           BS_APPROX_MOD                      29      565.359994 sec
+                           BS_SLOT_TO_COEFF                   29      284.237765 sec
+                          BS_EVAL                      sub total     1338.838166 sec
+                         BOOTSTRAP                     sub total     1422.731303 sec
+                         PT_ENCODE                         11494      109.001868 sec
+                        MAIN_GRAPH                     sub total     3552.057951 sec
+resnet32_cifar100:
+                   Exec: Time = 2260.9(s), Memory = 44.4(GB), Accuracy = 0.0%
+                         INFO: infer images [0, 0] from cifar-100 /app/cifar/cifar-100-binary/test.bin.
+                         ckks_param: _provider = 0, _poly_degree = 65536, mul_depth = 34, input_lev = 35, _first_mod_size = 60, _scaling_mod_size = 56, _num_q_parts = 3, _num_p = 12, _num_rot_idx = 202,_hamming_weight = 192
+                         Result: [-186.8743, -257.6252, 1174.0413, 153.7477, -1165.1731, 616.9333, -602.4608, -565.2739, -1379.9380, 429.2044, 1950.8148, -144.3469, 153.2011, -225.9055, 139.7229, 544.9923, 636.8703, -301.4045, 37.2059, 351.3307, -244.1521, -830.7118, 105.4546, 1103.6768, 432.1238, -412.3699, -612.5033, 26.7558, -490.4459, -15.5095, 151.7828, -603.9208, 55.4529, -923.7766, -587.3714, 238.2130, -840.1660, 398.1085, 810.2381, 554.7495, -394.6708, -424.9831, -27.5724, -328.7018, 304.4971, 118.1735, 1019.6687, 419.2070, -414.9216, -781.9520, -3.5975, 1006.6864, -1237.1917, -992.9024, 796.0711, 190.1449, 577.7812, -122.5762, 542.6160, 982.7212, -706.7146, 1162.2194, -205.9574, -846.0674, -572.5217, -305.4750, 1219.1774, -674.1618, -1462.2037, -74.1266, -130.2363, 415.4113, 119.2862, 2024.3751, -53.6043, -1324.1957, 239.2170, 137.7190, 1857.7665, 374.1312, 1558.6626, 1075.4629, -117.7018, -805.9833, -246.3390, -144.2802, 914.3302, 1387.9206, 2912.3296, 833.3622, -145.0014, -742.5782, 857.4032, -174.8288, 176.8424, -749.4141, 151.5911, 397.7904, -936.8787, 42.6182], expected=49.
+                         [INFO] infer image 0 failed
+                         [RESULT] infer 1 images, pass 0 0.000, fail 1 1.000.
+                         Total memory size for keys: rot_key_cnt = 231, rot_key_size = 34153248360 bytes, total_key_size = 34387081344 bytes
+                         Total memory size for weight plain: cnt = 10881, size = 24122750024 bytes
+                         RTLib functions                   Count          Elapse
+                         --------------------           --------        --------
+                         NN                                    -               -
+                          NN_ADD                              15        0.002930 sec
+                          NN_CONV                             33      282.608979 sec
+                          NN_FLATTEN                           1        0.000501 sec
+                          NN_GEMM                              1        1.756406 sec
+                          NN_GLOBAL_AVGPOOL                    1        1.515371 sec
+                          NN_RELU                             31     1745.278832 sec
+                         NN                            sub total     2031.163018 sec
+                         FHE                                   -               -
+                          FHE_ADDCC                        12580       20.022464 sec
+                          FHE_ADDCP                          344        1.123603 sec
+                          FHE_MULCC                         1271       12.595219 sec
+                          FHE_MULCP                        11158        9.202834 sec
+                          FHE_RELIN                         1271      200.838290 sec
+                          FHE_RESCALE                       2439      108.033139 sec
+                          FHE_ROTATE                        1741      174.119302 sec
+                         FHE                           sub total      525.934851 sec
+                         FINALIZE_CONTEXT                      1        0.024659 sec
+                         PREPARE_CONTEXT                       1      228.290744 sec
+                         ENCODE_ARRAY                      11260      136.353125 sec
+                         ENCODE_VALUE                        621        0.462367 sec
+                         NTT                              516540      663.057004 sec
+                         INTT                             163563      217.702654 sec
+                         MAIN_GRAPH                            1     2031.163193 sec
+                          HW_ADD                          267226       19.510521 sec
+                          HW_MUL                          269788       57.757295 sec
+                          HW_ROT                           11952        1.019462 sec
+                          COPY_POLY                        19290       32.110493 sec
+                          EXTEND                            2784       32.467777 sec
+                          PRECOMP                           1479      337.967579 sec
+                          MOD_DOWN                          8358      456.139354 sec
+                          DECOMP_MODUP                      7091      458.617760 sec
+                          DOT_PROD                          8178      233.416873 sec
+                          MULP                             25989      253.515844 sec
+                          RESCALE_POLY                      8991      223.440505 sec
+                          COPY_CIPH                         1123        1.264619 sec
+                          INIT_CIPH_SM_SC                  15936        2.149210 sec
+                          INIT_CIPH_UP_SC                  12429        3.587609 sec
+                          INIT_CIPH_DN_SC                   2439        1.881630 sec
+                          BOOTSTRAP                           29     1393.225235 sec
+                           BS_SETUP                            1       26.955432 sec
+                           BS_KEYGEN                           1       25.060660 sec
+                           BS_EVAL                            29     1393.225185 sec
+                            BS_COEFF_TO_SLOT                      29      496.942410 sec
+                            BS_APPROX_MOD                         29      575.891766 sec
+                            BS_SLOT_TO_COEFF                      29      287.827372 sec
+                           BS_EVAL                     sub total     1360.661549 sec
+                          BOOTSTRAP                    sub total     1445.241277 sec
+                          PT_ENCODE                        11502      110.519083 sec
+                         MAIN_GRAPH                    sub total     3618.590848 sec
+resnet44_cifar10:
+                  Exec: Time = 3022.2(s), Memory = 44.1(GB), Accuracy = 100.0%
+                        INFO: infer images [0, 0] from cifar-10 /app/cifar/cifar-10-batches-bin/test_batch.bin.
+                        ckks_param: _provider = 0, _poly_degree = 65536, mul_depth = 34, input_lev = 35, _first_mod_size = 60, _scaling_mod_size = 56, _num_q_parts = 3, _num_p = 12, _num_rot_idx = 196,_hamming_weight = 192
+                        Result: [-69.2609, -1826.9103, 185.7627, 865.4578, -279.9504, 227.3272, -7.1910, 256.9765, -1144.6087, 671.2777], expected=3.
+                        [INFO] infer image 0 success
+                        [RESULT] infer 1 images, pass 1 1.000, fail 0 0.000.
+                        Total memory size for keys: rot_key_cnt = 226, rot_key_size = 33414000560 bytes, total_key_size = 33647833544 bytes
+                        Total memory size for weight plain: cnt = 15229, size = 32559905576 bytes
+                        RTLib functions                    Count          Elapse
+                        --------------------            --------        --------
+                        NN                                     -               -
+                         NN_ADD                               21        0.004017 sec
+                         NN_CONV                              45      369.740787 sec
+                         NN_FLATTEN                            1        0.000497 sec
+                         NN_GEMM                               1        0.922774 sec
+                         NN_GLOBAL_AVGPOOL                     1        1.488959 sec
+                         NN_RELU                              43     2425.157574 sec
+                        NN                             sub total     2797.314609 sec
+                        FHE                                    -               -
+                         FHE_ADDCC                         17593       26.918335 sec
+                         FHE_ADDCP                           476        1.487244 sec
+                         FHE_MULCC                          1763       16.873345 sec
+                         FHE_MULCP                         15614       12.330049 sec
+                         FHE_RELIN                          1763      270.516619 sec
+                         FHE_RESCALE                        3375      146.722795 sec
+                         FHE_ROTATE                         2302      220.732670 sec
+                        FHE                            sub total      695.581057 sec
+                        FINALIZE_CONTEXT                       1        0.026863 sec
+                        PREPARE_CONTEXT                        1      223.435014 sec
+                        ENCODE_ARRAY                       15608      176.427797 sec
+                        ENCODE_VALUE                         861        0.608187 sec
+                        NTT                               680254      873.584247 sec
+                        INTT                              224897      297.112364 sec
+                        MAIN_GRAPH                             1     2797.314805 sec
+                         HW_ADD                           356084       25.395391 sec
+                         HW_MUL                           360776       74.904769 sec
+                         HW_ROT                            15148        1.221028 sec
+                         COPY_POLY                         26578       44.373463 sec
+                         EXTEND                             3936       45.606813 sec
+                         PRECOMP                            2091      474.558785 sec
+                         MOD_DOWN                          11448      623.288202 sec
+                         DECOMP_MODUP                       9776      631.950184 sec
+                         DOT_PROD                          11562      329.179082 sec
+                         MULP                              36438      327.814897 sec
+                         RESCALE_POLY                      12531      310.575111 sec
+                         COPY_CIPH                          1434        1.565801 sec
+                         INIT_CIPH_SM_SC                   22134        2.774541 sec
+                         INIT_CIPH_UP_SC                   17377        4.707147 sec
+                         INIT_CIPH_DN_SC                    3375        2.469343 sec
+                         BOOTSTRAP                            41     1949.218232 sec
+                          BS_SETUP                             1       27.001950 sec
+                          BS_KEYGEN                            1       25.781036 sec
+                          BS_EVAL                             41     1949.218161 sec
+                           BS_COEFF_TO_SLOT                   41      691.509705 sec
+                           BS_APPROX_MOD                      41      808.494853 sec
+                           BS_SLOT_TO_COEFF                   41      403.419472 sec
+                          BS_EVAL                      sub total     1903.424029 sec
+                         BOOTSTRAP                     sub total     2002.001147 sec
+                         PT_ENCODE                         16090      150.661190 sec
+                        MAIN_GRAPH                     sub total     5000.263978 sec
+resnet56_cifar10:
+                  Exec: Time = 3813.2(s), Memory = 44.5(GB), Accuracy = 100.0%
+                        INFO: infer images [0, 0] from cifar-10 /app/cifar/cifar-10-batches-bin/test_batch.bin.
+                        ckks_param: _provider = 0, _poly_degree = 65536, mul_depth = 34, input_lev = 35, _first_mod_size = 60, _scaling_mod_size = 56, _num_q_parts = 3, _num_p = 12, _num_rot_idx = 196,_hamming_weight = 192
+                        Result: [-751.6280, 244.7460, -2729.3643, 1302.9091, -93.4441, 5.8899, 849.0830, 180.6197, -581.8472, -184.9603], expected=3.
+                        [INFO] infer image 0 success
+                        [RESULT] infer 1 images, pass 1 1.000, fail 0 0.000.
+                        Total memory size for keys: rot_key_cnt = 226, rot_key_size = 33414000560 bytes, total_key_size = 33647833544 bytes
+                        Total memory size for weight plain: cnt = 19585, size = 41009644616 bytes
+                        RTLib functions                    Count          Elapse
+                        --------------------            --------        --------
+                        NN                                     -               -
+                         NN_ADD                               27        0.005331 sec
+                         NN_CONV                              57      461.237520 sec
+                         NN_FLATTEN                            1        0.000484 sec
+                         NN_GEMM                               1        0.926836 sec
+                         NN_GLOBAL_AVGPOOL                     1        1.500314 sec
+                         NN_RELU                              55     3123.957042 sec
+                        NN                             sub total     3587.627526 sec
+                        FHE                                    -               -
+                         FHE_ADDCC                         22619       33.314945 sec
+                         FHE_ADDCP                           608        1.873818 sec
+                         FHE_MULCC                          2255       21.179144 sec
+                         FHE_MULCP                         20078       15.524054 sec
+                         FHE_RELIN                          2255      342.449137 sec
+                         FHE_RESCALE                        4311      184.487594 sec
+                         FHE_ROTATE                         2870      267.853137 sec
+                        FHE                            sub total      866.681829 sec
+                        FINALIZE_CONTEXT                       1        0.036077 sec
+                        PREPARE_CONTEXT                        1      224.192319 sec
+                        ENCODE_ARRAY                       19964      221.442604 sec
+                        ENCODE_VALUE                        1101        0.782903 sec
+                        NTT                               845530     1083.779044 sec
+                        INTT                              286421      381.242592 sec
+                        MAIN_GRAPH                             1     3587.627718 sec
+                         HW_ADD                           445256       31.171077 sec
+                         HW_MUL                           452024       91.881734 sec
+                         HW_ROT                            18388        1.470652 sec
+                         COPY_POLY                         33882       56.462254 sec
+                         EXTEND                             5088       58.496475 sec
+                         PRECOMP                            2703      611.208120 sec
+                         MOD_DOWN                          14552      793.458388 sec
+                         DECOMP_MODUP                      12468      806.090146 sec
+                         DOT_PROD                          14946      427.239004 sec
+                         MULP                              46902      414.784470 sec
+                         RESCALE_POLY                      16071      396.494666 sec
+                         COPY_CIPH                          1746        1.876074 sec
+                         INIT_CIPH_SM_SC                   28352        3.448950 sec
+                         INIT_CIPH_UP_SC                   22333        5.851096 sec
+                         INIT_CIPH_DN_SC                    4311        3.110047 sec
+                         BOOTSTRAP                            53     2522.147067 sec
+                          BS_SETUP                             1       26.960869 sec
+                          BS_KEYGEN                            1       25.914628 sec
+                          BS_EVAL                             53     2522.146981 sec
+                           BS_COEFF_TO_SLOT                   53      898.471259 sec
+                           BS_APPROX_MOD                      53     1041.279001 sec
+                           BS_SLOT_TO_COEFF                   53      523.131183 sec
+                          BS_EVAL                      sub total     2462.881443 sec
+                         BOOTSTRAP                     sub total     2575.022479 sec
+                         PT_ENCODE                         20686      196.536743 sec
+                        MAIN_GRAPH                     sub total     6421.726961 sec
+resnet110_cifar10:
+                   Exec: Time = 7317.0(s), Memory = 46.3(GB), Accuracy = 0.0%
+                         INFO: infer images [0, 0] from cifar-10 /app/cifar/cifar-10-batches-bin/test_batch.bin.
+                         ckks_param: _provider = 0, _poly_degree = 65536, mul_depth = 34, input_lev = 35, _first_mod_size = 60, _scaling_mod_size = 56, _num_q_parts = 3, _num_p = 12, _num_rot_idx = 196,_hamming_weight = 192
+                         Result: [1405.1305, 92.8809, 631.0997, -557.8080, -303.2841, -264.3304, -1253.9208, 958.5939, 511.2232, 684.1955], expected=3.
+                         [INFO] infer image 0 failed
+                         [RESULT] infer 1 images, pass 0 0.000, fail 1 1.000.
+                         Total memory size for keys: rot_key_cnt = 226, rot_key_size = 33414000560 bytes, total_key_size = 33647833544 bytes
+                         Total memory size for weight plain: cnt = 39187, size = 79033470296 bytes
+                         RTLib functions                   Count          Elapse
+                         --------------------           --------        --------
+                         NN                                    -               -
+                          NN_ADD                              54        0.010925 sec
+                          NN_CONV                            111      861.082509 sec
+                          NN_FLATTEN                           1        0.000484 sec
+                          NN_GEMM                              1        0.924938 sec
+                          NN_GLOBAL_AVGPOOL                    1        1.507724 sec
+                          NN_RELU                            109     6227.654756 sec
+                         NN                            sub total     7091.181336 sec
+                         FHE                                   -               -
+                          FHE_ADDCC                        45236       63.721961 sec
+                          FHE_ADDCP                         1202        3.579271 sec
+                          FHE_MULCC                         4469       40.775641 sec
+                          FHE_MULCP                        40166       29.906633 sec
+                          FHE_RELIN                         4469      660.916571 sec
+                          FHE_RESCALE                       8523      357.305231 sec
+                          FHE_ROTATE                        5426      492.746848 sec
+                         FHE                           sub total     1648.952155 sec
+                         FINALIZE_CONTEXT                      1        0.042935 sec
+                         PREPARE_CONTEXT                       1      224.342999 sec
+                         ENCODE_ARRAY                      39566      397.929807 sec
+                         ENCODE_VALUE                       2181        1.515395 sec
+                         NTT                             1589272     2038.840180 sec
+                         INTT                             563279      749.886402 sec
+                         MAIN_GRAPH                            1     7091.181640 sec
+                          HW_ADD                          846530       57.811956 sec
+                          HW_MUL                          862640      172.832766 sec
+                          HW_ROT                           32968        2.506206 sec
+                          COPY_POLY                        66750      113.150432 sec
+                          EXTEND                           10272      117.843573 sec
+                          PRECOMP                           5457     1231.895687 sec
+                          MOD_DOWN                         28520     1565.747628 sec
+                          DECOMP_MODUP                     24582     1596.156470 sec
+                          DOT_PROD                         30174      846.753304 sec
+                          MULP                             93990      771.925655 sec
+                          RESCALE_POLY                     32001      789.087542 sec
+                          COPY_CIPH                         3150        3.265738 sec
+                          INIT_CIPH_SM_SC                  56333        6.476381 sec
+                          INIT_CIPH_UP_SC                  44635       11.161108 sec
+                          INIT_CIPH_DN_SC                   8523        6.001799 sec
+                          BOOTSTRAP                          107     5064.706038 sec
+                           BS_SETUP                            1       26.867488 sec
+                           BS_KEYGEN                           1       25.773835 sec
+                           BS_EVAL                           107     5064.705858 sec
+                            BS_COEFF_TO_SLOT                     107     1797.580238 sec
+                            BS_APPROX_MOD                        107     2099.406899 sec
+                            BS_SLOT_TO_COEFF                     107     1048.273136 sec
+                           BS_EVAL                     sub total     4945.260273 sec
+                          BOOTSTRAP                    sub total     5117.347181 sec
+                          PT_ENCODE                        41368      373.533252 sec
+                         MAIN_GRAPH                    sub total    12730.855533 sec
+Spent time = 20102.91(s)
+-------- Done --------

@@ -1,0 +1,9 @@
+
+build/
+.vscode/
+
+# result/ holds run outputs, but d13.txt (upstream FHE-MP-CNN ReLU minimax
+# composition coefficients) is required input data - the fpga clib-sdk app
+# (apps/fhe-mp-cnn, DATA_DIR points here) reads it from result/d13.txt.
+result/*
+!result/d13.txt

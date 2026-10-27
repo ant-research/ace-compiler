@@ -1,0 +1,855 @@
+layer 0
+multiplexed parallel convolution...
+time : 163 ms
+remaining level : 14
+scale: 2.2518e+15
+
+multiplexed parallel batch normalization...
+time : 4 ms
+remaining level : 15
+scale: 7.03687e+13
+
+approximate ReLU...
+time : 109 ms
+remaining level : 29
+scale: 7.0449e+13
+
+intermediate decrypted values: 
+( (0.00435774,-1.57704e-06), (0.00435701,-1.8282e-06), (0.00435756,-3.46712e-07), (0.00435743,1.40976e-08), ... (-0.00463453,-3.49923e-08))
+
+layer 1
+multiplexed parallel convolution...
+time : 260 ms
+remaining level : 31
+scale: 7.06905e+13
+
+multiplexed parallel batch normalization...
+time : 4 ms
+remaining level : 31
+scale: 7.06905e+13
+
+bootstrapping...
+time : 740 ms
+bootstrapping 1 result
+remaining level : 15
+scale: 7.03687e+13
+
+approximate ReLU...
+time : 107 ms
+remaining level : 29
+scale: 7.0449e+13
+
+intermediate decrypted values: 
+( (0.00208939,8.9325e-09), (0.00295103,-9.05735e-10), (0.00295089,4.12553e-10), (0.00295116,1.96484e-11), ... (0.00200169,1.94926e-12))
+
+layer 2
+multiplexed parallel convolution...
+time : 258 ms
+remaining level : 31
+scale: 7.06905e+13
+
+multiplexed parallel batch normalization...
+time : 4 ms
+remaining level : 31
+scale: 7.06905e+13
+
+cipher add...
+remaining level : 31
+scale: 7.06905e+13
+
+bootstrapping...
+time : 729 ms
+bootstrapping 2 result
+remaining level : 15
+scale: 7.03687e+13
+
+approximate ReLU...
+time : 107 ms
+remaining level : 29
+scale: 7.0449e+13
+
+intermediate decrypted values: 
+( (0.0105973,1.26496e-08), (0.0107591,-1.11563e-09), (0.0107124,5.7781e-10), (0.0107124,1.68269e-11), ... (-0.00396484,3.74548e-12))
+
+layer 3
+multiplexed parallel convolution...
+time : 259 ms
+remaining level : 31
+scale: 7.06905e+13
+
+multiplexed parallel batch normalization...
+time : 4 ms
+remaining level : 31
+scale: 7.06905e+13
+
+bootstrapping...
+time : 730 ms
+bootstrapping 3 result
+remaining level : 15
+scale: 7.03687e+13
+
+approximate ReLU...
+time : 107 ms
+remaining level : 29
+scale: 7.0449e+13
+
+intermediate decrypted values: 
+( (-0.00732084,1.07198e-09), (-0.00737078,-2.60715e-10), (-0.00747359,4.19265e-11), (-0.00752398,-3.5344e-12), ... (-0.00267091,2.04416e-12))
+
+layer 4
+multiplexed parallel convolution...
+time : 259 ms
+remaining level : 31
+scale: 7.06905e+13
+
+multiplexed parallel batch normalization...
+time : 4 ms
+remaining level : 31
+scale: 7.06905e+13
+
+cipher add...
+remaining level : 31
+scale: 7.06905e+13
+
+bootstrapping...
+time : 730 ms
+bootstrapping 4 result
+remaining level : 15
+scale: 7.03687e+13
+
+approximate ReLU...
+time : 108 ms
+remaining level : 29
+scale: 7.0449e+13
+
+intermediate decrypted values: 
+( (0.00631546,1.09697e-08), (0.00668697,-1.0138e-09), (0.00672039,4.52893e-10), (0.00673264,1.31982e-11), ... (-0.00566124,5.30078e-13))
+
+layer 5
+multiplexed parallel convolution...
+time : 261 ms
+remaining level : 31
+scale: 7.06905e+13
+
+multiplexed parallel batch normalization...
+time : 4 ms
+remaining level : 31
+scale: 7.06905e+13
+
+bootstrapping...
+time : 731 ms
+bootstrapping 5 result
+remaining level : 15
+scale: 7.03687e+13
+
+approximate ReLU...
+time : 107 ms
+remaining level : 29
+scale: 7.0449e+13
+
+intermediate decrypted values: 
+( (0.000171246,6.99832e-09), (-0.000545976,-6.05811e-10), (-0.000711888,2.52952e-10), (-0.000740088,6.16636e-12), ... (-0.00235892,4.02297e-12))
+
+layer 6
+multiplexed parallel convolution...
+time : 259 ms
+remaining level : 31
+scale: 7.06905e+13
+
+multiplexed parallel batch normalization...
+time : 4 ms
+remaining level : 31
+scale: 7.06905e+13
+
+cipher add...
+remaining level : 31
+scale: 7.06905e+13
+
+bootstrapping...
+time : 729 ms
+bootstrapping 6 result
+remaining level : 15
+scale: 7.03687e+13
+
+approximate ReLU...
+time : 107 ms
+remaining level : 29
+scale: 7.0449e+13
+
+intermediate decrypted values: 
+( (0.0036154,9.21494e-09), (0.00400531,-8.97785e-10), (0.00407067,3.55811e-10), (0.00408771,1.68599e-11), ... (-0.00111406,-7.97074e-12))
+
+layer 7
+multiplexed parallel convolution...
+time : 258 ms
+remaining level : 31
+scale: 7.06905e+13
+
+multiplexed parallel batch normalization...
+time : 4 ms
+remaining level : 31
+scale: 7.06905e+13
+
+bootstrapping...
+time : 732 ms
+bootstrapping 7 result
+remaining level : 15
+scale: 7.03687e+13
+
+approximate ReLU...
+time : 107 ms
+remaining level : 29
+scale: 7.0449e+13
+
+intermediate decrypted values: 
+( (0.000572288,8.20323e-09), (0.000324367,-6.02263e-10), (0.00018054,3.08021e-10), (0.000162311,1.21854e-11), ... (-0.0024685,-1.31531e-11))
+
+layer 8
+multiplexed parallel convolution...
+time : 259 ms
+remaining level : 31
+scale: 7.06905e+13
+
+multiplexed parallel batch normalization...
+time : 4 ms
+remaining level : 31
+scale: 7.06905e+13
+
+cipher add...
+remaining level : 31
+scale: 7.06905e+13
+
+bootstrapping...
+time : 730 ms
+bootstrapping 8 result
+remaining level : 15
+scale: 7.03687e+13
+
+approximate ReLU...
+time : 108 ms
+remaining level : 29
+scale: 7.0449e+13
+
+intermediate decrypted values: 
+( (0.00185863,8.08244e-09), (0.00209432,-8.03467e-10), (0.00215936,3.77544e-10), (0.00217585,1.15072e-11), ... (-0.00192514,1.91494e-12))
+
+layer 9
+multiplexed parallel convolution...
+time : 258 ms
+remaining level : 31
+scale: 7.06905e+13
+
+multiplexed parallel batch normalization...
+time : 4 ms
+remaining level : 31
+scale: 7.06905e+13
+
+bootstrapping...
+time : 728 ms
+bootstrapping 9 result
+remaining level : 15
+scale: 7.03687e+13
+
+approximate ReLU...
+time : 108 ms
+remaining level : 29
+scale: 7.0449e+13
+
+intermediate decrypted values: 
+( (-0.00684223,4.33464e-11), (-0.0072778,-1.6641e-10), (-0.007126,4.79754e-11), (-0.00710849,1.73205e-12), ... (0.000476475,-1.34468e-12))
+
+layer 10
+multiplexed parallel convolution...
+time : 260 ms
+remaining level : 31
+scale: 7.06905e+13
+
+multiplexed parallel batch normalization...
+time : 4 ms
+remaining level : 31
+scale: 7.06905e+13
+
+cipher add...
+remaining level : 31
+scale: 7.06905e+13
+
+bootstrapping...
+time : 731 ms
+bootstrapping 10 result
+remaining level : 15
+scale: 7.03687e+13
+
+approximate ReLU...
+time : 107 ms
+remaining level : 29
+scale: 7.0449e+13
+
+intermediate decrypted values: 
+( (-0.000230062,6.54647e-09), (-0.000490023,-6.13954e-10), (-0.000392267,2.49809e-10), (-0.000337731,1.61126e-11), ... (0.000565903,-9.92324e-12))
+
+layer 11
+multiplexed parallel convolution...
+time : 517 ms
+remaining level : 31
+scale: 7.06905e+13
+
+multiplexed parallel batch normalization...
+time : 4 ms
+remaining level : 31
+scale: 7.06905e+13
+
+bootstrapping...
+time : 623 ms
+bootstrapping 11 result
+remaining level : 15
+scale: 7.03687e+13
+
+approximate ReLU...
+time : 108 ms
+remaining level : 29
+scale: 7.0449e+13
+
+intermediate decrypted values: 
+( (0.00334715,1.08953e-08), (0.00219153,-8.68549e-10), (0.00405822,4.5059e-10), (0.00229142,6.93074e-12), ... (0.000498178,1.38527e-13))
+
+layer 12
+multiplexed parallel convolution...
+time : 289 ms
+remaining level : 31
+scale: 7.06905e+13
+
+multiplexed parallel batch normalization...
+time : 4 ms
+remaining level : 31
+scale: 7.06905e+13
+
+multiplexed parallel downsampling...
+time : 31 ms
+remaining level : 30
+scale: 7.05294e+13
+
+cipher add...
+remaining level : 31
+scale: 7.06905e+13
+
+bootstrapping...
+time : 619 ms
+bootstrapping 12 result
+remaining level : 15
+scale: 7.03687e+13
+
+approximate ReLU...
+time : 107 ms
+remaining level : 29
+scale: 7.0449e+13
+
+intermediate decrypted values: 
+( (0.00210378,8.61571e-09), (0.00237128,-8.00243e-10), (0.00180219,3.51402e-10), (0.00425061,1.03109e-11), ... (-0.00124665,-8.03061e-13))
+
+layer 13
+multiplexed parallel convolution...
+time : 288 ms
+remaining level : 31
+scale: 7.06905e+13
+
+multiplexed parallel batch normalization...
+time : 4 ms
+remaining level : 31
+scale: 7.06905e+13
+
+bootstrapping...
+time : 632 ms
+bootstrapping 13 result
+remaining level : 15
+scale: 7.03687e+13
+
+approximate ReLU...
+time : 108 ms
+remaining level : 29
+scale: 7.0449e+13
+
+intermediate decrypted values: 
+( (-0.00276921,1.48505e-09), (-0.000493702,-5.2769e-10), (-0.00294067,3.03841e-11), (-0.000735561,1.53817e-11), ... (5.71948e-05,-4.39778e-13))
+
+layer 14
+multiplexed parallel convolution...
+time : 288 ms
+remaining level : 31
+scale: 7.06905e+13
+
+multiplexed parallel batch normalization...
+time : 4 ms
+remaining level : 31
+scale: 7.06905e+13
+
+cipher add...
+remaining level : 31
+scale: 7.06905e+13
+
+bootstrapping...
+time : 629 ms
+bootstrapping 14 result
+remaining level : 15
+scale: 7.03687e+13
+
+approximate ReLU...
+time : 107 ms
+remaining level : 29
+scale: 7.0449e+13
+
+intermediate decrypted values: 
+( (-0.000943333,5.89609e-09), (0.00346475,-9.41174e-10), (-0.00292813,1.79725e-10), (0.00449505,9.75765e-12), ... (0.00046201,-4.29301e-14))
+
+layer 15
+multiplexed parallel convolution...
+time : 288 ms
+remaining level : 31
+scale: 7.06905e+13
+
+multiplexed parallel batch normalization...
+time : 4 ms
+remaining level : 31
+scale: 7.06905e+13
+
+bootstrapping...
+time : 632 ms
+bootstrapping 15 result
+remaining level : 15
+scale: 7.03687e+13
+
+approximate ReLU...
+time : 108 ms
+remaining level : 29
+scale: 7.0449e+13
+
+intermediate decrypted values: 
+( (-9.85616e-05,6.59965e-09), (0.000510522,-7.85042e-10), (0.000643561,3.87878e-10), (0.000575461,1.02707e-11), ... (0.00403677,-4.707e-11))
+
+layer 16
+multiplexed parallel convolution...
+time : 289 ms
+remaining level : 31
+scale: 7.06905e+13
+
+multiplexed parallel batch normalization...
+time : 4 ms
+remaining level : 31
+scale: 7.06905e+13
+
+cipher add...
+remaining level : 31
+scale: 7.06905e+13
+
+bootstrapping...
+time : 632 ms
+bootstrapping 16 result
+remaining level : 15
+scale: 7.03687e+13
+
+approximate ReLU...
+time : 108 ms
+remaining level : 29
+scale: 7.0449e+13
+
+intermediate decrypted values: 
+( (-0.00554557,2.62346e-09), (0.00123598,-7.99876e-10), (-0.00701102,1.2575e-10), (0.00101629,1.45105e-11), ... (0.000368028,-4.81092e-12))
+
+layer 17
+multiplexed parallel convolution...
+time : 288 ms
+remaining level : 31
+scale: 7.06905e+13
+
+multiplexed parallel batch normalization...
+time : 4 ms
+remaining level : 31
+scale: 7.06905e+13
+
+bootstrapping...
+time : 632 ms
+bootstrapping 17 result
+remaining level : 15
+scale: 7.03687e+13
+
+approximate ReLU...
+time : 107 ms
+remaining level : 29
+scale: 7.0449e+13
+
+intermediate decrypted values: 
+( (-0.0014747,3.8382e-09), (-0.00261428,-2.24819e-10), (-0.00239467,1.09958e-10), (-0.00140487,6.56347e-12), ... (0.00185239,-2.09774e-12))
+
+layer 18
+multiplexed parallel convolution...
+time : 287 ms
+remaining level : 31
+scale: 7.06905e+13
+
+multiplexed parallel batch normalization...
+time : 4 ms
+remaining level : 31
+scale: 7.06905e+13
+
+cipher add...
+remaining level : 31
+scale: 7.06905e+13
+
+bootstrapping...
+time : 632 ms
+bootstrapping 18 result
+remaining level : 15
+scale: 7.03687e+13
+
+approximate ReLU...
+time : 108 ms
+remaining level : 29
+scale: 7.0449e+13
+
+intermediate decrypted values: 
+( (-0.00700939,2.59556e-09), (0.00210911,-8.48519e-10), (-0.00966488,2.19938e-11), (0.00480718,1.41201e-11), ... (0.000155311,6.33347e-13))
+
+layer 19
+multiplexed parallel convolution...
+time : 288 ms
+remaining level : 31
+scale: 7.06905e+13
+
+multiplexed parallel batch normalization...
+time : 4 ms
+remaining level : 31
+scale: 7.06905e+13
+
+bootstrapping...
+time : 631 ms
+bootstrapping 19 result
+remaining level : 15
+scale: 7.03687e+13
+
+approximate ReLU...
+time : 108 ms
+remaining level : 29
+scale: 7.0449e+13
+
+intermediate decrypted values: 
+( (-0.00112297,4.58572e-09), (0.00321534,-1.2304e-09), (-0.0017459,1.75587e-10), (0.00175008,1.15317e-11), ... (0.00382491,-5.33405e-12))
+
+layer 20
+multiplexed parallel convolution...
+time : 287 ms
+remaining level : 31
+scale: 7.06905e+13
+
+multiplexed parallel batch normalization...
+time : 4 ms
+remaining level : 31
+scale: 7.06905e+13
+
+cipher add...
+remaining level : 31
+scale: 7.06905e+13
+
+bootstrapping...
+time : 631 ms
+bootstrapping 20 result
+remaining level : 15
+scale: 7.03687e+13
+
+approximate ReLU...
+time : 107 ms
+remaining level : 29
+scale: 7.0449e+13
+
+intermediate decrypted values: 
+( (-0.00289088,4.78006e-09), (7.51574e-05,-7.53873e-10), (-0.00355964,1.59467e-10), (0.000889685,7.02817e-12), ... (-0.000581723,-5.93727e-12))
+
+layer 21
+multiplexed parallel convolution...
+time : 579 ms
+remaining level : 31
+scale: 7.06905e+13
+
+multiplexed parallel batch normalization...
+time : 4 ms
+remaining level : 31
+scale: 7.06905e+13
+
+bootstrapping...
+time : 533 ms
+bootstrapping 21 result
+remaining level : 15
+scale: 7.03687e+13
+
+approximate ReLU...
+time : 107 ms
+remaining level : 29
+scale: 7.0449e+13
+
+intermediate decrypted values: 
+( (-0.00226814,4.18182e-09), (0.00153174,-8.86432e-10), (-0.000481637,2.94981e-10), (0.00174138,1.4926e-11), ... (0.000949848,-9.85933e-12))
+
+layer 22
+multiplexed parallel convolution...
+time : 351 ms
+remaining level : 31
+scale: 7.06905e+13
+
+multiplexed parallel batch normalization...
+time : 4 ms
+remaining level : 31
+scale: 7.06905e+13
+
+multiplexed parallel downsampling...
+time : 31 ms
+remaining level : 30
+scale: 7.05294e+13
+
+cipher add...
+remaining level : 31
+scale: 7.06905e+13
+
+bootstrapping...
+time : 524 ms
+bootstrapping 22 result
+remaining level : 15
+scale: 7.03687e+13
+
+approximate ReLU...
+time : 107 ms
+remaining level : 29
+scale: 7.0449e+13
+
+intermediate decrypted values: 
+( (0.0121675,1.24647e-08), (-0.00262872,-8.33868e-10), (-0.000862324,2.71681e-10), (0.00311248,7.39109e-12), ... (-0.0033215,2.17151e-13))
+
+layer 23
+multiplexed parallel convolution...
+time : 351 ms
+remaining level : 31
+scale: 7.06905e+13
+
+multiplexed parallel batch normalization...
+time : 4 ms
+remaining level : 31
+scale: 7.06905e+13
+
+bootstrapping...
+time : 525 ms
+bootstrapping 23 result
+remaining level : 15
+scale: 7.03687e+13
+
+approximate ReLU...
+time : 107 ms
+remaining level : 29
+scale: 7.0449e+13
+
+intermediate decrypted values: 
+( (-0.00120889,4.96271e-09), (-0.00397085,-9.62734e-11), (-0.0034801,9.19186e-12), (0.000957027,1.61397e-11), ... (-0.00168664,7.92338e-12))
+
+layer 24
+multiplexed parallel convolution...
+time : 350 ms
+remaining level : 31
+scale: 7.06905e+13
+
+multiplexed parallel batch normalization...
+time : 4 ms
+remaining level : 31
+scale: 7.06905e+13
+
+cipher add...
+remaining level : 31
+scale: 7.06905e+13
+
+bootstrapping...
+time : 532 ms
+bootstrapping 24 result
+remaining level : 15
+scale: 7.03687e+13
+
+approximate ReLU...
+time : 108 ms
+remaining level : 29
+scale: 7.0449e+13
+
+intermediate decrypted values: 
+( (0.0155167,1.14218e-08), (-0.00942583,-6.05267e-10), (0.00432994,3.68777e-10), (0.00303006,-7.51269e-13), ... (-0.0043067,-7.91417e-12))
+
+layer 25
+multiplexed parallel convolution...
+time : 351 ms
+remaining level : 31
+scale: 7.06905e+13
+
+multiplexed parallel batch normalization...
+time : 4 ms
+remaining level : 31
+scale: 7.06905e+13
+
+bootstrapping...
+time : 532 ms
+bootstrapping 25 result
+remaining level : 15
+scale: 7.03687e+13
+
+approximate ReLU...
+time : 108 ms
+remaining level : 29
+scale: 7.0449e+13
+
+intermediate decrypted values: 
+( (-1.53875e-05,6.797e-09), (0.000930853,-7.79788e-10), (-0.00418051,-5.33434e-12), (0.000585803,1.45394e-11), ... (-0.0015433,3.33379e-12))
+
+layer 26
+multiplexed parallel convolution...
+time : 350 ms
+remaining level : 31
+scale: 7.06905e+13
+
+multiplexed parallel batch normalization...
+time : 4 ms
+remaining level : 31
+scale: 7.06905e+13
+
+cipher add...
+remaining level : 31
+scale: 7.06905e+13
+
+bootstrapping...
+time : 524 ms
+bootstrapping 26 result
+remaining level : 15
+scale: 7.03687e+13
+
+approximate ReLU...
+time : 107 ms
+remaining level : 29
+scale: 7.0449e+13
+
+intermediate decrypted values: 
+( (0.0302694,1.17913e-08), (-0.00981082,-7.12919e-10), (0.0131942,3.56827e-10), (0.0153047,1.36138e-11), ... (-0.00448404,5.09037e-12))
+
+layer 27
+multiplexed parallel convolution...
+time : 351 ms
+remaining level : 31
+scale: 7.06905e+13
+
+multiplexed parallel batch normalization...
+time : 4 ms
+remaining level : 31
+scale: 7.06905e+13
+
+bootstrapping...
+time : 533 ms
+bootstrapping 27 result
+remaining level : 15
+scale: 7.03687e+13
+
+approximate ReLU...
+time : 107 ms
+remaining level : 29
+scale: 7.0449e+13
+
+intermediate decrypted values: 
+( (-0.00695931,1.89173e-09), (-0.000237235,-7.86897e-10), (-0.00741982,-2.13601e-11), (0.000619025,1.7369e-11), ... (0.00271822,5.44053e-13))
+
+layer 28
+multiplexed parallel convolution...
+time : 351 ms
+remaining level : 31
+scale: 7.06905e+13
+
+multiplexed parallel batch normalization...
+time : 4 ms
+remaining level : 31
+scale: 7.06905e+13
+
+cipher add...
+remaining level : 31
+scale: 7.06905e+13
+
+bootstrapping...
+time : 523 ms
+bootstrapping 28 result
+remaining level : 15
+scale: 7.03687e+13
+
+approximate ReLU...
+time : 108 ms
+remaining level : 29
+scale: 7.0449e+13
+
+intermediate decrypted values: 
+( (0.031851,1.09625e-08), (-0.0144915,-5.79368e-10), (0.00974128,3.99228e-10), (0.00524908,9.23074e-12), ... (-0.0022348,1.76076e-12))
+
+layer 29
+multiplexed parallel convolution...
+time : 350 ms
+remaining level : 31
+scale: 7.06905e+13
+
+multiplexed parallel batch normalization...
+time : 4 ms
+remaining level : 31
+scale: 7.06905e+13
+
+bootstrapping...
+time : 532 ms
+bootstrapping 29 result
+remaining level : 15
+scale: 7.03687e+13
+
+approximate ReLU...
+time : 107 ms
+remaining level : 29
+scale: 7.0449e+13
+
+intermediate decrypted values: 
+( (0.000745726,7.32886e-09), (-0.00142524,-5.6874e-10), (0.00368358,4.26464e-10), (0.00178326,1.18076e-11), ... (-0.00161596,5.5345e-13))
+
+layer 30
+multiplexed parallel convolution...
+time : 350 ms
+remaining level : 31
+scale: 7.06905e+13
+
+multiplexed parallel batch normalization...
+time : 4 ms
+remaining level : 31
+scale: 7.06905e+13
+
+cipher add...
+remaining level : 31
+scale: 7.06905e+13
+
+bootstrapping...
+time : 532 ms
+bootstrapping 30 result
+remaining level : 15
+scale: 7.03687e+13
+
+approximate ReLU...
+time : 107 ms
+remaining level : 29
+scale: 7.0449e+13
+
+intermediate decrypted values: 
+( (0.0187981,8.60573e-09), (-0.018497,-4.91819e-10), (0.0148789,3.27159e-10), (0.0104929,1.5049e-11), ... (0.00263742,-6.34589e-13))
+
+layer 31
+average pooling...
+time : 25 ms
+remaining level : 30
+scale: 7.05294e+13
+
+fully connected layer...
+time : 242 ms
+remaining level : 31
+scale: 7.06905e+13
+
+( (-5.0391,7.15732e-08), (-1.07214,2.14306e-09), (6.58143,1.3753e-08), (-4.22723,-8.93495e-09), (3.1075,-9.32545e-08), (-15.6203,4.01163e-08), (1.91977,-5.54374e-08), (3.56915,-1.92406e-08), (5.94354,-3.44816e-08), (7.76393,1.27158e-08), (7.52432,2.0025e-08), (3.49304,3.74699e-08), (0.254002,5.25858e-08), (1.18623,4.24818e-09), (15.2817,2.95336e-08), (4.34794,1.79431e-09), (-1.01,-6.35268e-08), (5.40971,-3.69813e-09), (-4.48257,-6.83273e-09), (6.38061,6.33768e-09), (-3.9359,7.18972e-08), (-0.269003,1.28448e-08), (-0.131894,-5.14616e-09), (2.24767,-5.2053e-09), (-2.40634,6.18302e-08), (0.330133,6.72931e-09), (1.46733,1.74948e-08), (-1.07689,-3.23661e-09), (8.06613,2.49052e-08), (3.68691,-1.94243e-08), (-8.44408,1.2173e-08), (8.0941,2.29397e-09), (1.18072,5.25056e-08), (5.8872,-2.56227e-09), (-13.5355,2.19185e-08), (7.99521,2.03359e-08), (-10.4101,1.04551e-07), (1.4451,-1.88574e-08), (2.54935,8.28245e-08), (-6.84351,-6.86682e-09), (-2.25887,-4.51474e-08), (3.7344,-1.92117e-08), (0.167414,1.70523e-08), (-4.69365,-1.20641e-08), (7.46221,3.79532e-08), (8.68513,-1.29891e-08), (13.5027,1.03731e-08), (1.96848,-1.1381e-08), (1.38264,-3.10587e-07), (4.58182,-3.06734e-10), (2.23521,7.42548e-09), (1.98871,1.7485e-08), (-0.508548,-2.02382e-09), (3.20579,2.27707e-08), (7.94383,-6.10494e-09), (-10.2951,1.19079e-08), (4.43514,1.3046e-08), (-1.22407,-4.79095e-09), (-5.37598,2.00991e-08), (3.18377,1.33274e-08), (3.94616,3.80419e-08), (-3.65264,-1.97729e-08), (-4.33295,-1.05523e-09), (-14.5634,9.96556e-09), (-8.57842,3.79938e-08), (-13.2466,2.46078e-08), (-12.1069,-2.67254e-08), (4.70227,6.34335e-09), (-2.70564,5.67873e-08), (1.21867,-4.56497e-10), (4.34942,-1.21408e-08), (-0.943848,1.40478e-08), (-12.4416,-7.28768e-09), (-0.711381,3.54159e-08), (-4.70951,-2.31076e-08), (-6.04376,-1.33821e-08), (1.57195,-1.59339e-08), (-2.99393,2.94453e-08), (-0.0685696,1.02979e-09), (7.65732,4.56143e-09), (-4.99526,4.20929e-08), (5.44638,-1.9516e-08), (-2.94346,4.69237e-09), (10.693,3.72065e-09), (-3.82755,-9.26487e-08), (10.0271,-4.43942e-08), (-4.23645,-1.90317e-08), (3.9496,-1.24609e-08), (-3.523,-6.58565e-08), (-0.223098,6.69857e-09), (-1.28723,5.55012e-09), (-10.368,-2.32705e-09), (0.748023,-5.98532e-08), (-0.925691,9.44677e-09), (4.18144,-1.35283e-08), (-9.90673,-3.8594e-08), (-1.73476,2.34687e-08), (-2.54083,7.20751e-09), (4.21097,-2.37144e-08), (7.76393,1.27158e-08))
+total time : 32406 ms
+image label: 0
+inferred label: 9
+max score: 7.76393

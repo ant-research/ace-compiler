@@ -1,0 +1,48 @@
+# Naming-convention control for the fhe_lib/ subtree.
+#
+# Scope: in CI invoked with `clang-tidy --config-file=fhe_lib/.clang-tidy`
+# (explicit, so it does NOT collide with fhe_dsl/csrc's air-infra dialect
+# config). Lives under fhe_lib/ (not the repo root) so IDE/clangd discovery
+# also applies it only to fhe_lib files.
+#
+# Custom (non-stock) rule set, Google-flavored. Enforces ONLY the axes that are
+# uniform across fhe_lib (or explicitly requested); axes fhe_lib genuinely
+# mixes are LEFT UNCONFIGURED (clang-tidy does not check unconfigured kinds),
+# rather than forcing a large, API-breaking rename:
+#
+#   Enforced:
+#     * Private members: lower_case + leading underscore `_` (the requested
+#       change; aligns fhe_lib with air-infra/fhe-cmplr/nn-addon/fhe_dsl).
+#     * Types (class/struct/union/enum/typedef): CamelCase.
+#     * Namespace & local variable: lower_case.
+#
+#   Intentionally NOT configured (mixed in fhe_lib, unifying is out of scope):
+#     * enum constants — UPPER_CASE (SECRET_KEY/ONLINE) vs lowercase (auto_/
+#       gds/staged) vs CamelCase (Device/Host); unifying ripples into Python API.
+#     * functions & methods — snake_case IO layer vs Camel_Snake/PascalCase
+#       FHE-op API mirroring C op names (Add_ciph/Encode_float…).
+#     * public/protected members — POD struct fields & API function-pointer
+#       mirrors vary; only PRIVATE members carry the underscore convention.
+#     * global variables — g_ globals vs file-scope statics vs UPPER_CASE
+#       constexpr magics (KEY_MAGIC).
+#
+# Excluded from diagnosis (mirror external APIs; names not ours to change):
+#   fhe_lib/include/fhe/vendor/         (upstream phantom/ace wrappers)
+#   fhe_lib/include/fhe/io/cufile_api.h (NVIDIA cuFile ABI)
+# via the --header-filter whitelist in the Makefile `lint-tidy` target.
+# .cu files are excluded from clang-tidy (CUDA parse limitations); the member
+# rename in .cu is verified by the build instead.
+Checks: '-*,readability-identifier-naming'
+CheckOptions:
+  # Types — CamelCase (uniform across fhe_lib)
+  - { key: readability-identifier-naming.ClassCase,            value: CamelCase }
+  - { key: readability-identifier-naming.StructCase,           value: CamelCase }
+  - { key: readability-identifier-naming.UnionCase,            value: CamelCase }
+  - { key: readability-identifier-naming.EnumCase,             value: CamelCase }
+  - { key: readability-identifier-naming.TypedefCase,          value: CamelCase }
+  # Namespace & local variable — lower_case (uniform)
+  - { key: readability-identifier-naming.NamespaceCase,        value: lower_case }
+  - { key: readability-identifier-naming.LocalVariableCase,    value: lower_case }
+  # Private members — lower_case + leading underscore (requested convention)
+  - { key: readability-identifier-naming.PrivateMemberCase,    value: lower_case }
+  - { key: readability-identifier-naming.PrivateMemberPrefix,  value: _ }

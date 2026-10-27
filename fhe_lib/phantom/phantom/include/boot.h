@@ -1,0 +1,18 @@
+#pragma once
+
+#include "boot/Bootstrapper.cuh"
+#include "boot/ckks_evaluator.cuh"
+#include "boot/MinicompFunc.cuh"
+#include "boot/func.cuh"
+#include "boot/PolyUpdate.cuh"
+#include "boot/Choosemax.cuh"
+#include "boot/MinicompRemez.cuh"
+#include "boot/ModularReducer.cuh"
+#include "boot/Point.cuh"
+#include "boot/Polynomial.cuh"
+#include "boot/RemezParam.h"
+#include "boot/utils.cuh"
+#include "boot/Remez.cuh"
+#include "boot/RemezApp.cuh"
+#include "boot/RemezArcsin.cuh"
+#include "boot/RemezCos.cuh"

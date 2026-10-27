@@ -1,0 +1,122 @@
+//-*-c++-*-
+//=============================================================================
+//
+// Copyright (c) Ant Group Co., Ltd
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//=============================================================================
+
+//! @brief test_data_file.cpp
+//! Host-only unit tests for DataFileReader and DataFileWriter.
+//!
+//! DISABLED: data_file.h depends on fhe/core/rt_data_def.h which is
+//! provided by the compiler_shared target. The ut_common executable
+//! does not have compiler_shared's include path in its direct
+//! include directories (it gets the symbols via FHErt_io's link, but
+//! not the include path for transitively included headers).
+//! Re-enable by adding compiler_shared's include directory to
+//! FHELIB_UNITTEST_INCLUDE_DIRS when these types are needed.
+//! Uses test_util.h for temp file management (TempFileGuard).
+
+#include <gtest/gtest.h>
+
+#include <cstdio>
+#include <cstring>
+#include <string>
+#include <vector>
+
+#include "test_util.h"
+#include "lib/common/io/data_file.h"
+
+using namespace fhert;
+using rtio::test::TempFileGuard;
+using rtio::test::make_temp_file;
+
+//=============================================================================
+// DataFileWriter → DataFileReader round-trip
+//=============================================================================
+
+TEST(DataFileTest, WriteReadRoundTrip) {
+    auto guard = make_temp_file("df", "data_rt.bin");
+
+    // Write two entries
+    const char *entry1 = "First entry data payload";
+    const char *entry2 = "Second entry data payload";
+
+    {
+        DataFileWriter writer;
+        ASSERT_TRUE(writer.open(guard.path(), nullptr, nullptr, DE_PLAINTEXT, 12));
+        uint64_t off1 = writer.append_entry("weight_0", entry1, std::strlen(entry1), 0, 0);
+        EXPECT_EQ(off1, 0u);  // first entry starts at beginning of data section
+        uint64_t off2 = writer.append_entry("weight_1", entry2, std::strlen(entry2), 1, 0);
+        EXPECT_GT(off2, off1);
+        EXPECT_EQ(writer.entry_count(), 2u);
+        writer.close();
+    }
+
+    // Read entries back
+    {
+        DataFileReader reader;
+        ASSERT_TRUE(reader.open(guard.path()));
+        EXPECT_EQ(reader.entry_count(), 2u);
+
+        // Read first entry
+        const auto &lut0 = reader.lut()[0];
+        std::vector<char> buf0(lut0.size + 1, '\0');
+        ASSERT_TRUE(reader.read_entry(lut0, buf0.data()));
+        EXPECT_STREQ(buf0.data(), entry1);
+
+        // Read second entry
+        const auto &lut1 = reader.lut()[1];
+        std::vector<char> buf1(lut1.size + 1, '\0');
+        ASSERT_TRUE(reader.read_entry(lut1, buf1.data()));
+        EXPECT_STREQ(buf1.data(), entry2);
+
+        reader.close();
+    }
+}
+
+TEST(DataFileTest, ReadNonexistentFile) {
+    std::string path = rtio::test::make_temp_path("df", "nonexistent_data.bin");
+    rtio::test::remove_file(path);
+
+    DataFileReader reader;
+    EXPECT_FALSE(reader.open(path));
+}
+
+TEST(DataFileTest, MultipleEntries) {
+    auto guard = make_temp_file("df", "multi_entry.bin");
+
+    const int N = 10;
+    std::vector<std::string> payloads;
+    for (int i = 0; i < N; i++) {
+        payloads.push_back("Entry_" + std::to_string(i) + "_data");
+    }
+
+    {
+        DataFileWriter writer;
+        ASSERT_TRUE(writer.open(guard.path(), nullptr, nullptr, DE_PLAINTEXT, 8));
+        for (int i = 0; i < N; i++) {
+            std::string name = "entry_" + std::to_string(i);
+            writer.append_entry(name.c_str(), payloads[i].data(),
+                               payloads[i].size(), i, i + 1);
+        }
+        EXPECT_EQ(writer.entry_count(), static_cast<uint64_t>(N));
+        writer.close();
+    }
+
+    {
+        DataFileReader reader;
+        ASSERT_TRUE(reader.open(guard.path()));
+        EXPECT_EQ(reader.entry_count(), static_cast<uint64_t>(N));
+
+        for (int i = 0; i < N; i++) {
+            const auto &lut = reader.lut()[i];
+            std::vector<char> buf(lut.size + 1, '\0');
+            ASSERT_TRUE(reader.read_entry(lut, buf.data()));
+            EXPECT_EQ(std::string(buf.data()), payloads[i]);
+        }
+
+        reader.close();
+    }
+}

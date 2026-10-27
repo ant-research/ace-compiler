@@ -1,0 +1,178 @@
+{
+  "relu_vr_def": 3,
+  "relu_vr": "relu_Relu=4;layer1_0_relu_Relu=3;layer1_0_relu_1_Relu=6;layer1_1_relu_Relu=4;layer1_1_relu_1_Relu=7;layer1_2_relu_Relu=3;layer1_2_relu_1_Relu=7;layer1_3_relu_Relu=2;layer1_3_relu_1_Relu=7;layer1_4_relu_Relu=3;layer1_4_relu_1_Relu=7;layer1_5_relu_Relu=2;layer1_5_relu_1_Relu=7;layer1_6_relu_Relu=3;layer1_6_relu_1_Relu=7;layer2_0_relu_Relu=3;layer2_0_relu_1_Relu=7;layer2_1_relu_Relu=3;layer2_1_relu_1_Relu=7;layer2_2_relu_Relu=2;layer2_2_relu_1_Relu=7;layer2_3_relu_Relu=2;layer2_3_relu_1_Relu=7;layer2_4_relu_Relu=2;layer2_4_relu_1_Relu=8;layer2_5_relu_Relu=3;layer2_5_relu_1_Relu=10;layer2_6_relu_Relu=3;layer2_6_relu_1_Relu=12;layer3_0_relu_Relu=5;layer3_0_relu_1_Relu=9;layer3_1_relu_Relu=3;layer3_1_relu_1_Relu=9;layer3_2_relu_Relu=2;layer3_2_relu_1_Relu=9;layer3_3_relu_Relu=3;layer3_3_relu_1_Relu=9;layer3_4_relu_Relu=3;layer3_4_relu_1_Relu=9;layer3_5_relu_Relu=4;layer3_5_relu_1_Relu=14;layer3_6_relu_Relu=2;layer3_6_relu_1_Relu=17",
+  "per_node": {
+    "relu_Relu": {
+      "abs_max": 3.7342147827148438,
+      "vr": 4
+    },
+    "layer1_0_relu_Relu": {
+      "abs_max": 2.489133358001709,
+      "vr": 3
+    },
+    "layer1_0_relu_1_Relu": {
+      "abs_max": 5.982662677764893,
+      "vr": 6
+    },
+    "layer1_1_relu_Relu": {
+      "abs_max": 3.824789524078369,
+      "vr": 4
+    },
+    "layer1_1_relu_1_Relu": {
+      "abs_max": 6.645394802093506,
+      "vr": 7
+    },
+    "layer1_2_relu_Relu": {
+      "abs_max": 2.5007262229919434,
+      "vr": 3
+    },
+    "layer1_2_relu_1_Relu": {
+      "abs_max": 6.551213264465332,
+      "vr": 7
+    },
+    "layer1_3_relu_Relu": {
+      "abs_max": 1.78438138961792,
+      "vr": 2
+    },
+    "layer1_3_relu_1_Relu": {
+      "abs_max": 6.561029434204102,
+      "vr": 7
+    },
+    "layer1_4_relu_Relu": {
+      "abs_max": 2.737092971801758,
+      "vr": 3
+    },
+    "layer1_4_relu_1_Relu": {
+      "abs_max": 6.745364665985107,
+      "vr": 7
+    },
+    "layer1_5_relu_Relu": {
+      "abs_max": 1.9755722284317017,
+      "vr": 2
+    },
+    "layer1_5_relu_1_Relu": {
+      "abs_max": 6.988776206970215,
+      "vr": 7
+    },
+    "layer1_6_relu_Relu": {
+      "abs_max": 2.7379446029663086,
+      "vr": 3
+    },
+    "layer1_6_relu_1_Relu": {
+      "abs_max": 6.848714351654053,
+      "vr": 7
+    },
+    "layer2_0_relu_Relu": {
+      "abs_max": 2.8043930530548096,
+      "vr": 3
+    },
+    "layer2_0_relu_1_Relu": {
+      "abs_max": 6.782610893249512,
+      "vr": 7
+    },
+    "layer2_1_relu_Relu": {
+      "abs_max": 2.12721848487854,
+      "vr": 3
+    },
+    "layer2_1_relu_1_Relu": {
+      "abs_max": 6.657979488372803,
+      "vr": 7
+    },
+    "layer2_2_relu_Relu": {
+      "abs_max": 1.9724783897399902,
+      "vr": 2
+    },
+    "layer2_2_relu_1_Relu": {
+      "abs_max": 6.462069034576416,
+      "vr": 7
+    },
+    "layer2_3_relu_Relu": {
+      "abs_max": 1.7458062171936035,
+      "vr": 2
+    },
+    "layer2_3_relu_1_Relu": {
+      "abs_max": 6.6160454750061035,
+      "vr": 7
+    },
+    "layer2_4_relu_Relu": {
+      "abs_max": 1.8185062408447266,
+      "vr": 2
+    },
+    "layer2_4_relu_1_Relu": {
+      "abs_max": 7.425342559814453,
+      "vr": 8
+    },
+    "layer2_5_relu_Relu": {
+      "abs_max": 2.00911808013916,
+      "vr": 3
+    },
+    "layer2_5_relu_1_Relu": {
+      "abs_max": 9.532975196838379,
+      "vr": 10
+    },
+    "layer2_6_relu_Relu": {
+      "abs_max": 2.386634349822998,
+      "vr": 3
+    },
+    "layer2_6_relu_1_Relu": {
+      "abs_max": 11.23735237121582,
+      "vr": 12
+    },
+    "layer3_0_relu_Relu": {
+      "abs_max": 4.182129859924316,
+      "vr": 5
+    },
+    "layer3_0_relu_1_Relu": {
+      "abs_max": 8.768430709838867,
+      "vr": 9
+    },
+    "layer3_1_relu_Relu": {
+      "abs_max": 2.09114146232605,
+      "vr": 3
+    },
+    "layer3_1_relu_1_Relu": {
+      "abs_max": 8.268715858459473,
+      "vr": 9
+    },
+    "layer3_2_relu_Relu": {
+      "abs_max": 1.9858533143997192,
+      "vr": 2
+    },
+    "layer3_2_relu_1_Relu": {
+      "abs_max": 8.49484920501709,
+      "vr": 9
+    },
+    "layer3_3_relu_Relu": {
+      "abs_max": 2.0973284244537354,
+      "vr": 3
+    },
+    "layer3_3_relu_1_Relu": {
+      "abs_max": 8.596290588378906,
+      "vr": 9
+    },
+    "layer3_4_relu_Relu": {
+      "abs_max": 2.4979546070098877,
+      "vr": 3
+    },
+    "layer3_4_relu_1_Relu": {
+      "abs_max": 8.905546188354492,
+      "vr": 9
+    },
+    "layer3_5_relu_Relu": {
+      "abs_max": 3.082658290863037,
+      "vr": 4
+    },
+    "layer3_5_relu_1_Relu": {
+      "abs_max": 13.760432243347168,
+      "vr": 14
+    },
+    "layer3_6_relu_Relu": {
+      "abs_max": 1.8630144596099854,
+      "vr": 2
+    },
+    "layer3_6_relu_1_Relu": {
+      "abs_max": 16.91598129272461,
+      "vr": 17
+    }
+  }
+}

@@ -1,0 +1,21 @@
+add_count: 1
+add_ops:
+- inputs:
+  - y
+  name: add
+constant_shapes: {}
+conv_count: 0
+conv_layers: []
+input_shape:
+- 1
+- 4
+linear_count: 0
+linear_layers: []
+op_counts:
+  add: 1
+  div: 1
+output_shape:
+- 1
+- 4
+total_constants: 0
+total_ops: 2

@@ -1,0 +1,40 @@
+# Pre-commit hooks for ACE
+# Install: pip install pre-commit && pre-commit install
+# Run manually: pre-commit run --all-files
+
+repos:
+  # Ruff: Python lint + format (replaces flake8, isort, black)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.11.10
+    hooks:
+      # Linter
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+        types_or: [python, pyi, jupyter]
+      # Formatter
+      - id: ruff-format
+        types_or: [python, pyi, jupyter]
+
+  # # Clang-format: C/C++ formatting
+  # - repo: https://github.com/pre-commit/mirrors-clang-format
+  #   rev: v14.0.0
+  #   hooks:
+  #     - id: clang-format
+  #       types_or: [c++, c, cuda]
+  #       # Only check formatting, don't auto-fix (safer for C++)
+  #       args: [--dry-run, --Werror]
+
+  # General file checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: ^(fhe_dsl/csrc/|.*\.patch|.*\.diff)
+      - id: end-of-file-fixer
+        exclude: ^(fhe_dsl/csrc/|.*\.patch|.*\.diff|benchmark/.*\.yml)
+      - id: check-yaml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: [--maxkb=1024]
+      - id: detect-private-key

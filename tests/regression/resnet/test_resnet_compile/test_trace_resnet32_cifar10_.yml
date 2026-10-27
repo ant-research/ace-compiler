@@ -1,0 +1,590 @@
+add_count: 15
+add_ops:
+- inputs:
+  - layer1_0_conv2
+  - relu
+  name: add
+- inputs:
+  - layer1_1_conv2
+  - layer1_0_relu_1
+  name: add_1
+- inputs:
+  - layer1_2_conv2
+  - layer1_1_relu_1
+  name: add_2
+- inputs:
+  - layer1_3_conv2
+  - layer1_2_relu_1
+  name: add_3
+- inputs:
+  - layer1_4_conv2
+  - layer1_3_relu_1
+  name: add_4
+- inputs:
+  - layer2_0_conv2
+  - layer2_0_downsample_0
+  name: add_5
+- inputs:
+  - layer2_1_conv2
+  - layer2_0_relu_1
+  name: add_6
+- inputs:
+  - layer2_2_conv2
+  - layer2_1_relu_1
+  name: add_7
+- inputs:
+  - layer2_3_conv2
+  - layer2_2_relu_1
+  name: add_8
+- inputs:
+  - layer2_4_conv2
+  - layer2_3_relu_1
+  name: add_9
+- inputs:
+  - layer3_0_conv2
+  - layer3_0_downsample_0
+  name: add_10
+- inputs:
+  - layer3_1_conv2
+  - layer3_0_relu_1
+  name: add_11
+- inputs:
+  - layer3_2_conv2
+  - layer3_1_relu_1
+  name: add_12
+- inputs:
+  - layer3_3_conv2
+  - layer3_2_relu_1
+  name: add_13
+- inputs:
+  - layer3_4_conv2
+  - layer3_3_relu_1
+  name: add_14
+constant_shapes:
+  _view_shape_view:
+  - 2
+  conv1_bias:
+  - 16
+  conv1_weight:
+  - 16
+  - 3
+  - 3
+  - 3
+  fc_bias:
+  - 10
+  fc_weight:
+  - 10
+  - 64
+  layer1_0_conv1_bias:
+  - 16
+  layer1_0_conv1_weight:
+  - 16
+  - 16
+  - 3
+  - 3
+  layer1_0_conv2_bias:
+  - 16
+  layer1_0_conv2_weight:
+  - 16
+  - 16
+  - 3
+  - 3
+  layer1_1_conv1_bias:
+  - 16
+  layer1_1_conv1_weight:
+  - 16
+  - 16
+  - 3
+  - 3
+  layer1_1_conv2_bias:
+  - 16
+  layer1_1_conv2_weight:
+  - 16
+  - 16
+  - 3
+  - 3
+  layer1_2_conv1_bias:
+  - 16
+  layer1_2_conv1_weight:
+  - 16
+  - 16
+  - 3
+  - 3
+  layer1_2_conv2_bias:
+  - 16
+  layer1_2_conv2_weight:
+  - 16
+  - 16
+  - 3
+  - 3
+  layer1_3_conv1_bias:
+  - 16
+  layer1_3_conv1_weight:
+  - 16
+  - 16
+  - 3
+  - 3
+  layer1_3_conv2_bias:
+  - 16
+  layer1_3_conv2_weight:
+  - 16
+  - 16
+  - 3
+  - 3
+  layer1_4_conv1_bias:
+  - 16
+  layer1_4_conv1_weight:
+  - 16
+  - 16
+  - 3
+  - 3
+  layer1_4_conv2_bias:
+  - 16
+  layer1_4_conv2_weight:
+  - 16
+  - 16
+  - 3
+  - 3
+  layer2_0_conv1_bias:
+  - 32
+  layer2_0_conv1_weight:
+  - 32
+  - 16
+  - 3
+  - 3
+  layer2_0_conv2_bias:
+  - 32
+  layer2_0_conv2_weight:
+  - 32
+  - 32
+  - 3
+  - 3
+  layer2_0_downsample_0_bias:
+  - 32
+  layer2_0_downsample_0_weight:
+  - 32
+  - 16
+  - 1
+  - 1
+  layer2_1_conv1_bias:
+  - 32
+  layer2_1_conv1_weight:
+  - 32
+  - 32
+  - 3
+  - 3
+  layer2_1_conv2_bias:
+  - 32
+  layer2_1_conv2_weight:
+  - 32
+  - 32
+  - 3
+  - 3
+  layer2_2_conv1_bias:
+  - 32
+  layer2_2_conv1_weight:
+  - 32
+  - 32
+  - 3
+  - 3
+  layer2_2_conv2_bias:
+  - 32
+  layer2_2_conv2_weight:
+  - 32
+  - 32
+  - 3
+  - 3
+  layer2_3_conv1_bias:
+  - 32
+  layer2_3_conv1_weight:
+  - 32
+  - 32
+  - 3
+  - 3
+  layer2_3_conv2_bias:
+  - 32
+  layer2_3_conv2_weight:
+  - 32
+  - 32
+  - 3
+  - 3
+  layer2_4_conv1_bias:
+  - 32
+  layer2_4_conv1_weight:
+  - 32
+  - 32
+  - 3
+  - 3
+  layer2_4_conv2_bias:
+  - 32
+  layer2_4_conv2_weight:
+  - 32
+  - 32
+  - 3
+  - 3
+  layer3_0_conv1_bias:
+  - 64
+  layer3_0_conv1_weight:
+  - 64
+  - 32
+  - 3
+  - 3
+  layer3_0_conv2_bias:
+  - 64
+  layer3_0_conv2_weight:
+  - 64
+  - 64
+  - 3
+  - 3
+  layer3_0_downsample_0_bias:
+  - 64
+  layer3_0_downsample_0_weight:
+  - 64
+  - 32
+  - 1
+  - 1
+  layer3_1_conv1_bias:
+  - 64
+  layer3_1_conv1_weight:
+  - 64
+  - 64
+  - 3
+  - 3
+  layer3_1_conv2_bias:
+  - 64
+  layer3_1_conv2_weight:
+  - 64
+  - 64
+  - 3
+  - 3
+  layer3_2_conv1_bias:
+  - 64
+  layer3_2_conv1_weight:
+  - 64
+  - 64
+  - 3
+  - 3
+  layer3_2_conv2_bias:
+  - 64
+  layer3_2_conv2_weight:
+  - 64
+  - 64
+  - 3
+  - 3
+  layer3_3_conv1_bias:
+  - 64
+  layer3_3_conv1_weight:
+  - 64
+  - 64
+  - 3
+  - 3
+  layer3_3_conv2_bias:
+  - 64
+  layer3_3_conv2_weight:
+  - 64
+  - 64
+  - 3
+  - 3
+  layer3_4_conv1_bias:
+  - 64
+  layer3_4_conv1_weight:
+  - 64
+  - 64
+  - 3
+  - 3
+  layer3_4_conv2_bias:
+  - 64
+  layer3_4_conv2_weight:
+  - 64
+  - 64
+  - 3
+  - 3
+conv_count: 33
+conv_layers:
+- bias: true
+  groups: 1
+  in_channels: 3
+  kernel_size: 3
+  name: conv1
+  out_channels: 16
+  padding: 1
+  stride: 1
+- bias: true
+  groups: 1
+  in_channels: 16
+  kernel_size: 3
+  name: layer1.0.conv1
+  out_channels: 16
+  padding: 1
+  stride: 1
+- bias: true
+  groups: 1
+  in_channels: 16
+  kernel_size: 3
+  name: layer1.0.conv2
+  out_channels: 16
+  padding: 1
+  stride: 1
+- bias: true
+  groups: 1
+  in_channels: 16
+  kernel_size: 3
+  name: layer1.1.conv1
+  out_channels: 16
+  padding: 1
+  stride: 1
+- bias: true
+  groups: 1
+  in_channels: 16
+  kernel_size: 3
+  name: layer1.1.conv2
+  out_channels: 16
+  padding: 1
+  stride: 1
+- bias: true
+  groups: 1
+  in_channels: 16
+  kernel_size: 3
+  name: layer1.2.conv1
+  out_channels: 16
+  padding: 1
+  stride: 1
+- bias: true
+  groups: 1
+  in_channels: 16
+  kernel_size: 3
+  name: layer1.2.conv2
+  out_channels: 16
+  padding: 1
+  stride: 1
+- bias: true
+  groups: 1
+  in_channels: 16
+  kernel_size: 3
+  name: layer1.3.conv1
+  out_channels: 16
+  padding: 1
+  stride: 1
+- bias: true
+  groups: 1
+  in_channels: 16
+  kernel_size: 3
+  name: layer1.3.conv2
+  out_channels: 16
+  padding: 1
+  stride: 1
+- bias: true
+  groups: 1
+  in_channels: 16
+  kernel_size: 3
+  name: layer1.4.conv1
+  out_channels: 16
+  padding: 1
+  stride: 1
+- bias: true
+  groups: 1
+  in_channels: 16
+  kernel_size: 3
+  name: layer1.4.conv2
+  out_channels: 16
+  padding: 1
+  stride: 1
+- bias: true
+  groups: 1
+  in_channels: 16
+  kernel_size: 3
+  name: layer2.0.conv1
+  out_channels: 32
+  padding: 1
+  stride: 2
+- bias: true
+  groups: 1
+  in_channels: 32
+  kernel_size: 3
+  name: layer2.0.conv2
+  out_channels: 32
+  padding: 1
+  stride: 1
+- bias: true
+  groups: 1
+  in_channels: 16
+  kernel_size: 1
+  name: layer2.0.downsample.0
+  out_channels: 32
+  padding: 0
+  stride: 2
+- bias: true
+  groups: 1
+  in_channels: 32
+  kernel_size: 3
+  name: layer2.1.conv1
+  out_channels: 32
+  padding: 1
+  stride: 1
+- bias: true
+  groups: 1
+  in_channels: 32
+  kernel_size: 3
+  name: layer2.1.conv2
+  out_channels: 32
+  padding: 1
+  stride: 1
+- bias: true
+  groups: 1
+  in_channels: 32
+  kernel_size: 3
+  name: layer2.2.conv1
+  out_channels: 32
+  padding: 1
+  stride: 1
+- bias: true
+  groups: 1
+  in_channels: 32
+  kernel_size: 3
+  name: layer2.2.conv2
+  out_channels: 32
+  padding: 1
+  stride: 1
+- bias: true
+  groups: 1
+  in_channels: 32
+  kernel_size: 3
+  name: layer2.3.conv1
+  out_channels: 32
+  padding: 1
+  stride: 1
+- bias: true
+  groups: 1
+  in_channels: 32
+  kernel_size: 3
+  name: layer2.3.conv2
+  out_channels: 32
+  padding: 1
+  stride: 1
+- bias: true
+  groups: 1
+  in_channels: 32
+  kernel_size: 3
+  name: layer2.4.conv1
+  out_channels: 32
+  padding: 1
+  stride: 1
+- bias: true
+  groups: 1
+  in_channels: 32
+  kernel_size: 3
+  name: layer2.4.conv2
+  out_channels: 32
+  padding: 1
+  stride: 1
+- bias: true
+  groups: 1
+  in_channels: 32
+  kernel_size: 3
+  name: layer3.0.conv1
+  out_channels: 64
+  padding: 1
+  stride: 2
+- bias: true
+  groups: 1
+  in_channels: 64
+  kernel_size: 3
+  name: layer3.0.conv2
+  out_channels: 64
+  padding: 1
+  stride: 1
+- bias: true
+  groups: 1
+  in_channels: 32
+  kernel_size: 1
+  name: layer3.0.downsample.0
+  out_channels: 64
+  padding: 0
+  stride: 2
+- bias: true
+  groups: 1
+  in_channels: 64
+  kernel_size: 3
+  name: layer3.1.conv1
+  out_channels: 64
+  padding: 1
+  stride: 1
+- bias: true
+  groups: 1
+  in_channels: 64
+  kernel_size: 3
+  name: layer3.1.conv2
+  out_channels: 64
+  padding: 1
+  stride: 1
+- bias: true
+  groups: 1
+  in_channels: 64
+  kernel_size: 3
+  name: layer3.2.conv1
+  out_channels: 64
+  padding: 1
+  stride: 1
+- bias: true
+  groups: 1
+  in_channels: 64
+  kernel_size: 3
+  name: layer3.2.conv2
+  out_channels: 64
+  padding: 1
+  stride: 1
+- bias: true
+  groups: 1
+  in_channels: 64
+  kernel_size: 3
+  name: layer3.3.conv1
+  out_channels: 64
+  padding: 1
+  stride: 1
+- bias: true
+  groups: 1
+  in_channels: 64
+  kernel_size: 3
+  name: layer3.3.conv2
+  out_channels: 64
+  padding: 1
+  stride: 1
+- bias: true
+  groups: 1
+  in_channels: 64
+  kernel_size: 3
+  name: layer3.4.conv1
+  out_channels: 64
+  padding: 1
+  stride: 1
+- bias: true
+  groups: 1
+  in_channels: 64
+  kernel_size: 3
+  name: layer3.4.conv2
+  out_channels: 64
+  padding: 1
+  stride: 1
+input_shape:
+- 1
+- 3
+- 32
+- 32
+linear_count: 1
+linear_layers:
+- bias: true
+  in_features: 64
+  name: fc
+  out_features: 10
+op_counts:
+  add: 15
+  conv: 33
+  gemm: 1
+  global_average_pool: 1
+  relu: 31
+  reshape: 1
+output_shape:
+- 1
+- 10
+total_constants: 69
+total_ops: 82

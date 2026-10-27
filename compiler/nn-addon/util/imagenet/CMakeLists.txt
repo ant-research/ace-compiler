@@ -1,0 +1,18 @@
+find_package (OpenCV QUIET)
+if (OpenCV_FOUND)
+        message (STATUS "Build examples require OpenCV")
+else ()
+        message (WARNING "OpenCV not found. Examples with OpenCV won't be built")
+        return ()
+endif ()
+
+include_directories( ${OpenCV_INCLUDE_DIRS} )
+
+file (GLOB NNUTIL_OPENCV_SRC_FILES CONFIGURE_DEPENDS *.cxx)
+foreach (app ${NNUTIL_OPENCV_SRC_FILES})
+	get_filename_component (exe ${app} NAME_WE)
+	add_executable (${exe} ${app})
+	set_property (TARGET ${exe} PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test)
+	target_link_libraries (${exe} ${NN_LIBS} ${OpenCV_LIBS})
+	add_test( NAME ${exe} COMMAND ${CMAKE_BINARY_DIR}/opencv/${exe})
+endforeach ()

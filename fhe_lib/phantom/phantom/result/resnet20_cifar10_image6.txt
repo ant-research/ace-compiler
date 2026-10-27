@@ -1,0 +1,352 @@
+layer 0
+multiplexed parallel convolution...
+time : 203 ms
+remaining level : 5
+log2(scale): 51
+
+multiplexed parallel batch normalization...
+time : 7 ms
+remaining level : 5
+log2(scale): 51
+
+approximate ReLU...
+time : 122 ms
+remaining level : 19
+log2(scale): 51.0008
+
+intermediate decrypted values: 
+
+( (-1.01241e-06,-2.56224e-11), (-6.95707e-07,-4.10127e-11), (1.2342e-06,-9.91537e-12), (-8.35264e-08,-7.63414e-13), ... (0.0268395,1.93987e-11))
+
+layer 1
+multiplexed parallel convolution...
+time : 535 ms
+remaining level : 22
+log2(scale): 46
+
+multiplexed parallel batch normalization...
+time : 7 ms
+remaining level : 22
+log2(scale): 46
+
+bootstrapping...
+remaining level : 20
+log2(scale): 46
+
+layer 2
+multiplexed parallel convolution...
+time : 533 ms
+remaining level : 22
+log2(scale): 46
+
+multiplexed parallel batch normalization...
+time : 7 ms
+remaining level : 22
+log2(scale): 46
+
+cipher add...
+remaining level : 22
+log2(scale): 46
+
+bootstrapping...
+remaining level : 20
+log2(scale): 46
+
+layer 3
+multiplexed parallel convolution...
+time : 533 ms
+remaining level : 22
+log2(scale): 46
+
+multiplexed parallel batch normalization...
+time : 7 ms
+remaining level : 22
+log2(scale): 46
+
+bootstrapping...
+remaining level : 20
+log2(scale): 46
+
+layer 4
+multiplexed parallel convolution...
+time : 529 ms
+remaining level : 22
+log2(scale): 46
+
+multiplexed parallel batch normalization...
+time : 8 ms
+remaining level : 22
+log2(scale): 46
+
+cipher add...
+remaining level : 22
+log2(scale): 46
+
+bootstrapping...
+remaining level : 20
+log2(scale): 46
+
+layer 5
+multiplexed parallel convolution...
+time : 535 ms
+remaining level : 22
+log2(scale): 46
+
+multiplexed parallel batch normalization...
+time : 7 ms
+remaining level : 22
+log2(scale): 46
+
+bootstrapping...
+remaining level : 20
+log2(scale): 46
+
+layer 6
+multiplexed parallel convolution...
+time : 524 ms
+remaining level : 22
+log2(scale): 46
+
+multiplexed parallel batch normalization...
+time : 7 ms
+remaining level : 22
+log2(scale): 46
+
+cipher add...
+remaining level : 22
+log2(scale): 46
+
+bootstrapping...
+remaining level : 20
+log2(scale): 46
+
+layer 7
+multiplexed parallel convolution...
+time : 1071 ms
+remaining level : 22
+log2(scale): 46
+
+multiplexed parallel batch normalization...
+time : 7 ms
+remaining level : 22
+log2(scale): 46
+
+bootstrapping...
+remaining level : 20
+log2(scale): 46
+
+layer 8
+multiplexed parallel convolution...
+time : 592 ms
+remaining level : 22
+log2(scale): 46
+
+multiplexed parallel batch normalization...
+time : 7 ms
+remaining level : 22
+log2(scale): 46
+
+multiplexed parallel downsampling...
+time : 44 ms
+remaining level : 21
+log2(scale): 46
+
+cipher add...
+remaining level : 22
+log2(scale): 46
+
+bootstrapping...
+remaining level : 20
+log2(scale): 46
+
+layer 9
+multiplexed parallel convolution...
+time : 562 ms
+remaining level : 22
+log2(scale): 46
+
+multiplexed parallel batch normalization...
+time : 7 ms
+remaining level : 22
+log2(scale): 46
+
+bootstrapping...
+remaining level : 20
+log2(scale): 46
+
+layer 10
+multiplexed parallel convolution...
+time : 557 ms
+remaining level : 22
+log2(scale): 46
+
+multiplexed parallel batch normalization...
+time : 7 ms
+remaining level : 22
+log2(scale): 46
+
+cipher add...
+remaining level : 22
+log2(scale): 46
+
+bootstrapping...
+remaining level : 20
+log2(scale): 46
+
+layer 11
+multiplexed parallel convolution...
+time : 565 ms
+remaining level : 22
+log2(scale): 46
+
+multiplexed parallel batch normalization...
+time : 8 ms
+remaining level : 22
+log2(scale): 46
+
+bootstrapping...
+remaining level : 20
+log2(scale): 46
+
+layer 12
+multiplexed parallel convolution...
+time : 567 ms
+remaining level : 22
+log2(scale): 46
+
+multiplexed parallel batch normalization...
+time : 7 ms
+remaining level : 22
+log2(scale): 46
+
+cipher add...
+remaining level : 22
+log2(scale): 46
+
+bootstrapping...
+remaining level : 20
+log2(scale): 46
+
+layer 13
+multiplexed parallel convolution...
+time : 1143 ms
+remaining level : 22
+log2(scale): 46
+
+multiplexed parallel batch normalization...
+time : 8 ms
+remaining level : 22
+log2(scale): 46
+
+bootstrapping...
+remaining level : 20
+log2(scale): 46
+
+layer 14
+multiplexed parallel convolution...
+time : 661 ms
+remaining level : 22
+log2(scale): 46
+
+multiplexed parallel batch normalization...
+time : 7 ms
+remaining level : 22
+log2(scale): 46
+
+multiplexed parallel downsampling...
+time : 43 ms
+remaining level : 21
+log2(scale): 46
+
+cipher add...
+remaining level : 22
+log2(scale): 46
+
+bootstrapping...
+remaining level : 20
+log2(scale): 46
+
+layer 15
+multiplexed parallel convolution...
+time : 649 ms
+remaining level : 22
+log2(scale): 46
+
+multiplexed parallel batch normalization...
+time : 7 ms
+remaining level : 22
+log2(scale): 46
+
+bootstrapping...
+remaining level : 20
+log2(scale): 46
+
+layer 16
+multiplexed parallel convolution...
+time : 638 ms
+remaining level : 22
+log2(scale): 46
+
+multiplexed parallel batch normalization...
+time : 7 ms
+remaining level : 22
+log2(scale): 46
+
+cipher add...
+remaining level : 22
+log2(scale): 46
+
+bootstrapping...
+remaining level : 20
+log2(scale): 46
+
+layer 17
+multiplexed parallel convolution...
+time : 640 ms
+remaining level : 22
+log2(scale): 46
+
+multiplexed parallel batch normalization...
+time : 7 ms
+remaining level : 22
+log2(scale): 46
+
+bootstrapping...
+remaining level : 20
+log2(scale): 46
+
+layer 18
+multiplexed parallel convolution...
+time : 642 ms
+remaining level : 22
+log2(scale): 46
+
+multiplexed parallel batch normalization...
+time : 7 ms
+remaining level : 22
+log2(scale): 46
+
+cipher add...
+remaining level : 22
+log2(scale): 46
+
+bootstrapping...
+remaining level : 20
+log2(scale): 46
+
+layer 19
+average pooling...
+time : 32 ms
+remaining level : 21
+log2(scale): 46
+
+fully connected layer...
+time : 133 ms
+remaining level : 22
+log2(scale): 46
+
+( (-1.5382,-2.16552e-08), (15.9103,-2.46539e-08), (-0.967189,1.71317e-08), (-1.2171,-1.61171e-08), (-10.4614,3.22058e-08), (0.344734,1.20245e-08), (0.815572,3.00039e-09), (0.685309,1.22863e-08), (-11.7316,-3.15466e-08), (8.0782,9.14286e-09))
+total time : 25461 ms
+image label: 1
+inferred label: 1
+max score: 15.9103

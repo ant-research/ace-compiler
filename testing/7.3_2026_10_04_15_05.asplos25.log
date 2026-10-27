@@ -1,0 +1,861 @@
+#### log for: /app/scripts/resbm.py -n 100
+-------- ACE(OpenMP) Compilation --------
+alexnet_cifar10:
+                 ACE: Time = 2.54(s), Memory = 1.41(GB)
+                 GCC: Time = 8.91(s), Memory = 0.46(GB)
+-------- Done --------
+-------- ACE Accuracy --------
+Available CPU: 64, Required CPU: 50, Process: 1
+alexnet_cifar10: Accuracy = 85.0%, Time = 7314.55(s), Memory = 517.5(GB)
+                 INFO: infer images [0, 99] from cifar-10 /app/cifar/cifar-10-batches-bin/test_batch.bin.
+                 ckks_param: _provider = 0, _poly_degree = 131072, mul_depth = 31, input_lev = 14, _first_mod_size = 60, _scaling_mod_size = 57, _num_q_parts = 3, _num_p = 11, _num_rot_idx = 688,_hamming_weight = 192
+                 Result: [4.9788, -0.8357, -1.3018, -2.3418, -3.8458, -4.0557, -4.0308, -0.8205, -0.6367, 12.8895], expected=9.
+                 [INFO] infer image 76 success
+                 Result: [-3.1503, -3.9512, -2.8105, 0.5852, 8.6340, 7.6315, -1.3247, 0.7069, -4.8641, -1.4571], expected=4.
+                 [INFO] infer image 26 success
+                 Result: [-3.6463, -2.7078, 0.3810, 1.8096, 1.0995, -3.9844, 21.4706, -6.1455, -4.5800, -3.6974], expected=6.
+                 [INFO] infer image 96 success
+                 Result: [-2.8642, -3.4603, -2.5790, 13.2720, -2.6836, 7.8178, -2.7906, 0.4294, -4.7224, -2.4196], expected=3.
+                 [INFO] infer image 78 success
+                 Result: [-4.5786, -3.2809, -2.8370, 7.8941, 0.5008, 9.2504, -2.0567, 3.6145, -4.1988, -4.3083], expected=5.
+                 [INFO] infer image 12 success
+                 Result: [-1.1367, 28.8212, -5.4259, -3.3675, -7.5002, -8.8622, -1.7720, -7.1672, 1.0756, 5.3336], expected=1.
+                 [INFO] infer image 82 success
+                 Result: [5.7596, -4.1216, 9.5404, -1.4340, 1.7928, -4.0217, -2.4794, -3.2704, 0.7383, -2.5044], expected=2.
+                 [INFO] infer image 70 success
+                 Result: [0.1482, -4.5998, 0.2725, -1.7602, 16.5205, -1.9773, -2.4589, 1.1704, -3.3091, -4.0068], expected=4.
+                 [INFO] infer image 22 success
+                 Result: [-1.3003, -4.3230, 12.9288, 3.6012, -2.0949, 0.4165, -2.6212, 1.3068, -4.1496, -3.7649], expected=2.
+                 [INFO] infer image 84 success
+                 Result: [-3.3051, -4.3981, 0.3982, -2.6015, 11.5063, 4.7039, -3.7995, 7.3395, -5.1546, -4.6895], expected=4.
+                 [INFO] infer image 94 success
+                 Result: [0.5846, 0.6053, -2.1480, -0.3168, -4.4670, -3.0215, -2.2788, -3.9833, 13.5290, 1.4960], expected=8.
+                 [INFO] infer image 92 success
+                 Result: [11.0463, -0.8956, -1.9404, -2.0273, -3.5074, -4.2901, -2.6447, -0.5364, -1.2775, 6.0726], expected=0.
+                 [INFO] infer image 74 success
+                 Result: [1.9339, 2.2912, -3.5256, -3.2369, -1.4024, -3.8253, -2.1126, -3.9445, 14.2485, -0.4270], expected=8.
+                 [INFO] infer image 2 success
+                 Result: [-0.8252, 6.2076, -5.0939, -3.3451, -6.9987, -7.2228, -4.6216, -3.9700, 2.2447, 23.6241], expected=9.
+                 [INFO] infer image 14 success
+                 Result: [-2.7353, 13.1364, -3.9000, 2.4621, -4.9378, -1.1765, -3.7079, -3.9956, -1.1244, 5.9784], expected=1.
+                 [INFO] infer image 6 success
+                 Result: [-4.1373, -3.3968, -1.0018, 12.0437, -2.5318, 4.7635, 1.2449, -1.6914, -2.1585, -3.1349], expected=3.
+                 [INFO] infer image 68 success
+                 Result: [-3.6844, -4.3867, 0.9619, 1.6789, -3.0467, 14.1018, -1.5551, 3.2834, -3.6505, -3.7030], expected=5.
+                 [INFO] infer image 16 success
+                 Result: [4.3484, 0.2681, -3.5461, -3.4287, -5.1348, -5.0648, -2.9352, -5.8480, 21.8683, -0.5279], expected=8.
+                 [INFO] infer image 72 success
+                 Result: [-3.8574, -3.0469, 2.1660, -0.5515, 1.4690, -4.0019, 19.5151, -5.5049, -3.1037, -3.0845], expected=6.
+                 [INFO] infer image 4 success
+                 Result: [-3.2297, -4.9598, -0.7400, 0.6569, 12.6483, 6.0381, -2.0403, 0.4388, -4.4103, -4.4025], expected=5.
+                 [INFO] infer image 24 failed
+                 Result: [-3.5591, -4.5879, -2.6137, 11.8378, 5.1677, 2.7227, 0.4916, -1.2773, -4.2606, -3.9216], expected=3.
+                 [INFO] infer image 8 success
+                 Result: [-1.1692, -1.8030, 2.2568, 2.4795, -2.3519, 2.2456, -0.4084, 2.4943, -3.2966, -0.4476], expected=2.
+                 [INFO] infer image 86 failed
+                 Result: [3.3967, 1.8858, -4.3407, -2.6731, -4.6915, -5.4326, -2.5706, -5.5506, 19.9807, -0.0049], expected=8.
+                 [INFO] infer image 80 success
+                 Result: [13.6218, -4.0809, 1.0673, -0.9914, -2.2075, -0.5530, -1.6567, -2.6938, -0.6679, -1.8385], expected=0.
+                 [INFO] infer image 10 success
+                 Result: [19.0129, -1.0419, -2.4596, -3.3431, -1.7907, -5.4060, -4.4557, -2.8844, 0.4546, 1.9132], expected=0.
+                 [INFO] infer image 90 success
+                 Result: [-1.3345, -3.0959, -0.5866, -0.9844, 0.5450, 1.7558, -2.9268, 11.5181, -3.5679, -1.3232], expected=7.
+                 [INFO] infer image 20 success
+                 Result: [21.1162, -4.4145, 1.5143, -4.0010, -4.0839, -6.0154, 3.8648, -5.7671, -0.0233, -2.1911], expected=0.
+                 [INFO] infer image 98 success
+                 Result: [3.0573, 1.4118, -3.7182, -3.1231, -4.6839, -4.0122, -2.4379, -5.0953, 20.0004, -1.3996], expected=8.
+                 [INFO] infer image 18 success
+                 Result: [-3.0746, -1.9273, -0.3052, 1.9692, -2.0084, 0.7970, 14.3077, -4.2139, -2.3005, -3.2444], expected=6.
+                 [INFO] infer image 64 success
+                 Result: [-2.0450, 0.3846, -0.7061, 0.0527, -2.1976, -2.5090, 15.7923, -2.8351, -2.7431, -3.1942], expected=6.
+                 [INFO] infer image 62 success
+                 Result: [2.7036, 15.4604, -1.9690, -4.1604, -4.2519, -7.0797, -1.5582, -5.2879, 1.5984, 4.5440], expected=1.
+                 [INFO] infer image 66 success
+                 Result: [1.4359, 1.4171, -6.3144, -4.3108, -9.2322, -8.2582, -3.8578, -1.6386, 2.9584, 27.7996], expected=9.
+                 [INFO] infer image 50 success
+                 Result: [4.5646, -3.7572, -1.2463, -2.7627, 17.2576, -2.0143, -4.0222, -0.3827, -3.3466, -4.2906], expected=4.
+                 [INFO] infer image 40 success
+                 Result: [-3.4891, -4.0655, 4.2463, -2.7437, 11.4916, 1.0826, 0.0227, -0.8126, -2.5241, -3.2087], expected=4.
+                 [INFO] infer image 32 success
+                 Result: [-5.1675, -6.8803, -3.0685, -3.5126, 3.2998, 8.3666, -4.5946, 25.7724, -8.0512, -6.1648], expected=7.
+                 [INFO] infer image 48 success
+                 Result: [-3.5398, -5.9262, -3.1519, -2.1098, 4.5622, 0.6963, -4.4129, 25.9065, -7.1757, -4.8493], expected=7.
+                 [INFO] infer image 60 success
+                 Result: [0.6681, -0.5267, -3.7974, -3.4095, -5.4768, -5.0910, -3.6182, -4.8494, 22.6484, 3.4518], expected=8.
+                 [INFO] infer image 88 success
+                 Result: [17.1678, -1.6390, 0.5639, -3.4376, -1.9477, -3.5956, -4.2196, -2.2240, -0.2786, -0.3902], expected=0.
+                 [INFO] infer image 44 success
+                 Result: [-0.7054, -2.3064, -3.0030, 5.3756, -2.1985, -0.5710, 9.9149, -0.5197, -3.3990, -2.5878], expected=6.
+                 [INFO] infer image 30 success
+                 Result: [-1.1698, 3.9530, -3.3092, 0.7058, -4.5298, -4.4597, -3.7010, -2.1186, -1.0953, 15.7241], expected=9.
+                 [INFO] infer image 28 success
+                 Result: [0.5467, 3.8053, -6.0627, -1.8258, -8.0819, -6.7523, -6.3602, -2.7619, -0.5217, 28.0135], expected=9.
+                 [INFO] infer image 34 success
+                 Result: [-2.4000, -3.5972, 0.1207, 5.9222, 0.2502, 7.0196, -0.8447, -0.6614, -2.4845, -3.3253], expected=4.
+                 [INFO] infer image 58 failed
+                 Result: [-2.7423, -3.5206, 2.3287, -0.4285, 1.2959, 5.3950, -1.9231, 5.4928, -3.8545, -2.0438], expected=0.
+                 [INFO] infer image 52 failed
+                 Result: [-3.8827, -5.2014, -2.6583, 17.3802, -1.1983, 4.3415, -0.2152, -0.6346, -4.4125, -3.5194], expected=3.
+                 [INFO] infer image 46 success
+                 Result: [8.6142, -1.9465, -3.9214, -3.5492, -4.3320, -6.5345, -2.0566, -5.3948, 18.0294, 1.0908], expected=8.
+                 [INFO] infer image 54 success
+                 Result: [-1.0594, 5.9858, -5.4957, -2.5232, -7.0520, -5.4832, -4.8896, -3.4565, -0.7748, 24.7476], expected=9.
+                 [INFO] infer image 38 success
+                 Result: [-3.4486, -4.2538, -1.9335, -0.1252, -0.1019, 7.7923, -1.2677, 11.6747, -4.9940, -3.3426], expected=7.
+                 [INFO] infer image 56 success
+                 Result: [-2.2594, -4.8326, -2.9727, 4.5358, -1.5070, 13.7836, -2.2781, 3.7322, -5.4973, -2.7049], expected=5.
+                 [INFO] infer image 42 success
+                 Result: [-4.2230, -5.3666, -3.3634, -2.9324, 5.7401, 12.9444, -1.3740, 9.7900, -6.2416, -4.9739], expected=4.
+                 [INFO] infer image 36 failed
+                 Result: [-3.3348, 2.9998, -4.6746, 12.2790, -3.7963, 8.9980, -2.7076, -4.3781, -1.5888, -3.7972], expected=3.
+                 [INFO] infer image 0 success
+                 Result: [1.1735, 4.7351, -3.5195, -4.1503, -5.5338, -2.0953, -2.6255, -4.3616, 17.2051, -0.8283], expected=8.
+                 [INFO] infer image 1 success
+                 Result: [-1.6402, -4.9156, 11.0779, 3.9168, 0.8305, 1.6687, -1.2858, -2.1970, -2.9312, -4.5246], expected=2.
+                 [INFO] infer image 25 success
+                 Result: [0.1137, -0.1414, 0.0145, 1.9220, 6.7531, -2.1260, 2.2351, -2.5922, -2.4854, -3.6940], expected=6.
+                 [INFO] infer image 59 failed
+                 Result: [-0.7107, -0.2443, -1.6625, 4.0536, -3.5425, -1.2792, -3.5933, -2.4061, 0.6855, 8.6989], expected=3.
+                 [INFO] infer image 63 failed
+                 Result: [-1.5450, -2.3683, -1.3376, -0.2448, -2.1228, 2.4513, 11.5015, -3.2208, -2.3410, -0.7731], expected=6.
+                 [INFO] infer image 7 success
+                 Result: [-3.2391, 2.0560, 5.3480, 4.3406, -5.6533, -3.7825, -1.0252, -4.1079, 6.8294, -0.7665], expected=2.
+                 [INFO] infer image 35 failed
+                 Result: [-3.3987, -2.7885, -1.4151, 0.0375, -1.5535, -3.1310, 24.7439, -4.9231, -3.8418, -3.7306], expected=6.
+                 [INFO] infer image 29 success
+                 Result: [-2.0243, -1.8869, 1.1462, 2.4000, -0.5022, -3.3571, 13.7307, -4.1368, -2.3014, -3.0687], expected=6.
+                 [INFO] infer image 49 success
+                 Result: [0.5434, 5.4035, -5.3185, -2.8190, -6.3220, -4.9727, -4.6872, -2.1441, 0.0734, 20.2424], expected=9.
+                 [INFO] infer image 89 success
+                 Result: [-4.4968, -3.9419, -2.2854, -2.2029, 1.6362, 0.0229, -5.3270, 27.0213, -7.6560, -2.7710], expected=7.
+                 [INFO] infer image 17 success
+                 Result: [16.1030, -4.8569, 8.6424, -2.4526, -3.3647, -4.3287, -2.8099, -2.3049, -2.0311, -2.5973], expected=0.
+                 [INFO] infer image 21 success
+                 Result: [-2.9686, 0.1952, 0.0988, 1.3135, 2.1908, -3.1122, 5.1034, -2.8788, -1.7634, 1.8210], expected=6.
+                 [INFO] infer image 95 success
+                 Result: [10.8555, 2.0205, 1.6758, -0.5173, -2.3197, -5.7190, -3.5926, -4.1208, 2.5629, -0.8459], expected=0.
+                 [INFO] infer image 3 success
+                 Result: [-4.6652, -0.8016, -1.8306, 1.3098, -1.9820, -3.3533, 24.6839, -5.4494, -4.3095, -3.6029], expected=6.
+                 [INFO] infer image 19 success
+                 Result: [-0.6024, 5.4431, -5.0199, -2.4881, -6.9162, -5.9314, -5.5029, -1.4299, -1.2038, 23.6506], expected=9.
+                 [INFO] infer image 23 success
+                 Result: [-0.6272, 4.7989, -6.1239, -2.3499, -8.6819, -7.0443, -7.3559, -3.6437, -0.4978, 31.5247], expected=9.
+                 [INFO] infer image 11 success
+                 Result: [-1.2082, 19.8037, -4.1466, -2.9952, -5.8875, -5.6201, -1.9603, -4.9763, -0.2488, 7.2385], expected=1.
+                 [INFO] infer image 9 success
+                 Result: [18.4910, -3.9349, 3.2063, -5.7367, -2.1867, -5.7056, -1.4800, -1.9910, -1.7712, 1.1079], expected=0.
+                 [INFO] infer image 27 success
+                 Result: [0.9710, 1.9017, -3.3798, -2.6186, -3.2660, -4.5491, -1.0842, -4.8267, 16.1061, 0.7449], expected=8.
+                 [INFO] infer image 15 success
+                 Result: [-4.6886, -6.2533, -0.4602, -3.0283, 1.4164, 4.0803, -4.2711, 26.2398, -7.8066, -5.2292], expected=7.
+                 [INFO] infer image 13 success
+                 Result: [-2.9638, -2.9307, 1.2224, 1.8242, -1.4652, -2.3502, 18.8294, -4.6649, -3.3148, -4.1870], expected=6.
+                 [INFO] infer image 41 success
+                 Result: [-4.0466, -1.8396, -1.2432, 0.9941, -2.9242, -1.4981, 19.2186, -1.2624, -3.6833, -3.7159], expected=6.
+                 [INFO] infer image 5 success
+                 Result: [0.0103, 0.2059, -3.7383, -2.2929, -5.3013, -4.1849, 2.0476, -2.6167, 14.8092, 1.0605], expected=8.
+                 [INFO] infer image 51 success
+                 Result: [-0.1431, 8.4324, -5.6570, -3.1046, -6.9329, -6.2991, -5.9391, -3.6548, -0.3603, 23.6576], expected=9.
+                 [INFO] infer image 45 success
+                 Result: [4.1964, -0.6979, -3.5705, -3.0116, -4.3455, -5.0264, -2.9941, -5.3971, 20.8430, 0.0031], expected=8.
+                 [INFO] infer image 55 success
+                 Result: [-2.9250, -1.4385, -1.7640, 4.2553, -1.6267, 6.0067, -0.6983, 1.6804, -1.1573, -2.3329], expected=7.
+                 [INFO] infer image 57 failed
+                 Result: [-1.3710, 11.1113, -3.7941, -3.2044, -4.4655, -4.6293, -3.0501, -3.8470, 1.4423, 11.8071], expected=1.
+                 [INFO] infer image 37 failed
+                 Result: [-3.9107, -3.2465, -1.9421, 7.6875, 0.7002, 10.4855, -0.8185, -1.1526, -3.9559, -3.8473], expected=3.
+                 [INFO] infer image 53 failed
+                 Result: [-3.8082, -1.4287, 1.4135, -1.6544, -0.8836, 0.7262, 17.0613, -5.6239, -2.0281, -3.7747], expected=6.
+                 [INFO] infer image 43 success
+                 Result: [-4.0737, -4.3685, 8.4823, -0.3395, -1.4396, 10.4087, 1.9594, -2.7542, -3.0899, -4.7854], expected=5.
+                 [INFO] infer image 31 success
+                 Result: [-4.7660, -3.1827, 1.4321, -0.0311, -0.8865, 13.0933, 0.9245, 1.1423, -3.3583, -4.3681], expected=5.
+                 [INFO] infer image 33 success
+                 Result: [-3.6076, 1.5279, -0.9350, 0.8093, -3.4924, -2.6631, 20.8618, -5.7512, -3.5634, -3.1869], expected=6.
+                 [INFO] infer image 71 success
+                 Result: [1.4792, 0.9651, -2.9270, -2.9844, -5.2922, -5.1192, -3.1329, -4.5115, 21.3398, 0.1823], expected=8.
+                 [INFO] infer image 73 success
+                 Result: [-3.4844, -4.4940, 2.4681, 8.3359, -1.9073, 10.3231, -2.9474, -1.5028, -4.7922, -1.9994], expected=3.
+                 [INFO] infer image 61 failed
+                 Result: [-1.7087, -2.6451, -3.0363, 4.4782, 1.1053, -1.7967, -1.9897, 3.6622, 1.1018, 0.8287], expected=7.
+                 [INFO] infer image 87 failed
+                 Result: [-2.3097, -4.9721, 16.7036, -1.9523, 3.4308, -4.4878, 3.5100, -1.2655, -4.3755, -4.2823], expected=2.
+                 [INFO] infer image 65 success
+                 Result: [2.9278, 1.7170, -4.5883, -3.5506, -6.7946, -5.5974, -3.1326, -5.6267, 25.9299, -1.2854], expected=8.
+                 [INFO] infer image 79 success
+                 Result: [-0.5391, 1.5460, -3.8027, 0.8913, -3.6804, -3.5558, -3.1927, 0.7567, 3.2385, 8.3377], expected=9.
+                 [INFO] infer image 47 success
+                 Result: [-4.2123, -4.2360, -0.3082, 14.0627, -1.7258, -0.8686, 1.9768, 1.4496, -3.4787, -2.6599], expected=3.
+                 [INFO] infer image 91 success
+                 Result: [-2.0068, -6.2031, 26.1072, -4.2388, -1.6304, -1.0375, -0.9959, -0.7469, -5.0053, -4.2435], expected=2.
+                 [INFO] infer image 75 success
+                 Result: [-3.5820, -1.7624, -1.7740, 0.8833, -1.5182, -1.0501, 21.6600, -5.7050, -3.5032, -3.6492], expected=6.
+                 [INFO] infer image 93 success
+                 Result: [1.0516, 7.0666, -1.7923, -1.0921, -2.0772, -4.3057, -0.9682, -1.6019, 1.1032, 2.6156], expected=1.
+                 [INFO] infer image 81 success
+                 Result: [-2.1090, -4.4681, 2.0547, -5.0138, 4.1924, 3.2670, -3.7599, 13.0143, -5.1365, -2.0416], expected=5.
+                 [INFO] infer image 85 failed
+                 Result: [-4.5647, -6.5097, -1.0099, -3.6961, 7.0416, 0.7914, -5.9746, 26.8486, -7.8065, -5.1209], expected=7.
+                 [INFO] infer image 99 success
+                 Result: [-0.8802, -5.2310, 18.8350, 3.9363, -3.0262, -4.9773, 1.6150, -3.3945, -5.5817, -1.2961], expected=2.
+                 [INFO] infer image 67 success
+                 Result: [11.2156, -2.0881, 0.8308, -3.5155, 1.9950, -5.4919, -2.8216, -2.7396, 3.4618, -0.8469], expected=0.
+                 [INFO] infer image 97 success
+                 Result: [-1.3529, -4.6755, -3.3756, 14.6604, -0.3954, 4.3570, -2.1535, -2.1239, -2.3154, -2.6254], expected=3.
+                 [INFO] infer image 77 success
+                 Result: [-2.7330, -2.2736, 0.0462, -2.3110, 8.5456, 2.4078, -4.0392, 7.9823, -4.8166, -2.8090], expected=7.
+                 [INFO] infer image 69 failed
+                 Result: [-7.0582, -5.9346, -2.3158, 3.6298, -2.3969, 27.3008, -0.4323, -0.6689, -5.6410, -6.4838], expected=5.
+                 [INFO] infer image 39 success
+                 Result: [-0.9967, -5.0116, -2.2586, -0.9761, 0.7706, 1.3560, -3.5491, 18.8858, -5.4514, -2.7694], expected=7.
+                 [INFO] infer image 83 success
+                 [RESULT] infer 100 images, pass 85 0.850, fail 15 0.150.
+                 Total memory size for keys: rot_key_cnt = 796, rot_key_size = 215344229792 bytes, total_key_size = 215772049336 bytes
+                 Total memory size for weight plain: cnt = 946537, size = 2698171622832 bytes
+Spent time = 7314.56(s), Accumulated time = 7314.55(s)
+-------- Done --------
+-------- ACE(OpenMP) Compilation --------
+resnet20_cifar10:
+                  ACE: Time = 1.20(s), Memory = 0.69(GB)
+                  GCC: Time = 10.25(s), Memory = 0.65(GB)
+-------- Done --------
+-------- ACE Accuracy --------
+Available CPU: 64, Required CPU: 50, Process: 1
+resnet20_cifar10: Accuracy = 89.0%, Time = 3692.43(s), Memory = 146.1(GB)
+                  INFO: infer images [0, 99] from cifar-10 /app/cifar/cifar-10-batches-bin/test_batch.bin.
+                  ckks_param: _provider = 0, _poly_degree = 65536, mul_depth = 30, input_lev = 17, _first_mod_size = 60, _scaling_mod_size = 57, _num_q_parts = 3, _num_p = 11, _num_rot_idx = 196,_hamming_weight = 192
+                  Result: [-3.5959, -1.1585, 0.9310, 4.1716, -3.1761, -0.4554, 10.7364, -0.9529, -4.1190, -2.3814], expected=6.
+                  [INFO] infer image 30 success
+                  Result: [-1.0814, -3.5167, -3.4262, 14.9603, 0.3543, 6.2006, -2.2961, -3.1247, -4.4750, -3.5954], expected=3.
+                  [INFO] infer image 8 success
+                  Result: [-0.0003, 8.2539, -2.5426, -1.5486, -2.3164, 0.9357, -3.0174, -0.6408, -2.7442, 3.6204], expected=1.
+                  [INFO] infer image 6 success
+                  Result: [-2.6911, -2.2511, -2.5297, 21.6239, -3.1333, 2.0385, -3.0396, -2.7266, -5.0247, -2.2665], expected=3.
+                  [INFO] infer image 0 success
+                  Result: [-3.1806, 5.5938, -3.0318, 0.3718, -3.8356, -3.2165, -2.7762, -2.6168, -2.2662, 14.9577], expected=9.
+                  [INFO] infer image 28 success
+                  Result: [0.8106, -2.6188, -2.3371, -3.5143, -2.5302, -2.3736, -2.3130, -1.1510, 15.1550, 0.8720], expected=8.
+                  [INFO] infer image 88 success
+                  Result: [-0.1206, -2.7803, 5.7225, -0.0826, -0.5098, 1.8967, -2.9972, 2.2020, -0.5028, -2.8283], expected=2.
+                  [INFO] infer image 84 success
+                  Result: [-2.9345, -3.1312, -3.5278, -3.3664, 9.7738, 6.3032, -2.7297, 3.1285, -0.5130, -3.0032], expected=4.
+                  [INFO] infer image 36 success
+                  Result: [14.9775, -2.6529, 0.2347, -0.4103, -0.3139, -2.8482, -3.8615, -1.9432, -2.5650, -0.6173], expected=0.
+                  [INFO] infer image 10 success
+                  Result: [-3.2480, -1.0123, 2.9003, -1.4325, -1.7126, -2.7992, 16.4312, -3.4785, -2.1703, -3.4783], expected=6.
+                  [INFO] infer image 4 success
+                  Result: [-0.8629, -0.0026, -2.0867, 0.6984, -2.8157, -1.1828, -2.5221, -0.2529, -1.6023, 10.6293], expected=9.
+                  [INFO] infer image 38 success
+                  Result: [-2.6830, -1.1245, -3.2197, 1.6460, -2.4195, 13.4112, -3.1319, 3.9556, -2.7199, -3.7148], expected=5.
+                  [INFO] infer image 16 success
+                  Result: [-4.0336, -2.8075, -1.6237, 3.2146, 0.2520, 11.5787, -2.6109, 3.0492, -3.4477, -3.5713], expected=5.
+                  [INFO] infer image 12 success
+                  Result: [0.3602, 0.3961, -1.0716, -1.5958, -1.4758, -3.0624, -1.7273, -1.5838, 11.3691, -1.6090], expected=8.
+                  [INFO] infer image 18 success
+                  Result: [-3.3937, -3.1236, -3.0803, 6.4197, 3.1582, 9.7046, -3.1276, -0.4078, -3.4431, -2.7067], expected=5.
+                  [INFO] infer image 24 success
+                  Result: [0.2203, -1.3007, -3.2251, 0.6943, -1.1703, 4.2880, -3.8139, 5.1662, -3.8800, 3.0210], expected=7.
+                  [INFO] infer image 20 success
+                  Result: [2.2288, 0.7743, -2.8625, -2.8626, -3.1276, -3.8429, -2.2675, -2.8739, 16.0367, -1.2032], expected=8.
+                  [INFO] infer image 80 success
+                  Result: [4.5038, -2.6447, 0.1484, 1.0852, 4.4457, -3.8150, 0.9012, -2.9343, 1.5995, -3.2900], expected=4.
+                  [INFO] infer image 22 failed
+                  Result: [4.0143, -1.4050, 8.5372, -1.3344, -3.2907, 0.7171, -2.4311, 0.4436, -1.7053, -3.5459], expected=2.
+                  [INFO] infer image 86 success
+                  Result: [-1.8776, 4.0013, -3.6266, -3.0633, -3.8165, -4.2287, -2.9275, -1.2646, 1.4364, 15.3668], expected=9.
+                  [INFO] infer image 14 success
+                  Result: [-2.1250, -2.8926, 1.7161, 0.6918, 11.3443, -1.2382, 0.2056, -1.4869, -4.0893, -2.1259], expected=4.
+                  [INFO] infer image 26 success
+                  Result: [1.2538, 4.7704, -1.6581, -2.2242, -3.4991, -3.7699, -2.5205, -2.3126, 8.9751, 0.9849], expected=8.
+                  [INFO] infer image 2 success
+                  Result: [-2.2491, -2.0958, -3.9975, -1.9573, 6.3008, 6.6096, -2.4389, 3.5895, -1.1802, -2.5814], expected=4.
+                  [INFO] infer image 58 failed
+                  Result: [-3.1354, -0.6652, -1.6897, 1.4009, 0.5214, 1.5105, -2.5521, 10.4115, -3.2903, -2.5116], expected=7.
+                  [INFO] infer image 60 success
+                  Result: [16.7939, -0.4536, 0.6438, -4.0848, -0.0439, -5.4883, -3.4898, -2.3036, 0.2360, -1.8100], expected=0.
+                  [INFO] infer image 44 success
+                  Result: [-3.1394, -1.2462, -1.0630, -0.5266, 1.8994, -0.5145, -1.6859, 10.4238, -1.9094, -2.2384], expected=7.
+                  [INFO] infer image 48 success
+                  Result: [-0.0891, 0.8332, -2.4471, -2.9532, -4.5457, -3.4481, -3.4083, -1.7043, -1.0024, 18.7645], expected=9.
+                  [INFO] infer image 34 success
+                  Result: [14.6611, 4.6502, -1.0404, -4.1053, -0.2874, -4.8118, -3.6320, -3.3220, 0.5023, -2.6151], expected=0.
+                  [INFO] infer image 90 success
+                  Result: [-3.7099, -3.5013, 0.2231, 0.7927, 12.4403, 1.1232, -3.5420, 0.3535, -0.6571, -3.5227], expected=4.
+                  [INFO] infer image 32 success
+                  Result: [5.6903, 1.3620, -1.5485, -3.2664, -3.5280, -4.2072, -1.7248, -2.0278, 3.1625, 6.0876], expected=0.
+                  [INFO] infer image 74 failed
+                  Result: [-1.0120, 11.3472, -1.5426, -0.9194, -2.7513, -2.8772, -1.9867, -2.8498, 2.8557, -0.2641], expected=1.
+                  [INFO] infer image 66 success
+                  Result: [0.6163, 0.1799, -2.5918, -0.0895, -3.3559, -2.1869, 9.9426, 0.2438, 1.2581, -4.0169], expected=6.
+                  [INFO] infer image 62 success
+                  Result: [-0.9767, -0.3440, 1.5354, -2.5058, 1.2907, 10.6645, -3.1598, 0.3359, -2.8617, -3.9788], expected=5.
+                  [INFO] infer image 42 success
+                  Result: [-2.5382, -1.1353, 2.2703, 2.0799, 1.7133, -2.3489, 8.5014, -2.4702, -3.3215, -2.7509], expected=6.
+                  [INFO] infer image 96 success
+                  Result: [4.5142, -0.3547, -1.9657, -3.2661, -2.4727, -2.6367, -2.5650, -2.4668, 11.7793, -0.5661], expected=8.
+                  [INFO] infer image 54 success
+                  Result: [0.3448, -0.0293, -0.7042, -3.8725, -0.7790, -4.2440, -3.4714, -1.7520, 14.2458, 0.2615], expected=8.
+                  [INFO] infer image 92 success
+                  Result: [-1.9129, -1.5297, -1.5156, -2.9868, 1.6759, -0.7331, -4.0782, 14.8889, -3.8501, 0.0413], expected=7.
+                  [INFO] infer image 56 success
+                  Result: [-2.8706, 12.3282, -2.7808, -0.6586, -1.7965, -1.1846, -0.5622, -2.5134, 0.1128, -0.0747], expected=1.
+                  [INFO] infer image 82 success
+                  Result: [-2.0081, -3.6196, -2.6574, 6.9277, 0.5288, 7.5051, -3.5983, 3.6336, -4.5298, -2.1821], expected=3.
+                  [INFO] infer image 78 failed
+                  Result: [-2.5176, -3.6806, 0.4760, -3.0968, 13.4661, 1.3895, -3.3399, 1.4852, -1.2593, -2.9227], expected=4.
+                  [INFO] infer image 94 success
+                  Result: [1.2530, -2.5384, 5.6864, 2.1432, -0.5401, -0.0885, -1.6173, -2.1162, -0.0664, -2.1161], expected=2.
+                  [INFO] infer image 70 success
+                  Result: [-2.8977, -3.2590, 0.3925, 10.8078, 0.1944, 0.4949, 2.3036, -2.6562, -1.4202, -3.9602], expected=3.
+                  [INFO] infer image 46 success
+                  Result: [13.6013, -2.0325, 3.8985, -1.8018, -1.5506, -3.8769, -0.5439, -2.2015, -3.2100, -2.2827], expected=0.
+                  [INFO] infer image 98 success
+                  Result: [1.7512, 1.0582, 0.2159, -2.4297, -3.6777, -3.2590, -3.2993, -2.0157, -2.0713, 13.7269], expected=9.
+                  [INFO] infer image 76 success
+                  Result: [1.4558, -2.5407, -0.7056, -0.4245, 2.8623, 4.1860, -2.8525, 1.3679, -2.2254, -1.1234], expected=0.
+                  [INFO] infer image 52 failed
+                  Result: [-0.8448, 1.1886, -2.4965, -3.5495, -3.4215, -3.3296, 1.2982, -2.0510, 0.3592, 12.8465], expected=9.
+                  [INFO] infer image 50 success
+                  Result: [3.1546, 1.1400, -2.0321, -1.7949, -2.6032, -2.7902, -1.8313, -2.9967, 11.9892, -2.2356], expected=8.
+                  [INFO] infer image 72 success
+                  Result: [-3.0680, 0.0460, 1.5783, 1.3484, -1.6077, -0.9488, 11.8096, -2.8759, -1.5174, -4.7648], expected=6.
+                  [INFO] infer image 64 success
+                  Result: [-4.4272, -0.9874, -2.2813, 7.2517, 1.1271, 4.2548, -3.0369, -0.0412, -1.9058, 0.0460], expected=3.
+                  [INFO] infer image 68 success
+                  Result: [1.2530, -1.5649, 2.7532, 0.2632, 9.5179, -1.6873, -2.7707, -1.3793, -2.9759, -3.4094], expected=4.
+                  [INFO] infer image 40 success
+                  Result: [-3.9866, -2.4269, -1.1890, 0.5805, -1.1396, 16.8512, -2.9433, -0.6293, -2.3240, -2.7934], expected=5.
+                  [INFO] infer image 31 success
+                  Result: [1.5652, 3.6993, -3.5979, -1.5344, -3.7319, -3.8965, -1.9641, -3.8994, 15.7255, -2.3662], expected=8.
+                  [INFO] infer image 1 success
+                  Result: [1.8832, -3.8359, 5.1731, 0.4073, -1.7771, -2.9965, 11.6921, -4.5851, -4.0560, -1.9054], expected=6.
+                  [INFO] infer image 7 success
+                  Result: [-2.3041, 1.8455, -4.1638, -2.8244, -5.0236, -1.8074, -3.2794, -1.7536, -0.3605, 19.6709], expected=9.
+                  [INFO] infer image 11 success
+                  Result: [-1.2574, -3.5619, 6.2337, -3.0127, -1.2572, -1.0465, 10.4955, -1.2144, -4.0071, -1.3723], expected=6.
+                  [INFO] infer image 29 success
+                  Result: [-0.6966, 9.0907, -3.0705, -0.1310, -3.1354, -2.6653, -1.1228, -1.0991, 0.9651, 1.8647], expected=1.
+                  [INFO] infer image 9 success
+                  Result: [-4.0781, -1.4306, -2.1712, -1.3240, -0.6760, 2.1119, 14.4995, -1.5733, -2.1393, -3.2191], expected=6.
+                  [INFO] infer image 5 success
+                  Result: [-0.0581, 1.0624, -2.5795, -2.7098, -2.8254, -3.0306, -3.1051, -1.7443, 0.6531, 14.3371], expected=9.
+                  [INFO] infer image 89 success
+                  Result: [-0.1007, 5.7838, -3.6771, -0.5519, -3.0616, -1.0173, -2.2985, -1.1335, -0.0350, 6.0914], expected=1.
+                  [INFO] infer image 37 failed
+                  Result: [-3.7143, -0.0829, -5.0180, 1.7417, -1.8776, 17.0482, -3.5729, -1.4812, -1.5695, -1.4740], expected=5.
+                  [INFO] infer image 39 success
+                  Result: [-2.8838, -0.9838, -1.3227, 0.5844, -1.7365, 11.0608, -3.6835, 1.7910, -3.6260, 0.7998], expected=5.
+                  [INFO] infer image 85 success
+                  Result: [0.9706, -3.0608, -2.6818, 5.3265, 0.5569, 4.7080, 4.1287, -2.5314, -4.2741, -3.1429], expected=6.
+                  [INFO] infer image 59 failed
+                  Result: [-0.4439, -2.5677, 3.4563, 2.8808, -1.2417, 6.1636, -1.0888, -0.6103, -3.6093, -2.9392], expected=3.
+                  [INFO] infer image 61 failed
+                  Result: [1.5103, -3.1103, -2.6174, 8.7993, -0.2691, 0.6152, -3.5299, 4.1512, -3.3288, -2.2209], expected=7.
+                  [INFO] infer image 87 failed
+                  Result: [-0.7436, 7.4074, -2.1780, 0.6269, -2.9377, -1.9509, -1.1913, -1.9636, -0.8437, 3.7743], expected=1.
+                  [INFO] infer image 81 success
+                  Result: [12.4867, -2.8347, 4.3847, -1.7959, -2.9171, -4.1036, -0.3926, -2.5647, -1.0110, -1.2520], expected=0.
+                  [INFO] infer image 21 success
+                  Result: [-0.5351, -0.2367, 2.5841, 1.9794, -1.8449, 7.6259, -3.4219, -2.5065, -0.8943, -2.7503], expected=5.
+                  [INFO] infer image 33 success
+                  Result: [-5.3414, 0.5474, -2.9382, -0.4927, 1.1394, -1.4115, -3.7464, 14.8235, -1.1111, -1.4693], expected=7.
+                  [INFO] infer image 13 success
+                  Result: [6.9989, -1.0007, 0.4388, -2.1685, -3.9460, -3.8882, -2.7088, -2.7807, 4.9325, 4.1223], expected=0.
+                  [INFO] infer image 3 success
+                  Result: [-3.3709, -2.6830, 1.5028, -2.4608, -1.6794, -2.7997, 17.9845, -3.3312, -1.5439, -1.6185], expected=6.
+                  [INFO] infer image 19 success
+                  Result: [-0.6601, -3.8159, 4.9464, 2.8476, -1.5334, 1.6909, -1.5784, -0.2863, -1.2155, -0.3956], expected=2.
+                  [INFO] infer image 25 success
+                  Result: [0.1782, 1.5645, -0.7651, -3.1576, -1.6375, -2.5639, 7.5176, -3.8852, 5.5412, -2.7924], expected=8.
+                  [INFO] infer image 15 failed
+                  Result: [-3.6145, -1.0305, -0.7814, -1.6048, 0.1768, -1.3340, -1.7579, 13.9624, -2.6409, -1.3754], expected=7.
+                  [INFO] infer image 17 success
+                  Result: [-3.6566, 1.0537, -2.2506, 13.9462, -1.2272, -0.4572, 1.0318, -2.6583, -1.6162, -4.1658], expected=3.
+                  [INFO] infer image 91 success
+                  Result: [2.5480, -0.4093, 9.5136, -2.8778, -1.3741, -2.8916, 0.2773, -1.6047, -1.2352, -1.9465], expected=2.
+                  [INFO] infer image 67 success
+                  Result: [-3.0225, 2.0347, -2.8339, -1.9928, -4.6606, -0.5032, -2.9930, -2.5337, -2.7335, 19.2382], expected=9.
+                  [INFO] infer image 23 success
+                  Result: [-1.7934, -2.3098, 0.0467, 0.8351, -0.1038, -2.1299, 9.4190, -3.1491, -2.5318, 1.7168], expected=6.
+                  [INFO] infer image 49 success
+                  Result: [-1.4709, -3.0104, 13.8486, -1.9008, -0.2439, 0.7750, -0.4773, -1.6699, -3.4994, -2.3513], expected=2.
+                  [INFO] infer image 75 success
+                  Result: [-2.1985, -1.2717, 7.0784, 2.9242, -1.9009, -1.7035, -2.4838, -1.6409, 2.0817, -0.8852], expected=2.
+                  [INFO] infer image 35 success
+                  Result: [-1.1829, 0.0497, -2.3952, -1.7873, -3.8808, -2.7638, -2.8181, -3.9537, 19.5200, -0.7884], expected=8.
+                  [INFO] infer image 55 success
+                  Result: [17.2829, -3.0255, 2.0191, -2.3877, -1.5327, -4.7896, -2.4153, -0.0416, -2.9988, -2.1112], expected=0.
+                  [INFO] infer image 27 success
+                  Result: [-3.3273, 0.4991, 0.1524, -2.2166, -2.5673, -1.1553, 15.9890, -2.1092, -1.4806, -3.7845], expected=6.
+                  [INFO] infer image 93 success
+                  Result: [10.6048, -1.8309, 7.2644, -2.3547, -2.5825, -3.3460, -1.5869, -3.7458, 0.9881, -3.4107], expected=0.
+                  [INFO] infer image 97 success
+                  Result: [-2.4198, -2.4929, -1.4562, -1.5205, -0.8166, 0.0700, -2.9115, 14.3692, -1.4632, -1.3588], expected=7.
+                  [INFO] infer image 83 success
+                  Result: [1.6394, 0.1452, -1.6507, -0.7384, -3.4355, -2.4175, -2.2317, -2.7028, 12.6005, -1.2088], expected=8.
+                  [INFO] infer image 79 success
+                  Result: [-0.9789, 2.2648, -1.5110, -3.4804, -4.2156, -1.9003, -2.7387, -0.9038, -1.5910, 15.0545], expected=9.
+                  [INFO] infer image 45 success
+                  Result: [-1.4374, 2.2677, -0.2094, 6.2695, -2.8521, 1.3987, -3.2245, -1.7315, -1.0087, 0.5273], expected=3.
+                  [INFO] infer image 63 success
+                  Result: [-3.0660, -1.8630, -2.5150, 3.9279, -0.1684, 5.4149, -1.5813, 6.0443, -3.4241, -2.7694], expected=7.
+                  [INFO] infer image 57 success
+                  Result: [-3.0013, 0.6720, 0.0496, 0.8910, -2.1892, -0.4906, 15.5021, -4.4007, -2.3380, -4.6953], expected=6.
+                  [INFO] infer image 43 success
+                  Result: [-1.6071, -2.2944, -0.5043, 5.5296, -3.6699, -0.5903, 11.8383, -2.1327, -4.0284, -2.5409], expected=6.
+                  [INFO] infer image 71 success
+                  Result: [-1.1303, -0.0304, -2.2918, 17.1331, -1.8108, 1.4177, -2.4893, -3.1625, -4.1200, -3.5158], expected=3.
+                  [INFO] infer image 77 success
+                  Result: [4.4566, 0.2933, -2.8519, -2.9773, -1.9804, -3.3672, -2.0245, -1.9458, 11.0170, -0.6200], expected=8.
+                  [INFO] infer image 73 success
+                  Result: [4.4034, 1.2818, -2.7198, -2.6212, -1.9037, -3.7439, -3.3604, -0.1166, 3.6037, 5.1763], expected=9.
+                  [INFO] infer image 47 success
+                  Result: [-3.6949, -2.1395, -0.7681, 4.9029, 2.5227, 0.4846, 4.6109, -2.3500, -3.0936, -0.4752], expected=6.
+                  [INFO] infer image 95 failed
+                  Result: [-4.1539, -1.6966, -2.2272, -3.8348, -0.1988, 1.2311, -1.9873, 20.5676, -4.6160, -3.0843], expected=7.
+                  [INFO] infer image 99 success
+                  Result: [-3.7967, -2.5656, -1.8163, 10.5665, -0.0897, 7.3320, -1.5294, -1.6229, -3.8878, -2.5904], expected=3.
+                  [INFO] infer image 53 success
+                  Result: [-1.0180, -5.5511, 21.1960, -2.2285, 0.4569, -2.0662, 0.9467, -3.0827, -4.4408, -4.2125], expected=2.
+                  [INFO] infer image 65 success
+                  Result: [0.8486, -1.1478, -2.8500, -2.1515, 3.4237, -1.1418, -3.4025, 7.7593, -1.3235, -0.0146], expected=7.
+                  [INFO] infer image 69 success
+                  Result: [-2.2277, -2.0167, 0.3962, -0.1608, -2.9475, -2.1991, 15.6216, -2.4589, -2.2727, -1.7347], expected=6.
+                  [INFO] infer image 41 success
+                  Result: [-0.2877, -1.1445, -2.9909, -2.4319, 0.0780, -4.1350, -0.2274, -2.2853, 14.3693, -0.9451], expected=8.
+                  [INFO] infer image 51 success
+                  [RESULT] infer 100 images, pass 89 0.890, fail 11 0.110.
+                  Total memory size for keys: rot_key_cnt = 226, rot_key_size = 29859327920 bytes, total_key_size = 30067995080 bytes
+                  Total memory size for weight plain: cnt = 632845, size = 1129063573784 bytes
+Spent time = 3692.44(s), Accumulated time = 3692.43(s)
+-------- Done --------
+-------- ACE(OpenMP) Compilation --------
+squeezenet_cifar10:
+                    ACE: Time = 3.98(s), Memory = 2.56(GB)
+                    GCC: Time = 11.57(s), Memory = 0.72(GB)
+-------- Done --------
+-------- ACE Accuracy --------
+Available CPU: 64, Required CPU: 50, Process: 1
+squeezenet_cifar10: Accuracy = 89.0%, Time = 10067.22(s), Memory = 486.1(GB)
+                    INFO: infer images [0, 99] from cifar-10 /app/cifar/cifar-10-batches-bin/test_batch.bin.
+                    ckks_param: _provider = 0, _poly_degree = 131072, mul_depth = 29, input_lev = 16, _first_mod_size = 60, _scaling_mod_size = 57, _num_q_parts = 3, _num_p = 10, _num_rot_idx = 910,_hamming_weight = 192
+                    Result: [-1.5356, -3.8271, 7.9871, 10.3012, -4.9084, 1.2302, 4.4140, -4.4730, -1.5301, -7.6584], expected=3.
+                    [INFO] infer image 0 success
+                    Result: [-4.8894, -3.6688, 3.9458, -0.1281, 5.9568, -5.7593, 20.2971, -6.7181, -6.8754, -2.1607], expected=6.
+                    [INFO] infer image 96 success
+                    Result: [-6.2353, -2.2447, 3.1636, 5.0267, -3.4877, 1.5561, 4.7284, 5.1312, -5.6130, -2.0255], expected=3.
+                    [INFO] infer image 78 failed
+                    Result: [2.2553, -1.3033, 0.8418, -6.3860, -1.4512, -6.3425, -4.4391, 1.6927, 11.9731, 3.1591], expected=8.
+                    [INFO] infer image 92 success
+                    Result: [-2.3055, 18.0193, -4.1096, -2.6130, -4.8700, -0.6613, -0.4038, -3.3652, -2.8104, 3.1193], expected=1.
+                    [INFO] infer image 82 success
+                    Result: [1.7018, 2.7504, -1.6763, -4.7717, -4.8471, -6.6418, -1.5838, -1.3190, 14.8467, 1.5408], expected=8.
+                    [INFO] infer image 18 success
+                    Result: [3.4592, 0.3763, -3.5927, -6.5689, -4.5524, -6.9769, -4.5515, -0.2248, 19.7903, 2.8412], expected=8.
+                    [INFO] infer image 88 success
+                    Result: [4.0523, 3.1235, -9.1154, -2.9251, -8.2644, -8.9462, -6.1993, -3.4550, 0.9396, 30.7899], expected=9.
+                    [INFO] infer image 34 success
+                    Result: [-6.9250, 3.8325, 6.3278, -0.9054, -4.9555, 1.1126, -2.5637, 5.5552, -4.5118, 3.0330], expected=3.
+                    [INFO] infer image 68 failed
+                    Result: [4.4766, -3.6976, -1.4144, -0.1462, 4.0785, -0.2849, -4.0827, 5.1249, -3.6463, -0.4080], expected=4.
+                    [INFO] infer image 58 failed
+                    Result: [18.1647, -4.2329, 6.2931, -2.9036, -4.3657, -5.5651, 1.8582, -1.3212, -5.4682, -2.4595], expected=0.
+                    [INFO] infer image 98 success
+                    Result: [-4.9002, -3.9908, -2.4830, -3.8712, 4.1340, 1.5963, -1.0611, 21.5481, -6.8522, -4.1198], expected=7.
+                    [INFO] infer image 48 success
+                    Result: [-1.1904, 1.6702, 2.1959, -2.8035, -3.1240, -2.7555, 17.7644, -4.1558, -4.5519, -3.0497], expected=6.
+                    [INFO] infer image 64 success
+                    Result: [-3.9135, -6.0974, 6.0375, -3.1998, -8.7190, 15.6322, -4.9078, 14.7571, -6.0839, -3.5057], expected=5.
+                    [INFO] infer image 16 success
+                    Result: [2.4362, -0.1171, -3.0249, -2.0449, -2.8679, -4.6559, -2.3960, -3.9042, 14.7012, 1.8734], expected=8.
+                    [INFO] infer image 80 success
+                    Result: [4.1571, 17.0093, -4.6775, -2.9642, -5.6042, -6.9246, -2.3654, -5.2544, 4.2903, 2.3333], expected=1.
+                    [INFO] infer image 66 success
+                    Result: [3.6049, -1.8733, 8.4247, -0.0071, -2.1642, -0.5463, -2.6397, -2.7585, 1.6632, -3.7038], expected=2.
+                    [INFO] infer image 70 success
+                    Result: [17.0929, 6.4783, -2.3750, -5.0296, 0.1429, -8.4955, -6.2921, -0.5538, 0.4001, -1.3683], expected=0.
+                    [INFO] infer image 90 success
+                    Result: [2.1477, -1.3031, 11.7208, -1.2679, -4.7751, -0.6354, -1.3876, 1.0832, -2.4848, -3.0979], expected=2.
+                    [INFO] infer image 84 success
+                    Result: [-3.6533, -3.0339, -7.6112, 1.9708, 0.3983, 13.1952, 3.5760, 9.0361, -8.0667, -5.8115], expected=5.
+                    [INFO] infer image 12 success
+                    Result: [6.4023, 0.7515, -2.3051, -3.6597, -2.2428, -4.4074, -4.0162, -4.0820, 12.9199, 0.6393], expected=8.
+                    [INFO] infer image 72 success
+                    Result: [3.2110, -3.3723, -0.8315, 0.5978, 4.9902, -1.8982, 0.8783, -3.8468, 2.7669, -2.4954], expected=4.
+                    [INFO] infer image 22 success
+                    Result: [-4.6196, -3.9016, 1.4660, 4.9949, 3.7878, 6.2797, -0.9960, 0.7079, -3.6861, -4.0332], expected=5.
+                    [INFO] infer image 24 success
+                    Result: [8.9252, 0.9639, -3.9068, -2.3274, -5.5191, -7.9368, -3.9039, -1.6471, -1.5326, 16.8845], expected=9.
+                    [INFO] infer image 76 success
+                    Result: [7.1708, 0.4200, -0.6409, -5.5176, -3.3904, -7.8157, 2.2528, -3.3880, 2.6328, 8.2760], expected=0.
+                    [INFO] infer image 74 failed
+                    Result: [2.4256, -4.1959, 0.3101, 9.5671, 0.5514, -2.6364, 5.4897, -1.3159, -5.0976, -5.0983], expected=3.
+                    [INFO] infer image 8 success
+                    Result: [-3.9826, -0.6481, 0.5895, -1.2047, -3.6231, -1.8065, 16.9826, -4.1971, -2.6318, 0.5217], expected=6.
+                    [INFO] infer image 30 success
+                    Result: [1.5968, -4.1533, 19.2293, -6.0398, -7.3469, -3.3985, -0.7703, 8.2985, -4.9154, -2.5006], expected=2.
+                    [INFO] infer image 86 success
+                    Result: [-0.5346, -3.7296, -0.4973, -3.2105, 18.1604, -0.7859, -2.9286, 4.6332, -6.0335, -5.0738], expected=4.
+                    [INFO] infer image 94 success
+                    Result: [-2.1867, -3.8994, 4.1947, 0.7597, 4.2362, -2.9696, 1.0820, -1.2416, -0.2150, 0.2398], expected=4.
+                    [INFO] infer image 32 success
+                    Result: [-6.6661, -3.2228, 5.8626, 2.4774, -0.2002, -4.7987, 20.5841, -7.1220, -3.1568, -3.7576], expected=6.
+                    [INFO] infer image 4 success
+                    Result: [7.8663, -4.0593, 4.9971, -6.5953, 20.0730, -8.0070, -3.9243, -0.6125, -4.2601, -5.4780], expected=4.
+                    [INFO] infer image 40 success
+                    Result: [-4.9774, -4.7643, 3.5487, 7.6114, 4.2589, 0.5835, 7.1267, -4.1235, -3.2026, -6.0617], expected=3.
+                    [INFO] infer image 46 success
+                    Result: [-2.3946, 6.3445, 4.1639, -4.8673, -9.5606, -5.3939, -6.2504, 1.4129, -4.0782, 20.6233], expected=9.
+                    [INFO] infer image 28 success
+                    Result: [-2.1166, 2.9624, 1.0724, 0.3845, -3.0384, -1.5196, 12.7196, -4.9368, -3.1021, -2.4256], expected=6.
+                    [INFO] infer image 62 success
+                    Result: [-1.7979, 0.1992, 4.1382, -0.5112, -1.8577, -0.3811, -2.4441, 13.6844, -8.4783, -2.5516], expected=7.
+                    [INFO] infer image 56 success
+                    Result: [-2.5408, 1.0210, 5.7734, -1.1513, -3.2155, 7.8341, -2.9473, 2.6348, -3.5605, -3.8481], expected=5.
+                    [INFO] infer image 42 success
+                    Result: [6.5612, 1.2062, -4.2760, -5.4990, -4.8757, -7.5811, -4.6946, -5.1359, 20.4516, 3.8432], expected=8.
+                    [INFO] infer image 54 success
+                    Result: [3.7222, 4.2964, -3.3888, -5.9465, -8.1444, -7.0163, -7.1473, -0.0822, 1.2503, 22.4564], expected=9.
+                    [INFO] infer image 14 success
+                    Result: [1.8781, 13.8641, -0.1112, -3.2913, -9.5043, -0.9017, -2.0478, 1.3143, -3.4582, 2.2578], expected=1.
+                    [INFO] infer image 6 success
+                    Result: [0.2436, -2.7654, -0.2007, -2.2777, 8.9802, -0.9539, 1.9017, 1.1089, -4.1134, -1.9235], expected=4.
+                    [INFO] infer image 26 success
+                    Result: [23.9490, -3.1103, 3.7116, -3.5940, -2.3087, -4.3095, -5.9852, -3.4818, -1.8797, -2.9915], expected=0.
+                    [INFO] infer image 10 success
+                    Result: [-3.6064, -5.2131, -4.2944, -4.6808, 16.4853, 5.2116, -5.1082, 12.5236, -5.5570, -5.7608], expected=4.
+                    [INFO] infer image 36 success
+                    Result: [-2.6183, -2.2845, -4.3479, -1.4676, -0.8482, 3.3177, 3.1856, 13.3328, -5.2419, -3.0278], expected=7.
+                    [INFO] infer image 60 success
+                    Result: [1.6516, -0.3419, 1.9823, -3.5925, -8.1386, -7.9238, -2.4661, -0.5025, 2.5695, 16.7618], expected=9.
+                    [INFO] infer image 38 success
+                    Result: [2.5356, 2.6831, -4.0342, -5.6431, -5.8466, -7.2047, -0.0291, -1.3262, 0.0176, 18.8474], expected=9.
+                    [INFO] infer image 50 success
+                    Result: [9.7847, -4.2742, 4.4672, -3.1528, -2.1972, -4.7417, -2.2644, -1.7981, -0.9917, 5.1682], expected=0.
+                    [INFO] infer image 52 success
+                    Result: [13.8086, -0.8441, 0.7190, -3.7932, -1.5192, -6.1254, -3.5305, -1.1820, 1.8723, 0.5943], expected=0.
+                    [INFO] infer image 44 success
+                    Result: [1.3919, 0.7160, -2.5060, 0.0791, -0.8827, 4.2567, -4.0020, 5.0086, -5.6138, 1.5520], expected=7.
+                    [INFO] infer image 20 success
+                    Result: [3.5507, 8.4289, -3.2894, -6.4720, -5.0601, -6.2618, -1.0633, -3.8336, 10.6549, 3.3454], expected=8.
+                    [INFO] infer image 2 success
+                    Result: [4.4209, 7.1178, -4.6414, -5.7255, -6.3577, -8.7287, -4.0429, -5.8908, 21.6295, 2.2186], expected=8.
+                    [INFO] infer image 1 success
+                    Result: [10.4562, -1.7643, 3.5736, -0.9018, -1.0242, -3.0381, -2.4871, -3.2390, 0.7453, -2.3207], expected=0.
+                    [INFO] infer image 97 success
+                    Result: [2.7758, -0.7968, -4.1260, -2.0592, -3.6279, -4.2299, -3.3341, -1.2390, 12.7580, 3.8791], expected=8.
+                    [INFO] infer image 79 success
+                    Result: [-6.6083, 0.1321, 10.9190, 2.6521, -4.5406, -1.6502, 0.2356, -1.0635, 0.7706, -0.8470], expected=2.
+                    [INFO] infer image 35 success
+                    Result: [-3.1494, -2.5766, 1.3759, -3.0829, -0.0051, -6.9452, 21.7648, -7.5861, -2.7925, 2.9970], expected=6.
+                    [INFO] infer image 19 success
+                    Result: [-0.0988, 1.2273, 2.3304, -2.9199, -5.2285, -3.3769, -0.4238, 13.2317, -6.2987, 1.5570], expected=7.
+                    [INFO] infer image 17 success
+                    Result: [-1.6455, -1.5570, 1.8700, 7.9388, -1.2498, 2.5514, 7.7113, -4.5001, -4.4997, -6.6196], expected=6.
+                    [INFO] infer image 59 failed
+                    Result: [7.3672, 4.7599, -4.3409, -3.4592, -6.2645, -9.0580, -3.9074, -0.3763, 1.8369, 13.4422], expected=9.
+                    [INFO] infer image 89 success
+                    Result: [-0.2246, -3.2372, 0.5668, 0.5342, 2.0689, -3.7121, 12.8281, -4.2419, -4.3614, -0.2209], expected=6.
+                    [INFO] infer image 49 success
+                    Result: [-1.9257, -7.4252, 25.8668, -4.4334, -1.4566, -3.1411, 12.0004, -5.8878, -6.6960, -6.9015], expected=2.
+                    [INFO] infer image 65 success
+                    Result: [-3.2754, -2.1303, 1.6014, 2.1794, -0.4744, -1.5087, 15.5527, -6.0628, -3.4237, -2.4584], expected=6.
+                    [INFO] infer image 93 success
+                    Result: [2.2395, -4.7334, -0.0563, -4.7465, -0.5824, -3.2466, 2.2239, 12.6154, -5.1599, 1.4462], expected=7.
+                    [INFO] infer image 69 success
+                    Result: [-0.3461, -3.5307, -4.6916, -0.8824, 0.2192, -2.9310, -5.0258, 16.7097, -3.2348, 3.7134], expected=7.
+                    [INFO] infer image 83 success
+                    Result: [-0.9486, -4.5177, 3.6139, -4.3327, -1.6940, -2.7253, -5.0514, 22.7507, -1.8062, -5.2890], expected=7.
+                    [INFO] infer image 99 success
+                    Result: [-6.4728, -0.2109, -3.5273, -3.4113, -2.3330, -0.4705, -1.4430, 28.8947, -7.0198, -4.0062], expected=7.
+                    [INFO] infer image 13 success
+                    Result: [-1.5567, -2.1956, -1.0191, -2.2630, -3.5291, -4.0669, 25.1561, -2.0179, -5.7681, -2.7397], expected=6.
+                    [INFO] infer image 71 success
+                    Result: [-0.0627, 4.3851, 2.8186, -2.0615, -4.0777, -4.2548, -0.7153, -0.0643, -0.5554, 4.5879], expected=1.
+                    [INFO] infer image 81 failed
+                    Result: [-2.3322, 12.8690, -0.7221, -3.7024, -7.8137, -6.6703, -0.0612, 2.5978, 0.8134, 5.0216], expected=1.
+                    [INFO] infer image 9 success
+                    Result: [-0.6364, 6.8130, -3.3212, -3.5648, -9.4506, -7.1143, -3.4452, -0.6307, -3.1590, 24.5089], expected=9.
+                    [INFO] infer image 23 success
+                    Result: [-7.6519, -6.2441, -0.1598, 0.5952, -1.0795, 20.9538, 0.0778, 5.0326, -7.3384, -4.1857], expected=5.
+                    [INFO] infer image 31 success
+                    Result: [-0.0922, -4.5924, 5.8932, 6.7564, 0.6793, -0.5694, 8.9128, -4.9691, -5.6162, -6.4025], expected=3.
+                    [INFO] infer image 91 failed
+                    Result: [3.1520, 5.9149, 17.3401, -6.6292, -5.7482, -3.9672, 2.6563, -2.7174, -4.2970, -5.7047], expected=2.
+                    [INFO] infer image 67 success
+                    Result: [-4.2813, -3.8020, -0.7121, 2.2691, -0.3502, -2.4429, 15.4988, 3.6630, -7.3891, -2.4534], expected=6.
+                    [INFO] infer image 5 success
+                    Result: [-3.8242, 0.3584, 7.1484, -1.0802, -0.0551, 2.2067, 4.1644, -4.0953, -0.3287, -4.4946], expected=5.
+                    [INFO] infer image 33 failed
+                    Result: [-0.6268, -8.1712, 27.7748, -2.1819, -2.2906, -1.3701, 3.9233, -1.3131, -7.2373, -8.5073], expected=2.
+                    [INFO] infer image 75 success
+                    Result: [-3.6339, -4.1150, 3.1771, -2.8968, -0.7326, 6.5264, -0.7657, 3.8342, -4.1759, 2.7821], expected=5.
+                    [INFO] infer image 85 success
+                    Result: [8.5907, -2.4142, -2.9620, 0.0719, -2.7121, -2.0053, -3.5529, 8.7014, -2.7702, -0.9474], expected=7.
+                    [INFO] infer image 87 success
+                    Result: [-4.2854, -3.8523, 4.1286, 5.8074, 0.9909, -1.4877, 10.7570, -4.6925, -4.7386, -2.6276], expected=6.
+                    [INFO] infer image 95 success
+                    Result: [4.8084, 3.2713, -1.8960, -6.7549, -3.8273, -5.5778, -2.4574, 2.1267, 3.0581, 7.2487], expected=9.
+                    [INFO] infer image 47 success
+                    Result: [8.8269, 1.2375, -1.8680, -4.9763, -3.6021, -7.0797, -3.5349, -3.0350, 13.5844, 0.4471], expected=8.
+                    [INFO] infer image 73 success
+                    Result: [-4.6072, -3.4087, 2.2513, -2.1724, -0.8426, -4.9275, 26.5298, -6.2817, -4.1768, -2.3645], expected=6.
+                    [INFO] infer image 29 success
+                    Result: [1.8636, -2.3235, 5.1322, 14.9779, 1.4305, -0.9480, -2.7652, -5.1250, -4.6001, -7.6427], expected=3.
+                    [INFO] infer image 77 success
+                    Result: [-6.1099, -0.2755, 1.8156, -0.6270, -5.1275, -3.9406, 23.2286, -2.7344, -5.2258, -1.0037], expected=6.
+                    [INFO] infer image 41 success
+                    Result: [2.4766, -5.0272, 15.2479, 0.3755, -1.7164, 1.0798, 0.8330, -2.5150, -4.0846, -6.6697], expected=2.
+                    [INFO] infer image 25 success
+                    Result: [2.4941, -0.9814, -2.6280, -2.2555, -2.9181, -3.7905, -2.4865, -4.6558, 16.9329, 0.2889], expected=8.
+                    [INFO] infer image 55 success
+                    Result: [-3.0366, -2.8331, -1.5122, -3.5097, 1.6828, -0.6123, 0.3340, 15.5367, -3.8728, -2.1769], expected=7.
+                    [INFO] infer image 57 success
+                    Result: [0.4794, -0.3009, 0.8660, -2.8943, -2.4422, -3.8774, 14.4951, -6.4107, 3.8941, -3.8091], expected=8.
+                    [INFO] infer image 15 failed
+                    Result: [-5.3031, 0.6833, -0.5886, 1.1119, -4.9226, -3.1529, 23.1649, -7.0838, -0.9916, -2.9175], expected=6.
+                    [INFO] infer image 43 success
+                    Result: [-1.9450, 9.4302, -9.6018, -3.5007, -10.5966, -8.8874, -4.6868, -0.9591, 1.0841, 29.6630], expected=9.
+                    [INFO] infer image 11 success
+                    Result: [0.6098, -4.1302, 2.9889, 0.2812, -3.4495, -1.8425, 14.8289, -2.8648, -5.7342, -0.6876], expected=6.
+                    [INFO] infer image 7 success
+                    Result: [25.2681, -3.4053, 2.0094, -4.2498, -4.4165, -9.6093, 0.6661, -1.5458, -4.5644, -0.1527], expected=0.
+                    [INFO] infer image 27 success
+                    Result: [-2.5974, 5.8674, -1.1540, 8.7475, -6.3625, 2.9119, -1.5815, -4.6059, -0.9815, -0.2442], expected=3.
+                    [INFO] infer image 63 success
+                    Result: [3.1007, 7.3371, -3.9039, -5.6894, -5.6520, -7.6536, -3.7540, -0.7686, 6.4503, 10.5332], expected=1.
+                    [INFO] infer image 37 failed
+                    Result: [-3.0632, 0.5696, -3.4273, -0.8569, -2.5053, 16.7032, -5.1711, 1.4414, -4.4193, 0.7288], expected=5.
+                    [INFO] infer image 39 success
+                    Result: [-5.7051, -2.0029, -0.1628, 8.4663, -5.0144, 9.8034, 5.1093, -4.0922, -1.6534, -4.7484], expected=3.
+                    [INFO] infer image 61 failed
+                    Result: [0.7161, 5.4868, -7.0200, -4.5117, -10.0849, -8.1789, -6.3725, 1.7780, -0.6296, 28.8165], expected=9.
+                    [INFO] infer image 45 success
+                    Result: [-5.4766, 0.2316, 0.5965, 5.0779, -2.3833, 3.2396, 4.9813, -1.0466, -5.9440, 0.7235], expected=3.
+                    [INFO] infer image 53 success
+                    Result: [0.9188, 1.8285, -3.5755, -1.4047, -2.3338, -8.1003, -0.0436, -4.5778, 15.3687, 1.9195], expected=8.
+                    [INFO] infer image 51 success
+                    Result: [10.2817, -3.6472, 9.6338, -2.1340, -2.2279, -3.8154, 1.1403, -5.1729, -0.7534, -3.3051], expected=0.
+                    [INFO] infer image 21 success
+                    Result: [12.5916, 0.3716, 2.2538, -2.2609, -5.2264, -7.3366, -4.9356, -2.5171, 4.6828, 2.3767], expected=0.
+                    [INFO] infer image 3 success
+                    [RESULT] infer 100 images, pass 89 0.890, fail 11 0.110.
+                    Total memory size for keys: rot_key_cnt = 1005, rot_key_size = 252916876920 bytes, total_key_size = 253315336336 bytes
+                    Total memory size for weight plain: cnt = 657429, size = 2501083539264 bytes
+Spent time = 10067.23(s), Accumulated time = 10067.22(s)
+-------- Done --------
+-------- ACE(OpenMP) Compilation --------
+vgg16_cifar10:
+               ACE: Time = 6.95(s), Memory = 4.24(GB)
+               GCC: Time = 6.70(s), Memory = 0.42(GB)
+-------- Done --------
+-------- ACE Accuracy --------
+Available CPU: 64, Required CPU: 50, Process: 1
+vgg16_cifar10: Accuracy = 96.0%, Time = 10834.82(s), Memory = 804.3(GB)
+               INFO: infer images [0, 99] from cifar-10 /app/cifar/cifar-10-batches-bin/test_batch.bin.
+               ckks_param: _provider = 0, _poly_degree = 131072, mul_depth = 29, input_lev = 16, _first_mod_size = 60, _scaling_mod_size = 57, _num_q_parts = 3, _num_p = 10, _num_rot_idx = 1914,_hamming_weight = 192
+               Result: [8.6827, -1.4599, -0.3823, -1.0696, -1.2387, -1.8199, -1.1732, -1.2224, -0.3073, -0.0095], expected=0.
+               [INFO] infer image 74 success
+               Result: [-1.1797, -1.3231, -0.8867, 9.4257, -1.3185, 0.2691, -0.8392, -1.2215, -1.5646, -1.3616], expected=3.
+               [INFO] infer image 0 success
+               Result: [-0.5942, 0.1221, -1.7971, -1.2991, -1.6292, -0.9632, -1.2226, -0.8138, -0.3657, 8.5628], expected=9.
+               [INFO] infer image 38 success
+               Result: [-1.2692, -0.9898, -0.9072, -0.6949, -0.2881, 0.0271, -1.2986, 8.1405, -1.6395, -1.0804], expected=7.
+               [INFO] infer image 48 success
+               Result: [-1.2777, -1.0071, -0.8736, -0.6921, -0.3166, -0.1383, -1.3852, 8.4377, -1.7052, -1.0419], expected=7.
+               [INFO] infer image 60 success
+               Result: [8.7750, -1.4793, -0.4372, -0.7642, -1.0362, -1.6704, -1.3298, -1.2738, -0.0364, -0.7477], expected=0.
+               [INFO] infer image 44 success
+               Result: [-0.8726, -2.1588, -0.4720, -0.4787, 9.2539, -0.8826, -0.5777, -0.4032, -1.5817, -1.8265], expected=4.
+               [INFO] infer image 22 success
+               Result: [7.6823, -2.6341, -0.2787, -0.5384, -2.1633, -0.5766, -1.1542, -0.7777, -0.6816, 1.1223], expected=0.
+               [INFO] infer image 52 success
+               Result: [-2.0601, -2.1627, -0.7867, 0.6440, -0.5831, 9.8376, -1.1051, -0.8874, -1.5837, -1.3128], expected=5.
+               [INFO] infer image 12 success
+               Result: [-1.1471, 8.9527, -1.6392, -1.0639, -2.0565, -1.6651, -1.0596, -1.2920, 0.3638, 0.6071], expected=1.
+               [INFO] infer image 66 success
+               Result: [-1.2200, -2.0778, -0.0943, -0.4363, 8.5199, -0.6028, -1.3830, -0.6786, -0.5251, -1.5019], expected=4.
+               [INFO] infer image 32 success
+               Result: [-0.7173, -1.8543, -0.7544, -0.6587, 8.0569, -0.2725, -0.7768, 0.2151, -1.5437, -1.6942], expected=4.
+               [INFO] infer image 36 success
+               Result: [-0.9675, 8.8421, -1.4656, -1.0766, -1.9723, -1.3661, -0.7810, -0.8566, -0.3640, 0.0074], expected=1.
+               [INFO] infer image 82 success
+               Result: [0.0093, 0.0653, -1.1203, -0.9635, -1.9558, -1.6107, -1.1959, -1.4975, 9.0412, -0.7721], expected=8.
+               [INFO] infer image 2 success
+               Result: [-1.9267, -1.5338, -0.5985, 0.1226, -0.9303, 8.5509, -0.9776, 0.3171, -1.6953, -1.3284], expected=5.
+               [INFO] infer image 16 success
+               Result: [-0.7840, 0.3943, -1.7872, -1.0088, -1.5016, -1.3700, -1.4878, -0.9939, -0.4867, 9.0258], expected=9.
+               [INFO] infer image 28 success
+               Result: [8.8763, -1.6290, -0.3078, -0.2782, -1.3555, -1.3178, -1.1720, -1.4927, -0.3906, -0.9326], expected=0.
+               [INFO] infer image 10 success
+               Result: [-2.0904, -1.9423, -0.7406, 0.2446, -0.9554, 9.5308, -1.0154, -0.1434, -1.7896, -1.0984], expected=5.
+               [INFO] infer image 42 success
+               Result: [-1.0437, -2.1042, -0.1583, -0.2389, 9.2029, -0.8556, -1.5898, 0.0987, -1.7591, -1.5519], expected=4.
+               [INFO] infer image 40 success
+               Result: [-0.0144, 0.0761, -1.8326, -1.0384, -1.4981, -1.3808, -1.3912, -0.9260, -0.4537, 8.4591], expected=9.
+               [INFO] infer image 76 success
+               Result: [0.1396, -0.3972, -1.1514, -0.9476, -1.7678, -1.4220, -1.1243, -1.5410, 8.7712, -0.5595], expected=8.
+               [INFO] infer image 72 success
+               Result: [-1.4985, -1.1140, -0.6944, -0.4773, 0.1662, -1.0532, 8.6336, -1.7233, -0.9946, -1.2443], expected=6.
+               [INFO] infer image 4 success
+               Result: [8.0583, -0.3669, -0.7085, -0.7837, -0.9059, -1.5790, -1.5424, -1.2176, -0.2916, -0.6626], expected=0.
+               [INFO] infer image 90 success
+               Result: [-0.3858, -1.8507, -0.4761, -0.3744, -1.3921, -1.2393, 9.0199, -1.4572, -1.4106, -0.4337], expected=6.
+               [INFO] infer image 62 success
+               Result: [-0.9775, -1.7138, -0.4978, 0.1845, -1.1628, -1.2397, 9.5241, -1.6423, -1.1260, -1.3487], expected=6.
+               [INFO] infer image 30 success
+               Result: [-1.1004, -1.6667, -0.2064, -0.4510, 8.1733, 0.1764, -1.1361, -0.6554, -1.6493, -1.4842], expected=4.
+               [INFO] infer image 94 success
+               Result: [8.3953, -1.1758, -0.0004, -0.8768, -1.3170, -1.5291, -1.0188, -1.1486, -0.3514, -0.9773], expected=0.
+               [INFO] infer image 98 success
+               Result: [-0.8686, -1.3858, -1.0954, -0.5744, -0.4076, -0.6018, -1.7153, 9.4894, -2.0347, -0.8057], expected=7.
+               [INFO] infer image 20 success
+               Result: [-0.0578, -0.5813, -1.1872, -0.7651, -1.9134, -1.3407, -1.0736, -1.3323, 8.8733, -0.6218], expected=8.
+               [INFO] infer image 80 success
+               Result: [-1.8856, -2.4356, -1.9515, 2.0366, -0.1701, 6.1792, -1.6164, 3.4992, -2.0169, -1.6389], expected=4.
+               [INFO] infer image 58 failed
+               Result: [-0.6442, -0.1787, -1.7837, -1.3153, -1.5732, -0.9907, -0.0980, -1.1299, -0.4083, 8.1221], expected=9.
+               [INFO] infer image 50 success
+               Result: [-0.1645, -0.6837, -1.0630, -0.9542, -1.8612, -1.4132, -1.1397, -1.5096, 9.1222, -0.3331], expected=8.
+               [INFO] infer image 92 success
+               Result: [-1.1829, -2.2823, -0.6980, -0.0431, 9.3239, -1.1594, -1.3104, 0.0818, -1.6714, -1.0583], expected=4.
+               [INFO] infer image 26 success
+               Result: [-0.4636, 0.1467, -1.7765, -1.1587, -1.5475, -1.2828, -1.3504, -0.9162, -0.2407, 8.5897], expected=9.
+               [INFO] infer image 34 success
+               Result: [-1.5383, -1.3342, -0.8639, 9.4232, -1.1351, 0.4194, -1.1537, -1.2993, -1.2508, -1.2673], expected=3.
+               [INFO] infer image 8 success
+               Result: [-1.7536, -0.9325, -1.1492, 9.0187, -1.1382, 1.1465, -1.1448, -1.5089, -1.5806, -0.9574], expected=3.
+               [INFO] infer image 68 success
+               Result: [-1.2803, -1.2949, -0.5078, -0.4408, -0.7653, -0.8468, 9.0238, -1.5112, -1.1478, -1.2289], expected=6.
+               [INFO] infer image 64 success
+               Result: [-0.2775, -1.7524, 8.3453, -0.3954, -1.0863, -0.5333, -1.1464, -1.6350, 0.2081, -1.7271], expected=2.
+               [INFO] infer image 70 success
+               Result: [-0.5033, 0.2220, -1.8430, -1.0806, -1.6122, -1.3427, -1.4172, -0.7923, -0.4695, 8.8388], expected=9.
+               [INFO] infer image 14 success
+               Result: [-1.4223, -1.3182, -0.9951, -0.8521, -0.0512, -0.3835, -1.6894, 9.5146, -1.9407, -0.8621], expected=7.
+               [INFO] infer image 56 success
+               Result: [0.1076, -0.6372, -1.1971, -0.9585, -1.7357, -1.3869, -1.1238, -1.4228, 8.7240, -0.3696], expected=8.
+               [INFO] infer image 54 success
+               Result: [-2.0474, -2.1446, -0.7799, 0.6826, -0.6645, 9.8470, -1.0722, -0.8629, -1.6396, -1.3186], expected=5.
+               [INFO] infer image 24 success
+               Result: [-0.8237, -2.1477, 8.8661, 0.2919, -1.0234, -0.1351, -1.0996, -1.0755, -1.4801, -1.3729], expected=2.
+               [INFO] infer image 86 success
+               Result: [0.0170, -0.6431, -1.2440, -0.9364, -1.6328, -1.2797, -1.1603, -1.5019, 8.7235, -0.3421], expected=8.
+               [INFO] infer image 88 success
+               Result: [-1.1003, 9.1099, -1.5758, -0.5988, -2.0648, -1.3371, -1.0479, -1.1616, -0.7045, 0.4810], expected=1.
+               [INFO] infer image 6 success
+               Result: [-1.6525, -1.3669, -0.1688, 9.3693, -1.1413, 0.6652, -1.1694, -1.5657, -1.6387, -1.3313], expected=3.
+               [INFO] infer image 46 success
+               Result: [-0.3762, -1.6451, 9.0611, -0.5672, -0.7107, -0.7034, -0.7330, -0.8698, -1.6881, -1.7674], expected=2.
+               [INFO] infer image 84 success
+               Result: [-0.9038, -1.2364, 0.8278, -1.2276, 0.2818, -1.0377, 8.4339, -2.2206, -1.5463, -1.3712], expected=6.
+               [INFO] infer image 96 success
+               Result: [-1.4095, -1.4969, -1.2841, 8.1889, -1.5678, 2.0937, -0.9322, -0.3256, -1.6812, -1.5853], expected=3.
+               [INFO] infer image 78 success
+               Result: [0.3142, -0.6543, -1.1774, -1.0048, -1.7807, -1.3939, -1.1558, -1.3591, 8.7638, -0.5522], expected=8.
+               [INFO] infer image 18 success
+               Result: [-0.0746, -0.0850, -1.2446, -0.7265, -1.8985, -1.4998, -1.0959, -1.3829, 8.7661, -0.7583], expected=8.
+               [INFO] infer image 1 success
+               Result: [-0.2529, -1.7740, 8.1262, -0.5001, -0.6246, -0.4756, -0.6469, -0.8767, -1.4239, -1.5515], expected=2.
+               [INFO] infer image 75 success
+               Result: [-1.7354, -1.2837, -0.6228, 0.2538, -0.7331, 8.4625, -1.1028, -0.5507, -1.3744, -1.3134], expected=5.
+               [INFO] infer image 39 success
+               Result: [-2.0024, -2.1091, -0.7889, 1.1216, -0.8024, 9.7617, -1.0969, -1.0492, -1.7141, -1.3204], expected=3.
+               [INFO] infer image 61 failed
+               Result: [-1.1901, -1.7002, -0.4535, -0.4976, -0.3050, -1.1057, 9.6488, -1.8321, -1.3056, -1.2588], expected=6.
+               [INFO] infer image 49 success
+               Result: [-1.1998, -1.0081, -0.8812, -0.6408, -0.1627, -0.2410, -1.4115, 8.0433, -1.6288, -0.8693], expected=7.
+               [INFO] infer image 13 success
+               Result: [-0.4857, 0.1234, -1.7481, -1.3295, -1.6771, -1.1401, -1.2759, -0.8501, -0.3780, 8.7612], expected=9.
+               [INFO] infer image 23 success
+               Result: [-0.6108, 0.2369, -1.7645, -1.2114, -1.5981, -1.2713, -1.3707, -0.8623, -0.3792, 8.8314], expected=9.
+               [INFO] infer image 45 success
+               Result: [-0.1248, -1.8492, 9.1382, -0.5624, -0.8612, -0.9229, -0.2235, -0.9727, -1.7009, -1.9206], expected=2.
+               [INFO] infer image 67 success
+               Result: [-1.6457, -1.8572, -0.5494, 7.8832, -1.0742, 3.4196, -1.4034, -1.3722, -2.1804, -1.2204], expected=3.
+               [INFO] infer image 53 success
+               Result: [9.7756, -1.7739, -0.1565, -0.9239, -1.3538, -1.9721, -1.2610, -1.4922, -0.0502, -0.7921], expected=0.
+               [INFO] infer image 3 success
+               Result: [0.2226, -0.4817, -1.1801, -0.9675, -1.7127, -1.3186, -1.1654, -1.4183, 8.6367, -0.6151], expected=8.
+               [INFO] infer image 73 success
+               Result: [-1.4180, -1.0340, -0.7321, -0.2943, -0.4952, -0.5947, 8.2621, -1.4948, -0.9600, -1.2389], expected=6.
+               [INFO] infer image 43 success
+               Result: [-1.2657, -1.2976, -0.9514, -0.8628, -0.3578, -0.2599, -1.5082, 8.7866, -1.8215, -0.4617], expected=7.
+               [INFO] infer image 17 success
+               Result: [-0.9056, 7.9326, -1.8420, -1.1088, -2.0462, -1.7968, -1.2889, -1.5346, 0.2766, 2.3137], expected=1.
+               [INFO] infer image 37 success
+               Result: [-1.3867, -1.2743, -0.4856, -0.9194, -0.3143, -0.3222, 7.9655, -1.5323, -0.9643, -0.7665], expected=6.
+               [INFO] infer image 29 success
+               Result: [-1.2946, -1.1855, -0.3579, -0.7258, -0.6007, -0.9583, 8.8168, -1.3678, -1.1087, -1.2175], expected=6.
+               [INFO] infer image 41 success
+               Result: [-2.0465, -1.9776, -0.7870, 0.4050, -0.8619, 9.5807, -0.8765, -0.4642, -1.6891, -1.2828], expected=5.
+               [INFO] infer image 33 success
+               Result: [-0.9406, -0.9975, -0.9940, 8.5915, -1.3008, 0.4577, -0.9703, -1.0103, -1.5532, -1.2825], expected=3.
+               [INFO] infer image 77 success
+               Result: [-1.3546, -1.1872, -0.8740, -0.6674, -0.2786, -0.2747, -1.4647, 8.8643, -1.6994, -1.0638], expected=7.
+               [INFO] infer image 83 success
+               Result: [-0.5350, 0.3102, -1.6005, -1.1355, -1.5964, -1.1248, -1.4002, -0.7871, -0.5404, 8.4096], expected=9.
+               [INFO] infer image 11 success
+               Result: [-1.3523, -1.5051, -0.9014, -0.0845, -0.9159, -1.1901, 9.1059, -1.5493, -1.0062, -0.6011], expected=6.
+               [INFO] infer image 5 success
+               Result: [-1.3824, -1.0458, -0.8292, -0.8225, -0.2095, -0.0565, -1.4334, 8.5758, -1.6975, -1.0989], expected=7.
+               [INFO] infer image 99 success
+               Result: [-1.6539, -1.4562, -0.9104, 9.2824, -1.5330, 0.1318, 0.0466, -1.1501, -1.0865, -1.6708], expected=3.
+               [INFO] infer image 91 success
+               Result: [-1.9127, 0.5561, -0.5624, 8.2662, -1.1896, 0.2607, -1.4783, -1.7748, -1.6413, -0.5238], expected=3.
+               [INFO] infer image 63 success
+               Result: [8.5868, -1.2059, 0.3319, -0.7252, -1.4077, -1.6757, -0.9881, -1.4102, -0.4788, -1.0271], expected=0.
+               [INFO] infer image 21 success
+               Result: [-1.4717, -1.7572, -1.4767, 9.1277, -1.6357, 2.5672, -0.0851, -1.4745, -2.2195, -1.5746], expected=6.
+               [INFO] infer image 59 failed
+               Result: [-0.2995, -0.9050, -1.2787, -0.8755, -1.7346, -1.6799, -0.6381, -1.3534, 8.6575, 0.1074], expected=8.
+               [INFO] infer image 51 success
+               Result: [-1.8817, -1.8046, -0.5918, 0.3955, -0.7262, 8.8531, -0.8714, -0.6452, -1.5533, -1.1744], expected=5.
+               [INFO] infer image 31 success
+               Result: [-1.8913, -1.5944, 0.3157, 6.0027, -1.0509, -1.7279, 4.3931, -1.5767, -0.8171, -2.0533], expected=6.
+               [INFO] infer image 95 failed
+               Result: [8.3867, -1.5274, -0.1396, -0.7743, -1.2808, -1.7548, -0.8409, -1.0356, -0.2519, -0.7814], expected=0.
+               [INFO] infer image 27 success
+               Result: [-1.4087, -1.1725, -0.9361, -0.7075, -0.1483, -0.1340, -1.5329, 8.8030, -1.6761, -1.0869], expected=7.
+               [INFO] infer image 69 success
+               Result: [-0.9744, 8.9908, -1.4968, -1.0407, -1.9317, -1.5232, -0.9214, -1.0526, -0.4665, 0.4165], expected=1.
+               [INFO] infer image 9 success
+               Result: [-1.1777, -1.5339, 8.1771, 0.5575, -0.4360, -0.9883, -1.3243, -1.0150, -0.5497, -1.7098], expected=2.
+               [INFO] infer image 35 success
+               Result: [-1.4221, -1.1450, -0.6687, -0.3986, -0.2879, -0.8414, 8.6299, -1.6601, -0.9905, -1.2157], expected=6.
+               [INFO] infer image 93 success
+               Result: [-1.0268, 9.7007, -1.5973, -1.1437, -2.1353, -1.5830, -1.1833, -1.1756, -0.8783, 1.0226], expected=1.
+               [INFO] infer image 81 success
+               Result: [-1.6752, -1.2256, -0.9551, -0.9191, -0.4392, 0.2038, -1.5814, 9.7252, -2.0720, -1.0613], expected=7.
+               [INFO] infer image 57 success
+               Result: [-0.3248, -0.3305, -0.8832, -0.6819, -1.9141, -1.4568, -1.0536, -1.4472, 8.6450, -0.5528], expected=8.
+               [INFO] infer image 55 success
+               Result: [9.0939, -1.9030, 1.9134, -1.3597, -1.4142, -1.9996, -0.8111, -1.7802, -0.3656, -1.3740], expected=0.
+               [INFO] infer image 97 success
+               Result: [0.0909, -0.5763, -1.1996, -0.9722, -1.5981, -1.1323, -1.1368, -1.5008, 8.5290, -0.5037], expected=8.
+               [INFO] infer image 79 success
+               Result: [-1.5036, -1.4949, -1.1152, -0.7978, 0.0344, -0.1935, -1.7880, 9.7617, -1.8814, -1.0216], expected=7.
+               [INFO] infer image 87 success
+               Result: [-2.2660, -1.5362, -0.9637, 1.6435, -1.1742, 6.7982, -1.3623, 1.8224, -2.3692, -0.5924], expected=5.
+               [INFO] infer image 85 success
+               Result: [-0.8432, -1.8422, 0.0038, -0.9997, -0.9084, -0.9110, 9.1768, -1.7560, -1.3117, -0.6084], expected=6.
+               [INFO] infer image 7 success
+               Result: [-0.8622, -1.0752, -1.3233, -0.8412, -0.8091, -1.4698, 4.1922, -1.9212, 4.5551, -0.4452], expected=8.
+               [INFO] infer image 15 success
+               Result: [-0.5990, 0.1888, -1.7633, -1.1960, -1.5219, -1.2246, -1.2958, -0.9133, -0.3060, 8.6312], expected=9.
+               [INFO] infer image 89 success
+               Result: [-1.2087, -1.1616, -0.4427, -0.4513, -0.5614, -0.7978, 8.3745, -1.5132, -1.0165, -1.2213], expected=6.
+               [INFO] infer image 71 success
+               Result: [-1.4643, -1.3119, -0.6933, -0.7592, -0.0924, -0.5911, 8.2134, -1.5061, -0.9394, -0.8558], expected=6.
+               [INFO] infer image 19 success
+               Result: [-0.2237, -2.3032, 10.5449, -0.3724, -0.7543, -0.9784, -0.7298, -1.3150, -1.8347, -2.0334], expected=2.
+               [INFO] infer image 25 success
+               Result: [-0.2766, -1.8071, 8.3824, -0.3814, -0.5049, -0.7617, -0.5943, -0.8838, -1.5440, -1.6286], expected=2.
+               [INFO] infer image 65 success
+               Result: [-0.1358, 1.3606, -2.4409, -1.0424, -1.8744, -2.0309, -1.6832, -0.3723, -0.2762, 8.4954], expected=9.
+               [INFO] infer image 47 success
+               [RESULT] infer 100 images, pass 96 0.960, fail 4 0.040.
+               Total memory size for keys: rot_key_cnt = 1995, rot_key_size = 502058875080 bytes, total_key_size = 502457334496 bytes
+               Total memory size for weight plain: cnt = 3501684, size = 7845323305776 bytes
+Spent time = 10834.83(s), Accumulated time = 10834.82(s)
+-------- Done --------

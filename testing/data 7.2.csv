@@ -1,0 +1,6 @@
+﻿FHE Compiler Generalization Ability Test,,,,
+No.,Model,Dataset,ANT-ACE Inference Time,Inference Accuracy (10 images)
+1,AlexNet,CIFAR-10,2671.44(s),100.00%
+2,ResNet-20,CIFAR-10,1302.84(s),100.00%
+3,SqueezeNet,CIFAR-10,3870.14(s),100.00%
+4,VGG16,CIFAR-10,4177.17(s),100.00%

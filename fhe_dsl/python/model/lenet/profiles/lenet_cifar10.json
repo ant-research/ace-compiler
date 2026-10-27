@@ -1,0 +1,18 @@
+{
+  "relu_vr_def": 3,
+  "relu_vr": "relu1_Relu=1;relu2_Relu=1;relu3_Relu=1",
+  "per_node": {
+    "relu1_Relu": {
+      "abs_max": 0.6997374892234802,
+      "vr": 1
+    },
+    "relu2_Relu": {
+      "abs_max": 0.40236619114875793,
+      "vr": 1
+    },
+    "relu3_Relu": {
+      "abs_max": 0.14291952550411224,
+      "vr": 1
+    }
+  }
+}

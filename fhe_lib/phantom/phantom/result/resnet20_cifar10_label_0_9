@@ -1,0 +1,12 @@
+image_id: 0, image label: 3, inferred label: 3
+image_id: 1, image label: 8, inferred label: 8
+image_id: 2, image label: 8, inferred label: 8
+image_id: 3, image label: 0, inferred label: 8
+image_id: 4, image label: 6, inferred label: 6
+image_id: 5, image label: 6, inferred label: 6
+image_id: 6, image label: 1, inferred label: 1
+image_id: 7, image label: 6, inferred label: 6
+image_id: 8, image label: 3, inferred label: 3
+image_id: 9, image label: 1, inferred label: 1
+
+all threads time : 259691 ms

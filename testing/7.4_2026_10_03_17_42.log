@@ -1,0 +1,15 @@
+-------- Expert --------
+resnet20_cifar10_expert:                             Inference Time = 15.1170(s)
+resnet32_cifar10_expert:                             Inference Time = 24.0020(s)
+resnet32_cifar100_expert:                              Inference Time = 21.7940(s)
+resnet44_cifar10_expert:                             Inference Time = 30.1020(s)
+resnet56_cifar10_expert:                             Inference Time = 38.4560(s)
+resnet110_cifar10_expert:                              Inference Time = 77.1290(s)
+-------- ACE --------
+resnet20_cifar10_ace:                             [RESULT] infer 1 images, pass 1 1.000, fail 0 0.000.                            Inference Time = 8.4356(s)
+resnet32_cifar10_ace:                             [RESULT] infer 1 images, pass 1 1.000, fail 0 0.000.                            Inference Time = 13.8008(s)
+resnet32_cifar100_ace:                              [RESULT] infer 1 images, pass 0 0.000, fail 1 1.000.                             Inference Time = 13.8198(s)
+resnet44_cifar10_ace:                             [RESULT] infer 1 images, pass 1 1.000, fail 0 0.000.                            Inference Time = 19.3284(s)
+resnet56_cifar10_ace:                             [RESULT] infer 1 images, pass 1 1.000, fail 0 0.000.                            Inference Time = 24.6543(s)
+resnet110_cifar10_ace:                              [RESULT] infer 1 images, pass 0 0.000, fail 1 1.000.                             Inference Time = 50.1480(s)
+-------- Done --------

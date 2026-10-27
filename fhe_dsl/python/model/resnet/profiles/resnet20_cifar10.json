@@ -1,0 +1,82 @@
+{
+  "relu_vr_def": 3,
+  "relu_vr": "relu_Relu=4;layer1_0_relu_Relu=3;layer1_0_relu_1_Relu=5;layer1_1_relu_Relu=4;layer1_1_relu_1_Relu=6;layer1_2_relu_Relu=3;layer1_2_relu_1_Relu=7;layer2_0_relu_Relu=4;layer2_0_relu_1_Relu=6;layer2_1_relu_Relu=4;layer2_1_relu_1_Relu=6;layer2_2_relu_Relu=3;layer2_2_relu_1_Relu=11;layer3_0_relu_Relu=5;layer3_0_relu_1_Relu=6;layer3_1_relu_Relu=4;layer3_1_relu_1_Relu=7;layer3_2_relu_Relu=4;layer3_2_relu_1_Relu=29",
+  "per_node": {
+    "relu_Relu": {
+      "abs_max": 3.0474350452423096,
+      "vr": 4
+    },
+    "layer1_0_relu_Relu": {
+      "abs_max": 2.407583713531494,
+      "vr": 3
+    },
+    "layer1_0_relu_1_Relu": {
+      "abs_max": 4.47607946395874,
+      "vr": 5
+    },
+    "layer1_1_relu_Relu": {
+      "abs_max": 3.7844369411468506,
+      "vr": 4
+    },
+    "layer1_1_relu_1_Relu": {
+      "abs_max": 5.978718280792236,
+      "vr": 6
+    },
+    "layer1_2_relu_Relu": {
+      "abs_max": 2.901824951171875,
+      "vr": 3
+    },
+    "layer1_2_relu_1_Relu": {
+      "abs_max": 6.194578170776367,
+      "vr": 7
+    },
+    "layer2_0_relu_Relu": {
+      "abs_max": 3.1645069122314453,
+      "vr": 4
+    },
+    "layer2_0_relu_1_Relu": {
+      "abs_max": 5.1462626457214355,
+      "vr": 6
+    },
+    "layer2_1_relu_Relu": {
+      "abs_max": 3.0633316040039062,
+      "vr": 4
+    },
+    "layer2_1_relu_1_Relu": {
+      "abs_max": 5.038936614990234,
+      "vr": 6
+    },
+    "layer2_2_relu_Relu": {
+      "abs_max": 2.6845016479492188,
+      "vr": 3
+    },
+    "layer2_2_relu_1_Relu": {
+      "abs_max": 10.307952880859375,
+      "vr": 11
+    },
+    "layer3_0_relu_Relu": {
+      "abs_max": 4.131927013397217,
+      "vr": 5
+    },
+    "layer3_0_relu_1_Relu": {
+      "abs_max": 5.695651054382324,
+      "vr": 6
+    },
+    "layer3_1_relu_Relu": {
+      "abs_max": 3.157561779022217,
+      "vr": 4
+    },
+    "layer3_1_relu_1_Relu": {
+      "abs_max": 6.650762557983398,
+      "vr": 7
+    },
+    "layer3_2_relu_Relu": {
+      "abs_max": 3.989905834197998,
+      "vr": 4
+    },
+    "layer3_2_relu_1_Relu": {
+      "abs_max": 28.050954818725586,
+      "vr": 29
+    }
+  }
+}

@@ -1,0 +1,9 @@
+﻿FHE Inference Performance Test for Neural Networks,,,,,
+No.,Model,Dataset,ANT-ACE Inference Time,FHE-MP-CNN Inference Time,Speedup
+1,ResNet-20,CIFAR-10,1476.2(s),2997.94(s),2.030849478
+2,ResNet-32,CIFAR-10,2213.3(s),4851.45(s),2.191953192
+3,ResNet-32,CIFAR-100,2260.9(s),4854.09(s),2.146972445
+4,ResNet-44,CIFAR-10,3022.2(s),6657.36(s),2.202819138
+5,ResNet-56,CIFAR-10,3813.2(s),8494.23(s),2.227585755
+6,ResNet-110,CIFAR-10,7317.0(s),17056.50(s),2.331078311
+Average,-,-,-,-,2.188543053

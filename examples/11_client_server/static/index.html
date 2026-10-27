@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>ACE FHE resnet20 — web client</title>
+  <style>
+    body{font-family:system-ui,Segoe UI,Roboto,sans-serif;margin:24px;background:#0e1117;color:#e6edf3}
+    h1{font-size:20px}
+    h2{font-size:15px;color:#9da7b5;font-weight:600;margin-bottom:2px}
+    .row{margin:14px 0}
+    label{display:block;font-size:13px;color:#9da7b5;margin-bottom:4px}
+    input[type=text]{background:#161b22;color:#e6edf3;border:1px solid #30363d;border-radius:6px;padding:8px 10px;width:380px}
+    button{background:#2f81f7;color:#fff;border:0;border-radius:6px;padding:9px 18px;font-size:14px;cursor:pointer}
+    button:disabled{opacity:.5;cursor:default}
+    /* Gallery scrolls horizontally so we can offer many images (e.g. 100).
+       Cards are ~80px wide in a fixed-height row; tall enough to feel like
+       a strip, not a wrap grid (kept to a single scrollable band). */
+    .gallery{display:flex;gap:8px;margin-top:6px;overflow-x:auto;
+             padding:6px 2px 10px;border:1px solid #30363d;border-radius:8px;background:#0d1117;
+             max-height:230px;flex-wrap:wrap;align-content:flex-start}
+    .gallery::-webkit-scrollbar{height:10px}
+    .gallery::-webkit-scrollbar-thumb{background:#30363d;border-radius:5px}
+    .gallery::-webkit-scrollbar-track{background:#0d1117}
+    .card{border:2px solid #30363d;border-radius:8px;padding:6px;cursor:pointer;width:78px;background:#161b22;
+          transition:border-color .12s;flex:0 0 auto}
+    .card:hover{border-color:#586680}
+    .card.sel{border-color:#2f81f7;box-shadow:0 0 0 1px #2f81f7}
+    .card img{width:66px;height:66px;display:block}
+    .card .cap{font-size:10px;text-align:center;margin-top:3px;color:#9da7b5}
+    .card .idx{font-size:9px;text-align:center;color:#586680}
+    #status{margin-top:10px;font-size:13px;color:#9da7b5;min-height:18px}
+    table{border-collapse:collapse;margin-top:12px}
+    td,th{border:1px solid #30363d;padding:6px 12px;font-size:15px;text-align:left}
+    .bar{height:14px;background:#2f81f7;border-radius:3px;display:inline-block;vertical-align:middle}
+    .pred{font-size:16px;margin-top:12px;color:#3fb950}
+    .err{color:#f85149}
+    .badge{font-size:12px;color:#9da7b5;background:#161b22;border:1px solid #30363d;border-radius:4px;padding:2px 7px;margin-left:8px}
+    .stages td{white-space:nowrap;padding:6px 12px;font-size:15px}
+    .stages td:nth-child(2){text-align:right;font-variant-numeric:tabular-nums}
+    .stages th:nth-child(2){text-align:right}
+    .stagebar{height:10px;background:#2f81f7;border-radius:3px;display:inline-block;vertical-align:middle}
+    .totals{margin-top:8px;font-size:14px}
+    .totals b{color:#e6edf3}
+    /* Two-column results: left = timing (main flow + server detail), right = Logits.
+       Both cols size to content with a modest gap, so Logits sits just right of
+       the timing tables. */
+    .layout{display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap;margin-top:8px}
+    .layout .col{flex:0 1 auto}
+    .panel{background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:4px 12px}
+    .panel h3{font-size:13px;color:#9da7b5;font-weight:600;margin:10px 0 6px}
+    .kv{font-size:13px;color:#9da7b5;margin:2px 0}
+    .kv b{color:#e6edf3}
+  </style>
+</head>
+<body>
+  <h1>resnet20 FHE inference — web client
+    <span class="badge">ciphertext in / out · client encrypt · server eval-only</span></h1>
+
+  <div class="row">
+    <label>Server URL</label>
+    <input id="url" type="text" value="{{SERVER_URL}}">
+  </div>
+
+  <div class="row">
+    <label>Pick a CIFAR-10 image (presets load from the local web client)</label>
+    <div class="gallery" id="gal">
+      <div class="cap" id="gal-loading">loading presets…</div>
+    </div>
+  </div>
+
+  <div class="row">
+    <button id="go" disabled>Infer (encrypt → server eval → decrypt)</button>
+  </div>
+
+  <div id="status"></div>
+  <div id="results"></div>
+
+  <script>
+  const gal = document.getElementById('gal');
+  const urlEl = document.getElementById('url');
+  const go = document.getElementById('go');
+  const statusEl = document.getElementById('status');
+  const resultsEl = document.getElementById('results');
+  let selIdx = null;
+  let CIFAR = [];
+
+  async function loadPresets() {
+    try {
+      const r = await fetch('/api/presets');
+      const j = await r.json();
+      CIFAR = j.classes || [];
+      const presets = j.presets || [];
+      gal.innerHTML = '';
+      if (!presets.length) { gal.innerHTML = '<div class="cap">no preset images</div>'; return; }
+      presets.forEach(p => {
+        const c = document.createElement('div');
+        c.className = 'card';
+        c.dataset.idx = p.idx;
+        c.innerHTML = `<img src="data:image/png;base64,${p.thumb_b64}">`
+                    + `<div class="cap">${p.label}</div><div class="idx">img #${p.idx}</div>`;
+        c.onclick = () => {
+          document.querySelectorAll('.card').forEach(x => x.classList.remove('sel'));
+          c.classList.add('sel');
+          selIdx = p.idx;
+          go.disabled = false;
+        };
+        gal.appendChild(c);
+      });
+    } catch (e) {
+      gal.innerHTML = `<div class="err">failed to load presets: ${e}</div>`;
+    }
+  }
+
+  go.onclick = async () => {
+    if (selIdx === null) return;
+    go.disabled = true;
+    statusEl.className = '';
+    statusEl.textContent = 'encrypting + sending to server (first call warms the slot; can take ~20s)…';
+    resultsEl.innerHTML = '';
+    const t0 = performance.now();
+    try {
+      const r = await fetch('/api/infer', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({url: urlEl.value.trim(), image_idx: selIdx})
+      });
+      const j = await r.json();
+      if (!r.ok) {
+        statusEl.className = 'err';
+        statusEl.textContent = 'ERROR: ' + (j.detail || r.status);
+        go.disabled = false;
+        return;
+      }
+      const dt = ((performance.now() - t0) / 1000).toFixed(2);
+      // Per-stage breakdown from the client backend (server-side pure-eval is
+      // ~8-9s; round-trip wall adds server route + network; warmup is one-time).
+      const stages = j.stages || [];
+      const stMax = Math.max(...stages.map(s => s.s), 0.001);
+      let stageRows = '';
+      stages.forEach(s => {
+        // dim rows: warmup — muted color.
+        const dim = s.dim ? ' style="color:#6e7681"' : '';
+        stageRows += `<tr${dim}><td>${s.name}</td><td>${s.s.toFixed(3)}s</td>`
+                   + `<td style="color:#9da7b5">${s.note || ''}</td></tr>`;
+      });
+      const warmNote = j.warmed_first_call
+        ? `<span style="color:#d29922">(this call included one-time warmup)</span>` : '';
+      statusEl.textContent = `done in ${dt}s (wall) · true label = ${j.true_label}`;
+      const max = Math.max(...j.logits.map(Math.abs));
+      let rows = '';
+      j.logits.forEach((v, i) => {
+        const cls = (i === j.predicted) ? 'color:#3fb950;font-weight:bold' : '';
+        const mark = (i === j.predicted) ? ' ◀ predicted' : '';
+        rows += `<tr><td style="${cls}">${i}${mark}</td><td>${CIFAR[i]}</td>`
+              + `<td>${v.toFixed(4)}</td></tr>`;
+      });
+      // Server-side eval detail table (right column) — from j.server_split
+      // (echoed via X-RC-* headers). All the deser/launder/kernel/serialize/
+      // overhead/network detail, kept out of the main flow table on the left.
+      let serverDetail = '';
+      if (j.server_split) {
+        const sp = j.server_split;
+        const rcSum = sp.deser_sync + sp.launder_sync + sp.kernel + sp.serialize;
+        const sWall = sp.server_wall || rcSum;
+        const drow = (name, v, note) => `<tr><td>${name}</td><td>${(v != null ? v.toFixed(3) : '—')}s</td><td style="color:#9da7b5;font-size:11px">${note||''}</td></tr>`;
+        serverDetail =
+            `<h2>Server eval detail</h2>`
+          + `<table class="stages"><tr><th>stage</th><th>time</th><th>note</th></tr>`
+          + drow('deserialize input ct + sync', sp.deser_sync, 'H2D + device sync')
+          + drow('launder (cross-stream D2D) + sync', sp.launder_sync, 'session-stream re-alloc')
+          + `<tr style="color:#3fb950"><td><b>pure GPU eval (kernel)</b></td><td><b>${sp.kernel.toFixed(3)}s</b></td><td style="color:#9da7b5;font-size:11px">Main_graph — the inference</td></tr>`
+          + drow('serialize output ct', sp.serialize, 'D2H + serialize')
+          + `</table>`
+          + `<div class="kv" style="margin-top:8px">pure eval is <b>${(sp.kernel/(sWall||1)*100).toFixed(0)}%</b> of the server wall</div>`;
+      } else {
+        serverDetail = `<h2>Server eval detail</h2><div class="kv">(server didn't return a per-stage split — server .so too old?)</div>`;
+      }
+      resultsEl.innerHTML =
+          `<div class="pred">Predicted: <b>${CIFAR[j.predicted]}</b> (class ${j.predicted}) · true label = ${j.true_label}</div>`
+        + `<div class="totals">`
+        + `<div>steady-state per-inference: <b>${j.steady_total_s}s</b> (encrypt + server eval + network + decrypt; excludes one-time warmup)</div>`
+        + `<div>this-call wall: <b>${j.wall_total_s}s</b> ${warmNote} · ciphertext in ${j.ct_in_bytes} B / out ${j.ct_out_bytes} B</div>`
+        + `</div>`
+        + `<div class="layout">`
+        + `<div class="col">`
+        + `<h2>Main flow</h2>`
+        + `<table class="stages"><tr><th>stage</th><th>time</th><th>note</th></tr>${stageRows}</table>`
+        + `${serverDetail}`
+        + `</div>`
+        + `<div class="col">`
+        + `<h2>Logits</h2>`
+        + `<table><tr><th>idx</th><th>class</th><th>logit</th></tr>${rows}</table>`
+        + `</div>`
+        + `</div>`;
+    } catch (e) {
+      statusEl.className = 'err';
+      statusEl.textContent = 'ERROR: ' + e;
+    }
+    go.disabled = false;
+  };
+
+  loadPresets();
+  </script>
+</body>
+</html>

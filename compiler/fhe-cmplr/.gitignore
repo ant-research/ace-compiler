@@ -1,0 +1,98 @@
+# WPILib
+bin/
+build/
+dist/
+sysProps.xml
+workbench.xmi
+CMakeUserPresets.json
+compile_commands.json
+.clangd
+
+# IDE
+*.ipr
+*.iml
+*.iws
+out/
+tmp/
+.settings/
+.loadpath
+.project
+/.idea
+.classpath
+.vscode/
+.devcontainer/
+
+# Toast/GradleRIO
+run/
+.gradle/
+gradle/.launch/
+
+# OS Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.AppleDouble
+.LSOverride
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# backup files
+*~
+
+# fhe_cmplr byproducts: .conf = CKKS get_context_params JSON (Emit_conf, gate
+# requires it next to the emitted .py); .t = IR trace dump. 
+/*.conf
+/*.t
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# directory for XML generated after running junit tests through ant
+junit/
+
+# onnx models for testing
+onnx-models/
+
+# claude code
+.claude/
+
+# byproducts
+doc/**/__pycache__/
+*.log
+doc/**/chat.txt
+/temp.txt
+/rtpy-bts-chat.txt
+
+# onnx-py/onnx-torch
+onnx-py/*
+!onnx-py/onnx_to_py.py
+!onnx-py/onnx_ops_lib.py
+onnx-torch/*
+!onnx-torch/onnx2torch_batch.py
+
+# archive and byproduct
+test/test-simple-onnx/
+doc/_archive/
+_archive/
+
+# build products / generated onnx->c
+/a.out
+*.onnx.c
+
+# PR676 section 5 OUT: doc/fhert-device-fix is a local device-fix reference
+# set; only OPEN-ISSUES.md is committed (trimmed, at stage F4.10).
+doc/fhert-device-fix/*
+!doc/fhert-device-fix/OPEN-ISSUES.md
+
+# PR676 section 5 OUT: doc/local-test-rtpy is a local Python-provider result
+# set; only 00-methodology.md is committed (trimmed, at stage F6.2). The
+# per-phase PASS/NOISY matrix and the phase snapshots stay local.
+doc/local-test-rtpy/*
+!doc/local-test-rtpy/00-methodology.md
+
+# PR676 section 5 OUT: result dumps archived locally; not in git.
+local-runs/

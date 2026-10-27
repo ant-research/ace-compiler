@@ -1,0 +1,26 @@
+add_count: 0
+add_ops: []
+constant_shapes:
+  _tensor_constant0:
+  - 1
+  - 1
+  - 2
+  - 2
+conv_count: 0
+conv_layers: []
+input_shape:
+- 1
+- 1
+- 2
+- 2
+linear_count: 0
+linear_layers: []
+op_counts:
+  mul: 1
+output_shape:
+- 1
+- 1
+- 2
+- 2
+total_constants: 1
+total_ops: 1

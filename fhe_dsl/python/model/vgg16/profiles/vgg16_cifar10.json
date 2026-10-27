@@ -1,0 +1,58 @@
+{
+  "relu_vr_def": 3,
+  "relu_vr": "features_2_Relu=6;features_5_Relu=6;features_9_Relu=8;features_12_Relu=9;features_16_Relu=8;features_19_Relu=8;features_22_Relu=8;features_26_Relu=7;features_29_Relu=6;features_32_Relu=6;features_36_Relu=7;features_39_Relu=5;features_42_Relu=5",
+  "per_node": {
+    "features_2_Relu": {
+      "abs_max": 5.89877986907959,
+      "vr": 6
+    },
+    "features_5_Relu": {
+      "abs_max": 5.747956275939941,
+      "vr": 6
+    },
+    "features_9_Relu": {
+      "abs_max": 7.678126335144043,
+      "vr": 8
+    },
+    "features_12_Relu": {
+      "abs_max": 8.490144729614258,
+      "vr": 9
+    },
+    "features_16_Relu": {
+      "abs_max": 7.574599742889404,
+      "vr": 8
+    },
+    "features_19_Relu": {
+      "abs_max": 7.67335844039917,
+      "vr": 8
+    },
+    "features_22_Relu": {
+      "abs_max": 7.551382541656494,
+      "vr": 8
+    },
+    "features_26_Relu": {
+      "abs_max": 6.529383659362793,
+      "vr": 7
+    },
+    "features_29_Relu": {
+      "abs_max": 5.457656383514404,
+      "vr": 6
+    },
+    "features_32_Relu": {
+      "abs_max": 5.599785804748535,
+      "vr": 6
+    },
+    "features_36_Relu": {
+      "abs_max": 6.493427276611328,
+      "vr": 7
+    },
+    "features_39_Relu": {
+      "abs_max": 4.882531642913818,
+      "vr": 5
+    },
+    "features_42_Relu": {
+      "abs_max": 4.269001007080078,
+      "vr": 5
+    }
+  }
+}

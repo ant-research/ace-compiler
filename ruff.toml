@@ -1,0 +1,72 @@
+# Ruff configuration for ACE
+# https://docs.astral.sh/ruff/configuration/
+
+# Target Python 3.10+ (matches pyproject.toml requires-python)
+target-version = "py310"
+
+# Line length matches common C++ style and is readable
+line-length = 120
+
+# Files to exclude from linting
+extend-exclude = [
+    "build",
+    "dist",
+    ".git",
+    "__pycache__",
+    "*.egg-info",
+    "third_party",
+    "fhe_dsl/csrc",       # C++ extension code
+    "benchmark/io/_archive",  # dead archived scripts (0 importers, not pytest-collected)
+]
+
+[lint]
+# Enable rule categories
+select = [
+    "E",     # pycodestyle errors
+    "W",     # pycodestyle warnings
+    "F",     # pyflakes
+    "I",     # isort (import ordering)
+    "UP",    # pyupgrade (modernize Python syntax)
+    "B",     # flake8-bugbear (likely bugs)
+    "SIM",   # flake8-simplify (code simplification)
+    "ICN",   # flake8-import-conventions (consistent import names)
+    "RUF",   # Ruff-specific rules
+]
+
+# Ignore rules that are too noisy for existing codebase
+ignore = [
+    "E501",   # line too long (handled by formatter)
+    "E722",   # bare except (existing code uses this)
+    "F401",   # unused import (too many in existing code, fix gradually)
+    "F841",   # unused variable (too many in existing code, fix gradually)
+    "B905",   # zip() without strict= (Python 3.10+ feature)
+    "RUF001", # ambiguous unicode in strings (CN docstrings use × / –)
+    "RUF002", # ambiguous unicode in docstrings (CN docstrings use × / –)
+    "RUF003", # ambiguous unicode in comments (CN comments use × / –)
+]
+
+# Allow autofix for all enabled rules
+fixable = ["ALL"]
+unfixable = []
+
+# Allow unused variables in __init__.py (re-exports)
+[lint.per-file-ignores]
+"__init__.py" = ["F401", "F403"]
+"tests/**" = ["F841"]   # unused variables common in test fixtures
+"fhe_dsl/python/gds/cufile.py" = ["RUF012"]  # ctypes Structure _fields_ must be mutable lists
+
+[lint.isort]
+# Import sorting configuration
+known-first-party = ["ace", "fhe_dsl"]
+force-single-line = false
+lines-after-imports = 2
+
+[format]
+# Use double quotes (matches existing codebase)
+quote-style = "double"
+
+# Indent with 4 spaces (matches PEP 8 and existing code)
+indent-style = "space"
+
+# Respect magic trailing commas
+skip-magic-trailing-comma = false

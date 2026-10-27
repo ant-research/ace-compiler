@@ -1,0 +1,8 @@
+﻿FHE Compilation System Performance Test for Hardware Accelerators,,,,,
+No.,Model,Dataset,FHE-MP-CNN Inference Time,ANT-ACE Inference Time,Speedup
+1,ResNet-20,CIFAR-10,15.1170(s),8.4356(s),1.792047987
+2,ResNet-32,CIFAR-10,24.0020(s),13.8008(s),1.739174541
+3,ResNet-32,CIFAR-100,21.7940(s),13.8198(s),1.577012692
+4,ResNet-44,CIFAR-10,30.1020(s),19.3284(s),1.557397405
+5,ResNet-56,CIFAR-10,38.4560(s),24.6543(s),1.559809039
+6,ResNet-110,CIFAR-10,77.1290(s),50.1480(s),1.538027439

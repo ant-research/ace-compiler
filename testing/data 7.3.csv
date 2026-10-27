@@ -1,0 +1,7 @@
+﻿Inference Accuracy Test,,,,,
+No.,Model,Dataset,ANT-ACE Encrypted Accuracy,Non-encrypted Accuracy,Accuracy Difference
+1,AlexNet,CIFAR-10,85.0%,86.0%,1%
+2,ResNet-20,CIFAR-10,89.0%,89.0%,0%
+3,SqueezeNet,CIFAR-10,89.0%,93.0%,4%
+4,VGG16,CIFAR-10,96.0%,96.0%,0%
+Average,-,-,-,-,1.25%

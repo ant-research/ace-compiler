@@ -1,0 +1,20 @@
+#=============================================================================
+#
+# Copyright (c) Ant Group Co., Ltd
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+#
+#=============================================================================
+
+# @PACKAGE_NAME@
+set(PACKAGE_NAME "@PACKAGE_NAME@")
+set(PACKAGE_VERSION "@PACKAGE_VERSION@")
+set(PACKAGE_BASE_DIR "@CMAKE_INSTALL_PREFIX@/share/@PACKAGE_NAME@")
+set(PACKAGE_CONF_DIR "@CMAKE_INSTALL_PREFIX@/share/@PACKAGE_NAME@")
+set(PACKAGE_INC_DIR "@CMAKE_INSTALL_PREFIX@/share/@PACKAGE_NAME@/include" CACHE STRING "List of glob include")
+set(PACKAGE_DEVTOOLS_DIR "@CMAKE_INSTALL_PREFIX@/share/@PACKAGE_NAME@/devtools")
+
+# @PROJECT_NAME@_Config.cmake.in
+include("${CMAKE_CURRENT_LIST_DIR}/cmake/@PROJECT_NAME@/function_common.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/cmake/@PROJECT_NAME@/function_app.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/cmake/@PROJECT_NAME@/function_library.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/cmake/@PROJECT_NAME@/function_extralib.cmake")

@@ -1,0 +1,154 @@
+[hekit] compiling lr with provider iie
+model: LR
+weights/input: seeded random (seed=0); no training or downloads
+input_shape: (1, 1, 28, 28), calibration_shape: (32, 1, 28, 28)
+[hekit] IIE hardware layout: CB_NUM=8 CORE_NUM=64 coefficients_per_line=8 parallelism=512
+[hekit] IIE param: LOG_N=16 LOG_COL=9 LOG_BATCHSIZE=7 batch_size=128
+compile_timing:
+  prepare: 0.000829s
+  fit: 0.616817s
+  plan_packing: 0.001291s
+  lower_to_ckks: 0.139682s
+  static_search: 0.000037s
+  r_search_rotate_decompose: 0.000011s
+  r_search: 0.000005s
+  hekit_ckks_pass: 2.121031s
+  emit_ace_json: 0.578944s
+  ace_ckks_pass_import: 0.000073s
+  final_bootstrap_lowering: 0.000429s
+  cost_evaluation: 0.013497s
+  search_stub: 0.000018s
+  preserve_programs: 0.000006s
+  codegen: 43.716977s
+  debug_artifacts: 1.342375s
+  runtime_reference: 0.351583s
+  total: 48.883627s
+ckks_nodes: 807
+ckks_ir: /home/B/caiming/fheacc-software-platform/soft/hekit/hekit/hekit_ace_cases/lr/selected/program.hekit_ckks.json
+case_dir: /home/B/caiming/fheacc-software-platform/soft/hekit/hekit/hekit_ace_cases/lr/selected
+generated: /home/B/caiming/fheacc-software-platform/soft/hekit/hekit/hekit_ace_cases/lr/selected/generated.cc
+[hekit] validated layout: CB_NUM=8 CORE_NUM=64 PARALLELISM=512 LOG_COL=9 LOG_BATCHSIZE=7 batch_size=128
+[hekit] staged generated code and context in /home/B/caiming/fheacc-software-platform/soft/clib/tests/tests/lr
+cc -g -O0 -fopenmp -DRTLIB_SUPPORT_LINUX -I/home/B/caiming/fheacc-software-platform/soft/hekit/ace_cmplr/rtlib/include -I/home/B/caiming/fheacc-software-platform/soft/hekit/ace_cmplr/rtlib/include/ant -I/home/B/caiming/fheacc-software-platform/soft/hekit/ace_cmplr/include -I/home/B/caiming/fheacc-software-platform/soft/hekit/ace-compiler/ace-compiler/fhe-cmplr/include -I/home/B/caiming/fheacc-software-platform/soft/hekit/ace-compiler/ace-compiler/air-infra/include -I/home/B/caiming/fheacc-software-platform/soft/hekit/ace-compiler/ace-compiler/nn-addon/include encr.c generated.c -L/home/B/caiming/fheacc-software-platform/soft/hekit/ace_cmplr/rtlib/lib -lFHErt_ant -lFHErt_common -lgmp -lm -fopenmp -o lr_enc.ace
+cc -g -O0 -fopenmp -DRTLIB_SUPPORT_LINUX -I/home/B/caiming/fheacc-software-platform/soft/hekit/ace_cmplr/rtlib/include -I/home/B/caiming/fheacc-software-platform/soft/hekit/ace_cmplr/rtlib/include/ant -I/home/B/caiming/fheacc-software-platform/soft/hekit/ace_cmplr/include -I/home/B/caiming/fheacc-software-platform/soft/hekit/ace-compiler/ace-compiler/fhe-cmplr/include -I/home/B/caiming/fheacc-software-platform/soft/hekit/ace-compiler/ace-compiler/air-infra/include -I/home/B/caiming/fheacc-software-platform/soft/hekit/ace-compiler/ace-compiler/nn-addon/include -DHEKIT_REPORT_SCRIPT=\"/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/report_decrypt_result.py\" decr.c -L/home/B/caiming/fheacc-software-platform/soft/hekit/ace_cmplr/rtlib/lib -lFHErt_ant -lFHErt_common -lgmp -lm -fopenmp -o lr_dec.ace
+mkdir -p ../bin
+cp -f lr_enc.ace ../bin/lr_enc.ace
+cp -f lr_dec.ace ../bin/lr_dec.ace
+rm -rf soft/clib/tests/tests/lr/golden/plain/
+rm -rf soft/clib/tests/tests/lr/golden/key/
+rm -rf soft/hekit/hekit/hekit_ace_cases/lr/
+src/clib_profile.o src/define.o src/evk_map.o src/poly_op.o src/cipher_op.o src/cipher2_api.o src/rf_live_log.o src/hekit_bootstrap.o src/hardware_image_writer.o src/bootstrap.o src/memsystem.o src/assem.o src/config.o src/encode.o tests/lr/lr.o src/golden/common.o src/golden/autom.o src/golden/crb.o src/golden/ntt.o xuantie-lib/lib/clib/vtimer.o xuantie-lib/lib/clib/uart.o xuantie-lib/lib/clib/intc.o xuantie-lib/lib/clib/fputc.o xuantie-lib/lib/newlib_wrap/printf.o xuantie-lib/lib/newlib_wrap/vasprintf.o xuantie-lib/lib/newlib_wrap/__thead_printf.o xuantie-lib/lib/crt0.o
+rm -rf src/clib_profile.o src/define.o src/evk_map.o src/poly_op.o src/cipher_op.o src/cipher2_api.o src/rf_live_log.o src/hekit_bootstrap.o src/hardware_image_writer.o src/bootstrap.o src/memsystem.o src/assem.o src/config.o src/encode.o tests/lr/lr.o src/golden/common.o src/golden/autom.o src/golden/crb.o src/golden/ntt.o xuantie-lib/lib/clib/vtimer.o xuantie-lib/lib/clib/uart.o xuantie-lib/lib/clib/intc.o xuantie-lib/lib/clib/fputc.o xuantie-lib/lib/newlib_wrap/printf.o xuantie-lib/lib/newlib_wrap/vasprintf.o xuantie-lib/lib/newlib_wrap/__thead_printf.o xuantie-lib/lib/crt0.o tests/lr/bin/lr_gm
+src/clib_profile.o src/define.o src/evk_map.o src/poly_op.o src/cipher_op.o src/cipher2_api.o src/rf_live_log.o src/hekit_bootstrap.o src/hardware_image_writer.o src/bootstrap.o src/memsystem.o src/assem.o src/config.o src/encode.o tests/lr/lr.o src/golden/common.o src/golden/autom.o src/golden/crb.o src/golden/ntt.o
+mkdir -p tests/lr/bin
+mkdir -p tests/lr/data
+mkdir -p tests/lr/nttw/ntt
+mkdir -p tests/lr/nttw/intt
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.7MQFX6" --kind "compile" --name "clib_profile.cc" --source "src/clib_profile.cc" --target "src/clib_profile.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DRESULT_DEMONT -DMONT -Itests/lr/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/clib_profile.cc -o src/clib_profile.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.7MQFX6" --kind "compile" --name "define.cc" --source "src/define.cc" --target "src/define.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DRESULT_DEMONT -DMONT -Itests/lr/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/define.cc -o src/define.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.7MQFX6" --kind "compile" --name "evk_map.cc" --source "src/evk_map.cc" --target "src/evk_map.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DRESULT_DEMONT -DMONT -Itests/lr/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/evk_map.cc -o src/evk_map.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.7MQFX6" --kind "compile" --name "poly_op.cc" --source "src/poly_op.cc" --target "src/poly_op.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DRESULT_DEMONT -DMONT -Itests/lr/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/poly_op.cc -o src/poly_op.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.7MQFX6" --kind "compile" --name "cipher_op.cc" --source "src/cipher_op.cc" --target "src/cipher_op.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DRESULT_DEMONT -DMONT -Itests/lr/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/cipher_op.cc -o src/cipher_op.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.7MQFX6" --kind "compile" --name "cipher2_api.cc" --source "src/cipher2_api.cc" --target "src/cipher2_api.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DRESULT_DEMONT -DMONT -Itests/lr/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/cipher2_api.cc -o src/cipher2_api.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.7MQFX6" --kind "compile" --name "rf_live_log.cc" --source "src/rf_live_log.cc" --target "src/rf_live_log.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DRESULT_DEMONT -DMONT -Itests/lr/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/rf_live_log.cc -o src/rf_live_log.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.7MQFX6" --kind "compile" --name "hekit_bootstrap.cc" --source "src/hekit_bootstrap.cc" --target "src/hekit_bootstrap.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DRESULT_DEMONT -DMONT -Itests/lr/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/hekit_bootstrap.cc -o src/hekit_bootstrap.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.7MQFX6" --kind "compile" --name "hardware_image_writer.cc" --source "src/hardware_image_writer.cc" --target "src/hardware_image_writer.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DRESULT_DEMONT -DMONT -Itests/lr/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/hardware_image_writer.cc -o src/hardware_image_writer.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.7MQFX6" --kind "compile" --name "bootstrap.cc" --source "src/bootstrap.cc" --target "src/bootstrap.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DRESULT_DEMONT -DMONT -Itests/lr/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/bootstrap.cc -o src/bootstrap.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.7MQFX6" --kind "compile" --name "memsystem.cc" --source "src/memsystem.cc" --target "src/memsystem.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DRESULT_DEMONT -DMONT -Itests/lr/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/memsystem.cc -o src/memsystem.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.7MQFX6" --kind "compile" --name "assem.cc" --source "src/assem.cc" --target "src/assem.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DRESULT_DEMONT -DMONT -Itests/lr/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/assem.cc -o src/assem.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.7MQFX6" --kind "compile" --name "config.cc" --source "src/config.cc" --target "src/config.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DRESULT_DEMONT -DMONT -Itests/lr/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/config.cc -o src/config.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.7MQFX6" --kind "compile" --name "encode.cc" --source "src/encode.cc" --target "src/encode.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DRESULT_DEMONT -DMONT -Itests/lr/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/encode.cc -o src/encode.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.7MQFX6" --kind "compile" --name "lr.cc" --source "tests/lr/lr.cc" --target "tests/lr/lr.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DRESULT_DEMONT -DMONT -Itests/lr/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c tests/lr/lr.cc -o tests/lr/lr.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.7MQFX6" --kind "compile" --name "common.cc" --source "src/golden/common.cc" --target "src/golden/common.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DRESULT_DEMONT -DMONT -Itests/lr/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/golden/common.cc -o src/golden/common.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.7MQFX6" --kind "compile" --name "autom.cc" --source "src/golden/autom.cc" --target "src/golden/autom.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DRESULT_DEMONT -DMONT -Itests/lr/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/golden/autom.cc -o src/golden/autom.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.7MQFX6" --kind "compile" --name "crb.cc" --source "src/golden/crb.cc" --target "src/golden/crb.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DRESULT_DEMONT -DMONT -Itests/lr/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/golden/crb.cc -o src/golden/crb.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.7MQFX6" --kind "compile" --name "ntt.cc" --source "src/golden/ntt.cc" --target "src/golden/ntt.o" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DRESULT_DEMONT -DMONT -Itests/lr/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -c src/golden/ntt.cc -o src/golden/ntt.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.7MQFX6" --kind "link" --name "golden_link" --target "tests/lr/bin/lr_gm" -- g++ -DGOLDENMODLE -DRELEASE -g -std=c++17 -O3 -march=native -fopenmp -DRESULT_DEMONT -DMONT src/clib_profile.o src/define.o src/evk_map.o src/poly_op.o src/cipher_op.o src/cipher2_api.o src/rf_live_log.o src/hekit_bootstrap.o src/hardware_image_writer.o src/bootstrap.o src/memsystem.o src/assem.o src/config.o src/encode.o tests/lr/lr.o src/golden/common.o src/golden/autom.o src/golden/crb.o src/golden/ntt.o -Itests/lr/include -Iinclude -Ixuantie-lib -Ixuantie-lib/lib -Ixuantie-lib/lib/clib -Ixuantie-lib/lib/newlib_wrap -o tests/lr/bin/lr_gm
+rm -f src/clib_profile.o src/define.o src/evk_map.o src/poly_op.o src/cipher_op.o src/cipher2_api.o src/rf_live_log.o src/hekit_bootstrap.o src/hardware_image_writer.o src/bootstrap.o src/memsystem.o src/assem.o src/config.o src/encode.o tests/lr/lr.o src/golden/common.o src/golden/autom.o src/golden/crb.o src/golden/ntt.o
+python3 "/home/B/caiming/fheacc-software-platform/soft/clib/tests/scripts/buildTiming.py" run --record-dir "/tmp/fheacc-make-soft.7MQFX6" --kind "runtime" --name "golden_main" --target "tests/lr/bin/lr_gm" -- bash -c 'ulimit -s 32768 -n 65535 && OMP_NUM_THREADS=32 ./tests/lr/bin/lr_gm lr'
+[Info:] benchmark name is : lr
+------------- params --------------
+-- N : 65536
+-- col : 512
+-- batchsize : 128
+-- L : 4
+-- K : 5
+-- CB NUM : 8
+-----------------------------------
+[INFO:] complete main graph compute
+[INFO:] complete traceToInst.py
+Wrote mb_instr.hex/.depth and 8 CB hex/.depth files to './'
+[INFO:] complete transInstrToAccFormat.py
+trace contract audit: ./instr_trace.txt
+  ops=94808 rf_bank_num=3 poly_len=128 strict=False liveness=False
+  summary: errors=0 warns=0 -> PASS
+Finished splitting 64 NTT files and 64 INTT files into merged CB outputs under /home/B/caiming/fheacc-software-platform/soft/clib/tests/tests/lr/nttw/ntt_intt_merged using /home/B/caiming/fheacc-software-platform/soft/clib/tests/tests/lr/include/param.hh (CB_NUM=8, L=4, K=5, NTT depth=138, INTT depth=138, INTT offset multiplier=1, log=/home/B/caiming/fheacc-software-platform/soft/clib/tests/tests/lr/nttw/ntt_intt_merged/transNttWinFormat.log)
+work dictory is /home/B/caiming/fheacc-software-platform/soft/clib/tests/tests/lr/data
+ntt_trace trans end
+[INFO:] complete transNttTraeFormat.py
+✅ [GOLDEN MODEL] Finished processing benchmark: lr
+make decrypt
+[decrypt] result_path=soft/clib/tests/tests/lr/data/tmp_result.json
+output: decrypted=[0.27627855, 0.089763667, -0.058641095, 0.7235275, -0.34286867, 0.56865668, -0.92214342, 0.69767551, ...] len=32768
+output: expected_name=output
+output: expected=[0.27627855, 0.089763667, -0.058641095, 0.7235275, -0.34286867, 0.56865668, -0.92214342, 0.69767551, ...] len=10
+output: compared_prefix_len=10, decrypted_len=32768
+output: max_abs_error=1.377831e-11, max_rel_error=1.580696e-10, atol=1.000e-04, rtol=1.000e-04, status=OK
+rm -rf soft/clib/tests/tests/lr/plain/
+rm -rf soft/clib/tests/tests/lr/key/
+
+========== make soft timing breakdown ==========
+benchmark=lr release_mode=2 LOG_N=16 N=65536 L=4 K=5
+Root pipeline (stages are contained in total):
+  geneC                             59.28 s
+  gene_encr_dec                     0.453 s
+  hekit_refresh_input_cipher        0.395 s
+  gene_riscv                     1m 57.57s
+Compilation and link:
+  wall span                     1m 06.65s
+  compile task wall sum         1m 05.39s
+  compile user CPU              1m 01.73s
+  compile system CPU                3.37 s
+  peak child RSS                   512.1 MiB
+  link task wall sum               0.149 s
+  Slowest translation units:
+      14.082 s  src/cipher2_api.cc
+      13.049 s  src/bootstrap.cc
+       9.995 s  src/clib_profile.cc
+       5.102 s  src/hekit_bootstrap.cc
+       4.724 s  src/config.cc
+       2.883 s  src/hardware_image_writer.cc
+       2.153 s  src/golden/crb.cc
+       1.823 s  src/golden/ntt.cc
+       1.640 s  src/memsystem.cc
+       1.493 s  tests/lr/lr.cc
+Model runtime:
+  golden_main                       46.19 s
+Python post-processing:
+  traceToInst                       0.407 s
+  transInstrToAccFormat             0.225 s
+  check_trace_contract              0.376 s
+  transNttWinFormat                 0.185 s
+  transNttTraceFormat               0.049 s
+Total (not added to the nested stages above):
+  make_soft                      2m 57.94s
+Result: SUCCESS
+TSV: /home/B/caiming/fheacc-software-platform/soft/clib/tests/tests/lr/data/make_soft_timing.tsv
+================================================
+
+========== accelerator cycle profile ==========
+profile=/home/B/caiming/fheacc-software-platform/soft/clib/tests/tests/lr/data/clib_profile.md
+[accelerator cycle summary]
+
+category device total_cycles total_exe_cycles total_mem_cycles total_sync_cycles total_crb_cycles
+0 CB0 3431150 1250756 1475882 704512 0
+0 CB1 3431150 1250756 1475882 704512 0
+0 CB2 3427018 1247862 1474644 704512 0
+0 CB3 3424730 1245574 1474644 704512 0
+0 CB4 620512 243488 16576 360448 0
+0 CB5 16384 0 0 16384 0
+0 CB6 16384 0 0 16384 0
+0 CB7 16384 0 0 16384 0
+0 MB 51538344 0 0 16384 51521960
+
+================================================

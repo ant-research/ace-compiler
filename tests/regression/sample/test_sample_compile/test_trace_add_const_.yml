@@ -1,0 +1,30 @@
+add_count: 1
+add_ops:
+- inputs:
+  - x
+  - _tensor_constant0
+  name: add
+constant_shapes:
+  _tensor_constant0:
+  - 1
+  - 1
+  - 2
+  - 2
+conv_count: 0
+conv_layers: []
+input_shape:
+- 1
+- 1
+- 2
+- 2
+linear_count: 0
+linear_layers: []
+op_counts:
+  add: 1
+output_shape:
+- 1
+- 1
+- 2
+- 2
+total_constants: 1
+total_ops: 1
