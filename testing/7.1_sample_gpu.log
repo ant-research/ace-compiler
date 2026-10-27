@@ -1,0 +1,49 @@
+==================================================================================================== test session starts ====================================================================================================
+platform linux -- Python 3.12.3, pytest-9.1.0, pluggy-1.6.0 -- /opt/ace-env/bin/python3
+cachedir: .pytest_cache
+benchmark: 5.2.3 (defaults: timer=time.perf_counter disable_gc=False min_rounds=5 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)
+rootdir: /work/ace-fhe/ace-compiler
+configfile: pytest.ini
+plugins: anyio-4.14.2, regressions-2.11.0, datadir-1.8.0, benchmark-5.2.3
+collected 38 items                                                                                                                                                                                                          
+
+tests/regression/sample/test_sample_smoke_phantom.py::test_op_compile[linear_op] PASSED                                                                                                                               [  2%]
+tests/regression/sample/test_sample_smoke_phantom.py::test_op_compile[linear_relu_op] PASSED                                                                                                                          [  5%]
+tests/regression/sample/test_sample_smoke_phantom.py::test_op_compile[relu_linear_op] PASSED                                                                                                                          [  7%]
+tests/regression/sample/test_sample_smoke_phantom.py::test_op_compile[linear_bias_op] PASSED                                                                                                                          [ 10%]
+tests/regression/sample/test_sample_smoke_phantom.py::test_op_compile[mlp_op] PASSED                                                                                                                                  [ 13%]
+tests/regression/sample/test_sample_smoke_phantom.py::test_op_compile[flatten_op] PASSED                                                                                                                              [ 15%]
+tests/regression/sample/test_sample_smoke_phantom.py::test_op_compile[conv2d_op] PASSED                                                                                                                               [ 18%]
+tests/regression/sample/test_sample_smoke_phantom.py::test_op_compile[conv2d_relu_op] PASSED                                                                                                                          [ 21%]
+tests/regression/sample/test_sample_smoke_phantom.py::test_op_compile[depthwise_conv2d_op] PASSED                                                                                                                     [ 23%]
+tests/regression/sample/test_sample_smoke_phantom.py::test_op_compile[avg_pool2d_op] PASSED                                                                                                                           [ 26%]
+tests/regression/sample/test_sample_smoke_phantom.py::test_op_compile[max_pool2d_op] PASSED                                                                                                                           [ 28%]
+tests/regression/sample/test_sample_smoke_phantom.py::test_op_compile[global_avg_pool_op] PASSED                                                                                                                      [ 31%]
+tests/regression/sample/test_sample_smoke_phantom.py::test_op_compile[add_op] PASSED                                                                                                                                  [ 34%]
+tests/regression/sample/test_sample_smoke_phantom.py::test_op_compile[mul_op] PASSED                                                                                                                                  [ 36%]
+tests/regression/sample/test_sample_smoke_phantom.py::test_op_compile[relu_op] PASSED                                                                                                                                 [ 39%]
+tests/regression/sample/test_sample_smoke_phantom.py::test_op_compile[add_const] PASSED                                                                                                                               [ 42%]
+tests/regression/sample/test_sample_smoke_phantom.py::test_op_compile[mult_const] PASSED                                                                                                                              [ 44%]
+tests/regression/sample/test_sample_smoke_phantom.py::test_op_compile[gemm_49x3] PASSED                                                                                                                               [ 47%]
+tests/regression/sample/test_sample_smoke_phantom.py::test_op_compile[relu_gemm] PASSED                                                                                                                               [ 50%]
+tests/regression/sample/test_sample_smoke_phantom.py::test_op_compile[conv2d] PASSED                                                                                                                                  [ 52%]
+tests/regression/sample/test_sample_smoke_phantom.py::test_op_compile[avg_pool_2d] PASSED                                                                                                                             [ 55%]
+tests/regression/sample/test_sample_smoke_phantom.py::test_op_compile[avg_pool_2d_with_stride] PASSED                                                                                                                 [ 57%]
+tests/regression/sample/test_sample_smoke_phantom.py::test_op_compile[global_avg_pool] PASSED                                                                                                                         [ 60%]
+tests/regression/sample/test_sample_smoke_phantom.py::test_op_compile[relu_avg_pool] PASSED                                                                                                                           [ 63%]
+tests/regression/sample/test_sample_smoke_phantom.py::test_op_compile[avg_pool_flatten] PASSED                                                                                                                        [ 65%]
+tests/regression/sample/test_sample_smoke_phantom.py::test_op_smoke[linear_bias_op] PASSED                                                                                                                            [ 68%]
+tests/regression/sample/test_sample_smoke_phantom.py::test_op_smoke[add_op] PASSED                                                                                                                                    [ 71%]
+tests/regression/sample/test_sample_smoke_phantom.py::test_op_smoke[mul_op] PASSED                                                                                                                                    [ 73%]
+tests/regression/sample/test_sample_smoke_phantom.py::test_op_smoke[add_const] PASSED                                                                                                                                 [ 76%]
+tests/regression/sample/test_sample_smoke_phantom.py::test_op_smoke[mult_const] PASSED                                                                                                                                [ 78%]
+tests/regression/sample/test_sample_smoke_phantom.py::test_func_compile[add_func] PASSED                                                                                                                              [ 81%]
+tests/regression/sample/test_sample_smoke_phantom.py::test_func_compile[mul_func] PASSED                                                                                                                              [ 84%]
+tests/regression/sample/test_sample_smoke_phantom.py::test_func_compile[square_func] PASSED                                                                                                                           [ 86%]
+tests/regression/sample/test_sample_smoke_phantom.py::test_func_compile[relu_func] PASSED                                                                                                                             [ 89%]
+tests/regression/sample/test_sample_smoke_phantom.py::test_func_compile[conditional_chain_func] PASSED                                                                                                                [ 92%]
+tests/regression/sample/test_sample_smoke_phantom.py::test_func_smoke[add_func] PASSED                                                                                                                                [ 94%]
+tests/regression/sample/test_sample_smoke_phantom.py::test_func_smoke[mul_func] PASSED                                                                                                                                [ 97%]
+tests/regression/sample/test_sample_smoke_phantom.py::test_func_smoke[conditional_chain_func] PASSED                                                                                                                  [100%]
+
+==================================================================================================== 38 passed in 9.57s =====================================================================================================

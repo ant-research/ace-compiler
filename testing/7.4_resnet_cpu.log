@@ -1,0 +1,106 @@
+collecting ... collected 18 items / 12 deselected / 6 selected
+[INFO] ace.fhe.backend.antlib: Library: using ant for build...
+[INFO] ace.fhe.driver.driver: Loading relu_vr_data from file: /opt/ace-env/lib/python3.12/site-packages/ace/model/resnet/profiles/resnet20_cifar10.json
+[INFO] ace.fhe.frontend.torch.torch_frontend: Traced successfully, Output shape: [1, 10]
+/aoneci/runner/work/source/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/aoneci/runner/work/source/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/aoneci/runner/work/source/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+benchmark/resnet/test_latency.py::TestResNet20Latency::test_latency[ant-cpu] /aoneci/runner/work/source/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/aoneci/runner/work/source/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/aoneci/runner/work/source/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+[INFO] ace.fhe.ir.frontends.torch.torch_trace: AIR IR exported successfully!
+[INFO] ace.fhe.driver.builder: [SUCCESS] ANT-ANT build succeeded.
+[INFO] ace.fhe.cache: [Cache] MISS: Compiled to /tmp/ace-compile-cache/resnet20_cifar10-torch-ant-cpu/shape_1x3x32x32_dtype_torch_float32/0e805e77b0e2a181_vr8c6d9768e27cd706/libant_cpu_158814.so
+  latency: total=1478025.5ms  avg=147802.6ms  min=1477305.6ms  max=1478025.2ms
+PASSED
+[INFO] ace.fhe.backend.antlib: Library: using ant for build...
+[INFO] ace.fhe.driver.driver: Loading relu_vr_data from file: /opt/ace-env/lib/python3.12/site-packages/ace/model/resnet/profiles/resnet32_cifar10.json
+[INFO] ace.fhe.frontend.torch.torch_frontend: Traced successfully, Output shape: [1, 10]
+/aoneci/runner/work/source/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/aoneci/runner/work/source/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+benchmark/resnet/test_latency.py::TestResNet32Latency::test_latency[ant-cpu] ckks_param: _provider = 0, _poly_degree = 65536, mul_depth = 30, input_lev = 17, _first_mod_size = 60, _scaling_mod_size = 56, _num_q_parts = 3, _num_p = 11, _num_rot_idx = 196,_hamming_weight = 192
+/aoneci/runner/work/source/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+/aoneci/runner/work/source/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/aoneci/runner/work/source/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/aoneci/runner/work/source/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+[INFO] ace.fhe.ir.frontends.torch.torch_trace: AIR IR exported successfully!
+[INFO] ace.fhe.driver.builder: [SUCCESS] ANT-ANT build succeeded.
+[INFO] ace.fhe.cache: [Cache] MISS: Compiled to /tmp/ace-compile-cache/resnet32_cifar10-torch-ant-cpu/shape_1x3x32x32_dtype_torch_float32/0e805e77b0e2a181_vr1159245bdab31981/libant_cpu_881356.so
+  latency: total=2237492.4ms  avg=223749.2ms  min=2183502.7ms  max=2237492.0ms
+PASSED
+[INFO] ace.fhe.backend.antlib: Library: using ant for build...
+[INFO] ace.fhe.driver.driver: Loading relu_vr_data from file: /opt/ace-env/lib/python3.12/site-packages/ace/model/resnet/profiles/resnet32_cifar100.json
+[INFO] ace.fhe.frontend.torch.torch_frontend: Traced successfully, Output shape: [1, 100]
+/aoneci/runner/work/source/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/aoneci/runner/work/source/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/aoneci/runner/work/source/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+benchmark/resnet/test_latency.py::TestResNet32Cifar100Latency::test_latency[ant-cpu] Total memory size for keys: rot_key_cnt = 226, rot_key_size = 29859327920 bytes, total_key_size = 30067995080 bytes
+Total memory size for weight plain: cnt = 63641, size = 113449495304 bytes
+ckks_param: _provider = 0, _poly_degree = 65536, mul_depth = 30, input_lev = 17, _first_mod_size = 60, _scaling_mod_size = 56, _num_q_parts = 3, _num_p = 11, _num_rot_idx = 196,_hamming_weight = 192
+/aoneci/runner/work/source/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/aoneci/runner/work/source/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/aoneci/runner/work/source/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+[INFO] ace.fhe.ir.frontends.torch.torch_trace: AIR IR exported successfully!
+[INFO] ace.fhe.driver.builder: [SUCCESS] ANT-ANT build succeeded.
+[INFO] ace.fhe.cache: [Cache] MISS: Compiled to /tmp/ace-compile-cache/resnet32_cifar100-torch-ant-cpu/shape_1x3x32x32_dtype_torch_float32/0e805e77b0e2a181_vr2758a5cedca9158d/libant_cpu_474508.so
+  latency: total=2235440.4ms  avg=223544.0ms  min=2202033.0ms  max=2235440.0ms
+PASSED
+[INFO] ace.fhe.backend.antlib: Library: using ant for build...
+[INFO] ace.fhe.driver.driver: Loading relu_vr_data from file: /opt/ace-env/lib/python3.12/site-packages/ace/model/resnet/profiles/resnet44_cifar10.json
+[INFO] ace.fhe.frontend.torch.torch_frontend: Traced successfully, Output shape: [1, 10]
+benchmark/resnet/test_latency.py::TestResNet44Latency::test_latency[ant-cpu] Total memory size for keys: rot_key_cnt = 226, rot_key_size = 29859327920 bytes, total_key_size = 30067995080 bytes
+Total memory size for weight plain: cnt = 106236, size = 179351369008 bytes
+ckks_param: _provider = 0, _poly_degree = 65536, mul_depth = 30, input_lev = 17, _first_mod_size = 60, _scaling_mod_size = 56, _num_q_parts = 3, _num_p = 11, _num_rot_idx = 202,_hamming_weight = 192
+/aoneci/runner/work/source/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/aoneci/runner/work/source/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/aoneci/runner/work/source/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+/aoneci/runner/work/source/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/aoneci/runner/work/source/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/aoneci/runner/work/source/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+[INFO] ace.fhe.ir.frontends.torch.torch_trace: AIR IR exported successfully!
+[INFO] ace.fhe.driver.builder: [SUCCESS] ANT-ANT build succeeded.
+[INFO] ace.fhe.cache: [Cache] MISS: Compiled to /tmp/ace-compile-cache/resnet44_cifar10-torch-ant-cpu/shape_1x3x32x32_dtype_torch_float32/0e805e77b0e2a181_vr4a269f5f8a2d901b/libant_cpu_173303.so
+  latency: total=3103870.7ms  avg=310387.1ms  min=3007978.9ms  max=3103870.3ms
+PASSED
+[INFO] ace.fhe.backend.antlib: Library: using ant for build...
+[INFO] ace.fhe.driver.driver: Loading relu_vr_data from file: /opt/ace-env/lib/python3.12/site-packages/ace/model/resnet/profiles/resnet56_cifar10.json
+[INFO] ace.fhe.frontend.torch.torch_frontend: Traced successfully, Output shape: [1, 10]
+benchmark/resnet/test_latency.py::TestResNet56Latency::test_latency[ant-cpu] Total memory size for keys: rot_key_cnt = 231, rot_key_size = 30519932520 bytes, total_key_size = 30728599680 bytes
+Total memory size for weight plain: cnt = 106314, size = 179490835448 bytes
+ckks_param: _provider = 0, _poly_degree = 65536, mul_depth = 30, input_lev = 17, _first_mod_size = 60, _scaling_mod_size = 56, _num_q_parts = 3, _num_p = 11, _num_rot_idx = 196,_hamming_weight = 192
+/aoneci/runner/work/source/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/aoneci/runner/work/source/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/aoneci/runner/work/source/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/aoneci/runner/work/source/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/aoneci/runner/work/source/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+/aoneci/runner/work/source/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+[INFO] ace.fhe.ir.frontends.torch.torch_trace: AIR IR exported successfully!
+[INFO] ace.fhe.driver.builder: [SUCCESS] ANT-ANT build succeeded.
+[INFO] ace.fhe.cache: [Cache] MISS: Compiled to /tmp/ace-compile-cache/resnet56_cifar10-torch-ant-cpu/shape_1x3x32x32_dtype_torch_float32/0e805e77b0e2a181_vr76ee38808444f8a8/libant_cpu_549331.so
+  latency: total=3971930.2ms  avg=397193.0ms  min=3848124.1ms  max=3971929.7ms
+PASSED
+[INFO] ace.fhe.backend.antlib: Library: using ant for build...
+[INFO] ace.fhe.driver.driver: Loading relu_vr_data from file: /opt/ace-env/lib/python3.12/site-packages/ace/model/resnet/profiles/resnet110_cifar10.json
+[INFO] ace.fhe.frontend.torch.torch_frontend: Traced successfully, Output shape: [1, 10]
+benchmark/resnet/test_latency.py::TestResNet110Latency::test_latency[ant-cpu] Total memory size for keys: rot_key_cnt = 226, rot_key_size = 29859327920 bytes, total_key_size = 30067995080 bytes
+Total memory size for weight plain: cnt = 148844, size = 245287323088 bytes
+ckks_param: _provider = 0, _poly_degree = 65536, mul_depth = 30, input_lev = 17, _first_mod_size = 60, _scaling_mod_size = 56, _num_q_parts = 3, _num_p = 11, _num_rot_idx = 196,_hamming_weight = 192
+/aoneci/runner/work/source/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/aoneci/runner/work/source/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/aoneci/runner/work/source/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+/aoneci/runner/work/source/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/aoneci/runner/work/source/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/aoneci/runner/work/source/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+[INFO] ace.fhe.ir.frontends.torch.torch_trace: AIR IR exported successfully!
+[INFO] ace.fhe.driver.builder: [SUCCESS] ANT-ANT build succeeded.
+[INFO] ace.fhe.cache: [Cache] MISS: Compiled to /tmp/ace-compile-cache/resnet110_cifar10-torch-ant-cpu/shape_1x3x32x32_dtype_torch_float32/0e805e77b0e2a181_vr5a14c2720d6f2d8b/libant_cpu_542411.so
+  latency: total=7889263.5ms  avg=788926.4ms  min=7819188.1ms  max=7889263.0ms
+PASSED
+================ 6 passed, 12 deselected in 21156.93s (5:52:36) ================
+Total memory size for keys: rot_key_cnt = 226, rot_key_size = 29859327920 bytes, total_key_size = 30067995080 bytes
+Total memory size for weight plain: cnt = 191434, size = 311110553592 bytes
+ckks_param: _provider = 0, _poly_degree = 65536, mul_depth = 30, input_lev = 17, _first_mod_size = 60, _scaling_mod_size = 56, _num_q_parts = 3, _num_p = 11, _num_rot_idx = 196,_hamming_weight = 192
+Total memory size for keys: rot_key_cnt = 226, rot_key_size = 29859327920 bytes, total_key_size = 30067995080 bytes
+Total memory size for weight plain: cnt = 383095, size = 607228059376 bytes
+[INFO] uploaded internal log with size: 11542
+2026-10-24T06:54:01.818998887+08:00 [WARNING] container b81e2b98d5bec32fbf850fd75268ad9d2582251fdb5c9a1e1491ea022edf7883 status updated. status code: 0

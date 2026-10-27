@@ -6,30 +6,24 @@ Pull the pre-built docker image from Docker Hub (the same image the
 `delivery/final-202610` GitHub Actions workflow builds and pushes from
 this repo — see `.github/workflows/build-image.yml`):
 
-```
-docker pull opencc/ace:final-202610
-```
-
-Or build the image locally:
-
-```
-docker build . -t opencc/ace:final-202610
+```bash
+docker pull opencc/ace:final-202610-v2
 ```
 
 Start a container once per test item — the `--name` differs per item so
 the containers do not collide. CPU test items (§1 / §2 / §3 / §5):
 
-```
-docker run -it -d --name test_7.x opencc/ace:final-202610 bash
+```bash
+docker run -it -d --name test_7.x opencc/ace:final-202610-v2 bash
 docker exec -it test_7.x bash
 ```
 
-GPU test item (§4.1) — pass through the GPU:
+```bash
+cd ace-compiler
+./scripts/dev-build.sh
+```
 
-```
-docker run -it -d --name test_7.4 --gpus '"device=1"' opencc/ace:final-202610 bash
-docker exec -it test_7.4 bash
-```
+- GPU test item (§4.1) — pass through the GPU: `--gpus '"device=1"'`
 
 The image does NOT pre-build any FHE baseline — it installs the pip
 deps and tools only. Run the per-baseline build scripts
@@ -40,23 +34,24 @@ inside the container before the inference step.
 
 - Setup
 
-    ```
-    docker run -it -d --name test_7.1 opencc/ace:final-202610 bash
-    docker exec -it test_7.1 bash
-    ```
-
 - Build
 
-    ```
+    ```bash
     python3 /app/scripts/build_cnn.py   # build the cpu baseline (FHE-MP-CNN, SEAL 3.6.6) + install modified SEAL to /usr/local
     /app/scripts/build_cmplr.sh         # build the ace-compiler (CPU backend, ONNX -> FHE executable)
     ```
 
 - Inference
 
-    ```
-    nohup python3 /app/scripts/perf.py -e > /dev/null 2>&1 &
-    nohup python3 /app/scripts/cgo25_ae.py -a > /dev/null 2>&1 &
+    ```bash
+    # GPU
+    python3 benchmark/basic_ops/bench_basic_ops.py
+
+    # CPU
+    python3 benchmark/basic_ops/bench_basic_ops.py --library ant --device cpu
+
+    # 输出 JSON 报告
+    python3 benchmark/basic_ops/bench_basic_ops.py --output basic_ops_report.json
     ```
 
 ## 2 Generalization Ability Test of Fully Homomorphic Encryption Compiler
@@ -64,11 +59,38 @@ inside the container before the inference step.
 - Setup
 
     ```
-    docker run -it -d --name test_7.2 opencc/ace:final-202610 bash
+    docker run -it -d --name test_7.2 opencc/ace:final-202610-v2 bash
     docker exec -it test_7.2 bash
     ```
 
-- Inference
+- CPU Platform
+
+    ```
+    pytest tests/regression/vgg16/test_vgg16_smoke.py -k ant -v -s
+    pytest tests/regression/alexnet/test_alexnet_smoke.py -k ant -v -s
+    pytest tests/regression/resnet_x2/test_resnet20_smoke.py -k ant -s
+    ```
+
+- GPU Platform
+
+    ```bash
+    # LR
+    CUDA_VISIBLE_DEVICES=0 python3 -m pytest benchmark/lr/test_lr_latency.py -k "phantom" -v -s
+
+    # LeNet
+    CUDA_VISIBLE_DEVICES=0 python3 -m pytest benchmark/lenet/test_lenet_latency.py -k "phantom" -v -s
+
+    # ResNet-20
+    CUDA_VISIBLE_DEVICES=0 python3 -m pytest benchmark/resnet/test_latency.py -k "resnet20 and phantom" -v -s
+    ```
+
+    ```
+    pytest tests/regression/vgg16/test_vgg16_smoke.py -k phantom -v -s
+    pytest tests/regression/alexnet/test_alexnet_smoke.py -k phantom -v -s
+    pytest tests/regression/resnet_x2/test_resnet20_smoke.py -k phantom -s
+    ```
+
+- FPGA Platform
 
     ```
     pytest tests/regression/lenet_x2/test_lenet_x2_smoke.py -v -s
@@ -82,7 +104,7 @@ inside the container before the inference step.
 - Setup
 
     ```
-    docker run -it -d --name test_7.3 opencc/ace:final-202610 bash
+    docker run -it -d --name test_7.3 opencc/ace:final-202610-v2 bash
     docker exec -it test_7.3 bash
     ```
 
@@ -106,7 +128,7 @@ inside the container before the inference step.
 - Setup
 
     ```
-    docker run -it -d --name test_7.4 --gpus '"device=1"' opencc/ace:final-202610 bash
+    docker run -it -d --name test_7.4 --gpus '"device=1"' opencc/ace:final-202610-v2 bash
     docker exec -it test_7.4 bash
     ```
 
@@ -120,7 +142,7 @@ inside the container before the inference step.
     | GPU  Name                 Persistence-M | Bus-Id          Disp. A | Volatile Uncorr. ECC |
     | Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
     |                                         |                        |               MIG M. |
-    |=========================================+=========================================================+
+    |=========================================+===============================================+
     |   0  NVIDIA H20                     Off |   00000000:26:00.0 Off |                    0 |
     | N/A   40C    P0             74W /  500W |       4MiB /  97871MiB |      0%      Default |
     |                                         |                        |             Disabled |
@@ -145,7 +167,7 @@ inside the container before the inference step.
     | GPU  Name                 Persistence-M | Bus-Id          Disp. A | Volatile Uncorr. ECC |
     | Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
     |                                         |                        |               MIG M. |
-    |=========================================+=========================================================+
+    |=========================================+===============================================+
     |   0  NVIDIA A100 80GB PCIe          Off |   00000000:36:00.0 Off |                    0 |
     | N/A   44C    P0             45W /  300W |       0MiB /  81920MiB |      0%      Default |
     |                                         |                        |             Disabled |

@@ -81,4 +81,7 @@ RUN wget -O - https://www.cs.toronto.edu/~kriz/cifar-10-binary.tar.gz | tar -xz 
     wget https://www.cs.toronto.edu/~kriz/cifar-100-python.tar.gz
 
 WORKDIR /app
+
+COPY ./ .
+
 CMD ["/bin/bash"]
