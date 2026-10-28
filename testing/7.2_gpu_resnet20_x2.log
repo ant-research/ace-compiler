@@ -1,0 +1,444 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-9.1.0, pluggy-1.6.0 -- /opt/ace-env/bin/python3
+cachedir: .pytest_cache
+benchmark: 5.2.3 (defaults: timer=time.perf_counter disable_gc=False min_rounds=5 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)
+rootdir: /work/ace-fhe/ace-compiler
+configfile: pytest.ini
+plugins: anyio-4.14.2, regressions-2.11.0, datadir-1.8.0, benchmark-5.2.3
+collecting ... collected 18 items / 17 deselected / 1 selected
+
+tests/regression/resnet/test_resnet_smoke.py::test_smoke_phantom[resnet20_cifar10] [INFO] ace.fhe.backend.phantom: Library: using phantom for build...
+[INFO] ace.fhe.backend.phantom: Library: using phantom for build...
+[INFO] ace.fhe.driver.driver: Loading relu_vr_data from file: /opt/ace-env/lib/python3.12/site-packages/ace/model/resnet/profiles/resnet20_cifar10.json
+[DEBUG] ace.fhe.frontend.torch.torch_frontend: Fusing BatchNorm layers...
+[DEBUG] ace.fhe.frontend.torch.torch_frontend: Tracing model with 1 inputs using CustomTracer...
+[DEBUG] ace.fhe.frontend.torch.torch_frontend: Found 45 constants: ['conv1_weight', 'conv1_bias', 'layer1_0_conv1_weight', 'layer1_0_conv1_bias', 'layer1_0_conv2_weight', 'layer1_0_conv2_bias', 'layer1_1_conv1_weight', 'layer1_1_conv1_bias', 'layer1_1_conv2_weight', 'layer1_1_conv2_bias', 'layer1_2_conv1_weight', 'layer1_2_conv1_bias', 'layer1_2_conv2_weight', 'layer1_2_conv2_bias', 'layer2_0_conv1_weight', 'layer2_0_conv1_bias', 'layer2_0_conv2_weight', 'layer2_0_conv2_bias', 'layer2_0_downsample_0_weight', 'layer2_0_downsample_0_bias', 'layer2_1_conv1_weight', 'layer2_1_conv1_bias', 'layer2_1_conv2_weight', 'layer2_1_conv2_bias', 'layer2_2_conv1_weight', 'layer2_2_conv1_bias', 'layer2_2_conv2_weight', 'layer2_2_conv2_bias', 'layer3_0_conv1_weight', 'layer3_0_conv1_bias', 'layer3_0_conv2_weight', 'layer3_0_conv2_bias', 'layer3_0_downsample_0_weight', 'layer3_0_downsample_0_bias', 'layer3_1_conv1_weight', 'layer3_1_conv1_bias', 'layer3_1_conv2_weight', 'layer3_1_conv2_bias', 'layer3_2_conv1_weight', 'layer3_2_conv1_bias', 'layer3_2_conv2_weight', 'layer3_2_conv2_bias', '_view_shape_view', 'fc_weight', 'fc_bias']
+[INFO] ace.fhe.frontend.torch.torch_frontend: Traced successfully, Output shape: [1, 10]
+[DEBUG] ace.fhe.frontend.torch.torch_frontend: prepare returned: <class 'ace.fhe.ir.frontends.torch.torch_trace.TorchTracedModel'>
+[DEBUG] ace.fhe.frontend.torch.torch_frontend: traced has execute: True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Starting AIR generation...
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Input names: ['x']
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Input shapes: [[1, 3, 32, 32]]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Output shape: [1, 10]
+/work/ace-fhe/ace-compiler/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/work/ace-fhe/ace-compiler/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/work/ace-fhe/ace-compiler/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/work/ace-fhe/ace-compiler/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/work/ace-fhe/ace-compiler/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+/work/ace-fhe/ace-compiler/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: fc_weight, shape=[10, 64], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: fc_bias, shape=[10], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: conv1_weight, shape=[16, 3, 3, 3], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: conv1_bias, shape=[16], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: layer1_0_conv1_weight, shape=[16, 16, 3, 3], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: layer1_0_conv1_bias, shape=[16], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: layer1_0_conv2_weight, shape=[16, 16, 3, 3], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: layer1_0_conv2_bias, shape=[16], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: layer1_1_conv1_weight, shape=[16, 16, 3, 3], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: layer1_1_conv1_bias, shape=[16], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: layer1_1_conv2_weight, shape=[16, 16, 3, 3], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: layer1_1_conv2_bias, shape=[16], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: layer1_2_conv1_weight, shape=[16, 16, 3, 3], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: layer1_2_conv1_bias, shape=[16], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: layer1_2_conv2_weight, shape=[16, 16, 3, 3], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: layer1_2_conv2_bias, shape=[16], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: layer2_0_conv1_weight, shape=[32, 16, 3, 3], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: layer2_0_conv1_bias, shape=[32], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: layer2_0_conv2_weight, shape=[32, 32, 3, 3], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: layer2_0_conv2_bias, shape=[32], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: layer2_0_downsample_0_weight, shape=[32, 16, 1, 1], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: layer2_0_downsample_0_bias, shape=[32], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: layer2_1_conv1_weight, shape=[32, 32, 3, 3], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: layer2_1_conv1_bias, shape=[32], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: layer2_1_conv2_weight, shape=[32, 32, 3, 3], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: layer2_1_conv2_bias, shape=[32], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: layer2_2_conv1_weight, shape=[32, 32, 3, 3], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: layer2_2_conv1_bias, shape=[32], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: layer2_2_conv2_weight, shape=[32, 32, 3, 3], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: layer2_2_conv2_bias, shape=[32], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: layer3_0_conv1_weight, shape=[64, 32, 3, 3], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: layer3_0_conv1_bias, shape=[64], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: layer3_0_conv2_weight, shape=[64, 64, 3, 3], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: layer3_0_conv2_bias, shape=[64], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: layer3_0_downsample_0_weight, shape=[64, 32, 1, 1], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: layer3_0_downsample_0_bias, shape=[64], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: layer3_1_conv1_weight, shape=[64, 64, 3, 3], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: layer3_1_conv1_bias, shape=[64], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: layer3_1_conv2_weight, shape=[64, 64, 3, 3], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: layer3_1_conv2_bias, shape=[64], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: layer3_2_conv1_weight, shape=[64, 64, 3, 3], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: layer3_2_conv1_bias, shape=[64], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: layer3_2_conv2_weight, shape=[64, 64, 3, 3], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: layer3_2_conv2_bias, shape=[64], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: _view_shape_view, shape=[2], dtype=int64
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Executing traced model node-by-node (generating AIR IR)...
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Starting node iteration, total nodes: 100
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: x, op=placeholder, target=x
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: conv1_weight, op=get_attr, target=conv1_weight
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: conv1_bias, op=get_attr, target=conv1_bias
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: conv1, op=call_function, target=tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=conv1, target_str=tensor.conv, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.conv, input_names=['x', 'conv1_weight', 'conv1_bias'], output_shape=[1, 16, 32, 32]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v0
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: relu, op=call_function, target=tensor.relu
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=relu, target_str=tensor.relu, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.relu
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: ReLU VR: node=relu_Relu, vr=4.0
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.relu, input_names=['_v0'], output_shape=[1, 16, 32, 32]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v1
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer1_0_conv1_weight, op=get_attr, target=layer1_0_conv1_weight
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer1_0_conv1_bias, op=get_attr, target=layer1_0_conv1_bias
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer1_0_conv1, op=call_function, target=tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=layer1_0_conv1, target_str=tensor.conv, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.conv, input_names=['_v1', 'layer1_0_conv1_weight', 'layer1_0_conv1_bias'], output_shape=[1, 16, 32, 32]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v2
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer1_0_relu, op=call_function, target=tensor.relu
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=layer1_0_relu, target_str=tensor.relu, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.relu
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: ReLU VR: node=layer1_0_relu_Relu, vr=3.0
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.relu, input_names=['_v2'], output_shape=[1, 16, 32, 32]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v3
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer1_0_conv2_weight, op=get_attr, target=layer1_0_conv2_weight
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer1_0_conv2_bias, op=get_attr, target=layer1_0_conv2_bias
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer1_0_conv2, op=call_function, target=tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=layer1_0_conv2, target_str=tensor.conv, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.conv, input_names=['_v3', 'layer1_0_conv2_weight', 'layer1_0_conv2_bias'], output_shape=[1, 16, 32, 32]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v4
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: add, op=call_function, target=tensor.add
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=add, target_str=tensor.add, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.add
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.add, input_names=['_v4', '_v1'], output_shape=[1, 16, 32, 32]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v5
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer1_0_relu_1, op=call_function, target=tensor.relu
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=layer1_0_relu_1, target_str=tensor.relu, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.relu
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: ReLU VR: node=layer1_0_relu_1_Relu, vr=5.0
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.relu, input_names=['_v5'], output_shape=[1, 16, 32, 32]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v6
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer1_1_conv1_weight, op=get_attr, target=layer1_1_conv1_weight
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer1_1_conv1_bias, op=get_attr, target=layer1_1_conv1_bias
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer1_1_conv1, op=call_function, target=tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=layer1_1_conv1, target_str=tensor.conv, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.conv, input_names=['_v6', 'layer1_1_conv1_weight', 'layer1_1_conv1_bias'], output_shape=[1, 16, 32, 32]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v7
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer1_1_relu, op=call_function, target=tensor.relu
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=layer1_1_relu, target_str=tensor.relu, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.relu
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: ReLU VR: node=layer1_1_relu_Relu, vr=4.0
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.relu, input_names=['_v7'], output_shape=[1, 16, 32, 32]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v8
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer1_1_conv2_weight, op=get_attr, target=layer1_1_conv2_weight
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer1_1_conv2_bias, op=get_attr, target=layer1_1_conv2_bias
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer1_1_conv2, op=call_function, target=tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=layer1_1_conv2, target_str=tensor.conv, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.conv, input_names=['_v8', 'layer1_1_conv2_weight', 'layer1_1_conv2_bias'], output_shape=[1, 16, 32, 32]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v9
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: add_1, op=call_function, target=tensor.add
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=add_1, target_str=tensor.add, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.add
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.add, input_names=['_v9', '_v6'], output_shape=[1, 16, 32, 32]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v10
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer1_1_relu_1, op=call_function, target=tensor.relu
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=layer1_1_relu_1, target_str=tensor.relu, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.relu
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: ReLU VR: node=layer1_1_relu_1_Relu, vr=6.0
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.relu, input_names=['_v10'], output_shape=[1, 16, 32, 32]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v11
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer1_2_conv1_weight, op=get_attr, target=layer1_2_conv1_weight
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer1_2_conv1_bias, op=get_attr, target=layer1_2_conv1_bias
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer1_2_conv1, op=call_function, target=tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=layer1_2_conv1, target_str=tensor.conv, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.conv, input_names=['_v11', 'layer1_2_conv1_weight', 'layer1_2_conv1_bias'], output_shape=[1, 16, 32, 32]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v12
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer1_2_relu, op=call_function, target=tensor.relu
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=layer1_2_relu, target_str=tensor.relu, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.relu
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: ReLU VR: node=layer1_2_relu_Relu, vr=3.0
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.relu, input_names=['_v12'], output_shape=[1, 16, 32, 32]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v13
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer1_2_conv2_weight, op=get_attr, target=layer1_2_conv2_weight
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer1_2_conv2_bias, op=get_attr, target=layer1_2_conv2_bias
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer1_2_conv2, op=call_function, target=tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=layer1_2_conv2, target_str=tensor.conv, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.conv, input_names=['_v13', 'layer1_2_conv2_weight', 'layer1_2_conv2_bias'], output_shape=[1, 16, 32, 32]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v14
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: add_2, op=call_function, target=tensor.add
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=add_2, target_str=tensor.add, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.add
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.add, input_names=['_v14', '_v11'], output_shape=[1, 16, 32, 32]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v15
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer1_2_relu_1, op=call_function, target=tensor.relu
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=layer1_2_relu_1, target_str=tensor.relu, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.relu
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: ReLU VR: node=layer1_2_relu_1_Relu, vr=7.0
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.relu, input_names=['_v15'], output_shape=[1, 16, 32, 32]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v16
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer2_0_conv1_weight, op=get_attr, target=layer2_0_conv1_weight
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer2_0_conv1_bias, op=get_attr, target=layer2_0_conv1_bias
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer2_0_conv1, op=call_function, target=tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=layer2_0_conv1, target_str=tensor.conv, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.conv, input_names=['_v16', 'layer2_0_conv1_weight', 'layer2_0_conv1_bias'], output_shape=[1, 32, 16, 16]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v17
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer2_0_relu, op=call_function, target=tensor.relu
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=layer2_0_relu, target_str=tensor.relu, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.relu
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: ReLU VR: node=layer2_0_relu_Relu, vr=4.0
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.relu, input_names=['_v17'], output_shape=[1, 32, 16, 16]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v18
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer2_0_conv2_weight, op=get_attr, target=layer2_0_conv2_weight
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer2_0_conv2_bias, op=get_attr, target=layer2_0_conv2_bias
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer2_0_conv2, op=call_function, target=tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=layer2_0_conv2, target_str=tensor.conv, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.conv, input_names=['_v18', 'layer2_0_conv2_weight', 'layer2_0_conv2_bias'], output_shape=[1, 32, 16, 16]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v19
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer2_0_downsample_0_weight, op=get_attr, target=layer2_0_downsample_0_weight
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer2_0_downsample_0_bias, op=get_attr, target=layer2_0_downsample_0_bias
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer2_0_downsample_0, op=call_function, target=tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=layer2_0_downsample_0, target_str=tensor.conv, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.conv, input_names=['_v16', 'layer2_0_downsample_0_weight', 'layer2_0_downsample_0_bias'], output_shape=[1, 32, 16, 16]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v20
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: add_3, op=call_function, target=tensor.add
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=add_3, target_str=tensor.add, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.add
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.add, input_names=['_v19', '_v20'], output_shape=[1, 32, 16, 16]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v21
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer2_0_relu_1, op=call_function, target=tensor.relu
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=layer2_0_relu_1, target_str=tensor.relu, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.relu
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: ReLU VR: node=layer2_0_relu_1_Relu, vr=6.0
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.relu, input_names=['_v21'], output_shape=[1, 32, 16, 16]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v22
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer2_1_conv1_weight, op=get_attr, target=layer2_1_conv1_weight
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer2_1_conv1_bias, op=get_attr, target=layer2_1_conv1_bias
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer2_1_conv1, op=call_function, target=tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=layer2_1_conv1, target_str=tensor.conv, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.conv, input_names=['_v22', 'layer2_1_conv1_weight', 'layer2_1_conv1_bias'], output_shape=[1, 32, 16, 16]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v23
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer2_1_relu, op=call_function, target=tensor.relu
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=layer2_1_relu, target_str=tensor.relu, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.relu
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: ReLU VR: node=layer2_1_relu_Relu, vr=4.0
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.relu, input_names=['_v23'], output_shape=[1, 32, 16, 16]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v24
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer2_1_conv2_weight, op=get_attr, target=layer2_1_conv2_weight
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer2_1_conv2_bias, op=get_attr, target=layer2_1_conv2_bias
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer2_1_conv2, op=call_function, target=tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=layer2_1_conv2, target_str=tensor.conv, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.conv, input_names=['_v24', 'layer2_1_conv2_weight', 'layer2_1_conv2_bias'], output_shape=[1, 32, 16, 16]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v25
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: add_4, op=call_function, target=tensor.add
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=add_4, target_str=tensor.add, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.add
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.add, input_names=['_v25', '_v22'], output_shape=[1, 32, 16, 16]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v26
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer2_1_relu_1, op=call_function, target=tensor.relu
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=layer2_1_relu_1, target_str=tensor.relu, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.relu
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: ReLU VR: node=layer2_1_relu_1_Relu, vr=6.0
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.relu, input_names=['_v26'], output_shape=[1, 32, 16, 16]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v27
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer2_2_conv1_weight, op=get_attr, target=layer2_2_conv1_weight
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer2_2_conv1_bias, op=get_attr, target=layer2_2_conv1_bias
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer2_2_conv1, op=call_function, target=tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=layer2_2_conv1, target_str=tensor.conv, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.conv, input_names=['_v27', 'layer2_2_conv1_weight', 'layer2_2_conv1_bias'], output_shape=[1, 32, 16, 16]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v28
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer2_2_relu, op=call_function, target=tensor.relu
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=layer2_2_relu, target_str=tensor.relu, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.relu
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: ReLU VR: node=layer2_2_relu_Relu, vr=3.0
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.relu, input_names=['_v28'], output_shape=[1, 32, 16, 16]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v29
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer2_2_conv2_weight, op=get_attr, target=layer2_2_conv2_weight
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer2_2_conv2_bias, op=get_attr, target=layer2_2_conv2_bias
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer2_2_conv2, op=call_function, target=tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=layer2_2_conv2, target_str=tensor.conv, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.conv, input_names=['_v29', 'layer2_2_conv2_weight', 'layer2_2_conv2_bias'], output_shape=[1, 32, 16, 16]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v30
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: add_5, op=call_function, target=tensor.add
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=add_5, target_str=tensor.add, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.add
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.add, input_names=['_v30', '_v27'], output_shape=[1, 32, 16, 16]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v31
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer2_2_relu_1, op=call_function, target=tensor.relu
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=layer2_2_relu_1, target_str=tensor.relu, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.relu
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: ReLU VR: node=layer2_2_relu_1_Relu, vr=11.0
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.relu, input_names=['_v31'], output_shape=[1, 32, 16, 16]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer3_0_conv1_weight, op=get_attr, target=layer3_0_conv1_weight
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer3_0_conv1_bias, op=get_attr, target=layer3_0_conv1_bias
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer3_0_conv1, op=call_function, target=tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=layer3_0_conv1, target_str=tensor.conv, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.conv, input_names=['_v32', 'layer3_0_conv1_weight', 'layer3_0_conv1_bias'], output_shape=[1, 64, 8, 8]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v33
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer3_0_relu, op=call_function, target=tensor.relu
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=layer3_0_relu, target_str=tensor.relu, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.relu
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: ReLU VR: node=layer3_0_relu_Relu, vr=5.0
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.relu, input_names=['_v33'], output_shape=[1, 64, 8, 8]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v34
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer3_0_conv2_weight, op=get_attr, target=layer3_0_conv2_weight
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer3_0_conv2_bias, op=get_attr, target=layer3_0_conv2_bias
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer3_0_conv2, op=call_function, target=tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=layer3_0_conv2, target_str=tensor.conv, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.conv, input_names=['_v34', 'layer3_0_conv2_weight', 'layer3_0_conv2_bias'], output_shape=[1, 64, 8, 8]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v35
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer3_0_downsample_0_weight, op=get_attr, target=layer3_0_downsample_0_weight
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer3_0_downsample_0_bias, op=get_attr, target=layer3_0_downsample_0_bias
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer3_0_downsample_0, op=call_function, target=tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=layer3_0_downsample_0, target_str=tensor.conv, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.conv, input_names=['_v32', 'layer3_0_downsample_0_weight', 'layer3_0_downsample_0_bias'], output_shape=[1, 64, 8, 8]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v36
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: add_6, op=call_function, target=tensor.add
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=add_6, target_str=tensor.add, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.add
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.add, input_names=['_v35', '_v36'], output_shape=[1, 64, 8, 8]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v37
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer3_0_relu_1, op=call_function, target=tensor.relu
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=layer3_0_relu_1, target_str=tensor.relu, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.relu
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: ReLU VR: node=layer3_0_relu_1_Relu, vr=6.0
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.relu, input_names=['_v37'], output_shape=[1, 64, 8, 8]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v38
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer3_1_conv1_weight, op=get_attr, target=layer3_1_conv1_weight
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer3_1_conv1_bias, op=get_attr, target=layer3_1_conv1_bias
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer3_1_conv1, op=call_function, target=tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=layer3_1_conv1, target_str=tensor.conv, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.conv, input_names=['_v38', 'layer3_1_conv1_weight', 'layer3_1_conv1_bias'], output_shape=[1, 64, 8, 8]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v39
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer3_1_relu, op=call_function, target=tensor.relu
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=layer3_1_relu, target_str=tensor.relu, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.relu
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: ReLU VR: node=layer3_1_relu_Relu, vr=4.0
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.relu, input_names=['_v39'], output_shape=[1, 64, 8, 8]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v40
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer3_1_conv2_weight, op=get_attr, target=layer3_1_conv2_weight
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer3_1_conv2_bias, op=get_attr, target=layer3_1_conv2_bias
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer3_1_conv2, op=call_function, target=tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=layer3_1_conv2, target_str=tensor.conv, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.conv, input_names=['_v40', 'layer3_1_conv2_weight', 'layer3_1_conv2_bias'], output_shape=[1, 64, 8, 8]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v41
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: add_7, op=call_function, target=tensor.add
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=add_7, target_str=tensor.add, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.add
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.add, input_names=['_v41', '_v38'], output_shape=[1, 64, 8, 8]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v42
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer3_1_relu_1, op=call_function, target=tensor.relu
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=layer3_1_relu_1, target_str=tensor.relu, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.relu
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: ReLU VR: node=layer3_1_relu_1_Relu, vr=7.0
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.relu, input_names=['_v42'], output_shape=[1, 64, 8, 8]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v43
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer3_2_conv1_weight, op=get_attr, target=layer3_2_conv1_weight
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer3_2_conv1_bias, op=get_attr, target=layer3_2_conv1_bias
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer3_2_conv1, op=call_function, target=tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=layer3_2_conv1, target_str=tensor.conv, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.conv, input_names=['_v43', 'layer3_2_conv1_weight', 'layer3_2_conv1_bias'], output_shape=[1, 64, 8, 8]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v44
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer3_2_relu, op=call_function, target=tensor.relu
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=layer3_2_relu, target_str=tensor.relu, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.relu
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: ReLU VR: node=layer3_2_relu_Relu, vr=4.0
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.relu, input_names=['_v44'], output_shape=[1, 64, 8, 8]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v45
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer3_2_conv2_weight, op=get_attr, target=layer3_2_conv2_weight
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer3_2_conv2_bias, op=get_attr, target=layer3_2_conv2_bias
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer3_2_conv2, op=call_function, target=tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=layer3_2_conv2, target_str=tensor.conv, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.conv, input_names=['_v45', 'layer3_2_conv2_weight', 'layer3_2_conv2_bias'], output_shape=[1, 64, 8, 8]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v46
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: add_8, op=call_function, target=tensor.add
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=add_8, target_str=tensor.add, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.add
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.add, input_names=['_v46', '_v43'], output_shape=[1, 64, 8, 8]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v47
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: layer3_2_relu_1, op=call_function, target=tensor.relu
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=layer3_2_relu_1, target_str=tensor.relu, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.relu
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: ReLU VR: node=layer3_2_relu_1_Relu, vr=29.0
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.relu, input_names=['_v47'], output_shape=[1, 64, 8, 8]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v48
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: avgpool, op=call_function, target=tensor.global_average_pool
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=avgpool, target_str=tensor.global_average_pool, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.global_average_pool
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.global_average_pool, input_names=['_v48'], output_shape=[1, 64, 1, 1]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v49
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: size, op=call_method, target=size
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: _view_shape_view, op=get_attr, target=_view_shape_view
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: view, op=call_function, target=tensor.reshape
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=view, target_str=tensor.reshape, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.reshape
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.reshape, input_names=['_v49', '_view_shape_view'], output_shape=[1, 64, 1, 1]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v50
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: fc_weight, op=get_attr, target=fc_weight
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: fc_bias, op=get_attr, target=fc_bias
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: fc, op=call_function, target=tensor.gemm
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=fc, target_str=tensor.gemm, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.gemm
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.gemm, input_names=['_v50', 'fc_weight', 'fc_bias'], output_shape=[1, 10]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v51
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: output, op=output, target=output
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: AIR generation complete!
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Exporting AIR IR to /tmp/ace-compile-cache/resnet20_cifar10-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/eb7a877bb0b86da7_vr8c6d9768e27cd706/model_136714000854496_3835.B...
+[INFO] ace.fhe.ir.frontends.torch.torch_trace: AIR IR exported successfully!
+[DEBUG] ace.fhe.frontend.torch.torch_frontend: AIR IR exported to: /tmp/ace-compile-cache/resnet20_cifar10-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/eb7a877bb0b86da7_vr8c6d9768e27cd706/model_136714000854496_3835.B
+[DEBUG] ace.fhe.backend.phantom: [phantom] resolved options = {'vec': {'conv_parl': True, 'ssf': True}, 'ckks': {'N': 65536, 'q0': 60, 'sf': 56, 'icl': 17}}
+[INFO] ace.fhe.backend.phantom: [phantom] option_args = ['-VEC:conv_parl:ssf', '-CKKS:N=65536:q0=60:sf=56:icl=17']
+[DEBUG] ace.fhe.backend.phantom: [SUCCESS] Compilation succeeded: /opt/ace-env/lib/python3.12/site-packages/ace/bin/fhe_cmplr /tmp/ace-compile-cache/resnet20_cifar10-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/eb7a877bb0b86da7_vr8c6d9768e27cd706/model_136714000854496_3835.B -P2C:lib=phantom -P2C:df=/tmp/ace-compile-cache/resnet20_cifar10-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/eb7a877bb0b86da7_vr8c6d9768e27cd706/data.weight -o /tmp/ace-compile-cache/resnet20_cifar10-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/eb7a877bb0b86da7_vr8c6d9768e27cd706/kernel_phantom.cu -VEC:conv_parl:ssf -CKKS:N=65536:q0=60:sf=56:icl=17
+[DEBUG] root: Build Kernel Library: /tmp/ace-compile-cache/resnet20_cifar10-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/eb7a877bb0b86da7_vr8c6d9768e27cd706/libphantom_cuda_837886.so
+[DEBUG] ace.fhe.driver.builder: Build command: nvcc -shared -Xcompiler -fPIC,-O3 --std=c++17 --expt-relaxed-constexpr -o /tmp/ace-compile-cache/resnet20_cifar10-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/eb7a877bb0b86da7_vr8c6d9768e27cd706/libphantom_cuda_837886.so /tmp/ace-compile-cache/resnet20_cifar10-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/eb7a877bb0b86da7_vr8c6d9768e27cd706/kernel_phantom.cu -I/opt/ace-env/lib/python3.12/site-packages/ace/include -I/opt/ace-env/lib/python3.12/site-packages/ace/include/fhe/vendor -I/opt/ace-env/lib/python3.12/site-packages/ace/include/lib_phantom -L/opt/ace-env/lib/python3.12/site-packages/ace/lib -lFHErt_phantom -lcudart -DUSE_GPU_BACKEND -DSPDLOG_COMPILED_LIB -Xlinker -rpath=/opt/ace-env/lib/python3.12/site-packages/ace/lib
+[INFO] ace.fhe.driver.builder: [SUCCESS] PHANTOM-PHANTOM build succeeded.
+[DEBUG] ace.fhe.driver.driver: Package built: model=Main_graph, kernel=/tmp/ace-compile-cache/resnet20_cifar10-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/eb7a877bb0b86da7_vr8c6d9768e27cd706/libphantom_cuda_837886.so, input_info=[{'name': 'x', 'shape': [1, 3, 32, 32], 'type': 'tensor(float)'}], output_info=[{'name': 'output', 'shape': [1, 10], 'type': 'tensor(float)'}], config_path=/tmp/ace-compile-cache/resnet20_cifar10-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/eb7a877bb0b86da7_vr8c6d9768e27cd706/model_136714000854496_3835.conf, key_path=None
+[INFO] ace.fhe.cache: [Cache] MISS: Compiled to /tmp/ace-compile-cache/resnet20_cifar10-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/eb7a877bb0b86da7_vr8c6d9768e27cd706/libphantom_cuda_837886.so
+[DEBUG] ace.fhe.runtime.loader: === Runtime Configuration ===
+Input Count: 1
+Output Count: 1
+
+CKKS Parameters:
+  Poly Degree: 65536
+  Mul Depth: 32
+  Rot Idxs: [-16384, -12288, -8192, -4096, -128, -64, -33, -32, -31, -17, -16, -15, -9, -8, -7, -1, 0, 1, 2, 4, 6, 7, 8, 9, 10, 12, 14, 15, 16, 17, 24, 31, 32, 33, 48, 63, 64, 72, 96, 126, 128, 192, 252, 256, 320, 384, 448, 504, 512, 576, 640, 704, 768, 832, 896, 960, 1008, 1024, 1280, 1536, 1792, 2016, 2048, 2304, 2560, 2816, 3072, 3328, 3584, 3840, 4096, 4352, 4608, 4864, 5120, 5376, 5632, 5888, 6144, 6400, 6656, 6912, 7168, 7424, 7680, 7936, 8192, 8448, 9216, 9984, 10240, 10752, 11264, 11520, 12288, 13312, 14336, 15360, 18432, 21504]
+
+Encode Schemes (1):
+  [0] x - Shape: [1,3,32,32]
+      Count: 1
+
+Decode Schemes (1):
+  [0] output - Shape: [1,10,1,1]
+      Count: 1
+
+[INFO] ace.runtime: [phantom] PhantomContext created (N=65536) [3.22s]
+[INFO] ace.runtime: [kms] PhantomContext received (N=65536)
+[INFO] ace.runtime: [kms] KeyMode::ONLINE — generating keys (sk, pk, rlk, rtk)...
+[INFO] ace.runtime: [kms] Keys generated [gen_keys=0.03s]
+[DEBUG] ace.runtime: [kms] key handles: sk=0x869d6cb0 pk=0x40aa4330 rlk=0x8cb82ef0 rtk=0x8cb5ea70
+[DEBUG] ace.runtime: [timing] init_bootstrap: total=6.96s | bts_ctor=0.00s prep_mod=5.46s rotkey=0.00s galgen=0.19s LT=1.30s
+[INFO] ace.runtime: [kms] bootstrap key prefetch (hoist) 0.000s
+[DEBUG] ace.runtime: [phantom] ckks_param: _provider=3, _poly_degree=65536, _sec_level=0, mul_depth=32, _first_mod_size=60, _scaling_mod_size=56, _num_q_parts=3, _num_rot_idx=100, _num_prime_parts=34
+[DEBUG] ace.runtime: [timing] FheContext init: total=10.34s | key_mgr=0.03s encoder=0.00s evaluator=0.00s galois_init=6.96s enc_mgr=0.13s
+[resnet20_cifar10] plaintext=3, fhe=3
+PASSED
+
+====================== 1 passed, 17 deselected in 41.20s =======================

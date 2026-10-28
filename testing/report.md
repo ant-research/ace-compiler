@@ -6,7 +6,34 @@
 
 ### 7.1.1 CPU 测试数据
 
-> 待补充：在 CPU（ant 后端）上重复 7.1.3 节相同算子与流程，记录编译/执行时间与结果。
+测试环境：CPU-only，Linux x86_64，ACE `ant` 后端（library=ant，device=cpu）。
+测试对象与参数：
+
+| 算子 | 对应 ModelSpec | 输入形状 | 说明 |
+|---|---|---|---|
+| Add | `ADD_OP` | `[1, 4] + [1, 4]` | 逐元素密文加法 |
+| Mul | `MUL_OP` | `[1, 4] × [1, 4]` | 逐元素密文乘法 |
+| MVM/Gemm | `LINEAR_OP` | `[1, 4]` | 单层 Linear（Gemm） |
+| Conv | `CONV2D_OP` | `[1, 3, 16, 16]` | 3×3 Conv2d |
+
+测试命令：
+
+```bash
+python3 benchmark/basic_ops/basic_ops.py --library ant --device cpu
+```
+
+#### 表 7.1-1 基础算子编译与执行结果（CPU）
+
+| 编号 | 算子 | 输入形状 | 编译时间 (s) | 执行时间 (ms) | 执行结果 |
+|---|---|---:|---:|---:|---|
+| 1 | Add | `[1, 4] + [1, 4]` | 0.86 | 1.89 | PASS |
+| 2 | Mul | `[1, 4] × [1, 4]` | 0.95 | 0.40 | PASS |
+| 3 | MVM/Gemm | `[1, 4]` | 0.56 | 0.35 | PASS |
+| 4 | Conv | `[1, 3, 16, 16]` | 0.63 | 351.91 | PASS |
+
+> 注：编译时间为清除 `/tmp/ace-compile-cache` 后，从 PyTorch tracing、AIR 导出、`fhe_cmplr` 生成源码到本地 `.so` 编译链接的完整端到端耗时；执行时间为单样本 FHE 推理耗时，包含密钥生成、加密、计算与解密。
+
+当前已实测数据为 **CPU 与 GPU 小节**，FPGA 数据待后续在支持加速器的测试环境中补充。
 
 ### 7.1.2 FPGA 测试数据
 
@@ -53,11 +80,34 @@
 
 ## 7.2 全同态加密编译器模型编译测试
 
-本节给出 ACE 全同态加密编译器对典型神经网络模型端到端编译与执行的测试数据。均采用 Phantom GPU 后端。下面按 CPU、GPU 与 FPGA 三个小节组织，当前已实测数据为 **GPU 小节**。
+本节给出 ACE 全同态加密编译器对典型神经网络模型端到端编译与执行的测试数据。下面按 CPU、GPU 与 FPGA 三个小节组织，当前已实测数据为 **CPU 与 GPU 小节**。
 
 ### 7.2.1 CPU 测试数据
 
-> 待补充：在 CPU（ant 后端）上重复 7.2.3 节相同模型与流程，记录编译/执行时间与结果。
+测试环境：CPU-only，Linux x86_64，ACE `ant` 后端（library=ant，device=cpu）。
+测试模型：AlexNet、ResNet-20、VGG16；x2 精度冒烟测试（平方激活，纯密文乘法链验证 CKKS 精度）。
+测试命令：
+
+```bash
+# CPU ant 后端
+pytest tests/regression/alexnet_x2/test_alexnet_x2_smoke.py -k ant -v -s
+pytest tests/regression/resnet_x2/test_resnet20_x2_smoke.py -k ant -v -s
+pytest tests/regression/vgg16_x2/test_vgg16_x2_smoke.py -k ant -v -s
+```
+
+#### 表 7.2-1 模型编译与执行结果（CPU）
+
+| 编号 | 模型 | 数据集 | Frontend | Cache | 端到端耗时 | 最大绝对误差 | 执行结果 |
+|---|---|---:|---|---|---:|---|---|
+| 1 | AlexNet | CIFAR-10 | torch-via-onnx | HIT | 1087.98 s (18:07) | 2.33e-08 | PASS (abs err<=0.001) |
+| 2 | ResNet-20 | CIFAR-10 | torch | MISS | 439.36 s (07:19) | 5.44e-07 | PASS (abs err<=0.001) |
+| 3 | VGG16 | CIFAR-10 | torch-via-onnx | MISS | 1120.37 s (18:40) | 5.67e-05 | PASS (abs err<=0.001) |
+
+> 注：
+> - 端到端耗时 = 清除缓存后从 PyTorch tracing/export → AIR → fhe_cmplr 编译链接到 FHE 推理输出的完整 pytest 耗时。AlexNet 命中缓存（此前已编译），ResNet-20 与 VGG16 为冷编译。
+> - 最大绝对误差 = FHE 推理 logit 与明文 logits 之差的绝对值上限（\|fhe_logits - plain_logits\|），判断标准为 ≤ 0.001。
+> - x2 精度测试使用平方激活（x²），将 ReLU 替换为纯密文乘法，直接衡量 CKKS 绝对噪声水平。
+> - ResNet-20 mul_depth=30，VGG16 mul_depth=29，AlexNet mul_depth=25；多项式次数均为 131072。
 
 ### 7.2.2 FPGA 测试数据
 
@@ -70,20 +120,32 @@
 测试命令：
 
 ```bash
-CUDA_VISIBLE_DEVICES=0 python3 -m pytest benchmark/lr/test_lr_latency.py -k "phantom" -v -s
-CUDA_VISIBLE_DEVICES=0 python3 -m pytest benchmark/lenet/test_lenet_latency.py -k "phantom" -v -s
-CUDA_VISIBLE_DEVICES=0 python3 -m pytest benchmark/resnet/test_latency.py -k "resnet20 and phantom" -v -s
+# LR / LeNet / ResNet-20 端到端 FHE 编译与单张 smoke 验证
+CUDA_VISIBLE_DEVICES=0 python3 -m pytest tests/regression/lr/test_lr_smoke.py -k "phantom" -v -s
+CUDA_VISIBLE_DEVICES=0 python3 -m pytest tests/regression/lenet/test_lenet_smoke.py -k "phantom" -v -s
+CUDA_VISIBLE_DEVICES=0 python3 -m pytest tests/regression/resnet/test_resnet_smoke.py -k "resnet20 and phantom" -v -s
 ```
 
-#### 表 7.2-1 模型编译与执行结果（GPU）
+#### 表 7.2-3 模型编译与执行结果（GPU）
 
-| 编号 | 模型 | 数据集 | 编译时间 | 执行总时间 | 平均每张 | 最小单张 | 最大单张 | 执行结果 |
-|---|---|---|---:|---:|---:|---:|---:|---|
-| 1 | LR | toy | 6.19 s | 90.5 ms | 9.0 ms | 7.0 ms | 26.7 ms | PASS (10/10) |
-| 2 | LeNet | CIFAR-10 | 10.02 s | 17,558.1 ms | 1,755.8 ms | 1,733.3 ms | 1,858.3 ms | PASS (10/10) |
-| 3 | ResNet-20 | CIFAR-10 | 22.83 s | 82,353.4 ms | 8,235.3 ms | 8,197.7 ms | 8,290.7 ms | PASS (10/10) |
+| 编号 | 模型 | 数据集 | 编译时间 | 总耗时 | 推理预测 | 执行结果 |
+|---|---|---|---:|---:|---:|---|
+| 1 | LR | toy | 0.52 s | 0.52 s | plaintext=0, fhe=0 | PASS (1/1) |
+| 2 | LeNet | CIFAR-10 | 12.02 s | 12.02 s | plaintext=0, fhe=0 | PASS (1/1) |
+| 3 | ResNet-20 | CIFAR-10 | 41.20 s | 41.20 s | plaintext=3, fhe=3 | PASS (1/1) |
 
-> 注：编译时间为清除 `/tmp/ace-compile-cache` 后从 tracing 到生成 `.so` 的端到端耗时（由 pytest 总耗时减去命中缓存时的执行耗时估算）。执行时间为 10 张图片推理的 `DatasetResult.timing` 统计值。
+> 注：
+> - 本组测试使用 `tests/regression/` 下的 smoke 用例，编译端到端时间由 pytest 总耗时反映（LR / LeNet 命中缓存，ResNet-20 冷编译一次）。
+> - 执行结果为单张图片 FHE 推理与明文 PyTorch 推理的预测类别是否一致，强验证密文路径正确性。
+> - 更完整的十张图片延迟数据可参考 `benchmark/{lr,lenet,resnet}/test_*_latency.py`。
+
+原始日志保存位置：
+
+| 模型 | 日志文件 |
+|---|---|
+| LR | [`testing/7.2_gpu_lr_x2.log`](7.2_gpu_lr_x2.log) |
+| LeNet | [`testing/7.2_gpu_lenet_x2.log`](7.2_gpu_lenet_x2.log) |
+| ResNet-20 | [`testing/7.2_gpu_resnet20_x2.log`](7.2_gpu_resnet20_x2.log) |
 
 
 
@@ -206,4 +268,3 @@ python3 benchmark/accuracy/bench_accuracy.py --output accuracy_report.json
 | resnet44_cifar10_gpu | PASS |
 | resnet56_cifar10_gpu | PASS |
 | resnet110_cifar10_gpu | PASS |
-

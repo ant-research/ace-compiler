@@ -1,0 +1,57 @@
+=============================================================================================================== test session starts ===============================================================================================================
+platform linux -- Python 3.12.3, pytest-9.1.0, pluggy-1.6.0 -- /opt/ace-env/bin/python3
+cachedir: .pytest_cache
+benchmark: 5.2.3 (defaults: timer=time.perf_counter disable_gc=False min_rounds=5 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)
+rootdir: /app/ace-compiler-iiecas
+configfile: pytest.ini
+plugins: datadir-1.8.0, benchmark-5.2.3, regressions-2.11.0
+collected 34 items                                                                                                                                                                                                                                
+
+tests/regression/sample/test_sample_smoke_antlib.py::test_op_compile[linear_op] PASSED                                                                                                                                                      [  2%]
+tests/regression/sample/test_sample_smoke_antlib.py::test_op_compile[linear_relu_op] PASSED                                                                                                                                                 [  5%]
+tests/regression/sample/test_sample_smoke_antlib.py::test_op_compile[relu_linear_op] PASSED                                                                                                                                                 [  8%]
+tests/regression/sample/test_sample_smoke_antlib.py::test_op_compile[linear_bias_op] PASSED                                                                                                                                                 [ 11%]
+tests/regression/sample/test_sample_smoke_antlib.py::test_op_compile[mlp_op] PASSED                                                                                                                                                         [ 14%]
+tests/regression/sample/test_sample_smoke_antlib.py::test_op_compile[flatten_op] PASSED                                                                                                                                                     [ 17%]
+tests/regression/sample/test_sample_smoke_antlib.py::test_op_compile[conv2d_op] PASSED                                                                                                                                                      [ 20%]
+tests/regression/sample/test_sample_smoke_antlib.py::test_op_compile[conv2d_relu_op] PASSED                                                                                                                                                 [ 23%]
+tests/regression/sample/test_sample_smoke_antlib.py::test_op_compile[depthwise_conv2d_op] PASSED                                                                                                                                            [ 26%]
+tests/regression/sample/test_sample_smoke_antlib.py::test_op_compile[avg_pool2d_op] PASSED                                                                                                                                                  [ 29%]
+tests/regression/sample/test_sample_smoke_antlib.py::test_op_compile[max_pool2d_op] PASSED                                                                                                                                                  [ 32%]
+tests/regression/sample/test_sample_smoke_antlib.py::test_op_compile[global_avg_pool_op] PASSED                                                                                                                                             [ 35%]
+tests/regression/sample/test_sample_smoke_antlib.py::test_op_compile[add_op] PASSED                                                                                                                                                         [ 38%]
+tests/regression/sample/test_sample_smoke_antlib.py::test_op_compile[mul_op] PASSED                                                                                                                                                         [ 41%]
+tests/regression/sample/test_sample_smoke_antlib.py::test_op_compile[relu_op] PASSED                                                                                                                                                        [ 44%]
+tests/regression/sample/test_sample_smoke_antlib.py::test_op_compile[add_const] PASSED                                                                                                                                                      [ 47%]
+tests/regression/sample/test_sample_smoke_antlib.py::test_op_compile[mult_const] PASSED                                                                                                                                                     [ 50%]
+tests/regression/sample/test_sample_smoke_antlib.py::test_op_compile[gemm_49x3] PASSED                                                                                                                                                      [ 52%]
+tests/regression/sample/test_sample_smoke_antlib.py::test_op_compile[relu_gemm] PASSED                                                                                                                                                      [ 55%]
+tests/regression/sample/test_sample_smoke_antlib.py::test_op_compile[conv2d] PASSED                                                                                                                                                         [ 58%]
+tests/regression/sample/test_sample_smoke_antlib.py::test_op_compile[avg_pool_2d] PASSED                                                                                                                                                    [ 61%]
+tests/regression/sample/test_sample_smoke_antlib.py::test_op_compile[avg_pool_2d_with_stride] PASSED                                                                                                                                        [ 64%]
+tests/regression/sample/test_sample_smoke_antlib.py::test_op_compile[global_avg_pool] PASSED                                                                                                                                                [ 67%]
+tests/regression/sample/test_sample_smoke_antlib.py::test_op_compile[relu_avg_pool] PASSED                                                                                                                                                  [ 70%]
+tests/regression/sample/test_sample_smoke_antlib.py::test_op_compile[avg_pool_flatten] PASSED                                                                                                                                               [ 73%]
+tests/regression/sample/test_sample_smoke_antlib.py::test_func_compile[add_func] PASSED                                                                                                                                                     [ 76%]
+tests/regression/sample/test_sample_smoke_antlib.py::test_func_compile[mul_func] PASSED                                                                                                                                                     [ 79%]
+tests/regression/sample/test_sample_smoke_antlib.py::test_func_compile[square_func] PASSED                                                                                                                                                  [ 82%]
+tests/regression/sample/test_sample_smoke_antlib.py::test_func_compile[relu_func] PASSED                                                                                                                                                    [ 85%]
+tests/regression/sample/test_sample_smoke_antlib.py::test_func_compile[conditional_chain_func] PASSED                                                                                                                                       [ 88%]
+tests/regression/sample/test_sample_smoke_antlib.py::test_func_smoke[add_func] PASSED                                                                                                                                                       [ 91%]
+tests/regression/sample/test_sample_smoke_antlib.py::test_func_smoke[mul_func] PASSED                                                                                                                                                       [ 94%]
+tests/regression/sample/test_sample_smoke_antlib.py::test_func_smoke[relu_func] PASSED                                                                                                                                                      [ 97%]
+tests/regression/sample/test_sample_smoke_antlib.py::test_func_smoke[conditional_chain_func] PASSED                                                                                                                                         [100%]
+
+=============================================================================================================== 34 passed in 29.12s ===============================================================================================================
+ckks_param: _provider = 0, _poly_degree = 32, mul_depth = 0, input_lev = 1, _first_mod_size = 60, _scaling_mod_size = 56, _num_q_parts = 1, _num_p = 1, _num_rot_idx = 0,_hamming_weight = 192
+Total memory size for keys: rot_key_cnt = 0, rot_key_size = 0 bytes, total_key_size = 2888 bytes
+Total memory size for weight plain: cnt = 0, size = 0 bytes
+ckks_param: _provider = 0, _poly_degree = 32, mul_depth = 1, input_lev = 2, _first_mod_size = 60, _scaling_mod_size = 56, _num_q_parts = 2, _num_p = 1, _num_rot_idx = 0,_hamming_weight = 192
+Total memory size for keys: rot_key_cnt = 0, rot_key_size = 0 bytes, total_key_size = 6064 bytes
+Total memory size for weight plain: cnt = 0, size = 0 bytes
+ckks_param: _provider = 0, _poly_degree = 32, mul_depth = 11, input_lev = 12, _first_mod_size = 60, _scaling_mod_size = 56, _num_q_parts = 3, _num_p = 4, _num_rot_idx = 0,_hamming_weight = 192
+Total memory size for keys: rot_key_cnt = 0, rot_key_size = 0 bytes, total_key_size = 39448 bytes
+Total memory size for weight plain: cnt = 17, size = 42440 bytes
+ckks_param: _provider = 0, _poly_degree = 32, mul_depth = 0, input_lev = 1, _first_mod_size = 60, _scaling_mod_size = 56, _num_q_parts = 1, _num_p = 1, _num_rot_idx = 0,_hamming_weight = 192
+Total memory size for keys: rot_key_cnt = 0, rot_key_size = 0 bytes, total_key_size = 2888 bytes
+Total memory size for weight plain: cnt = 0, size = 0 bytes

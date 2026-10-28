@@ -1,0 +1,65 @@
+[INFO] ace.fhe.backend.antlib: Library: using ant for build...
+[INFO] ace.fhe.frontend.torch.torch_frontend: Traced successfully, Output shape: [1, 4]
+/app/ace-compiler/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/app/ace-compiler/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/app/ace-compiler/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/app/ace-compiler/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/app/ace-compiler/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+/app/ace-compiler/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+[INFO] ace.fhe.ir.frontends.torch.torch_trace: AIR IR exported successfully!
+[INFO] ace.fhe.driver.builder: [SUCCESS] ANT-ANT build succeeded.
+[INFO] ace.fhe.cache: [Cache] MISS: Compiled to /tmp/ace-compile-cache/add_op-torch-ant-cpu/shape_1x4_dtype_torch_float32/68c759aa7338cc73/libant_cpu_465438.so
+[INFO] ace.fhe.backend.antlib: Library: using ant for build...
+[INFO] ace.fhe.frontend.torch.torch_frontend: Traced successfully, Output shape: [1, 4]
+ckks_param: _provider = 0, _poly_degree = 8, mul_depth = 0, input_lev = 1, _first_mod_size = 60, _scaling_mod_size = 56, _num_q_parts = 1, _num_p = 1, _num_rot_idx = 0,_hamming_weight = 192
+/app/ace-compiler/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/app/ace-compiler/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/app/ace-compiler/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/app/ace-compiler/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/app/ace-compiler/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+/app/ace-compiler/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+[INFO] ace.fhe.ir.frontends.torch.torch_trace: AIR IR exported successfully!
+[INFO] ace.fhe.driver.builder: [SUCCESS] ANT-ANT build succeeded.
+[INFO] ace.fhe.cache: [Cache] MISS: Compiled to /tmp/ace-compile-cache/mul_op-torch-ant-cpu/shape_1x4_dtype_torch_float32/68c759aa7338cc73/libant_cpu_790123.so
+[INFO] ace.fhe.backend.antlib: Library: using ant for build...
+[INFO] ace.fhe.frontend.torch.torch_frontend: Traced successfully, Output shape: [1, 4]
+Total memory size for keys: rot_key_cnt = 0, rot_key_size = 0 bytes, total_key_size = 968 bytes
+Total memory size for weight plain: cnt = 0, size = 0 bytes
+ckks_param: _provider = 0, _poly_degree = 8, mul_depth = 1, input_lev = 2, _first_mod_size = 60, _scaling_mod_size = 56, _num_q_parts = 2, _num_p = 1, _num_rot_idx = 0,_hamming_weight = 192
+/app/ace-compiler/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/app/ace-compiler/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/app/ace-compiler/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/app/ace-compiler/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/app/ace-compiler/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+/app/ace-compiler/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+[INFO] ace.fhe.ir.frontends.torch.torch_trace: AIR IR exported successfully!
+[INFO] ace.fhe.driver.builder: [SUCCESS] ANT-ANT build succeeded.
+[INFO] ace.fhe.cache: [Cache] MISS: Compiled to /tmp/ace-compile-cache/linear_op-torch-ant-cpu/shape_1x4_dtype_torch_float32/68c759aa7338cc73/libant_cpu_199250.so
+[INFO] ace.fhe.backend.antlib: Library: using ant for build...
+[INFO] ace.fhe.frontend.torch.torch_frontend: Traced successfully, Output shape: [1, 16, 14, 14]
+Total memory size for keys: rot_key_cnt = 0, rot_key_size = 0 bytes, total_key_size = 1840 bytes
+Total memory size for weight plain: cnt = 0, size = 0 bytes
+ckks_param: _provider = 0, _poly_degree = 16, mul_depth = 2, input_lev = 3, _first_mod_size = 60, _scaling_mod_size = 56, _num_q_parts = 2, _num_p = 2, _num_rot_idx = 4,_hamming_weight = 192
+/app/ace-compiler/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/app/ace-compiler/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/app/ace-compiler/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/app/ace-compiler/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/app/ace-compiler/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+/app/ace-compiler/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+[INFO] ace.fhe.ir.frontends.torch.torch_trace: AIR IR exported successfully!
+[INFO] ace.fhe.driver.builder: [SUCCESS] ANT-ANT build succeeded.
+[INFO] ace.fhe.cache: [Cache] MISS: Compiled to /tmp/ace-compile-cache/conv2d_op-torch-ant-cpu/shape_1x3x16x16_dtype_torch_float32/68c759aa7338cc73/libant_cpu_764845.so
+Backend: ant/cpu
+--------------------------------------------------------------------------------
+Operator        Input                  Compile(s)     Exec(ms)   Result
+--------------------------------------------------------------------------------
+add_op          [1, 4] + [1, 4]              0.86         1.89     PASS
+mul_op          [1, 4] × [1, 4]              0.95         0.40     PASS
+linear_op       [1, 4]                       0.56         0.35     PASS
+conv2d_op       [1, 3, 16, 16]               0.63       351.91     PASS
+--------------------------------------------------------------------------------
+Total memory size for keys: rot_key_cnt = 4, rot_key_size = 11200 bytes, total_key_size = 16240 bytes
+Total memory size for weight plain: cnt = 6, size = 2480 bytes
+ckks_param: _provider = 0, _poly_degree = 8192, mul_depth = 4, input_lev = 5, _first_mod_size = 60, _scaling_mod_size = 56, _num_q_parts = 3, _num_p = 2, _num_rot_idx = 42,_hamming_weight = 192
+Total memory size for keys: rot_key_cnt = 42, rot_key_size = 115619952 bytes, total_key_size = 119945864 bytes
+Total memory size for weight plain: cnt = 68, size = 17109792 bytes

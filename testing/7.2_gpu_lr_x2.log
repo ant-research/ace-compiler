@@ -1,0 +1,40 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-9.1.0, pluggy-1.6.0 -- /opt/ace-env/bin/python3
+cachedir: .pytest_cache
+benchmark: 5.2.3 (defaults: timer=time.perf_counter disable_gc=False min_rounds=5 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)
+rootdir: /work/ace-fhe/ace-compiler
+configfile: pytest.ini
+plugins: anyio-4.14.2, regressions-2.11.0, datadir-1.8.0, benchmark-5.2.3
+collecting ... collected 2 items / 1 deselected / 1 selected
+
+tests/regression/lr/test_lr_smoke.py::test_smoke_phantom[lr_1d] [INFO] ace.fhe.backend.phantom: Library: using phantom for build...
+[INFO] ace.fhe.backend.phantom: Library: using phantom for build...
+[INFO] ace.fhe.cache: [Cache] HIT: Loading from /tmp/ace-compile-cache/lr_1d-torch-phantom-cuda/shape_1x16_dtype_torch_float32/ba58676a564801d6/libphantom_cuda_637454.so
+[DEBUG] ace.fhe.runtime.loader: === Runtime Configuration ===
+Input Count: 1
+Output Count: 1
+
+CKKS Parameters:
+  Poly Degree: 65536
+  Mul Depth: 2
+  Rot Idxs: [-32, -16, 0, 1, 2, 4, 6, 24]
+
+Encode Schemes (1):
+  [0] x - Shape: [1,16,1,1]
+      Count: 1
+
+Decode Schemes (1):
+  [0] output - Shape: [1,10,1,1]
+      Count: 1
+
+[INFO] ace.runtime: [phantom] PhantomContext created (N=65536) [0.09s]
+[INFO] ace.runtime: [kms] PhantomContext received (N=65536)
+[INFO] ace.runtime: [kms] KeyMode::ONLINE — generating keys (sk, pk, rlk, rtk)...
+[INFO] ace.runtime: [kms] Keys generated [gen_keys=0.01s]
+[DEBUG] ace.runtime: [kms] key handles: sk=0x18f370f0 pk=0x1787a6a0 rlk=0x19e19c80 rtk=0x19e197c0
+[DEBUG] ace.runtime: [phantom] ckks_param: _provider=3, _poly_degree=65536, _sec_level=0, mul_depth=2, _first_mod_size=60, _scaling_mod_size=56, _num_q_parts=2, _num_rot_idx=8, _num_prime_parts=4
+[DEBUG] ace.runtime: [timing] FheContext init: total=0.11s | key_mgr=0.01s encoder=0.00s evaluator=0.00s galois_init=0.01s enc_mgr=0.00s
+[lr_1d] plaintext=0, fhe=0
+PASSED
+
+======================= 1 passed, 1 deselected in 0.52s ========================
