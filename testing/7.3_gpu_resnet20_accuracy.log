@@ -1,0 +1,22 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-9.1.0, pluggy-1.6.0 -- /opt/ace-env/bin/python3
+cachedir: .pytest_cache
+benchmark: 5.2.3 (defaults: timer=time.perf_counter disable_gc=False min_rounds=5 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)
+rootdir: /work/ace-fhe/ace-compiler
+configfile: pytest.ini
+plugins: anyio-4.14.2, regressions-2.11.0, datadir-1.8.0, benchmark-5.2.3
+collecting ... collected 9 items / 8 deselected / 1 selected
+
+benchmark/resnet/test_accuracy.py::TestResNet20Accuracy::test_accuracy[phantom-cuda-100] [INFO] ace.fhe.backend.phantom: Library: using phantom for build...
+[INFO] ace.fhe.driver.driver: Loading relu_vr_data from file: /opt/ace-env/lib/python3.12/site-packages/ace/model/resnet/profiles/resnet20_cifar10.json
+[INFO] ace.fhe.cache: [Cache] HIT: Loading from /tmp/ace-compile-cache/resnet20_cifar10-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/eb7a877bb0b86da7_vr8c6d9768e27cd706/libphantom_cuda_837886.so
+[INFO] ace.runtime: [phantom] PhantomContext created (N=65536) [2.86s]
+[INFO] ace.runtime: [kms] PhantomContext received (N=65536)
+[INFO] ace.runtime: [kms] KeyMode::ONLINE — generating keys (sk, pk, rlk, rtk)...
+[INFO] ace.runtime: [kms] Keys generated [gen_keys=0.07s]
+[INFO] ace.runtime: [kms] bootstrap key prefetch (hoist) 0.000s
+
+  accuracy: top1=0.9500  fhe_correct=95/100  plain_correct=95/100  mismatch=none
+PASSED
+
+================= 1 passed, 8 deselected in 895.55s (0:14:55) ==================

@@ -1,0 +1,20 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-9.1.0, pluggy-1.6.0 -- /opt/ace-env/bin/python3
+cachedir: .pytest_cache
+benchmark: 5.2.3 (defaults: timer=time.perf_counter disable_gc=False min_rounds=5 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)
+rootdir: /work/ace-fhe/ace-compiler
+configfile: pytest.ini
+plugins: anyio-4.14.2, regressions-2.11.0, datadir-1.8.0, benchmark-5.2.3
+collecting ... collected 9 items / 8 deselected / 1 selected
+
+benchmark/lr/test_accuracy.py::TestLRAccuracy::test_accuracy[phantom-cuda-100] [INFO] ace.fhe.backend.phantom: Library: using phantom for build...
+[INFO] ace.fhe.cache: [Cache] HIT: Loading from /tmp/ace-compile-cache/lr_1d-torch-phantom-cuda/shape_1x16_dtype_torch_float32/ba58676a564801d6/libphantom_cuda_215461.so
+[INFO] ace.runtime: [phantom] PhantomContext created (N=65536) [0.07s]
+[INFO] ace.runtime: [kms] PhantomContext received (N=65536)
+[INFO] ace.runtime: [kms] KeyMode::ONLINE — generating keys (sk, pk, rlk, rtk)...
+[INFO] ace.runtime: [kms] Keys generated [gen_keys=0.01s]
+
+  accuracy: top1=1.0000  fhe_correct=100/100  plain_correct=100/100  mismatch=none
+PASSED
+
+======================= 1 passed, 8 deselected in 1.04s ========================

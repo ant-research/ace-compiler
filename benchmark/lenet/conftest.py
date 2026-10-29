@@ -66,5 +66,13 @@ def _make_compiled_fixture(spec):
 compiled_lenet = pytest.fixture(scope="session")(_make_compiled_fixture(LENET_CIFAR10))
 
 
+@pytest.fixture(scope="session")
+def lenet_model():
+    """Session-scoped LeNet model for plaintext inference."""
+    model = LENET_CIFAR10.create_model()
+    model.eval()
+    return model
+
+
 def pytest_configure(config):
     config.addinivalue_line("markers", "lenet: LeNet benchmark tests")

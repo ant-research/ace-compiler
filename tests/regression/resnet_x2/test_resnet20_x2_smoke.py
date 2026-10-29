@@ -34,9 +34,18 @@ import copy
 
 import pytest
 import torch
+from utils import requires_gpu
 
 from ace import fhe
 from ace.model.spec_resnet_x2 import RESNET20_X2
+
+
+def _phantom_available():
+    try:
+        from ace.fhe.backend import get_library_impl
+        return get_library_impl("phantom", device="cuda").check_available()
+    except Exception:
+        return False
 
 
 # Absolute error tolerance. The x^2 forward is pure cipher*cipher MUL
@@ -91,6 +100,61 @@ def test_resnet20_x2_precision_ant():
     expect = plain_logits.flatten().float()
 
     assert not torch.isnan(expect).any(), "plaintext output contains NaN (BN calibration broken?)"
+    assert not torch.isnan(fhe_logits).any(), "FHE output contains NaN"
+
+    abs_errs = (fhe_logits - expect).abs().tolist()
+    for i, (r, e, ae) in enumerate(zip(fhe_logits.tolist(), expect.tolist(), abs_errs)):
+        status = "ok" if ae < ABS_ERROR_TOL else "FAILED"
+        print(f"index: {i}, result: {r:+.6f}, expect: {e:+.6f}, abs err={ae:.2e}, {status}")
+
+    max_abs = max(abs_errs)
+    print(f"\n[summary] max abs err={max_abs:.2e} (tol {ABS_ERROR_TOL:g})")
+
+    assert all(ae < ABS_ERROR_TOL for ae in abs_errs), (
+        f"max abs err {max_abs:.2e} exceeds tolerance {ABS_ERROR_TOL:g}"
+    )
+
+
+@pytest.mark.slow
+@requires_gpu
+def test_resnet20_x2_precision_phantom():
+    """Ciphertext vs plaintext logit ABS err on random input (phantom-cuda)."""
+    if not _phantom_available():
+        pytest.skip("phantom-cuda compiler not available")
+
+    spec = RESNET20_X2
+    model = spec.create_model()
+    model.eval()
+
+    probe = spec.example_inputs[0]
+
+    compile_kwargs = copy.deepcopy(spec.compile_options["phantom"])
+
+    compiled = fhe.compile(
+        frontend="torch",
+        library="phantom",
+        device="cuda",
+        encrypt_inputs=spec.encrypt_inputs,
+        **compile_kwargs,
+    )(model)
+    prog = compiled.fhe_compile((probe,))
+
+    runner = fhe.FHERuntime(prog.package)
+    runner.init()
+
+    with torch.no_grad():
+        plain_logits = model(probe)
+
+    fhe_out = runner.run(probe)
+    runner.finalize()
+
+    assert fhe_out is not None, "FHE inference returned None"
+    assert isinstance(fhe_out, torch.Tensor), f"expected Tensor, got {type(fhe_out)}"
+
+    fhe_logits = fhe_out.flatten().float()
+    expect = plain_logits.flatten().float()
+
+    assert not torch.isnan(expect).any(), "plaintext output contains NaN"
     assert not torch.isnan(fhe_logits).any(), "FHE output contains NaN"
 
     abs_errs = (fhe_logits - expect).abs().tolist()

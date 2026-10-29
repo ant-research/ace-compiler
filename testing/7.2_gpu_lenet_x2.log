@@ -5,21 +5,18 @@ benchmark: 5.2.3 (defaults: timer=time.perf_counter disable_gc=False min_rounds=
 rootdir: /work/ace-fhe/ace-compiler
 configfile: pytest.ini
 plugins: anyio-4.14.2, regressions-2.11.0, datadir-1.8.0, benchmark-5.2.3
-collecting ... collected 2 items / 1 deselected / 1 selected
+collecting ... collected 1 item
 
-tests/regression/lenet/test_lenet_smoke.py::test_smoke_phantom[lenet_cifar10] [INFO] ace.fhe.backend.phantom: Library: using phantom for build...
+tests/regression/lenet_x2/test_lenet_x2_smoke.py::test_lenet_x2_precision_phantom [INFO] ace.fhe.backend.phantom: Library: using phantom for build...
 [INFO] ace.fhe.backend.phantom: Library: using phantom for build...
-[INFO] ace.fhe.driver.driver: Profiling ReLU VR from example_inputs (built-in mode)
-[INFO] ace.fhe.driver.driver: Applied BN folding before built-in ReLU profiling
-[INFO] ace.fhe.driver.driver: Built-in profiling found 3 ReLU nodes
-[INFO] ace.fhe.cache: [Cache] HIT: Loading from /tmp/ace-compile-cache/lenet_cifar10-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/eb7a877bb0b86da7_vra522414af9fdd00d/libphantom_cuda_453391.so
+[INFO] ace.fhe.cache: [Cache] HIT: Loading from /tmp/ace-compile-cache/lenet_x2-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/0b1d09fd956040e3/libphantom_cuda_718124.so
 [DEBUG] ace.fhe.runtime.loader: === Runtime Configuration ===
 Input Count: 1
 Output Count: 1
 
 CKKS Parameters:
   Poly Degree: 65536
-  Mul Depth: 32
+  Mul Depth: 17
   Rot Idxs: [-4096, -2048, -1024, -64, -33, -32, -31, -17, -16, -15, -1, 0, 1, 2, 3, 4, 6, 8, 10, 12, 14, 15, 16, 17, 24, 31, 32, 33, 40, 48, 64, 96, 128, 192, 256, 384, 512, 576, 768, 1024, 1040, 1280, 1536, 1792, 2048, 2304, 3072]
 
 Encode Schemes (1):
@@ -30,16 +27,23 @@ Decode Schemes (1):
   [0] output - Shape: [1,10,1,1]
       Count: 1
 
-[INFO] ace.runtime: [phantom] PhantomContext created (N=65536) [3.03s]
+[INFO] ace.runtime: [phantom] PhantomContext created (N=65536) [0.95s]
 [INFO] ace.runtime: [kms] PhantomContext received (N=65536)
 [INFO] ace.runtime: [kms] KeyMode::ONLINE — generating keys (sk, pk, rlk, rtk)...
-[INFO] ace.runtime: [kms] Keys generated [gen_keys=0.03s]
-[DEBUG] ace.runtime: [kms] key handles: sk=0x41a7e320 pk=0xde96e50 rlk=0x59fb5390 rtk=0x59f90f10
-[DEBUG] ace.runtime: [timing] init_bootstrap: total=6.74s | bts_ctor=0.00s prep_mod=5.37s rotkey=0.00s galgen=0.20s LT=1.17s
-[INFO] ace.runtime: [kms] bootstrap key prefetch (hoist) 0.000s
-[DEBUG] ace.runtime: [phantom] ckks_param: _provider=3, _poly_degree=65536, _sec_level=0, mul_depth=32, _first_mod_size=60, _scaling_mod_size=56, _num_q_parts=3, _num_rot_idx=47, _num_prime_parts=34
-[DEBUG] ace.runtime: [timing] FheContext init: total=9.81s | key_mgr=0.03s encoder=0.00s evaluator=0.00s galois_init=6.74s enc_mgr=0.00s
-[lenet_cifar10] plaintext=0, fhe=0
-PASSED
+[INFO] ace.runtime: [kms] Keys generated [gen_keys=0.02s]
+[DEBUG] ace.runtime: [kms] key handles: sk=0x23328a50 pk=0x23fcfa90 rlk=0x3cff4720 rtk=0x3cfef0f0
+[DEBUG] ace.runtime: [phantom] ckks_param: _provider=3, _poly_degree=65536, _sec_level=0, mul_depth=17, _first_mod_size=60, _scaling_mod_size=56, _num_q_parts=3, _num_rot_idx=47, _num_prime_parts=19
+[DEBUG] ace.runtime: [timing] FheContext init: total=1.13s | key_mgr=0.02s encoder=0.00s evaluator=0.00s galois_init=0.16s enc_mgr=0.00s
+index: 0, result: -0.154975, expect: -0.154967, abs err=8.61e-06, ok
+index: 1, result: +0.103735, expect: +0.103731, abs err=4.46e-06, ok
+index: 2, result: -0.090585, expect: -0.090589, abs err=4.51e-06, ok
+index: 3, result: -0.124755, expect: -0.124753, abs err=1.41e-06, ok
+index: 4, result: +0.053657, expect: +0.053660, abs err=2.86e-06, ok
+index: 5, result: +0.064193, expect: +0.064187, abs err=5.67e-06, ok
+index: 6, result: -0.142613, expect: -0.142610, abs err=2.61e-06, ok
+index: 7, result: -0.052138, expect: -0.052132, abs err=6.17e-06, ok
+index: 8, result: -0.029282, expect: -0.029276, abs err=6.45e-06, ok
+index: 9, result: -0.081874, expect: -0.081870, abs err=3.71e-06, ok
 
-======================= 1 passed, 1 deselected in 12.02s =======================
+[summary] max abs err=8.61e-06 (tol 0.001)
+PASSED

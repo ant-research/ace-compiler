@@ -41,9 +41,18 @@ import copy
 
 import pytest
 import torch
+from utils import requires_gpu
 
 from ace import fhe
 from ace.model.spec_lenet_x2 import LENET_X2
+
+
+def _phantom_available():
+    try:
+        from ace.fhe.backend import get_library_impl
+        return get_library_impl("phantom", device="cuda").check_available()
+    except Exception:
+        return False
 
 
 # Absolute error tolerance. 1e-3 gives ~10x margin over the empirical
@@ -53,21 +62,21 @@ from ace.model.spec_lenet_x2 import LENET_X2
 ABS_ERROR_TOL = 1e-3
 
 
-def _run_precision(spec):
+def _run_precision(spec, library="ant", device="cpu"):
     """Compile at x^2, run ciphertext + plaintext, print per-logit
-    abs err, assert all below the harness tolerance (ant-cpu)."""
+    abs err, assert all below the harness tolerance."""
     model = spec.create_model()
     model.eval()
 
     probe = spec.example_inputs[0]
 
-    compile_kwargs = copy.deepcopy(spec.compile_options["ant"])
+    compile_kwargs = copy.deepcopy(spec.compile_options[library])
     # No relu_vr_file: the model has no ReLU.
 
     compiled = fhe.compile(
         frontend="torch",
-        library="ant",
-        device="cpu",
+        library=library,
+        device=device,
         encrypt_inputs=spec.encrypt_inputs,
         **compile_kwargs,
     )(model)
@@ -103,6 +112,15 @@ def _run_precision(spec):
     assert all(ae < ABS_ERROR_TOL for ae in abs_errs), (
         f"max abs err {max_abs:.2e} exceeds tolerance {ABS_ERROR_TOL:g}"
     )
+
+
+@pytest.mark.slow
+@requires_gpu
+def test_lenet_x2_precision_phantom():
+    """Ciphertext vs plaintext logit ABS err on random input (phantom-cuda)."""
+    if not _phantom_available():
+        pytest.skip("phantom-cuda compiler not available")
+    _run_precision(LENET_X2, library="phantom", device="cuda")
 
 
 @pytest.mark.slow

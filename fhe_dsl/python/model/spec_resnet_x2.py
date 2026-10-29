@@ -53,9 +53,10 @@ def _calibrate_and_eval(model: torch.nn.Module) -> None:
     inf/NaN (measured). Pushing a few seeded batches through in train
     mode (no grads — running statistics only) captures the true
     activation distribution, after which eval forwards are ~ +-0.1
-    logits, matching the reference harness's expect-value scale. The
-    calibration is seeded, so plaintext and ciphertext paths see
-    bit-wise identical parameters.
+    logits, matching the reference harness's expect-value scale.
+
+    Weight initialization is already seeded by init_seed in ResNetX2.__init__;
+    this hook only calibrates BN running stats.
     """
     g = torch.Generator().manual_seed(_X2_INIT_SEED + 1)
     model.train()
@@ -81,9 +82,10 @@ RESNET20_X2 = ModelSpec(
     example_inputs=_x2_example_inputs(),
     encrypt_inputs=["x"],
     model_init_args=(BasicBlockX2, [3, 3, 3]),
-    model_init_kwargs={"num_classes": 10},
-    # untrained random init, BN running-stats calibrated deterministically
-    # (see _calibrate_and_eval) so x^2 magnitudes stay finite.
+    model_init_kwargs={"num_classes": 10, "init_seed": _X2_INIT_SEED + 2},
+    # untrained random init (seeded via init_seed for reproducibility),
+    # BN running-stats calibrated deterministically (see _calibrate_and_eval)
+    # so x^2 magnitudes stay finite.
     model_post_init=_calibrate_and_eval,
     compile_options={
         # ant (CPU) — EXACTLY the standard RESNET20_CIFAR10 ant recipe,
@@ -96,6 +98,10 @@ RESNET20_X2 = ModelSpec(
             "vec": {"ts": True, "rtt": True},
             "sihe": {"ts": True, "rtt": True},
             "poly": {"ts": True, "rtt": True},
+        },
+        "phantom": {
+            "vec": {"conv_parl": True, "ssf": True},
+            "ckks": {"q0": 60, "sf": 56, "N": 65536, "icl": 17, "sbm": True},
         },
     },
     expected_ops=["Conv", "BatchNormalization", "Mul", "Add", "GlobalAveragePool", "Gemm"],

@@ -94,8 +94,11 @@ class ResNetX2(nn.Module):
 
     Reference structure (conv biases included)."""
 
-    def __init__(self, block, layers, num_classes=10):
+    def __init__(self, block, layers, num_classes=10, init_seed=None):
         super().__init__()
+        if init_seed is not None:
+            torch.manual_seed(init_seed)
+
         self.inplanes = 16
         self.conv1 = conv3x3(3, 16)
         self.bn1 = nn.BatchNorm2d(16)

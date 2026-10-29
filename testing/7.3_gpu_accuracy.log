@@ -1,0 +1,41 @@
+[INFO] ace.fhe.backend.phantom: Library: using phantom for build...
+[INFO] ace.fhe.frontend.torch.torch_frontend: Traced successfully, Output shape: [1, 10]
+/work/ace-fhe/ace-compiler/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/work/ace-fhe/ace-compiler/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/work/ace-fhe/ace-compiler/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/work/ace-fhe/ace-compiler/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/work/ace-fhe/ace-compiler/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+/work/ace-fhe/ace-compiler/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+[INFO] ace.fhe.ir.frontends.torch.torch_trace: AIR IR exported successfully!
+[INFO] ace.fhe.backend.phantom: [phantom] option_args = ['-CKKS:N=65536']
+[INFO] ace.fhe.driver.builder: [SUCCESS] PHANTOM-PHANTOM build succeeded.
+[INFO] ace.fhe.cache: [Cache] MISS: Compiled to /tmp/ace-compile-cache/lr_1d-torch-phantom-cuda/shape_1x16_dtype_torch_float32/ba58676a564801d6/libphantom_cuda_215461.so
+[INFO] ace.runtime: [phantom] PhantomContext created (N=65536) [0.07s]
+[INFO] ace.runtime: [kms] PhantomContext received (N=65536)
+[INFO] ace.runtime: [kms] KeyMode::ONLINE — generating keys (sk, pk, rlk, rtk)...
+[INFO] ace.runtime: [kms] Keys generated [gen_keys=0.01s]
+Backend: phantom/cuda, images=100
+------------------------------------------------------------------------------------------
+Model          Encrypted%       Plain%       Delta%     Compile(s)     Infer(s)
+------------------------------------------------------------------------------------------
+LR                 100.00       100.00         0.00           6.60         1.48
+
+[INFO] ace.fhe.backend.phantom: Library: using phantom for build...
+[INFO] ace.fhe.driver.driver: Profiling ReLU VR from example_inputs (built-in mode)
+[INFO] ace.fhe.driver.driver: Applied BN folding before built-in ReLU profiling
+[INFO] ace.fhe.driver.driver: Built-in profiling found 3 ReLU nodes
+[INFO] ace.fhe.frontend.torch.torch_frontend: Traced successfully, Output shape: [1, 10]
+/work/ace-fhe/ace-compiler/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/work/ace-fhe/ace-compiler/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/work/ace-fhe/ace-compiler/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/work/ace-fhe/ace-compiler/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/work/ace-fhe/ace-compiler/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+/work/ace-fhe/ace-compiler/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+[INFO] ace.fhe.ir.frontends.torch.torch_trace: AIR IR exported successfully!
+[INFO] ace.fhe.backend.phantom: [phantom] option_args = ['-VEC:conv_parl:ssf', '-CKKS:N=65536:q0=60:sf=56:icl=17']
+[INFO] ace.fhe.driver.builder: [SUCCESS] PHANTOM-PHANTOM build succeeded.
+[INFO] ace.fhe.cache: [Cache] MISS: Compiled to /tmp/ace-compile-cache/lenet_cifar10-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/eb7a877bb0b86da7_vra522414af9fdd00d/libphantom_cuda_304762.so
+[INFO] ace.runtime: [phantom] PhantomContext created (N=65536) [3.21s]
+[INFO] ace.runtime: [kms] PhantomContext received (N=65536)
+[INFO] ace.runtime: [kms] KeyMode::ONLINE — generating keys (sk, pk, rlk, rtk)...
+[INFO] ace.runtime: [kms] Keys generated [gen_keys=0.03s]
