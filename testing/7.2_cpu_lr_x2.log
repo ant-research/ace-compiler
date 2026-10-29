@@ -1,0 +1,20 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-9.1.1, pluggy-1.7.0 -- /opt/ace-env/bin/python3
+cachedir: .pytest_cache
+benchmark: 5.3.0 (defaults: timer=time.perf_counter disable_gc=False min_rounds=5 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)
+rootdir: /app/ace-compiler
+configfile: pytest.ini
+plugins: datadir-1.8.0, platformdirs-4.13.5, benchmark-5.3.0, regressions-2.11.0
+collecting ... collected 2 items
+
+tests/regression/lr/test_lr_smoke.py::test_smoke_ant[lr_1d] /app/ace-compiler/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/app/ace-compiler/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/app/ace-compiler/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+[lr_1d] plaintext=0, fhe=0
+PASSED
+tests/regression/lr/test_lr_smoke.py::test_smoke_phantom[lr_1d] SKIPPED
+
+========================= 1 passed, 1 skipped in 0.80s =========================
+ckks_param: _provider = 0, _poly_degree = 128, mul_depth = 2, input_lev = 3, _first_mod_size = 60, _scaling_mod_size = 56, _num_q_parts = 2, _num_p = 2, _num_rot_idx = 8,_hamming_weight = 192
+Total memory size for keys: rot_key_cnt = 8, rot_key_size = 165760 bytes, total_key_size = 203056 bytes
+Total memory size for weight plain: cnt = 10, size = 29392 bytes

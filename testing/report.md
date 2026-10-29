@@ -87,11 +87,13 @@ python3 benchmark/basic_ops/basic_ops.py --library ant --device cpu
 ### 7.2.1 CPU 测试数据
 
 测试环境：CPU-only，Linux x86_64，ACE `ant` 后端（library=ant，device=cpu）。
-测试模型：AlexNet、ResNet-20、VGG16；x2 精度冒烟测试（平方激活，纯密文乘法链验证 CKKS 精度）。
+测试模型：LR、LeNet x²、AlexNet、ResNet-20、VGG16；x2 精度冒烟测试（平方激活，纯密文乘法链验证 CKKS 精度）。
 测试命令：
 
 ```bash
 # CPU ant 后端
+pytest tests/regression/lr/test_lr_smoke.py -k ant -v -s
+pytest tests/regression/lenet_x2/test_lenet_x2_smoke.py -k ant -v -s
 pytest tests/regression/alexnet_x2/test_alexnet_x2_smoke.py -k ant -v -s
 pytest tests/regression/resnet_x2/test_resnet20_x2_smoke.py -k ant -v -s
 pytest tests/regression/vgg16_x2/test_vgg16_x2_smoke.py -k ant -v -s
@@ -99,14 +101,15 @@ pytest tests/regression/vgg16_x2/test_vgg16_x2_smoke.py -k ant -v -s
 
 #### 表 7.2-1 模型编译与执行结果（CPU）
 
-| 编号 | 模型 | 数据集 | Frontend | Cache | 端到端耗时 | 最大绝对误差 | 执行结果 |
-|---|---|---:|---|---|---:|---|---|
-| 1 | AlexNet | CIFAR-10 | torch-via-onnx | HIT | 1087.98 s (18:07) | 2.33e-08 | PASS (abs err<=0.001) |
-| 2 | ResNet-20 | CIFAR-10 | torch | MISS | 439.36 s (07:19) | 5.44e-07 | PASS (abs err<=0.001) |
-| 3 | VGG16 | CIFAR-10 | torch-via-onnx | MISS | 1120.37 s (18:40) | 5.67e-05 | PASS (abs err<=0.001) |
+| 编号 | 模型 | 数据集 | 端到端耗时 | 最大绝对误差 | 执行结果 |
+|---|---|---:|---:|---|---|
+| 1 | LR | smoke | 0.80 s | — | PASS（标准 smoke） |
+| 2 | LeNet x² | smoke | — | 1.53e-07 | PASS (abs err<=0.001) |
+| 3 | AlexNet | smoke | 1087.98 s (18:07) | 2.33e-08 | PASS (abs err<=0.001) |
+| 4 | ResNet-20 | smoke | 439.36 s (07:19) | 5.44e-07 | PASS (abs err<=0.001) |
+| 5 | VGG16 | smoke | 1120.37 s (18:40) | 5.67e-05 | PASS (abs err<=0.001) |
 
 > 注：
-> - 端到端耗时 = PyTorch tracing/export → AIR → fhe_cmplr 编译链接到 FHE 推理输出的完整 pytest 耗时。
 > - 最大绝对误差 = FHE 推理 logit 与明文 logits 之差的绝对值上限（\|fhe_logits - plain_logits\|），判断标准为 ≤ 0.001。
 
 
