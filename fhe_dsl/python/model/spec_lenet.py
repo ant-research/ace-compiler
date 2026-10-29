@@ -19,6 +19,7 @@ import torch
 from ace.fhe.config.spec import ModelSpec
 
 from .lenet import LeNet
+from ace.model.dataset import load_cifar10_images
 
 _WEIGHTS_DIR = os.path.join(os.path.dirname(__file__), "lenet", "weights")
 _LENET_WEIGHTS = os.path.join(_WEIGHTS_DIR, "lenet_cifar10.pt")
@@ -27,15 +28,15 @@ _LENET_DATA_SEED = 2026
 
 
 def _lenet_example_input() -> torch.Tensor:
-    """Deterministic class-0 template input, matching train_lenet.py.
+    """Use a real normalized CIFAR-10 image as the compile example input.
 
-    A fixed template from the training distribution (same generator seed)
-    keeps the logit margins wide, so CKKS noise / ReLU approximation never
-    flips the argmax. Random torch.randn inputs land where margins are small.
+    The weights are now trained on real CIFAR-10, so the example input must
+    come from the same distribution as load_cifar10_images() to keep tracing
+    and ReLU VR profiling meaningful. We pick a deterministic image from the
+    test set (offset 0) so the spec stays reproducible.
     """
-    g = torch.Generator().manual_seed(_LENET_DATA_SEED)
-    templates = torch.randn(10, 3, 32, 32, generator=g) / 7.0
-    return templates[0:1].float()          # [1, 3, 32, 32]
+    images, _ = load_cifar10_images(1, offset=0)
+    return images[0:1]
 
 
 def _load_lenet_weights(model: torch.nn.Module) -> None:

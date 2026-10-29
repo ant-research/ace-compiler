@@ -2,23 +2,13 @@
 # Copyright (c) Ant Group Co., Ltd
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #
-
 """
 Train and save weights + VR profile for the LeNet FHE smoke model.
 
-LeNet is a small CNN (conv→relu→avgpool)×2 → flatten → linear. FHE smoke
-testing needs:
-
-1. Fixed, well-separated weights — random small nets produce low logit
-   margins that CKKS noise flips, and the ReLU polynomial approximation
-   needs realistic value ranges, not randn.
-2. A per-call-site ReLU VR profile (profiles/{name}.json), consumed via
-   ModelSpec::get_vr_profile() when weights_required=True, exactly like
-   ResNet. See model/resnet/profiles/*.json for the format.
-
-This script trains on deterministic CIFAR-shaped synthetic data with a
-fixed seed, saves weights, then generates the VR profile over the same
-normalized inputs.
+This script trains LeNet on the real CIFAR-10 dataset (not synthetic templates)
+so that the resulting weights give meaningful accuracy on CIFAR-10 benchmarks.
+The saved weights and ReLU VR profile are consumed by LENET_CIFAR10 in
+spec_lenet.py.
 
 Usage:
     python3 -m model.lenet.train_lenet    (source tree, from fhe_dsl/python)
@@ -30,6 +20,8 @@ import os
 
 import torch
 import torch.nn as nn
+import torchvision
+import torchvision.transforms as transforms
 
 from .lenet import LeNet
 
@@ -38,57 +30,95 @@ _PROFILES_DIR = os.path.join(os.path.dirname(__file__), "..", "profiles")
 _WEIGHTS_FILE = "lenet_cifar10.pt"
 
 SEED = 2026
-STEPS = 800
-BATCH = 64
-LR = 0.01
+EPOCHS = 50
+BATCH = 128
+LR = 0.001
+DATASET_ROOT = "/opt/dataset"
 
 
-def _synthetic_cifar_like(n_per_class: int = 64, noise: float = 0.15):
-    """Deterministic CIFAR-shaped data with wide class margins.
+def _load_cifar10():
+    """Load normalized CIFAR-10 train/test sets matching ace.model.dataset."""
+    mean = (0.4914, 0.4822, 0.4465)
+    std = (0.2470, 0.2435, 0.2616)
 
-    Each class is a fixed random template [3,32,32] + small noise. A small
-    CNN can separate these with large margins, and values are normalized to
-    a realistic range so ReLU VR profiling is meaningful. Keeps training
-    self-contained (no dataset download).
-    """
-    g = torch.Generator().manual_seed(SEED)
-    templates = torch.randn(10, 3, 32, 32, generator=g) / 7.0  # ~ ±0.15
-    xs, ys = [], []
-    for cls in range(10):
-        t = templates[cls]
-        samples = t + noise * torch.randn(n_per_class, 3, 32, 32, generator=g)
-        xs.append(samples)
-        ys.append(torch.full((n_per_class,), cls, dtype=torch.long))
-    return torch.cat(xs), torch.cat(ys)
+    transform_train = transforms.Compose([
+        transforms.RandomCrop(32, padding=4),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        transforms.Normalize(mean, std),
+    ])
+    transform_test = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize(mean, std),
+    ])
+
+    trainset = torchvision.datasets.CIFAR10(
+        root=DATASET_ROOT, train=True, download=False, transform=transform_train
+    )
+    testset = torchvision.datasets.CIFAR10(
+        root=DATASET_ROOT, train=False, download=False, transform=transform_test
+    )
+    trainloader = torch.utils.data.DataLoader(
+        trainset, batch_size=BATCH, shuffle=True, num_workers=4
+    )
+    testloader = torch.utils.data.DataLoader(
+        testset, batch_size=100, shuffle=False, num_workers=4
+    )
+    return trainloader, testloader
 
 
-def _train(model, xs, ys, steps=STEPS, batch=BATCH, lr=LR):
-    """Train, returning final train accuracy and minimum class margin."""
-    opt = torch.optim.Adam(model.parameters(), lr=lr)
-    n = xs.shape[0]
-    g = torch.Generator().manual_seed(SEED + 1)
-    for _ in range(steps):
-        idx = torch.randperm(n, generator=g)[:batch]
-        opt.zero_grad()
-        loss = nn.functional.cross_entropy(model(xs[idx]), ys[idx])
-        loss.backward()
-        opt.step()
-    with torch.no_grad():
-        acc = (model(xs).argmax(dim=1) == ys).float().mean().item()
-        logits = model(xs)
-        top = logits.topk(2, dim=1).values
-        margin = (top[:, 0] - top[:, 1]).min().item()
-    return acc, margin
+def _train(model, trainloader, testloader, epochs=EPOCHS, lr=LR):
+    """Train with Adam + cosine annealing; return final test accuracy."""
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model.to(device)
+
+    criterion = nn.CrossEntropyLoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
+
+    best_acc = 0.0
+    for epoch in range(epochs):
+        model.train()
+        for inputs, labels in trainloader:
+            inputs, labels = inputs.to(device), labels.to(device)
+            optimizer.zero_grad()
+            outputs = model(inputs)
+            loss = criterion(outputs, labels)
+            loss.backward()
+            optimizer.step()
+        scheduler.step()
+
+        model.eval()
+        correct = 0
+        total = 0
+        with torch.no_grad():
+            for inputs, labels in testloader:
+                inputs, labels = inputs.to(device), labels.to(device)
+                outputs = model(inputs)
+                _, predicted = outputs.max(1)
+                total += labels.size(0)
+                correct += predicted.eq(labels).sum().item()
+        acc = 100.0 * correct / total
+        best_acc = max(best_acc, acc)
+        print(f"Epoch {epoch + 1}/{epochs}: test accuracy = {acc:.2f}%")
+
+    # Move model back to CPU before saving
+    model.to("cpu")
+    return best_acc
 
 
 def _profile_vr(model, inputs, name):
     """Generate and save the ReLU VR profile via the project ReLUProfiler."""
     from ace.fhe.config import ReLUProfiler, ModelSpec
 
+    # Use a real CIFAR-10 image as the spec example input
+    from ace.model.dataset import load_cifar10_images
+
+    example, _ = load_cifar10_images(1, offset=0)
     spec = ModelSpec(
         name=name,
         model_class=LeNet,
-        example_inputs=(inputs[:1],),
+        example_inputs=(example,),
         encrypt_inputs=["x"],
         model_init_args=(10, 3),
     )
@@ -106,23 +136,27 @@ def main():
     args = parser.parse_args()
 
     torch.manual_seed(SEED)
-    xs, ys = _synthetic_cifar_like()
-    print(f"data: {tuple(xs.shape)} labels=[{ys.min().item()},{ys.max().item()}]")
+    trainloader, testloader = _load_cifar10()
+    print("Training LeNet on real CIFAR-10...")
 
     model = LeNet(num_classes=10, in_channels=3)
-    acc, margin = _train(model, xs, ys)
-    print(f"train acc={acc:.4f} min margin={margin:.4f}")
-    if acc < 0.95 or margin < 0.2:
-        raise RuntimeError(
-            f"Poor separation: acc={acc}, margin={margin}. Train more / widen margins."
-        )
+    best_acc = _train(model, trainloader, testloader)
+    print(f"Best test accuracy: {best_acc:.2f}%")
 
     os.makedirs(_WEIGHTS_DIR, exist_ok=True)
     path = os.path.join(_WEIGHTS_DIR, _WEIGHTS_FILE)
     torch.save(model.state_dict(), path)
     print(f"saved weights -> {path}")
 
-    vr_path = _profile_vr(model, xs[:256], args.name)
+    # Build a tensor of 256 normalized CIFAR-10 test images for VR profiling
+    test_images_list = []
+    for inputs, _ in testloader:
+        test_images_list.append(inputs)
+        if sum(len(t) for t in test_images_list) >= 256:
+            break
+    test_images = torch.cat(test_images_list)[:256]
+
+    vr_path = _profile_vr(model, test_images, args.name)
     print(f"VR profile -> {vr_path}")
 
 

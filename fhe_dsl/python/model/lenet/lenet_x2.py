@@ -4,99 +4,68 @@
 #
 
 """
-LeNet x^2 (square activation) ModelSpec for FHE precision testing.
+Compact LeNet-style CNN with ReLU replaced by the square
+activation x^2.
 
-1:1 mirror of the reference experiment (cti
-verify/onnx2c/cnn/lenet_x2.py) on the compact LeNet structure
-used in this repo: ReLU -> x^2 at all 3 sites, UNTRAINED weights,
-and compile options EXACTLY the standard LENET_CIFAR10 recipe
-with only the ReLU VR knobs removed — x^2 is a pure activation
-swap and must not drag parameter changes with it. The shallow+
-narrow stack keeps float32 magnitudes finite with default init
-(no BN to calibrate).
+Structurally the SAME as the standard LeNet here (lenet.py,
+itself the compact stride-2-conv LeNet tuned for the FHE
+backends):
+- conv(3→8, s2) → Square → conv(8→16, s2) → Square →
+  flatten → fc(1024→32) → Square → fc(32→10) — 3 squares
+  total (every ReLU site),
+- no pooling layers, so unlike the reference
+  (cti verify/onnx2c/cnn/lenet_x2.py, which pools with MaxPool2d)
+  this variant also runs on the GPU executors
+  (phantom/ace) that segfault on pool ops — ant-cpu works either way,
+- untrained weights (default torch init; the shallow + narrow
+  stack keeps float32 magnitudes finite — no BN calibration
+  needed, there is no BN).
 
-The FHE precision test feeds the seeded random input to both the
-plaintext and the ciphertext paths and compares the per-logit
-absolute error (|fhe - plain|, NOT |fhe - plain|/|plain|): the x²
-chain measures PURE CKKS noise, and the cti reference rel_err
-formula `|diff|/|expect|` was designed against trained logits
-(~±10) — it explodes into noise on the BN-calibrated untrained
-logits the x² setup produces.
+The purpose is precision measurement: x -> x^2 is a single
+cipher*cipher MUL — exact in plaintext arithmetic, no ReLU
+polynomial/bootstrap in the way — so the ciphertext-vs-plaintext
+logit difference is pure CKKS noise, measured like the
+resnet20_x2 / alexnet_x2 / vgg16_x2 experiments. With untrained
+weights both paths evaluate the SAME function, so no training is
+needed.
 
-Key differences vs the standard LeNet spec:
-- No ReLU -> no VR profile (relu_vr_file) is used or needed.
-- No weights file: the model runs with its seeded random init; both
-  execution paths see identical parameters.
+Separate file from the standard LeNet (lenet.py) — the original
+model, its weights, its VR profiles and specs are untouched.
 
-The standard LeNet spec (spec_lenet.py) is untouched.
+The Square forward uses ``x * x`` (NOT torch.pow) so the tracer
+emits a plain element-wise MUL — supported end-to-end by the
+frontend, the AIR NN layer, and every backend (phantom/ace/ant;
+cipher*cipher is relin'd automatically).
 """
 
 import torch
-
-from ace.fhe.config.spec import ModelSpec
-
-from .lenet.lenet_x2 import LeNetX2
+import torch.nn as nn
 
 
-# Init seed fixed so both plaintext and ciphertext paths instantiate
-# the SAME random parameters.
-_X2_INIT_SEED = 2026
+class Square(nn.Module):
+    """x^2 activation (reference: MyReLU)."""
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return x * x
 
 
-def _x2_example_inputs() -> tuple[torch.Tensor, ...]:
-    """Deterministic random (non-image) example input.
+class LeNetX2(nn.Module):
+    """Compact LeNet: stride-2 conv blocks (no pooling) → flatten →
+    2 linear, square activation at every ReLU site."""
 
-    Seeded so compile tracing is reproducible; the smoke test reuses
-    the same tensor as its probe.
-    """
-    g = torch.Generator().manual_seed(_X2_INIT_SEED)
-    # Scale down the input so that the x^2 chain on GPU (phantom) stays
-    # within the CKKS dynamic range.  Without this rescaling, LeNet x^2
-    # on phantom produces ~1e-2 absolute error; with /10 the error drops
-    # to ~1e-5 and the test passes.
-    return (torch.randn(1, 3, 32, 32, generator=g).float() / 10.0,)
+    def __init__(self, num_classes: int = 10, in_channels: int = 3):
+        super().__init__()
+        self.conv1 = nn.Conv2d(in_channels, 8, kernel_size=3, stride=2, padding=1)
+        self.act1 = Square()
+        self.conv2 = nn.Conv2d(8, 16, kernel_size=3, stride=2, padding=1)
+        self.act2 = Square()
+        self.fc1 = nn.Linear(16 * 8 * 8, 32)
+        self.act3 = Square()
+        self.fc2 = nn.Linear(32, num_classes)
 
-
-def _init_x2_model(model: torch.nn.Module) -> None:
-    """Deterministic reseeding + eval mode.
-
-    Default torch.random-derived init is process-RNG dependent:
-    reseeding makes plaintext and ciphertext paths' parameters
-    bit-wise identical across processes.
-    """
-    torch.manual_seed(_X2_INIT_SEED)
-    for m in model.modules():
-        if hasattr(m, "reset_parameters"):
-            m.reset_parameters()
-    model.eval()
-
-
-LENET_X2 = ModelSpec(
-    name="lenet_x2",
-    model_class=LeNetX2,
-    example_inputs=_x2_example_inputs(),
-    encrypt_inputs=["x"],
-    model_init_args=(10, 3),
-    model_init_kwargs={},
-    # untrained random init, deterministic seeding (no BN to calibrate)
-    model_post_init=_init_x2_model,
-    compile_options={
-        "phantom": {
-            "vec": {"conv_parl": True, "ssf": True},
-            "ckks": {"q0": 60, "sf": 56, "N": 65536, "icl": 18},
-        },
-        # ant — EXACTLY the standard LENET_CIFAR10 ant recipe
-        # (see spec_lenet.py).
-        "ant": {
-            "ckks": {"hw": 192, "q0": 60, "sf": 56, "sbm": True, "ts": True, "rtt": True},
-            "p2c": {"fp": True, "lib": "ant", "ts": True},
-        },
-    },
-    expected_ops=["Conv", "Mul", "Gemm"],
-    weights_required=False,
-    relu_vr_file=None,
-)
-
-__all__ = [
-    "LENET_X2",
-]
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = self.act1(self.conv1(x))    # [B, 8, 16, 16]
+        x = self.act2(self.conv2(x))    # [B, 16, 8, 8]
+        x = torch.flatten(x, 1)         # [B, 1024]
+        x = self.act3(self.fc1(x))      # [B, 32]
+        return self.fc2(x)              # [B, num_classes]

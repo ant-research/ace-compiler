@@ -4,10 +4,10 @@
 #
 # LeNet-specific fixtures for FHE benchmark tests.
 #
-# LeNet is a small CNN with ReLUs, so it must be compiled with built-in
-# profile_relu=True (the bundled VR file's node names do not match the
-# compiled IR — see tests/regression/lenet). Compiled once per
-# (library, device) with session scope because FHE compilation is slow.
+# LeNet is a small CNN with ReLUs, so it uses the pre-profiled ReLU VR data
+# from lenet/profiles/lenet_cifar10.json via ModelSpec::get_vr_profile(), the
+# same route as ResNet. Compiled once per (library, device) with session
+# scope because FHE compilation is slow.
 
 import copy
 
@@ -32,14 +32,16 @@ SMALL_TARGET_PARAMS = [
 
 
 def _compile_lenet(spec, library, device):
-    """Compile LeNet with built-in ReLU VR profiling."""
+    """Compile LeNet with the pre-profiled ReLU VR data from ModelSpec."""
     from ace import fhe
 
     model = spec.create_model()
     model.eval()
 
     compile_opts = dict(spec.compile_options.get(library, {})) if spec.compile_options else {}
-    compile_opts["profile_relu"] = True
+    vr_file = spec.get_vr_profile()
+    if vr_file is not None:
+        compile_opts["relu_vr_file"] = vr_file
 
     compiled = fhe.compile(
         frontend="torch",

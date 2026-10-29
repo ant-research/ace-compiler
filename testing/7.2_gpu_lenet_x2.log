@@ -9,7 +9,94 @@ collecting ... collected 1 item
 
 tests/regression/lenet_x2/test_lenet_x2_smoke.py::test_lenet_x2_precision_phantom [INFO] ace.fhe.backend.phantom: Library: using phantom for build...
 [INFO] ace.fhe.backend.phantom: Library: using phantom for build...
-[INFO] ace.fhe.cache: [Cache] HIT: Loading from /tmp/ace-compile-cache/lenet_x2-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/0b1d09fd956040e3/libphantom_cuda_718124.so
+[DEBUG] ace.fhe.frontend.torch.torch_frontend: Fusing BatchNorm layers...
+[DEBUG] ace.fhe.frontend.torch.torch_frontend: Tracing model with 1 inputs using CustomTracer...
+[DEBUG] ace.fhe.frontend.torch.torch_frontend: Found 8 constants: ['conv1_weight', 'conv1_bias', 'conv2_weight', 'conv2_bias', 'fc1_weight', 'fc1_bias', 'fc2_weight', 'fc2_bias']
+[INFO] ace.fhe.frontend.torch.torch_frontend: Traced successfully, Output shape: [1, 10]
+[DEBUG] ace.fhe.frontend.torch.torch_frontend: prepare returned: <class 'ace.fhe.ir.frontends.torch.torch_trace.TorchTracedModel'>
+[DEBUG] ace.fhe.frontend.torch.torch_frontend: traced has execute: True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Starting AIR generation...
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Input names: ['x']
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Input shapes: [[1, 3, 32, 32]]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Output shape: [1, 10]
+/work/ace-fhe/ace-compiler/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/work/ace-fhe/ace-compiler/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/work/ace-fhe/ace-compiler/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/work/ace-fhe/ace-compiler/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/work/ace-fhe/ace-compiler/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+/work/ace-fhe/ace-compiler/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: conv1_weight, shape=[8, 3, 3, 3], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: conv1_bias, shape=[8], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: conv2_weight, shape=[16, 8, 3, 3], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: conv2_bias, shape=[16], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: fc1_weight, shape=[32, 1024], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: fc1_bias, shape=[32], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: fc2_weight, shape=[10, 32], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: fc2_bias, shape=[10], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Executing traced model node-by-node (generating AIR IR)...
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Starting node iteration, total nodes: 18
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: x, op=placeholder, target=x
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: conv1_weight, op=get_attr, target=conv1_weight
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: conv1_bias, op=get_attr, target=conv1_bias
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: conv1, op=call_function, target=tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=conv1, target_str=tensor.conv, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.conv, input_names=['x', 'conv1_weight', 'conv1_bias'], output_shape=[1, 8, 16, 16]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v0
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: mul, op=call_function, target=tensor.mul
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=mul, target_str=tensor.mul, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.mul
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.mul, input_names=['_v0', '_v0'], output_shape=[1, 8, 16, 16]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v1
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: conv2_weight, op=get_attr, target=conv2_weight
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: conv2_bias, op=get_attr, target=conv2_bias
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: conv2, op=call_function, target=tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=conv2, target_str=tensor.conv, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.conv
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.conv, input_names=['_v1', 'conv2_weight', 'conv2_bias'], output_shape=[1, 16, 8, 8]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v2
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: mul_1, op=call_function, target=tensor.mul
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=mul_1, target_str=tensor.mul, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.mul
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.mul, input_names=['_v2', '_v2'], output_shape=[1, 16, 8, 8]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v3
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: flatten, op=call_function, target=tensor.flatten
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=flatten, target_str=tensor.flatten, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.flatten
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.flatten, input_names=['_v3'], output_shape=[1, 1024]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v4
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: fc1_weight, op=get_attr, target=fc1_weight
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: fc1_bias, op=get_attr, target=fc1_bias
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: fc1, op=call_function, target=tensor.gemm
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=fc1, target_str=tensor.gemm, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.gemm
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.gemm, input_names=['_v4', 'fc1_weight', 'fc1_bias'], output_shape=[1, 32]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v5
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: mul_2, op=call_function, target=tensor.mul
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=mul_2, target_str=tensor.mul, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.mul
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.mul, input_names=['_v5', '_v5'], output_shape=[1, 32]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v6
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: fc2_weight, op=get_attr, target=fc2_weight
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: fc2_bias, op=get_attr, target=fc2_bias
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: fc2, op=call_function, target=tensor.gemm
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=fc2, target_str=tensor.gemm, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.gemm
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.gemm, input_names=['_v6', 'fc2_weight', 'fc2_bias'], output_shape=[1, 10]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v7
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: output, op=output, target=output
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: AIR generation complete!
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Exporting AIR IR to /tmp/ace-compile-cache/lenet_x2-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/0b1d09fd956040e3/model_130855658388384_8865.B...
+[INFO] ace.fhe.ir.frontends.torch.torch_trace: AIR IR exported successfully!
+[DEBUG] ace.fhe.frontend.torch.torch_frontend: AIR IR exported to: /tmp/ace-compile-cache/lenet_x2-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/0b1d09fd956040e3/model_130855658388384_8865.B
+[DEBUG] ace.fhe.backend.phantom: [phantom] resolved options = {'vec': {'conv_parl': True, 'ssf': True}, 'ckks': {'N': 65536, 'q0': 60, 'sf': 56, 'icl': 18}}
+[INFO] ace.fhe.backend.phantom: [phantom] option_args = ['-VEC:conv_parl:ssf', '-CKKS:N=65536:q0=60:sf=56:icl=18']
+[DEBUG] ace.fhe.backend.phantom: [SUCCESS] Compilation succeeded: /opt/ace-env/lib/python3.12/site-packages/ace/bin/fhe_cmplr /tmp/ace-compile-cache/lenet_x2-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/0b1d09fd956040e3/model_130855658388384_8865.B -P2C:lib=phantom -P2C:df=/tmp/ace-compile-cache/lenet_x2-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/0b1d09fd956040e3/data.weight -o /tmp/ace-compile-cache/lenet_x2-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/0b1d09fd956040e3/kernel_phantom.cu -VEC:conv_parl:ssf -CKKS:N=65536:q0=60:sf=56:icl=18
+[DEBUG] root: Build Kernel Library: /tmp/ace-compile-cache/lenet_x2-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/0b1d09fd956040e3/libphantom_cuda_866616.so
+[DEBUG] ace.fhe.driver.builder: Build command: nvcc -shared -Xcompiler -fPIC,-O3 --std=c++17 --expt-relaxed-constexpr -o /tmp/ace-compile-cache/lenet_x2-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/0b1d09fd956040e3/libphantom_cuda_866616.so /tmp/ace-compile-cache/lenet_x2-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/0b1d09fd956040e3/kernel_phantom.cu -I/opt/ace-env/lib/python3.12/site-packages/ace/include -I/opt/ace-env/lib/python3.12/site-packages/ace/include/fhe/vendor -I/opt/ace-env/lib/python3.12/site-packages/ace/include/lib_phantom -L/opt/ace-env/lib/python3.12/site-packages/ace/lib -lFHErt_phantom -lcudart -DUSE_GPU_BACKEND -DSPDLOG_COMPILED_LIB -Xlinker -rpath=/opt/ace-env/lib/python3.12/site-packages/ace/lib
+[INFO] ace.fhe.driver.builder: [SUCCESS] PHANTOM-PHANTOM build succeeded.
+[DEBUG] ace.fhe.driver.driver: Package built: model=Main_graph, kernel=/tmp/ace-compile-cache/lenet_x2-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/0b1d09fd956040e3/libphantom_cuda_866616.so, input_info=[{'name': 'x', 'shape': [1, 3, 32, 32], 'type': 'tensor(float)'}], output_info=[{'name': 'output', 'shape': [1, 10], 'type': 'tensor(float)'}], config_path=/tmp/ace-compile-cache/lenet_x2-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/0b1d09fd956040e3/model_130855658388384_8865.conf, key_path=None
+[INFO] ace.fhe.cache: [Cache] MISS: Compiled to /tmp/ace-compile-cache/lenet_x2-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/0b1d09fd956040e3/libphantom_cuda_866616.so
 [DEBUG] ace.fhe.runtime.loader: === Runtime Configuration ===
 Input Count: 1
 Output Count: 1
@@ -27,13 +114,13 @@ Decode Schemes (1):
   [0] output - Shape: [1,10,1,1]
       Count: 1
 
-[INFO] ace.runtime: [phantom] PhantomContext created (N=65536) [0.95s]
+[INFO] ace.runtime: [phantom] PhantomContext created (N=65536) [1.11s]
 [INFO] ace.runtime: [kms] PhantomContext received (N=65536)
 [INFO] ace.runtime: [kms] KeyMode::ONLINE — generating keys (sk, pk, rlk, rtk)...
 [INFO] ace.runtime: [kms] Keys generated [gen_keys=0.02s]
-[DEBUG] ace.runtime: [kms] key handles: sk=0x23328a50 pk=0x23fcfa90 rlk=0x3cff4720 rtk=0x3cfef0f0
+[DEBUG] ace.runtime: [kms] key handles: sk=0x41405dd0 pk=0x37e199c0 rlk=0x50e3d760 rtk=0x50e38370
 [DEBUG] ace.runtime: [phantom] ckks_param: _provider=3, _poly_degree=65536, _sec_level=0, mul_depth=17, _first_mod_size=60, _scaling_mod_size=56, _num_q_parts=3, _num_rot_idx=47, _num_prime_parts=19
-[DEBUG] ace.runtime: [timing] FheContext init: total=1.13s | key_mgr=0.02s encoder=0.00s evaluator=0.00s galois_init=0.16s enc_mgr=0.00s
+[DEBUG] ace.runtime: [timing] FheContext init: total=1.30s | key_mgr=0.02s encoder=0.00s evaluator=0.00s galois_init=0.16s enc_mgr=0.00s
 index: 0, result: -0.154975, expect: -0.154967, abs err=8.61e-06, ok
 index: 1, result: +0.103735, expect: +0.103731, abs err=4.46e-06, ok
 index: 2, result: -0.090585, expect: -0.090589, abs err=4.51e-06, ok
@@ -47,3 +134,5 @@ index: 9, result: -0.081874, expect: -0.081870, abs err=3.71e-06, ok
 
 [summary] max abs err=8.61e-06 (tol 0.001)
 PASSED
+
+============================== 1 passed in 15.97s ==============================

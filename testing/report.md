@@ -128,19 +128,23 @@ pytest tests/regression/vgg16_x2/test_vgg16_x2_smoke.py -k ant -v -s
 CUDA_VISIBLE_DEVICES=0 python3 -m pytest tests/regression/lr/test_lr_smoke.py -k "phantom" -v -s
 
 # LeNet x² GPU（spec 已更新：输入 /10、phantom icl=18）
-CUDA_VISIBLE_DEVICES=0 python3 -m pytest tests/regression/lenet_x2/test_lenet_x2_smoke.py::test_lenet_x2_precision_phantom -v -s
+CUDA_VISIBLE_DEVICES=0 python3 -m pytest tests/regression/lenet_x2/test_lenet_x2_smoke.py -k "phantom" -v -s
 
 # ResNet-20 x² GPU（spec 已更新：phantom icl=17 + sbm）
-CUDA_VISIBLE_DEVICES=0 python3 -m pytest tests/regression/resnet_x2/test_resnet20_x2_smoke.py::test_resnet20_x2_precision_phantom -v -s
+CUDA_VISIBLE_DEVICES=0 python3 -m pytest tests/regression/resnet_x2/test_resnet20_x2_smoke.py -k "phantom" -v -s
 ```
 
 #### 表 7.2-3 模型编译与执行结果（GPU，x²）
 
 | 编号 | 模型 | 数据集 | 编译时间 | 总耗时 | 最大绝对误差 | 执行结果 |
 |---|---|---:|---:|---:|---:|---|
-| 1 | LR | toy | 0.41 s | 0.41 s | — | PASS（标准 smoke） |
-| 2 | LeNet x² | CIFAR-10 | 8.33 s | ~10 s | 8.61e-06 | PASS |
-| 3 | ResNet-20 x² | CIFAR-10 | 18–19 s | 33.45 s | 7.45e-09 | PASS |
+| 1 | LR | toy | 6.4 s | 12.8 s | 2.38e-07 | PASS |
+| 2 | LeNet x² | CIFAR-10 | 8.0 s | 16.0 s | 8.61e-06 | PASS |
+| 3 | ResNet-20 x² | CIFAR-10 | 18.1 s | 39.1 s | 7.45e-09 | PASS |
+
+> 注：
+> - 总耗时 = 上述编译 + FHE 推理（密钥生成、加密、计算、解密）的完整 pytest 用例耗时。
+> - 最大绝对误差 = FHE 推理 logit 与明文 logits 之差的绝对值上限，判定标准 ≤ 1e-3。
 
 
 原始日志保存位置：
@@ -203,9 +207,14 @@ CUDA_VISIBLE_DEVICES=0 python3 -m pytest benchmark/resnet/test_accuracy.py::Test
 | 编号 | 模型 | 数据集 | 加密准确率 | 非加密准确率 | 差异 | 执行结果 |
 |---|---|---:|---:|---:|---:|---|
 | 1 | LR | toy | 100.00% | 100.00% | 0.00% | PASS |
-| 2 | LeNet | CIFAR-10 | 10.00% | 11.00% | 1.00% | PASS |
+| 2 | LeNet | CIFAR-10 | 58.00% | 74.00% | 16.00% | PASS |
 | 3 | ResNet-20 | CIFAR-10 | 95.00% | 95.00% | 0.00% | PASS |
 
+> 注：
+> - 加密准确率为 FHE 推理 Top-1 命中数 / 100。
+> - 非加密准确率为同一张图片在原 PyTorch 模型上的 Top-1 命中数 / 100。
+> - LR 使用固定 toy 权重，准确率 100%。
+> - LeNet 使用固定 `lenet_cifar10.pt` 训练权重：100 张 CIFAR-10 图片上明文准确率 74/100、密文准确率 58/100，相差 16 张；两者预测结果一致的为 59/100。
 
 原始日志保存位置：
 

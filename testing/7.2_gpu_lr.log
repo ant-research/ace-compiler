@@ -9,7 +9,52 @@ collecting ... collected 2 items / 1 deselected / 1 selected
 
 tests/regression/lr/test_lr_smoke.py::test_smoke_phantom[lr_1d] [INFO] ace.fhe.backend.phantom: Library: using phantom for build...
 [INFO] ace.fhe.backend.phantom: Library: using phantom for build...
-[INFO] ace.fhe.cache: [Cache] HIT: Loading from /tmp/ace-compile-cache/lr_1d-torch-phantom-cuda/shape_1x16_dtype_torch_float32/ba58676a564801d6/libphantom_cuda_637454.so
+[DEBUG] ace.fhe.frontend.torch.torch_frontend: Fusing BatchNorm layers...
+[DEBUG] ace.fhe.frontend.torch.torch_frontend: Tracing model with 1 inputs using CustomTracer...
+[DEBUG] ace.fhe.frontend.torch.torch_frontend: Found 2 constants: ['linear_weight', 'linear_bias']
+[INFO] ace.fhe.frontend.torch.torch_frontend: Traced successfully, Output shape: [1, 10]
+[DEBUG] ace.fhe.frontend.torch.torch_frontend: prepare returned: <class 'ace.fhe.ir.frontends.torch.torch_trace.TorchTracedModel'>
+[DEBUG] ace.fhe.frontend.torch.torch_frontend: traced has execute: True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Starting AIR generation...
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Input names: ['x']
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Input shapes: [[1, 16]]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Output shape: [1, 10]
+/work/ace-fhe/ace-compiler/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/work/ace-fhe/ace-compiler/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/work/ace-fhe/ace-compiler/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/work/ace-fhe/ace-compiler/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/work/ace-fhe/ace-compiler/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+/work/ace-fhe/ace-compiler/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: linear_weight, shape=[10, 16], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Registered constant: linear_bias, shape=[10], dtype=float32
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Executing traced model node-by-node (generating AIR IR)...
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Starting node iteration, total nodes: 6
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: x, op=placeholder, target=x
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: flatten, op=call_function, target=tensor.flatten
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=flatten, target_str=tensor.flatten, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.flatten
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.flatten, input_names=['x'], output_shape=[16]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v0
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: linear_weight, op=get_attr, target=linear_weight
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: linear_bias, op=get_attr, target=linear_bias
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: linear, op=call_function, target=tensor.gemm
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: call_function: node.name=linear, target_str=tensor.gemm, is_custom_op=True
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Using unified add_op for op: tensor.gemm
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: add_op: op_name=tensor.gemm, input_names=['_v0', 'linear_weight', 'linear_bias'], output_shape=[16, 10]
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v1
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: output, op=output, target=output
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: AIR generation complete!
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Exporting AIR IR to /tmp/ace-compile-cache/lr_1d-torch-phantom-cuda/shape_1x16_dtype_torch_float32/ba58676a564801d6/model_130535684074816_7892.B...
+[INFO] ace.fhe.ir.frontends.torch.torch_trace: AIR IR exported successfully!
+[DEBUG] ace.fhe.frontend.torch.torch_frontend: AIR IR exported to: /tmp/ace-compile-cache/lr_1d-torch-phantom-cuda/shape_1x16_dtype_torch_float32/ba58676a564801d6/model_130535684074816_7892.B
+[DEBUG] ace.fhe.backend.phantom: [phantom] resolved options = {'ckks': {'N': 65536}}
+[INFO] ace.fhe.backend.phantom: [phantom] option_args = ['-CKKS:N=65536']
+[DEBUG] ace.fhe.backend.phantom: [SUCCESS] Compilation succeeded: /opt/ace-env/lib/python3.12/site-packages/ace/bin/fhe_cmplr /tmp/ace-compile-cache/lr_1d-torch-phantom-cuda/shape_1x16_dtype_torch_float32/ba58676a564801d6/model_130535684074816_7892.B -P2C:lib=phantom -P2C:df=/tmp/ace-compile-cache/lr_1d-torch-phantom-cuda/shape_1x16_dtype_torch_float32/ba58676a564801d6/data.weight -o /tmp/ace-compile-cache/lr_1d-torch-phantom-cuda/shape_1x16_dtype_torch_float32/ba58676a564801d6/kernel_phantom.cu -CKKS:N=65536
+[DEBUG] root: Build Kernel Library: /tmp/ace-compile-cache/lr_1d-torch-phantom-cuda/shape_1x16_dtype_torch_float32/ba58676a564801d6/libphantom_cuda_892552.so
+[DEBUG] ace.fhe.driver.builder: Build command: nvcc -shared -Xcompiler -fPIC,-O3 --std=c++17 --expt-relaxed-constexpr -o /tmp/ace-compile-cache/lr_1d-torch-phantom-cuda/shape_1x16_dtype_torch_float32/ba58676a564801d6/libphantom_cuda_892552.so /tmp/ace-compile-cache/lr_1d-torch-phantom-cuda/shape_1x16_dtype_torch_float32/ba58676a564801d6/kernel_phantom.cu -I/opt/ace-env/lib/python3.12/site-packages/ace/include -I/opt/ace-env/lib/python3.12/site-packages/ace/include/fhe/vendor -I/opt/ace-env/lib/python3.12/site-packages/ace/include/lib_phantom -L/opt/ace-env/lib/python3.12/site-packages/ace/lib -lFHErt_phantom -lcudart -DUSE_GPU_BACKEND -DSPDLOG_COMPILED_LIB -Xlinker -rpath=/opt/ace-env/lib/python3.12/site-packages/ace/lib
+[INFO] ace.fhe.driver.builder: [SUCCESS] PHANTOM-PHANTOM build succeeded.
+[DEBUG] ace.fhe.driver.driver: Package built: model=Main_graph, kernel=/tmp/ace-compile-cache/lr_1d-torch-phantom-cuda/shape_1x16_dtype_torch_float32/ba58676a564801d6/libphantom_cuda_892552.so, input_info=[{'name': 'x', 'shape': [1, 16], 'type': 'tensor(float)'}], output_info=[{'name': 'output', 'shape': [1, 10], 'type': 'tensor(float)'}], config_path=/tmp/ace-compile-cache/lr_1d-torch-phantom-cuda/shape_1x16_dtype_torch_float32/ba58676a564801d6/model_130535684074816_7892.conf, key_path=None
+[INFO] ace.fhe.cache: [Cache] MISS: Compiled to /tmp/ace-compile-cache/lr_1d-torch-phantom-cuda/shape_1x16_dtype_torch_float32/ba58676a564801d6/libphantom_cuda_892552.so
 [DEBUG] ace.fhe.runtime.loader: === Runtime Configuration ===
 Input Count: 1
 Output Count: 1
@@ -31,8 +76,10 @@ Decode Schemes (1):
 [INFO] ace.runtime: [kms] PhantomContext received (N=65536)
 [INFO] ace.runtime: [kms] KeyMode::ONLINE — generating keys (sk, pk, rlk, rtk)...
 [INFO] ace.runtime: [kms] Keys generated [gen_keys=0.01s]
-[DEBUG] ace.runtime: [kms] key handles: sk=0x1567d8c0 pk=0x13f827f0 rlk=0x13f82a10 rtk=0x165602f0
+[DEBUG] ace.runtime: [kms] key handles: sk=0x1972d100 pk=0x1806ceb0 rlk=0x1806d0d0 rtk=0x1a60f590
 [DEBUG] ace.runtime: [phantom] ckks_param: _provider=3, _poly_degree=65536, _sec_level=0, mul_depth=2, _first_mod_size=60, _scaling_mod_size=56, _num_q_parts=2, _num_rot_idx=8, _num_prime_parts=4
-[DEBUG] ace.runtime: [timing] FheContext init: total=0.09s | key_mgr=0.01s encoder=0.00s evaluator=0.00s galois_init=0.01s enc_mgr=0.00s
+[DEBUG] ace.runtime: [timing] FheContext init: total=0.08s | key_mgr=0.01s encoder=0.00s evaluator=0.00s galois_init=0.01s enc_mgr=0.00s
 [lr_1d] plaintext=0, fhe=0
 PASSED
+
+======================= 1 passed, 1 deselected in 12.75s =======================

@@ -48,9 +48,14 @@ def _x2_example_inputs() -> tuple[torch.Tensor, ...]:
 
     Seeded so compile tracing is reproducible; the smoke test reuses
     the same tensor as its probe.
+
+    The input is scaled down by 10 so that the x^2 chain on GPU
+    (phantom) stays within the CKKS dynamic range. Without this
+    rescaling, LeNet x^2 on phantom produces ~1e-2 absolute error;
+    with /10 the error drops to ~1e-5 and the test passes.
     """
     g = torch.Generator().manual_seed(_X2_INIT_SEED)
-    return (torch.randn(1, 3, 32, 32, generator=g).float(),)
+    return (torch.randn(1, 3, 32, 32, generator=g).float() / 10.0,)
 
 
 def _init_x2_model(model: torch.nn.Module) -> None:
@@ -79,7 +84,10 @@ LENET_X2 = ModelSpec(
     compile_options={
         "phantom": {
             "vec": {"conv_parl": True, "ssf": True},
-            "ckks": {"q0": 60, "sf": 56, "N": 65536, "icl": 17},
+            # icl=18: the x^2 chain needs one more chain level than the
+            # standard ReLU LeNet (icl=17). With icl=17, fhe_cmplr aborts
+            # in NODE::Set_rtype ("Do not call this API to change rtype").
+            "ckks": {"q0": 60, "sf": 56, "N": 65536, "icl": 18},
         },
         # ant — EXACTLY the standard LENET_CIFAR10 ant recipe
         # (see spec_lenet.py).

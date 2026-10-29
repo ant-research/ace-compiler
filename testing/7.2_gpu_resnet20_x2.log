@@ -381,17 +381,17 @@ tests/regression/resnet_x2/test_resnet20_x2_smoke.py::test_resnet20_x2_precision
 [DEBUG] ace.fhe.ir.frontends.torch.torch_trace:   result_air_name=_v51
 [DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Processing node: output, op=output, target=output
 [DEBUG] ace.fhe.ir.frontends.torch.torch_trace: AIR generation complete!
-[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Exporting AIR IR to /tmp/ace-compile-cache/resnet20_x2-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/8805062bba9191e5/model_137398249126656_9687.B...
+[DEBUG] ace.fhe.ir.frontends.torch.torch_trace: Exporting AIR IR to /tmp/ace-compile-cache/resnet20_x2-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/8805062bba9191e5/model_129199544532512_2844.B...
 [INFO] ace.fhe.ir.frontends.torch.torch_trace: AIR IR exported successfully!
-[DEBUG] ace.fhe.frontend.torch.torch_frontend: AIR IR exported to: /tmp/ace-compile-cache/resnet20_x2-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/8805062bba9191e5/model_137398249126656_9687.B
+[DEBUG] ace.fhe.frontend.torch.torch_frontend: AIR IR exported to: /tmp/ace-compile-cache/resnet20_x2-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/8805062bba9191e5/model_129199544532512_2844.B
 [DEBUG] ace.fhe.backend.phantom: [phantom] resolved options = {'vec': {'conv_parl': True, 'ssf': True}, 'ckks': {'N': 65536, 'q0': 60, 'sf': 56, 'icl': 17, 'sbm': True}}
 [INFO] ace.fhe.backend.phantom: [phantom] option_args = ['-VEC:conv_parl:ssf', '-CKKS:N=65536:q0=60:sf=56:icl=17:sbm']
-[DEBUG] ace.fhe.backend.phantom: [SUCCESS] Compilation succeeded: /opt/ace-env/lib/python3.12/site-packages/ace/bin/fhe_cmplr /tmp/ace-compile-cache/resnet20_x2-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/8805062bba9191e5/model_137398249126656_9687.B -P2C:lib=phantom -P2C:df=/tmp/ace-compile-cache/resnet20_x2-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/8805062bba9191e5/data.weight -o /tmp/ace-compile-cache/resnet20_x2-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/8805062bba9191e5/kernel_phantom.cu -VEC:conv_parl:ssf -CKKS:N=65536:q0=60:sf=56:icl=17:sbm
-[DEBUG] root: Build Kernel Library: /tmp/ace-compile-cache/resnet20_x2-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/8805062bba9191e5/libphantom_cuda_689056.so
-[DEBUG] ace.fhe.driver.builder: Build command: nvcc -shared -Xcompiler -fPIC,-O3 --std=c++17 --expt-relaxed-constexpr -o /tmp/ace-compile-cache/resnet20_x2-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/8805062bba9191e5/libphantom_cuda_689056.so /tmp/ace-compile-cache/resnet20_x2-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/8805062bba9191e5/kernel_phantom.cu -I/opt/ace-env/lib/python3.12/site-packages/ace/include -I/opt/ace-env/lib/python3.12/site-packages/ace/include/fhe/vendor -I/opt/ace-env/lib/python3.12/site-packages/ace/include/lib_phantom -L/opt/ace-env/lib/python3.12/site-packages/ace/lib -lFHErt_phantom -lcudart -DUSE_GPU_BACKEND -DSPDLOG_COMPILED_LIB -Xlinker -rpath=/opt/ace-env/lib/python3.12/site-packages/ace/lib
+[DEBUG] ace.fhe.backend.phantom: [SUCCESS] Compilation succeeded: /opt/ace-env/lib/python3.12/site-packages/ace/bin/fhe_cmplr /tmp/ace-compile-cache/resnet20_x2-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/8805062bba9191e5/model_129199544532512_2844.B -P2C:lib=phantom -P2C:df=/tmp/ace-compile-cache/resnet20_x2-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/8805062bba9191e5/data.weight -o /tmp/ace-compile-cache/resnet20_x2-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/8805062bba9191e5/kernel_phantom.cu -VEC:conv_parl:ssf -CKKS:N=65536:q0=60:sf=56:icl=17:sbm
+[DEBUG] root: Build Kernel Library: /tmp/ace-compile-cache/resnet20_x2-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/8805062bba9191e5/libphantom_cuda_845925.so
+[DEBUG] ace.fhe.driver.builder: Build command: nvcc -shared -Xcompiler -fPIC,-O3 --std=c++17 --expt-relaxed-constexpr -o /tmp/ace-compile-cache/resnet20_x2-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/8805062bba9191e5/libphantom_cuda_845925.so /tmp/ace-compile-cache/resnet20_x2-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/8805062bba9191e5/kernel_phantom.cu -I/opt/ace-env/lib/python3.12/site-packages/ace/include -I/opt/ace-env/lib/python3.12/site-packages/ace/include/fhe/vendor -I/opt/ace-env/lib/python3.12/site-packages/ace/include/lib_phantom -L/opt/ace-env/lib/python3.12/site-packages/ace/lib -lFHErt_phantom -lcudart -DUSE_GPU_BACKEND -DSPDLOG_COMPILED_LIB -Xlinker -rpath=/opt/ace-env/lib/python3.12/site-packages/ace/lib
 [INFO] ace.fhe.driver.builder: [SUCCESS] PHANTOM-PHANTOM build succeeded.
-[DEBUG] ace.fhe.driver.driver: Package built: model=Main_graph, kernel=/tmp/ace-compile-cache/resnet20_x2-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/8805062bba9191e5/libphantom_cuda_689056.so, input_info=[{'name': 'x', 'shape': [1, 3, 32, 32], 'type': 'tensor(float)'}], output_info=[{'name': 'output', 'shape': [1, 10], 'type': 'tensor(float)'}], config_path=/tmp/ace-compile-cache/resnet20_x2-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/8805062bba9191e5/model_137398249126656_9687.conf, key_path=None
-[INFO] ace.fhe.cache: [Cache] MISS: Compiled to /tmp/ace-compile-cache/resnet20_x2-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/8805062bba9191e5/libphantom_cuda_689056.so
+[DEBUG] ace.fhe.driver.driver: Package built: model=Main_graph, kernel=/tmp/ace-compile-cache/resnet20_x2-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/8805062bba9191e5/libphantom_cuda_845925.so, input_info=[{'name': 'x', 'shape': [1, 3, 32, 32], 'type': 'tensor(float)'}], output_info=[{'name': 'output', 'shape': [1, 10], 'type': 'tensor(float)'}], config_path=/tmp/ace-compile-cache/resnet20_x2-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/8805062bba9191e5/model_129199544532512_2844.conf, key_path=None
+[INFO] ace.fhe.cache: [Cache] MISS: Compiled to /tmp/ace-compile-cache/resnet20_x2-torch-phantom-cuda/shape_1x3x32x32_dtype_torch_float32/8805062bba9191e5/libphantom_cuda_845925.so
 [DEBUG] ace.fhe.runtime.loader: === Runtime Configuration ===
 Input Count: 1
 Output Count: 1
@@ -409,27 +409,27 @@ Decode Schemes (1):
   [0] output - Shape: [1,10,1,1]
       Count: 1
 
-[INFO] ace.runtime: [phantom] PhantomContext created (N=65536) [2.87s]
+[INFO] ace.runtime: [phantom] PhantomContext created (N=65536) [2.60s]
 [INFO] ace.runtime: [kms] PhantomContext received (N=65536)
 [INFO] ace.runtime: [kms] KeyMode::ONLINE — generating keys (sk, pk, rlk, rtk)...
 [INFO] ace.runtime: [kms] Keys generated [gen_keys=0.03s]
-[DEBUG] ace.runtime: [kms] key handles: sk=0x519ed400 pk=0x10495130 rlk=0x10495350 rtk=0x53f045a0
-[DEBUG] ace.runtime: [timing] init_bootstrap: total=6.82s | bts_ctor=0.00s prep_mod=5.49s rotkey=0.00s galgen=0.16s LT=1.16s
+[DEBUG] ace.runtime: [kms] key handles: sk=0x85e80520 pk=0x46393bd0 rlk=0x46393df0 rtk=0x89dc9c80
+[DEBUG] ace.runtime: [timing] init_bootstrap: total=6.85s | bts_ctor=0.00s prep_mod=5.53s rotkey=0.00s galgen=0.16s LT=1.16s
 [INFO] ace.runtime: [kms] bootstrap key prefetch (hoist) 0.000s
 [DEBUG] ace.runtime: [phantom] ckks_param: _provider=3, _poly_degree=65536, _sec_level=0, mul_depth=30, _first_mod_size=60, _scaling_mod_size=56, _num_q_parts=3, _num_rot_idx=100, _num_prime_parts=32
-[DEBUG] ace.runtime: [timing] FheContext init: total=9.83s | key_mgr=0.03s encoder=0.00s evaluator=0.00s galois_init=6.82s enc_mgr=0.12s
-index: 0, result: -0.048138, expect: -0.048138, abs err=3.73e-09, ok
-index: 1, result: -0.051906, expect: -0.051906, abs err=0.00e+00, ok
-index: 2, result: -0.045148, expect: -0.045148, abs err=3.73e-09, ok
-index: 3, result: -0.122916, expect: -0.122916, abs err=0.00e+00, ok
-index: 4, result: -0.126017, expect: -0.126017, abs err=0.00e+00, ok
-index: 5, result: +0.064285, expect: +0.064285, abs err=0.00e+00, ok
-index: 6, result: +0.058222, expect: +0.058222, abs err=0.00e+00, ok
-index: 7, result: +0.123717, expect: +0.123717, abs err=0.00e+00, ok
-index: 8, result: +0.088080, expect: +0.088080, abs err=7.45e-09, ok
-index: 9, result: +0.072145, expect: +0.072145, abs err=7.45e-09, ok
+[DEBUG] ace.runtime: [timing] FheContext init: total=9.61s | key_mgr=0.03s encoder=0.00s evaluator=0.00s galois_init=6.85s enc_mgr=0.12s
+index: 0, result: -0.082947, expect: -0.082947, abs err=0.00e+00, ok
+index: 1, result: -0.046691, expect: -0.046691, abs err=0.00e+00, ok
+index: 2, result: +0.010586, expect: +0.010586, abs err=1.86e-09, ok
+index: 3, result: +0.104091, expect: +0.104091, abs err=0.00e+00, ok
+index: 4, result: +0.026959, expect: +0.026959, abs err=0.00e+00, ok
+index: 5, result: +0.073730, expect: +0.073730, abs err=7.45e-09, ok
+index: 6, result: -0.069531, expect: -0.069531, abs err=7.45e-09, ok
+index: 7, result: +0.123418, expect: +0.123418, abs err=0.00e+00, ok
+index: 8, result: -0.002471, expect: -0.002471, abs err=1.40e-09, ok
+index: 9, result: -0.103600, expect: -0.103600, abs err=7.45e-09, ok
 
 [summary] max abs err=7.45e-09 (tol 0.001)
 PASSED
 
-============================== 1 passed in 33.45s ==============================
+============================== 1 passed in 39.07s ==============================
