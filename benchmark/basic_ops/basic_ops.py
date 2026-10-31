@@ -48,7 +48,10 @@ if str(repo_root) not in sys.path:
     sys.path.insert(0, str(repo_root))
 
 from ace import fhe
-from ace.sample.ops.specs import ADD_OP, CONV2D_OP, LINEAR_OP, MUL_OP
+from ace.fhe.config.spec import ModelSpec
+from ace.sample.ops.arithmetic import AddOp, MulOp
+from ace.sample.ops.conv import Conv2dOp
+from ace.sample.ops.linear import LinearOp
 
 
 DEFAULT_CACHE_DIR = "/tmp/ace-compile-cache"
@@ -95,6 +98,13 @@ def input_shape_of(spec) -> list[int] | None:
     if hasattr(first, "shape"):
         return list(first.shape)
     return None
+
+
+def input_shape_str(shape: list[int] | None) -> str:
+    """Format a list[int] shape as a display string, e.g. '[1, 64, 32, 16]'."""
+    if shape is None:
+        return "—"
+    return "[" + ", ".join(str(s) for s in shape) + "]"
 
 
 def compile_and_run(
@@ -185,24 +195,91 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
+def _make_add_spec(name: str, shape: tuple) -> "ModelSpec":
+    """Create a ModelSpec for element-wise add at a given shape."""
+    return ModelSpec(
+        name=name,
+        model_class=AddOp,
+        example_inputs=(torch.randn(*shape, dtype=torch.float32), torch.randn(*shape, dtype=torch.float32)),
+        encrypt_inputs=["x", "y"],
+        expected_ops=["Add"],
+    )
+
+
+def _make_mul_spec(name: str, shape: tuple) -> "ModelSpec":
+    """Create a ModelSpec for element-wise mul at a given shape."""
+    return ModelSpec(
+        name=name,
+        model_class=MulOp,
+        example_inputs=(torch.randn(*shape, dtype=torch.float32), torch.randn(*shape, dtype=torch.float32)),
+        encrypt_inputs=["x", "y"],
+        expected_ops=["Mul"],
+    )
+
+
+def _make_linear_spec(name: str, input_size: int, num_classes: int, input_shape: tuple) -> "ModelSpec":
+    """Create a ModelSpec for Linear (GEMM) at a given (input_size, num_classes)."""
+    return ModelSpec(
+        name=name,
+        model_class=LinearOp,
+        example_inputs=(torch.randn(*input_shape, dtype=torch.float32),),
+        encrypt_inputs=["x"],
+        model_init_args=(input_size, num_classes),
+        expected_ops=["Gemm"],
+    )
+
+
+def _make_conv2d_spec(name: str, in_ch: int, out_ch: int, kernel_size: int, input_shape: tuple) -> "ModelSpec":
+    """Create a ModelSpec for Conv2d at a given (in_ch, out_ch, kernel_size)."""
+    return ModelSpec(
+        name=name,
+        model_class=Conv2dOp,
+        example_inputs=(torch.randn(*input_shape, dtype=torch.float32),),
+        encrypt_inputs=["x"],
+        model_init_args=(in_ch, out_ch, kernel_size),
+        expected_ops=["Conv"],
+    )
+
+
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
 
-    specs = [ADD_OP, MUL_OP, LINEAR_OP, CONV2D_OP]
-    shape_map = {
-        "add_op": "[1, 4] + [1, 4]",
-        "mul_op": "[1, 4] × [1, 4]",
-        "linear_op": "[1, 4]",
-        "conv2d_op": "[1, 3, 16, 16]",
-    }
+    # Each entry: (display_name, ModelSpec, display_shape_string)
+    specs: list[tuple[str, ModelSpec, str]] = [
+        # ── Add ──────────────────────────────────────────────────────────
+        ("add_op_32",   _make_add_spec("add_op_32",   (1, 32)),  "[1, 32] + [1, 32]"),
+        ("add_op_64",   _make_add_spec("add_op_64",   (1, 64)),  "[1, 64] + [1, 64]"),
+        ("add_op_128",  _make_add_spec("add_op_128",  (1, 128)), "[1, 128] + [1, 128]"),
+        ("add_op_256",  _make_add_spec("add_op_256",  (1, 256)), "[1, 256] + [1, 256]"),
+        ("add_op_512",  _make_add_spec("add_op_512",  (1, 512)), "[1, 512] + [1, 512]"),
+
+        # ── Mul ──────────────────────────────────────────────────────────
+        ("mul_op_32",   _make_mul_spec("mul_op_32",   (1, 32)),  "[1, 32] × [1, 32]"),
+        ("mul_op_64",   _make_mul_spec("mul_op_64",   (1, 64)),  "[1, 64] × [1, 64]"),
+        ("mul_op_128",  _make_mul_spec("mul_op_128",  (1, 128)), "[1, 128] × [1, 128]"),
+        ("mul_op_256",  _make_mul_spec("mul_op_256",  (1, 256)), "[1, 256] × [1, 256]"),
+        ("mul_op_512",  _make_mul_spec("mul_op_512",  (1, 512)), "[1, 512] × [1, 512]"),
+
+        # ── Linear (GEMM) ────────────────────────────────────────────────
+        ("linear_4x4",   _make_linear_spec("linear_4x4",   4,   4,   (1, 4)),   "[1, 4]"),
+        ("linear_16x8",  _make_linear_spec("linear_16x8",  16,  8,   (1, 16)),  "[1, 16]"),
+        ("linear_64x32", _make_linear_spec("linear_64x32", 64,  32,  (1, 64)),  "[1, 64]"),
+        ("linear_128x64", _make_linear_spec("linear_128x64", 128, 64, (1, 128)), "[1, 128]"),
+
+        # ── Conv2d ───────────────────────────────────────────────────────
+        ("conv2d_3x16",   _make_conv2d_spec("conv2d_3x16",   3, 16, 3, (1, 3, 16, 16)),  "[1, 3, 16, 16]"),
+        ("conv2d_16x32",  _make_conv2d_spec("conv2d_16x32",  16, 32, 3, (1, 16, 8, 8)),  "[1, 16, 8, 8]"),
+        ("conv2d_32x64",  _make_conv2d_spec("conv2d_32x64",  32, 64, 3, (1, 32, 4, 4)),  "[1, 32, 4, 4]"),
+    ]
 
     print(f"Backend: {args.library}/{args.device}")
-    print("-" * 80)
-    print(f"{'Operator':<15} {'Input':<20} {'Compile(s)':>12} {'Exec(ms)':>12} {'Result':>8}")
-    print("-" * 80)
+    print(f"Configs : {len(specs)} (shape variants per operator)")
+    print("-" * 100)
+    print(f"{'Operator':<20} {'Input':<22} {'Compile(s)':>12} {'Exec(ms)':>12} {'Result':>8}")
+    print("-" * 100)
 
     results: list[OperatorResult] = []
-    for spec in specs:
+    for display_name, spec, display_shape in specs:
         try:
             result = compile_and_run(
                 spec,
@@ -211,10 +288,10 @@ def main(argv: list[str] | None = None) -> int:
                 cache_dir=args.cache_dir,
             )
         except Exception as exc:  # noqa: BLE001
-            print(f"{spec.name:<15} {shape_map[spec.name]:<20} {'FAILED':>12} {'—':>12} {'FAIL':>8}")
+            print(f"{display_name:<20} {display_shape:<22} {'FAILED':>12} {'—':>12} {'FAIL':>8}")
             print(f"  error: {exc}", file=sys.stderr)
             result = OperatorResult(
-                name=spec.name,
+                name=display_name,
                 input_shape=input_shape_of(spec),
                 library=args.library,
                 device=args.device,
@@ -226,7 +303,8 @@ def main(argv: list[str] | None = None) -> int:
         results.append(result)
         status = "PASS" if result.result_ok else "FAIL"
         print(
-            f"{result.name:<15} {shape_map[spec.name]:<20} "
+            f"{result.name:<20} "
+            f"{(input_shape_str(result.input_shape)) if result.input_shape else display_shape:<22} "
             f"{result.compile_time_s:>12.2f} {result.execution_time_ms:>12.2f} {status:>8}"
         )
 

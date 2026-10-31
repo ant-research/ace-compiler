@@ -1,207 +1,136 @@
-# Test Content
+# 测试内容
 
-## Preparing a DOCKER environment to Build and Test
+## 准备 Docker 构建与测试环境
 
-Pull the pre-built docker image from Docker Hub (the same image the
-`delivery/final-202610` GitHub Actions workflow builds and pushes from
-this repo — see `.github/workflows/build-image.yml`):
+从 Docker Hub 拉取预构建镜像（与 `delivery/final-202610-v2` GitHub Actions 工作流构建并推送的镜像一致，详见 `.github/workflows/build-image.yml`）：
 
 ```bash
 docker pull opencc/ace:final-202610-v2
 ```
 
-Start a container once per test item — the `--name` differs per item so
-the containers do not collide. CPU test items (§1 / §2 / §3 / §5):
+每个测试项启动一个独立容器，通过 `--name` 区分以避免冲突。CPU 测试项（§1 / §2）：
 
 ```bash
-docker run -it -d --name test_7.x opencc/ace:final-202610-v2 bash
-docker exec -it test_7.x bash
+docker run -it -d --name test_<n> opencc/ace:final-202610-v2 bash
+docker exec -it test_<n> bash
 ```
+
+- GPU 测试项（§3）——透传 GPU：`--gpus '"device=1"'`
+- FPGA 测试项（§4）——宿主机需配备 FPGA 板卡并准备 `fheacc-software-platform` 仓库，详见 `baselines/fpga/README.md`。
 
 ```bash
 cd ace-compiler
 ./scripts/dev-build.sh
 ```
 
-- GPU test item (§4.1) — pass through the GPU: `--gpus '"device=1"'`
+## 1. 面向 CPU 全同态加密编译原型系统
 
-The image does NOT pre-build any FHE baseline — it installs the pip
-deps and tools only. Run the per-baseline build scripts
-(`scripts/build_cnn.py` / `build_cnn_gpu.py` / `build_cnn_fpga.py`)
-inside the container before the inference step.
+对应 `testing/report.md` §7.1（CPU）/ §7.2（CPU）/ §7.3（CPU）。覆盖 CPU 后端的基础算子编译执行、神经网络模型端到端编译与 FHE 推理精度测试。
 
-## 1. Testing the Inference Performance of Neural Networks for Fully Homomorphic Encryption
+- 环境准备
 
-- Setup
+```bash
+docker run -it -d --name test_1 opencc/ace:final-202610-v2 bash
+docker exec -it test_1 bash
+```
 
-- Build
+- 构建
 
-    ```bash
-    python3 /app/scripts/build_cnn.py   # build the cpu baseline (FHE-MP-CNN, SEAL 3.6.6) + install modified SEAL to /usr/local
-    /app/scripts/build_cmplr.sh         # build the ace-compiler (CPU backend, ONNX -> FHE executable)
-    ```
+```bash
+cd ace-compiler
+./scripts/dev-build.sh
+```
 
-- Inference
+- 测试
 
-    ```bash
-    # GPU
-    python3 benchmark/basic_ops/bench_basic_ops.py
+```bash
+# 基础算子（report 7.1）：Add / Mul / MVM / Conv2d
+python3 benchmark/basic_ops/basic_ops.py --library ant --device cpu
+```
 
-    # CPU
-    python3 benchmark/basic_ops/bench_basic_ops.py --library ant --device cpu
+## 2. CPU 运行时原型系统
 
-    # 输出 JSON 报告
-    python3 benchmark/basic_ops/bench_basic_ops.py --output basic_ops_report.json
-    ```
+对应 `testing/report.md` §7.4。覆盖 ResNet 系列（ResNet-20/32/44/56/110）在 CPU 上的 FHE 推理性能，对比 FHE-MP-CNN 基线与 ANT-ACE 预编译产物。
 
-## 2 Generalization Ability Test of Fully Homomorphic Encryption Compiler
+- 环境准备
 
-- Setup
+```bash
+docker run -it -d --name test_2 opencc/ace:final-202610-v2 bash
+docker exec -it test_2 bash
+```
 
-    ```
-    docker run -it -d --name test_7.2 opencc/ace:final-202610-v2 bash
-    docker exec -it test_7.2 bash
-    ```
+- 构建
 
-- CPU Platform
+```bash
+cd ace-compiler
+./scripts/dev-build.sh
+```
 
-    ```
-    pytest tests/regression/vgg16/test_vgg16_smoke.py -k ant -v -s
-    pytest tests/regression/alexnet/test_alexnet_smoke.py -k ant -v -s
-    pytest tests/regression/resnet_x2/test_resnet20_smoke.py -k ant -s
-    ```
+- 测试
 
-- GPU Platform
+```bash
+# 模型编译冒烟测试（report 7.2）：LR / LeNet x² / AlexNet / ResNet-20 / VGG16
+pytest tests/regression/lr/test_lr_smoke.py -k ant -v -s
+pytest tests/regression/lenet_x2/test_lenet_x2_smoke.py -k ant -v -s
+pytest tests/regression/alexnet_x2/test_alexnet_x2_smoke.py -k ant -v -s
+pytest tests/regression/resnet_x2/test_resnet20_x2_smoke.py -k ant -v -s
+pytest tests/regression/vgg16_x2/test_vgg16_x2_smoke.py -k ant -v -s
 
-    ```bash
-    # LR
-    CUDA_VISIBLE_DEVICES=0 python3 -m pytest benchmark/lr/test_lr_latency.py -k "phantom" -v -s
+# 推理准确率（report 7.3，每模型 100 张 CIFAR-10）
+pytest benchmark/alexnet/test_accuracy.py -k "ant-cpu-100 and not 1000" -v -s
+pytest benchmark/resnet/test_accuracy.py -k "ant-cpu-100 and resnet20 and not 1000" -v -s
+pytest benchmark/vgg16/test_accuracy.py -k "ant-cpu-100 and not 1000" -v -s
+```
 
-    # LeNet
-    CUDA_VISIBLE_DEVICES=0 python3 -m pytest benchmark/lenet/test_lenet_latency.py -k "phantom" -v -s
+## 3. 面向加速器全同态加密编译原型系统
 
-    # ResNet-20
-    CUDA_VISIBLE_DEVICES=0 python3 -m pytest benchmark/resnet/test_latency.py -k "resnet20 and phantom" -v -s
-    ```
+对应 `testing/report.md` §7.1（GPU）/ §7.2（GPU）/ §7.3（GPU）。覆盖 GPU（Phantom）后端的基础算子、模型端到端编译与 FHE 推理精度测试。
 
-    ```
-    pytest tests/regression/vgg16/test_vgg16_smoke.py -k phantom -v -s
-    pytest tests/regression/alexnet/test_alexnet_smoke.py -k phantom -v -s
-    pytest tests/regression/resnet_x2/test_resnet20_smoke.py -k phantom -s
-    ```
+- 环境准备
 
-- FPGA Platform
+```bash
+docker run -it -d --name test_3 --gpus '"device=1"' opencc/ace:final-202610-v2 bash
+docker exec -it test_3 bash
+```
 
-    ```
-    pytest tests/regression/lenet_x2/test_lenet_x2_smoke.py -v -s
-    pytest tests/regression/alexnet_x2/test_alexnet_x2_smoke.py -v -s
-    pytest tests/regression/vgg16_x2/test_vgg16_x2_smoke.py -v -s
-    pytest tests/regression/resnet_x2/test_resnet20_x2_smoke.py -v -s
-    ```
+- 构建
 
-## 3 Testing the Inference Accuracy of Neural Network Models for Fully homomorphic Encryption
+```bash
+cd ace-compiler
+./scripts/dev-build.sh
+```
 
-- Setup
+- 测试
 
-    ```
-    docker run -it -d --name test_7.3 opencc/ace:final-202610-v2 bash
-    docker exec -it test_7.3 bash
-    ```
+```bash
+# 基础算子（report 7.1）
+python3 benchmark/basic_ops/basic_ops.py --library phantom --device cuda
 
-- Build
+# 模型编译冒烟测试（report 7.2）：LR / LeNet x² / ResNet-20 x²
+CUDA_VISIBLE_DEVICES=0 pytest tests/regression/lr/test_lr_smoke.py -k phantom -v -s
+CUDA_VISIBLE_DEVICES=0 pytest tests/regression/lenet_x2/test_lenet_x2_smoke.py -k phantom -v -s
+CUDA_VISIBLE_DEVICES=0 pytest tests/regression/resnet_x2/test_resnet20_x2_smoke.py -k phantom -v -s
 
-    ```
-    /app/scripts/build_cmplr_omp.sh     # build ace-compiler (OpenMP backend, supports parallel multi-image inference)
-    ```
+# 推理准确率（report 7.3，每模型 100 张图片）
+CUDA_VISIBLE_DEVICES=0 pytest benchmark/lr/test_accuracy.py -k "[phantom-cuda-100]" -v -s
+CUDA_VISIBLE_DEVICES=0 pytest benchmark/resnet/test_accuracy.py -k "resnet20 and [phantom-cuda-100]" -v -s
+CUDA_VISIBLE_DEVICES=0 pytest benchmark/resnet/test_accuracy.py -k "resnet32 and [phantom-cuda-100]" -v -s
+CUDA_VISIBLE_DEVICES=0 pytest benchmark/resnet/test_accuracy.py -k "resnet44 and [phantom-cuda-100]" -v -s
+CUDA_VISIBLE_DEVICES=0 pytest benchmark/resnet/test_accuracy.py -k "resnet56 and [phantom-cuda-100]" -v -s
+CUDA_VISIBLE_DEVICES=0 pytest benchmark/resnet/test_accuracy.py -k "resnet110 and [phantom-cuda-100]" -v -s
+```
 
-- Inference
+## 4. 加速器运行时原型系统
 
-    ```
-    python3 /app/scripts/resbm_expert.py -n 100
-    nohup python3 /app/scripts/resbm.py -n 100 > /dev/null 2>&1 &
-    ```
+对应 `testing/report.md` §7.5。在 FPGA 加速器（AMD Alveo V80 / Versal VPK180）上运行编译器生成代码与手写 FHE-MP-CNN 程序，对比实测耗时。
 
-## 4. Performance Testing of Fully homomorphic Compilation Systems for Hardware Accelerators
+### 4.2 FPGA 加速器（baselines/fpga，接口适配 / CPU 验证路径）
 
-### 4.1 GPU accelerator (baselines/gpu)
+IIE FPGA 加速器支持运行编译器生成的程序与手写 FHE-MP-CNN 程序。编译器测试模型包括 LR、LeNet5、ResNet20、ResNet32；手写实现测试模型包括 ResNet20、ResNet32。
 
-- Setup
+- 基线验证
 
-    ```
-    docker run -it -d --name test_7.4 --gpus '"device=1"' opencc/ace:final-202610-v2 bash
-    docker exec -it test_7.4 bash
-    ```
-
-    H20
-    ```
-    root@99c62073fab2:/app# nvidia-smi
-    Sun Jun 29 18:40:19 2025
-    +-----------------------------------------------------------------------------------------+
-    | NVIDIA-SMI 550.144.03             Driver Version: 550.144.03     CUDA Version: 12.4     |
-    |-----------------------------------------+------------------------+----------------------+
-    | GPU  Name                 Persistence-M | Bus-Id          Disp. A | Volatile Uncorr. ECC |
-    | Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
-    |                                         |                        |               MIG M. |
-    |=========================================+===============================================+
-    |   0  NVIDIA H20                     Off |   00000000:26:00.0 Off |                    0 |
-    | N/A   40C    P0             74W /  500W |       4MiB /  97871MiB |      0%      Default |
-    |                                         |                        |             Disabled |
-    +-----------------------------------------+------------------------+----------------------+
-
-    +-----------------------------------------------------------------------------------------+
-    | Processes:                                                                              |
-    |  GPU   GI   CI        PID   Type   Process name                              GPU Memory |
-    |        ID   ID                                                               Usage      |
-    |=========================================================================================|
-    |  No running processes found                                                             |
-    +-----------------------------------------------------------------------------------------+
-    ```
-
-    A100:
-    ```
-    root@7a4253dbaa94:/app# nvidia-smi
-    Tue Jul  1 12:19:42 2025
-    +-----------------------------------------------------------------------------------------+
-    | NVIDIA-SMI 570.144                Driver Version: 570.144        CUDA Version: 12.8     |
-    |-----------------------------------------+------------------------+----------------------+
-    | GPU  Name                 Persistence-M | Bus-Id          Disp. A | Volatile Uncorr. ECC |
-    | Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
-    |                                         |                        |               MIG M. |
-    |=========================================+===============================================+
-    |   0  NVIDIA A100 80GB PCIe          Off |   00000000:36:00.0 Off |                    0 |
-    | N/A   44C    P0             45W /  300W |       0MiB /  81920MiB |      0%      Default |
-    |                                         |                        |             Disabled |
-    +-----------------------------------------+------------------------+----------------------+
-
-    +-----------------------------------------------------------------------------------------+
-    | Processes:                                                                              |
-    |  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
-    |        ID   ID                                                               Usage      |
-    |=========================================================================================|
-    |  No running processes found                                                             |
-    +-----------------------------------------------------------------------------------------+
-    ```
-
-- Build
-
-    ```
-    python3 /app/scripts/build_cnn_gpu.py   # build the gpu baseline (phantom-fhe, CUDA RNS-CKKS + bootstrapping)
-    /app/scripts/build_cmplr_gpu.sh         # build the ace-compiler (GPU/CUDA backend, ONNX -> FHE executable)
-    ```
-
-- Inference
-
-    ```
-    nohup python3 /app/scripts/perf_gpu.py -a > /dev/null 2>&1 &
-    ```
-
-### 4.2 FPGA accelerator (baselines/fpga, interface adaptation / CPU verification path)
-
-The IIE FPGA accelerator supports running compiler-generated programs and handwritten FHE-MP-CNN programs. Compiler test models include LR, LeNet5, ResNet20, and ResNet32; handwritten implementation test models include ResNet20 and ResNet32.
-
-- Baseline verification
-
-Follow the instructions in `baselines/fpga/README.md` in the delivery repository to complete board configuration and FPGA loading. Run the following commands in the root directory of the `fheacc-software-platform` repository to generate hardware instructions and data for the compiler test models:
+按交付仓库中 `baselines/fpga/README.md` 的说明完成板卡配置与 FPGA 加载。在 `fheacc-software-platform` 仓库根目录执行以下命令，生成编译器测试模型的硬件指令与数据：
 
 ```bash
 make soft TEST_NAME=lr       RELEASE_MODE=2
@@ -210,55 +139,39 @@ make soft TEST_NAME=resnet20 RELEASE_MODE=2
 make soft TEST_NAME=resnet32 RELEASE_MODE=2
 ```
 
-The artifacts for each model are located in `soft/clib/tests/tests/<TEST_NAME>/`, where `data/` contains the instructions and HBM image, and `nttw/ntt_intt_merged/` contains the NTT window data. `RELEASE_MODE=2` also runs the CPU Golden model for numerical verification.
+各模型的产物位于 `soft/clib/tests/tests/<TEST_NAME>/`，其中 `data/` 包含指令与 HBM 镜像，`nttw/ntt_intt_merged/` 包含 NTT 窗口数据。`RELEASE_MODE=2` 还会运行 CPU Golden model 进行数值验证。
 
-Generate the hardware package for the handwritten FHE-MP-CNN test model via the SDK app:
+通过 SDK app 生成手写 FHE-MP-CNN 测试模型的硬件包：
 
 ```bash
 cd soft/clib/sdk/apps/resnet20
 make hardware MODEL=20 SAMPLE=0 RELEASE_MODE=2
-# First load and test the generated resnet20/ hardware package, then generate the next model.
+# 先加载并测试生成的 resnet20/ 硬件包，再生成下一个模型
 make hardware MODEL=32 SAMPLE=0 RELEASE_MODE=2
 ```
 
-Both models are output to the `resnet20/` hardware package directory under the app directory; the second export overwrites the first. The hardware package name is determined by the app directory name, while the actual network is selected by `MODEL=20` or `MODEL=32`. If only hardware artifacts and cycle estimates are needed, `RELEASE_MODE=1` can be used; this mode does not perform Golden numerical verification.
+两个模型都输出到 app 目录下的 `resnet20/` 硬件包目录；第二次导出会覆盖第一次。硬件包名由 app 目录名决定，实际网络由 `MODEL=20` 或 `MODEL=32` 选择。若仅需硬件产物与 cycle 估算，可使用 `RELEASE_MODE=1`，该模式不执行 Golden 数值验证。
 
-Use the on-board loader to load the corresponding instruction stream, initial HBM data, and NTT window data. Run the accelerator, read back the output, and compare it with the corresponding Golden result. When performing decryption comparison, if the output is still in Montgomery representation, a de-Montgomery conversion should be performed first; the decryption tool of the SDK hardware package will handle the output format based on what is recorded in the package.
+使用上板 loader 加载对应的指令流、初始 HBM 数据与 NTT 窗口数据。运行加速器，读回输出并与对应 Golden 结果比对。进行解密比对时，若输出仍为 Montgomery 表示，需先做去 Montgomery 转换；SDK 硬件包的解密工具会根据包内记录的格式处理输出。
 
-- FPGA performance testing
+- FPGA 性能测试
 
-**The elapsed time includes input data loading, FPGA computation, and result readback.** Compiler-generated code and handwritten implementations use the same timing scope. Save the on-board run logs and timing data to the `testing/` directory of the delivery repository.
+**耗时包含输入数据加载、FPGA 计算与结果回读。** 编译器生成代码与手写实现采用相同的计时口径。将上板运行日志与计时数据保存到交付仓库的 `testing/` 目录。
 
-The measured results are in the accompanying `report.md`, whose content corresponds to `testing/report.md` in the repository. These data are FPGA measured elapsed times; the run time of `make soft` and the cycle estimates in `clib_profile.md` are different metrics.
+实测结果见随附的 `report.md`，其内容对应仓库内的 `testing/report.md`。这些数据为 FPGA 实测耗时；`make soft` 的运行时间与 `clib_profile.md` 中的 cycle 估算是不同的指标。
 
-## 5. Runtime library unit tests (7.5)
+## 5. 生成测试报告
 
-Runtime-library unit tests (examples built by the ace-compiler's `RTLIB_BUILD_EXAMPLE`): polynomial computation per backend.
+任一/全部测试项运行完成后，使用 `gen_report.py` 从 `.log` 文件提取数据，生成 `data 7.X.csv` + `figures_7.X.png` + `report.md`（位于 `/app/testing/`）。脚本通过日志文件名前缀（`7.1_` / `7.2_` / `7.3_` / `7.4_` / `7.5_`，由各测试脚本写入）识别其所属测试项。
 
-```
-# CPU — build rtlib examples standalone into release_rtlib/ (does not touch the main ace-compiler release/)
-/app/scripts/build_rtlib.sh Release
-python3 /app/scripts/run_rtlib.py -e /app/ace-compiler/release_rtlib/example
+- 单项：
 
-# GPU
-python3 /app/scripts/run_rtlib.py -e /app/ace-compiler/release_gpu/rtlib/build/example
-
-# FPGA
-python3 /app/scripts/run_rtlib.py -e /app/ace-compiler/release_fpga/rtlib/build/example
+```bash
+python3 /app/scripts/gen_report.py -L /app -o /app/testing -t 7.4
 ```
 
-## 6. Generate testing report
+- 全部五项：
 
-After any/all test items run, use `gen_report.py` to extract data from the `.log` files and generate `data 7.X.csv` + `figures_7.X.png` + `report.md` (under `/app/testing/`). The script identifies which test item a log belongs to by its filename prefix (`7.1_` / `7.2_` / `7.3_` / `7.4_` / `7.5_`, written by each test script).
-
-- Single item:
-
-    ```
-    python3 /app/scripts/gen_report.py -L /app -o /app/testing -t 7.4
-    ```
-
-- All five items:
-
-    ```
-    python3 /app/scripts/gen_report.py -L /app -o /app/testing
-    ```
+```bash
+python3 /app/scripts/gen_report.py -L /app -o /app/testing
+```

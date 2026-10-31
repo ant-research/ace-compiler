@@ -1,0 +1,295 @@
+[INFO] ace.fhe.backend.phantom: Library: using phantom for build...
+[INFO] ace.fhe.frontend.torch.torch_frontend: Traced successfully, Output shape: [1, 32]
+/app/ace-compiler-iiecas/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/app/ace-compiler-iiecas/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+[INFO] ace.fhe.ir.frontends.torch.torch_trace: AIR IR exported successfully!
+[INFO] ace.fhe.backend.phantom: [phantom] option_args = ['-CKKS:N=65536']
+[INFO] ace.fhe.driver.builder: [SUCCESS] PHANTOM-PHANTOM build succeeded.
+[INFO] ace.fhe.cache: [Cache] MISS: Compiled to /tmp/ace-compile-cache/add_op_32-torch-phantom-cuda/shape_1x32_dtype_torch_float32/ba58676a564801d6/libphantom_cuda_989190.so
+[INFO] ace.runtime: [phantom] PhantomContext created (N=65536) [0.06s]
+[INFO] ace.runtime: [kms] PhantomContext received (N=65536)
+[INFO] ace.runtime: [kms] KeyMode::ONLINE — generating keys (sk, pk, rlk, rtk)...
+[INFO] ace.runtime: [kms] Keys generated [gen_keys=0.01s]
+[INFO] ace.fhe.backend.phantom: Library: using phantom for build...
+[INFO] ace.fhe.frontend.torch.torch_frontend: Traced successfully, Output shape: [1, 64]
+/app/ace-compiler-iiecas/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/app/ace-compiler-iiecas/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+[INFO] ace.fhe.ir.frontends.torch.torch_trace: AIR IR exported successfully!
+[INFO] ace.fhe.backend.phantom: [phantom] option_args = ['-CKKS:N=65536']
+[INFO] ace.fhe.driver.builder: [SUCCESS] PHANTOM-PHANTOM build succeeded.
+[INFO] ace.fhe.cache: [Cache] MISS: Compiled to /tmp/ace-compile-cache/add_op_64-torch-phantom-cuda/shape_1x64_dtype_torch_float32/ba58676a564801d6/libphantom_cuda_938752.so
+[INFO] ace.runtime: [phantom] PhantomContext created (N=65536) [0.03s]
+[INFO] ace.runtime: [kms] PhantomContext received (N=65536)
+[INFO] ace.runtime: [kms] KeyMode::ONLINE — generating keys (sk, pk, rlk, rtk)...
+[INFO] ace.runtime: [kms] Keys generated [gen_keys=0.00s]
+[INFO] ace.fhe.backend.phantom: Library: using phantom for build...
+[INFO] ace.fhe.frontend.torch.torch_frontend: Traced successfully, Output shape: [1, 128]
+/app/ace-compiler-iiecas/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/app/ace-compiler-iiecas/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+[INFO] ace.fhe.ir.frontends.torch.torch_trace: AIR IR exported successfully!
+[INFO] ace.fhe.backend.phantom: [phantom] option_args = ['-CKKS:N=65536']
+[INFO] ace.fhe.driver.builder: [SUCCESS] PHANTOM-PHANTOM build succeeded.
+[INFO] ace.fhe.cache: [Cache] MISS: Compiled to /tmp/ace-compile-cache/add_op_128-torch-phantom-cuda/shape_1x128_dtype_torch_float32/ba58676a564801d6/libphantom_cuda_180148.so
+[INFO] ace.runtime: [phantom] PhantomContext created (N=65536) [0.06s]
+[INFO] ace.runtime: [kms] PhantomContext received (N=65536)
+[INFO] ace.runtime: [kms] KeyMode::ONLINE — generating keys (sk, pk, rlk, rtk)...
+[INFO] ace.runtime: [kms] Keys generated [gen_keys=0.00s]
+[INFO] ace.fhe.backend.phantom: Library: using phantom for build...
+[INFO] ace.fhe.frontend.torch.torch_frontend: Traced successfully, Output shape: [1, 256]
+/app/ace-compiler-iiecas/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/app/ace-compiler-iiecas/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+[INFO] ace.fhe.ir.frontends.torch.torch_trace: AIR IR exported successfully!
+[INFO] ace.fhe.backend.phantom: [phantom] option_args = ['-CKKS:N=65536']
+[INFO] ace.fhe.driver.builder: [SUCCESS] PHANTOM-PHANTOM build succeeded.
+[INFO] ace.fhe.cache: [Cache] MISS: Compiled to /tmp/ace-compile-cache/add_op_256-torch-phantom-cuda/shape_1x256_dtype_torch_float32/ba58676a564801d6/libphantom_cuda_004013.so
+[INFO] ace.runtime: [phantom] PhantomContext created (N=65536) [0.06s]
+[INFO] ace.runtime: [kms] PhantomContext received (N=65536)
+[INFO] ace.runtime: [kms] KeyMode::ONLINE — generating keys (sk, pk, rlk, rtk)...
+[INFO] ace.runtime: [kms] Keys generated [gen_keys=0.00s]
+[INFO] ace.fhe.backend.phantom: Library: using phantom for build...
+[INFO] ace.fhe.frontend.torch.torch_frontend: Traced successfully, Output shape: [1, 512]
+/app/ace-compiler-iiecas/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/app/ace-compiler-iiecas/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+[INFO] ace.fhe.ir.frontends.torch.torch_trace: AIR IR exported successfully!
+[INFO] ace.fhe.backend.phantom: [phantom] option_args = ['-CKKS:N=65536']
+[INFO] ace.fhe.driver.builder: [SUCCESS] PHANTOM-PHANTOM build succeeded.
+[INFO] ace.fhe.cache: [Cache] MISS: Compiled to /tmp/ace-compile-cache/add_op_512-torch-phantom-cuda/shape_1x512_dtype_torch_float32/ba58676a564801d6/libphantom_cuda_871840.so
+[INFO] ace.runtime: [phantom] PhantomContext created (N=65536) [0.06s]
+[INFO] ace.runtime: [kms] PhantomContext received (N=65536)
+[INFO] ace.runtime: [kms] KeyMode::ONLINE — generating keys (sk, pk, rlk, rtk)...
+[INFO] ace.runtime: [kms] Keys generated [gen_keys=0.01s]
+[INFO] ace.fhe.backend.phantom: Library: using phantom for build...
+[INFO] ace.fhe.frontend.torch.torch_frontend: Traced successfully, Output shape: [1, 32]
+/app/ace-compiler-iiecas/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/app/ace-compiler-iiecas/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+[INFO] ace.fhe.ir.frontends.torch.torch_trace: AIR IR exported successfully!
+[INFO] ace.fhe.backend.phantom: [phantom] option_args = ['-CKKS:N=65536']
+[INFO] ace.fhe.driver.builder: [SUCCESS] PHANTOM-PHANTOM build succeeded.
+[INFO] ace.fhe.cache: [Cache] MISS: Compiled to /tmp/ace-compile-cache/mul_op_32-torch-phantom-cuda/shape_1x32_dtype_torch_float32/ba58676a564801d6/libphantom_cuda_834909.so
+[INFO] ace.runtime: [phantom] PhantomContext created (N=65536) [0.08s]
+[INFO] ace.runtime: [kms] PhantomContext received (N=65536)
+[INFO] ace.runtime: [kms] KeyMode::ONLINE — generating keys (sk, pk, rlk, rtk)...
+[INFO] ace.runtime: [kms] Keys generated [gen_keys=0.00s]
+[INFO] ace.fhe.backend.phantom: Library: using phantom for build...
+[INFO] ace.fhe.frontend.torch.torch_frontend: Traced successfully, Output shape: [1, 64]
+/app/ace-compiler-iiecas/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/app/ace-compiler-iiecas/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+[INFO] ace.fhe.ir.frontends.torch.torch_trace: AIR IR exported successfully!
+[INFO] ace.fhe.backend.phantom: [phantom] option_args = ['-CKKS:N=65536']
+[INFO] ace.fhe.driver.builder: [SUCCESS] PHANTOM-PHANTOM build succeeded.
+[INFO] ace.fhe.cache: [Cache] MISS: Compiled to /tmp/ace-compile-cache/mul_op_64-torch-phantom-cuda/shape_1x64_dtype_torch_float32/ba58676a564801d6/libphantom_cuda_646157.so
+[INFO] ace.runtime: [phantom] PhantomContext created (N=65536) [0.08s]
+[INFO] ace.runtime: [kms] PhantomContext received (N=65536)
+[INFO] ace.runtime: [kms] KeyMode::ONLINE — generating keys (sk, pk, rlk, rtk)...
+[INFO] ace.runtime: [kms] Keys generated [gen_keys=0.00s]
+[INFO] ace.fhe.backend.phantom: Library: using phantom for build...
+[INFO] ace.fhe.frontend.torch.torch_frontend: Traced successfully, Output shape: [1, 128]
+/app/ace-compiler-iiecas/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/app/ace-compiler-iiecas/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+[INFO] ace.fhe.ir.frontends.torch.torch_trace: AIR IR exported successfully!
+[INFO] ace.fhe.backend.phantom: [phantom] option_args = ['-CKKS:N=65536']
+[INFO] ace.fhe.driver.builder: [SUCCESS] PHANTOM-PHANTOM build succeeded.
+[INFO] ace.fhe.cache: [Cache] MISS: Compiled to /tmp/ace-compile-cache/mul_op_128-torch-phantom-cuda/shape_1x128_dtype_torch_float32/ba58676a564801d6/libphantom_cuda_559431.so
+[INFO] ace.runtime: [phantom] PhantomContext created (N=65536) [0.08s]
+[INFO] ace.runtime: [kms] PhantomContext received (N=65536)
+[INFO] ace.runtime: [kms] KeyMode::ONLINE — generating keys (sk, pk, rlk, rtk)...
+[INFO] ace.runtime: [kms] Keys generated [gen_keys=0.00s]
+[INFO] ace.fhe.backend.phantom: Library: using phantom for build...
+[INFO] ace.fhe.frontend.torch.torch_frontend: Traced successfully, Output shape: [1, 256]
+/app/ace-compiler-iiecas/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/app/ace-compiler-iiecas/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+[INFO] ace.fhe.ir.frontends.torch.torch_trace: AIR IR exported successfully!
+[INFO] ace.fhe.backend.phantom: [phantom] option_args = ['-CKKS:N=65536']
+[INFO] ace.fhe.driver.builder: [SUCCESS] PHANTOM-PHANTOM build succeeded.
+[INFO] ace.fhe.cache: [Cache] MISS: Compiled to /tmp/ace-compile-cache/mul_op_256-torch-phantom-cuda/shape_1x256_dtype_torch_float32/ba58676a564801d6/libphantom_cuda_344157.so
+[INFO] ace.runtime: [phantom] PhantomContext created (N=65536) [0.08s]
+[INFO] ace.runtime: [kms] PhantomContext received (N=65536)
+[INFO] ace.runtime: [kms] KeyMode::ONLINE — generating keys (sk, pk, rlk, rtk)...
+[INFO] ace.runtime: [kms] Keys generated [gen_keys=0.00s]
+[INFO] ace.fhe.backend.phantom: Library: using phantom for build...
+[INFO] ace.fhe.frontend.torch.torch_frontend: Traced successfully, Output shape: [1, 512]
+/app/ace-compiler-iiecas/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/app/ace-compiler-iiecas/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+[INFO] ace.fhe.ir.frontends.torch.torch_trace: AIR IR exported successfully!
+[INFO] ace.fhe.backend.phantom: [phantom] option_args = ['-CKKS:N=65536']
+[INFO] ace.fhe.driver.builder: [SUCCESS] PHANTOM-PHANTOM build succeeded.
+[INFO] ace.fhe.cache: [Cache] MISS: Compiled to /tmp/ace-compile-cache/mul_op_512-torch-phantom-cuda/shape_1x512_dtype_torch_float32/ba58676a564801d6/libphantom_cuda_122378.so
+[INFO] ace.runtime: [phantom] PhantomContext created (N=65536) [0.08s]
+[INFO] ace.runtime: [kms] PhantomContext received (N=65536)
+[INFO] ace.runtime: [kms] KeyMode::ONLINE — generating keys (sk, pk, rlk, rtk)...
+[INFO] ace.runtime: [kms] Keys generated [gen_keys=0.00s]
+[INFO] ace.fhe.backend.phantom: Library: using phantom for build...
+[INFO] ace.fhe.frontend.torch.torch_frontend: Traced successfully, Output shape: [1, 4]
+/app/ace-compiler-iiecas/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/app/ace-compiler-iiecas/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+[INFO] ace.fhe.ir.frontends.torch.torch_trace: AIR IR exported successfully!
+[INFO] ace.fhe.backend.phantom: [phantom] option_args = ['-CKKS:N=65536']
+[INFO] ace.fhe.driver.builder: [SUCCESS] PHANTOM-PHANTOM build succeeded.
+[INFO] ace.fhe.cache: [Cache] MISS: Compiled to /tmp/ace-compile-cache/linear_4x4-torch-phantom-cuda/shape_1x4_dtype_torch_float32/ba58676a564801d6/libphantom_cuda_831406.so
+[INFO] ace.runtime: [phantom] PhantomContext created (N=65536) [0.10s]
+[INFO] ace.runtime: [kms] PhantomContext received (N=65536)
+[INFO] ace.runtime: [kms] KeyMode::ONLINE — generating keys (sk, pk, rlk, rtk)...
+[INFO] ace.runtime: [kms] Keys generated [gen_keys=0.00s]
+[INFO] ace.fhe.backend.phantom: Library: using phantom for build...
+[INFO] ace.fhe.frontend.torch.torch_frontend: Traced successfully, Output shape: [1, 8]
+/app/ace-compiler-iiecas/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/app/ace-compiler-iiecas/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+[INFO] ace.fhe.ir.frontends.torch.torch_trace: AIR IR exported successfully!
+[INFO] ace.fhe.backend.phantom: [phantom] option_args = ['-CKKS:N=65536']
+[INFO] ace.fhe.driver.builder: [SUCCESS] PHANTOM-PHANTOM build succeeded.
+[INFO] ace.fhe.cache: [Cache] MISS: Compiled to /tmp/ace-compile-cache/linear_16x8-torch-phantom-cuda/shape_1x16_dtype_torch_float32/ba58676a564801d6/libphantom_cuda_954804.so
+[INFO] ace.runtime: [phantom] PhantomContext created (N=65536) [0.06s]
+[INFO] ace.runtime: [kms] PhantomContext received (N=65536)
+[INFO] ace.runtime: [kms] KeyMode::ONLINE — generating keys (sk, pk, rlk, rtk)...
+[INFO] ace.runtime: [kms] Keys generated [gen_keys=0.00s]
+[INFO] ace.fhe.backend.phantom: Library: using phantom for build...
+[INFO] ace.fhe.frontend.torch.torch_frontend: Traced successfully, Output shape: [1, 32]
+/app/ace-compiler-iiecas/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/app/ace-compiler-iiecas/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+[INFO] ace.fhe.ir.frontends.torch.torch_trace: AIR IR exported successfully!
+[INFO] ace.fhe.backend.phantom: [phantom] option_args = ['-CKKS:N=65536']
+[INFO] ace.fhe.driver.builder: [SUCCESS] PHANTOM-PHANTOM build succeeded.
+[INFO] ace.fhe.cache: [Cache] MISS: Compiled to /tmp/ace-compile-cache/linear_64x32-torch-phantom-cuda/shape_1x64_dtype_torch_float32/ba58676a564801d6/libphantom_cuda_047528.so
+[INFO] ace.runtime: [phantom] PhantomContext created (N=65536) [0.10s]
+[INFO] ace.runtime: [kms] PhantomContext received (N=65536)
+[INFO] ace.runtime: [kms] KeyMode::ONLINE — generating keys (sk, pk, rlk, rtk)...
+[INFO] ace.runtime: [kms] Keys generated [gen_keys=0.00s]
+[INFO] ace.fhe.backend.phantom: Library: using phantom for build...
+[INFO] ace.fhe.frontend.torch.torch_frontend: Traced successfully, Output shape: [1, 64]
+/app/ace-compiler-iiecas/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/app/ace-compiler-iiecas/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+[INFO] ace.fhe.ir.frontends.torch.torch_trace: AIR IR exported successfully!
+[INFO] ace.fhe.backend.phantom: [phantom] option_args = ['-CKKS:N=65536']
+[INFO] ace.fhe.driver.builder: [SUCCESS] PHANTOM-PHANTOM build succeeded.
+[INFO] ace.fhe.cache: [Cache] MISS: Compiled to /tmp/ace-compile-cache/linear_128x64-torch-phantom-cuda/shape_1x128_dtype_torch_float32/ba58676a564801d6/libphantom_cuda_146032.so
+[INFO] ace.runtime: [phantom] PhantomContext created (N=65536) [0.10s]
+[INFO] ace.runtime: [kms] PhantomContext received (N=65536)
+[INFO] ace.runtime: [kms] KeyMode::ONLINE — generating keys (sk, pk, rlk, rtk)...
+[INFO] ace.runtime: [kms] Keys generated [gen_keys=0.00s]
+[INFO] ace.fhe.backend.phantom: Library: using phantom for build...
+[INFO] ace.fhe.frontend.torch.torch_frontend: Traced successfully, Output shape: [1, 16, 14, 14]
+/app/ace-compiler-iiecas/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/app/ace-compiler-iiecas/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+[INFO] ace.fhe.ir.frontends.torch.torch_trace: AIR IR exported successfully!
+[INFO] ace.fhe.backend.phantom: [phantom] option_args = ['-CKKS:N=65536']
+[INFO] ace.fhe.driver.builder: [SUCCESS] PHANTOM-PHANTOM build succeeded.
+[INFO] ace.fhe.cache: [Cache] MISS: Compiled to /tmp/ace-compile-cache/conv2d_3x16-torch-phantom-cuda/shape_1x3x16x16_dtype_torch_float32/ba58676a564801d6/libphantom_cuda_574871.so
+[INFO] ace.runtime: [phantom] PhantomContext created (N=65536) [0.12s]
+[INFO] ace.runtime: [kms] PhantomContext received (N=65536)
+[INFO] ace.runtime: [kms] KeyMode::ONLINE — generating keys (sk, pk, rlk, rtk)...
+[INFO] ace.runtime: [kms] Keys generated [gen_keys=0.01s]
+[INFO] ace.fhe.backend.phantom: Library: using phantom for build...
+[INFO] ace.fhe.frontend.torch.torch_frontend: Traced successfully, Output shape: [1, 32, 6, 6]
+/app/ace-compiler-iiecas/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/app/ace-compiler-iiecas/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+[INFO] ace.fhe.ir.frontends.torch.torch_trace: AIR IR exported successfully!
+[INFO] ace.fhe.backend.phantom: [phantom] option_args = ['-CKKS:N=65536']
+[INFO] ace.fhe.driver.builder: [SUCCESS] PHANTOM-PHANTOM build succeeded.
+[INFO] ace.fhe.cache: [Cache] MISS: Compiled to /tmp/ace-compile-cache/conv2d_16x32-torch-phantom-cuda/shape_1x16x8x8_dtype_torch_float32/ba58676a564801d6/libphantom_cuda_112215.so
+[INFO] ace.runtime: [phantom] PhantomContext created (N=65536) [0.14s]
+[INFO] ace.runtime: [kms] PhantomContext received (N=65536)
+[INFO] ace.runtime: [kms] KeyMode::ONLINE — generating keys (sk, pk, rlk, rtk)...
+[INFO] ace.runtime: [kms] Keys generated [gen_keys=0.01s]
+[INFO] ace.fhe.backend.phantom: Library: using phantom for build...
+[INFO] ace.fhe.frontend.torch.torch_frontend: Traced successfully, Output shape: [1, 64, 2, 2]
+/app/ace-compiler-iiecas/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/app/ace-compiler-iiecas/compiler/nn-addon/vector/src/vector_opcode.cxx:30: Assertion Failure: FAILED in registering domain VECTOR
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/sihe/src/sihe_opcode.cxx:29: Assertion Failure: FAILED in registering domain SIHE
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+/app/ace-compiler-iiecas/compiler/fhe-cmplr/ckks/src/ckks_opcode.cxx:29: Assertion Failure: FAILED in registering domain CKKS
+[INFO] ace.fhe.ir.frontends.torch.torch_trace: AIR IR exported successfully!
+[INFO] ace.fhe.backend.phantom: [phantom] option_args = ['-CKKS:N=65536']
+[INFO] ace.fhe.driver.builder: [SUCCESS] PHANTOM-PHANTOM build succeeded.
+[INFO] ace.fhe.cache: [Cache] MISS: Compiled to /tmp/ace-compile-cache/conv2d_32x64-torch-phantom-cuda/shape_1x32x4x4_dtype_torch_float32/ba58676a564801d6/libphantom_cuda_818635.so
+[INFO] ace.runtime: [phantom] PhantomContext created (N=65536) [0.15s]
+[INFO] ace.runtime: [kms] PhantomContext received (N=65536)
+[INFO] ace.runtime: [kms] KeyMode::ONLINE — generating keys (sk, pk, rlk, rtk)...
+[INFO] ace.runtime: [kms] Keys generated [gen_keys=0.00s]
+Backend: phantom/cuda
+Configs : 17 (shape variants per operator)
+----------------------------------------------------------------------------------------------------
+Operator             Input                    Compile(s)     Exec(ms)   Result
+----------------------------------------------------------------------------------------------------
+add_op_32            [1, 32]                        6.09        40.85     PASS
+add_op_64            [1, 64]                        6.03         2.39     PASS
+add_op_128           [1, 128]                       5.74         2.70     PASS
+add_op_256           [1, 256]                       5.78         2.72     PASS
+add_op_512           [1, 512]                       5.87         2.69     PASS
+mul_op_32            [1, 32]                        5.70         3.36     PASS
+mul_op_64            [1, 64]                        5.81         2.68     PASS
+mul_op_128           [1, 128]                       5.68         2.62     PASS
+mul_op_256           [1, 256]                       5.67         2.61     PASS
+mul_op_512           [1, 512]                       5.58         2.91     PASS
+linear_4x4           [1, 4]                         6.02         5.29     PASS
+linear_16x8          [1, 16]                        6.02         5.85     PASS
+linear_64x32         [1, 64]                        5.96        19.44     PASS
+linear_128x64        [1, 128]                       6.27        34.27     PASS
+conv2d_3x16          [1, 3, 16, 16]                 6.32        42.27     PASS
+conv2d_16x32         [1, 16, 8, 8]                  6.39       105.80     PASS
+conv2d_32x64         [1, 32, 4, 4]                  6.57       187.25     PASS
+--------------------------------------------------------------------------------

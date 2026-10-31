@@ -39,6 +39,52 @@ TARGET_PARAMS = [
 
 
 # ============================================================================
+# Target params for models with AveragePool2d (always-skip GPU variants)
+#
+# Unlike TARGET_PARAMS (which uses skipif-GPU-unavailable), these use
+# unconditional pytest.mark.skip so the backward-compat GPU ids are still
+# visible at collection but are always skipped — AveragePool2d is
+# unsupported on phantom/ace GPU executors regardless of hardware.
+#
+# Each model gets its own constant so the skip reason can be model-specific
+# in the test output, but the structure is identical.
+# ============================================================================
+
+
+def _make_skip_gpu_params(phantom_gpu_reason: str = "AveragePool2d is unsupported on GPU executors"):
+    """Return target params identical to TARGET_PARAMS but GPU backends are always skipped.
+
+    This is for models that contain AveragePool2d (or similar ops) which
+    segfault on phantom/ace, making GPU execution impossible regardless of
+    whether CUDA is present. Compilation should use ``frontend="torch-via-onnx"``
+    so that the AIR vectorizer is bypassed; only ant-cpu produces meaningful
+    results.
+    """
+    return [
+        pytest.param(("ant", "cpu"), id="ant-cpu"),
+        pytest.param(
+            ("phantom", "cuda"),
+            marks=pytest.mark.skip(reason=phantom_gpu_reason),
+            id="phantom-cuda",
+        ),
+        pytest.param(
+            ("ace", "cuda"),
+            marks=pytest.mark.skip(reason=phantom_gpu_reason),
+            id="ace-cuda",
+        ),
+    ]
+
+
+ALEXNET_TARGET_PARAMS = _make_skip_gpu_params(
+    phantom_gpu_reason="AveragePool2d segfaults on phantom/ace GPU; AlexNet is ant-cpu only",
+)
+
+VGG16_TARGET_PARAMS = _make_skip_gpu_params(
+    phantom_gpu_reason="AveragePool2d segfaults on phantom/ace GPU; VGG16 is ant-cpu only",
+)
+
+
+# ============================================================================
 # GPU tag for baseline file naming
 # ============================================================================
 
@@ -107,13 +153,23 @@ def _load_images(dataset_name, num_images, offset=0):
 # ============================================================================
 
 
-def _compile_spec(spec, library="phantom", device="cuda", relu_vr_file=None):
+def _compile_spec(
+    spec,
+    library="phantom",
+    device="cuda",
+    frontend="torch",
+    relu_vr_file=None,
+):
     """Compile a ModelSpec and return CompiledProgram.
 
     Args:
         spec: ModelSpec to compile
         library: Backend library ("phantom", "ace", "ant")
         device: Device ("cuda", "cpu")
+        frontend: Frontend strategy (default "torch"). AlexNet and VGG16 on
+            ant-cpu require ``"torch-via-onnx"`` because AveragePool2d
+            segfaults on GPU executors and the direct torch→AIR vectorizer
+            fails on deep conv graphs.
         relu_vr_file: Optional path to ReLU VR profile JSON
     """
     model = spec.create_model()
@@ -123,7 +179,7 @@ def _compile_spec(spec, library="phantom", device="cuda", relu_vr_file=None):
     compile_opts = dict(spec.compile_options.get(library, {})) if spec.compile_options else {}
 
     compiled = fhe.compile(
-        frontend="torch",
+        frontend=frontend,
         library=library,
         device=device,
         encrypt_inputs=spec.encrypt_inputs,

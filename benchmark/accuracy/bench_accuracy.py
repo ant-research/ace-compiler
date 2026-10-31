@@ -7,16 +7,24 @@
 """
 Encrypted vs plaintext accuracy benchmark for FHE models.
 
-Runs 100-image inference on LR, LeNet and ResNet-20, comparing FHE top-1
-accuracy with the plaintext PyTorch model accuracy. The script is
-backend-agnostic via ``--library`` / ``--device`` (default phantom/cuda).
+Runs 100-image inference on LR, LeNet, ResNet-20, AlexNet and VGG16,
+comparing FHE top-1 accuracy with the plaintext PyTorch model accuracy.
+The script is backend-agnostic via ``--library`` / ``--device``
+(default phantom/cuda).
+
+Frontend selection:
+- LR, LeNet, ResNet-20 use ``frontend="torch"`` (direct torch→AIR).
+- **AlexNet and VGG16 use ``frontend="torch-via-onnx"``** (torch → .onnx
+  → AIR).  The direct torch→AIR vectorizer fails on deep conv graphs with
+  pooling (vector_gen.cxx:196: roll num attribute should not be empty),
+  and AveragePool2d segfaults on the phantom/ace GPU executors.
 
 Usage::
 
-    # GPU (phantom)
+    # GPU (phantom) — LR, LeNet, ResNet-20 only
     python3 benchmark/accuracy/bench_accuracy.py
 
-    # CPU (ant)
+    # CPU (ant) — all 5 models
     python3 benchmark/accuracy/bench_accuracy.py --library ant --device cpu
 
     # JSON report
@@ -43,9 +51,11 @@ if str(repo_root) not in sys.path:
 
 from ace import fhe
 from ace.model.dataset import load_cifar10_images
+from ace.model.spec_alexnet import ALEXNET_CIFAR10
 from ace.model.spec_lenet import LENET_CIFAR10
 from ace.model.spec_lr import LR_1D
 from ace.model.spec_resnet import RESNET20_CIFAR10
+from ace.model.spec_vgg16 import VGG16_CIFAR10
 
 DEFAULT_CACHE_DIR = "/tmp/ace-compile-cache"
 NUM_IMAGES = 100
@@ -72,13 +82,33 @@ def clear_compile_cache(name_fragment: str, cache_dir: str = DEFAULT_CACHE_DIR) 
             shutil.rmtree(os.path.join(cache_dir, entry), ignore_errors=True)
 
 
-def compile_spec(spec, library: str, device: str, **kwargs) -> tuple[Any, torch.nn.Module]:
+def compile_spec(
+    spec,
+    library: str,
+    device: str,
+    frontend: str = "torch",
+    **kwargs,
+) -> tuple[Any, torch.nn.Module]:
+    """Compile a model spec to an FHE program.
+
+    Args:
+        spec: ModelSpec to compile.
+        library: Backend library ("phantom", "ace", "ant").
+        device: Target device ("cuda", "cpu").
+        frontend: Frontend strategy. AlexNet/VGG16 require "torch-via-onnx";
+            other models use "torch" (default).
+        **kwargs: Additional compile options (relu_vr_file, profile_relu, etc.).
+
+    Returns:
+        (program, model) tuple — model is the same PyTorch instance used for
+        plaintext inference.
+    """
     model = spec.create_model()
     model.eval()
     compile_opts = dict(spec.compile_options.get(library, {})) if spec.compile_options else {}
     compile_opts.update(kwargs)
     compiled = fhe.compile(
-        frontend="torch",
+        frontend=frontend,
         library=library,
         device=device,
         encrypt_inputs=spec.encrypt_inputs,
@@ -128,10 +158,17 @@ def benchmark_lr(library: str, device: str) -> AccuracyResult:
     )
 
 
-def benchmark_cifar_model(name: str, spec, library: str, device: str, **compile_kwargs) -> AccuracyResult:
+def benchmark_cifar_model(
+    name: str,
+    spec,
+    library: str,
+    device: str,
+    frontend: str = "torch",
+    **compile_kwargs,
+) -> AccuracyResult:
     clear_compile_cache(spec.name)
     t0 = time.perf_counter()
-    program, model = compile_spec(spec, library, device, **compile_kwargs)
+    program, model = compile_spec(spec, library, device, frontend=frontend, **compile_kwargs)
     t1 = time.perf_counter()
 
     images, labels = load_cifar10_images(NUM_IMAGES)
@@ -171,7 +208,13 @@ def main(argv: list[str] | None = None) -> int:
     global NUM_IMAGES
     NUM_IMAGES = args.num_images
 
+    # Pre-profiled VR files (installed with the ace package)
     resnet_vr_file = "/opt/ace-env/lib/python3.12/site-packages/ace/model/resnet/profiles/resnet20_cifar10.json"
+    alexnet_vr_file = "/opt/ace-env/lib/python3.12/site-packages/ace/model/alexnet/profiles/alexnet_cifar10.json"
+    vgg16_vr_file = "/opt/ace-env/lib/python3.12/site-packages/ace/model/vgg16/profiles/vgg16_cifar10.json"
+
+    # AlexNet and VGG16 go through torch-via-onnx; LR/LeNet/ResNet use torch.
+    frontend_onnx = "torch-via-onnx"
 
     print(f"Backend: {args.library}/{args.device}, images={NUM_IMAGES}")
     print("-" * 90)
@@ -179,6 +222,8 @@ def main(argv: list[str] | None = None) -> int:
     print("-" * 90)
 
     results = []
+
+    # LR — 1D input, no conv/pool; always frontend="torch"
     lr = benchmark_lr(args.library, args.device)
     results.append(lr)
     print(
@@ -189,7 +234,11 @@ def main(argv: list[str] | None = None) -> int:
     # Process-per-model to avoid cross-model GPU context issues.
     print(flush=True)
 
-    lenet = benchmark_cifar_model("LeNet", LENET_CIFAR10, args.library, args.device, profile_relu=True)
+    # LeNet — stride-2 convs, no pooling; frontend="torch"
+    lenet = benchmark_cifar_model(
+        "LeNet", LENET_CIFAR10, args.library, args.device,
+        frontend="torch", profile_relu=True,
+    )
     results.append(lenet)
     print(
         f"{lenet.model:<12} {lenet.encrypted_accuracy_pct:>12.2f} {lenet.plaintext_accuracy_pct:>12.2f} "
@@ -197,12 +246,47 @@ def main(argv: list[str] | None = None) -> int:
         flush=True,
     )
 
-    resnet20 = benchmark_cifar_model("ResNet-20", RESNET20_CIFAR10, args.library, args.device, relu_vr_file=resnet_vr_file)
+    # ResNet-20 — stride-2 convs, no pooling; frontend="torch"
+    resnet20 = benchmark_cifar_model(
+        "ResNet-20", RESNET20_CIFAR10, args.library, args.device,
+        frontend="torch", relu_vr_file=resnet_vr_file,
+    )
     results.append(resnet20)
     print(
         f"{resnet20.model:<12} {resnet20.encrypted_accuracy_pct:>12.2f} {resnet20.plaintext_accuracy_pct:>12.2f} "
         f"{resnet20.delta_pct:>12.2f} {resnet20.compile_time_s:>14.2f} {resnet20.inference_time_s:>12.2f}"
     )
+
+    # AlexNet — pool-based deep CNN; ant-cpu only, frontend="torch-via-onnx"
+    if args.library == "ant" and args.device == "cpu":
+        alexnet = benchmark_cifar_model(
+            "AlexNet", ALEXNET_CIFAR10, args.library, args.device,
+            frontend=frontend_onnx, relu_vr_file=alexnet_vr_file,
+        )
+        results.append(alexnet)
+        print(
+            f"{alexnet.model:<12} {alexnet.encrypted_accuracy_pct:>12.2f} "
+            f"{alexnet.plaintext_accuracy_pct:>12.2f} {alexnet.delta_pct:>12.2f} "
+            f"{alexnet.compile_time_s:>14.2f} {alexnet.inference_time_s:>12.2f}",
+            flush=True,
+        )
+
+        # VGG16 — pool-based deep CNN; ant-cpu only, frontend="torch-via-onnx"
+        vgg16 = benchmark_cifar_model(
+            "VGG16", VGG16_CIFAR10, args.library, args.device,
+            frontend=frontend_onnx, relu_vr_file=vgg16_vr_file,
+        )
+        results.append(vgg16)
+        print(
+            f"{vgg16.model:<12} {vgg16.encrypted_accuracy_pct:>12.2f} "
+            f"{vgg16.plaintext_accuracy_pct:>12.2f} {vgg16.delta_pct:>12.2f} "
+            f"{vgg16.compile_time_s:>14.2f} {vgg16.inference_time_s:>12.2f}",
+        )
+    else:
+        print(
+            "[skip] AlexNet and VGG16 require ant-cpu "
+            f"(AveragePool2d unsupported on {args.library}/{args.device} falls back to torch-via-onnx ant-cpu)"
+        )
 
     print("-" * 90)
 

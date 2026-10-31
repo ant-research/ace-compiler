@@ -1,0 +1,6 @@
+fhe_correct: 96
+plaintext_correct: 96
+fhe_match_count: 96
+top1_accuracy: 0.96
+num_images: 100
+fhe_mismatch: []
