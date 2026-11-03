@@ -503,9 +503,16 @@ template <> void FheContext<phantom::VendorTraits>::Bootstrap(Ciphertext& res, C
     Ciphertext cyclic_input;
     bool cyclic_input_used = false;
     if (effective_slot > 0 && static_cast<uint64_t>(effective_slot) < _params.slot_count) {
+        // Replicate the data block [0, slot) into disjoint blocks so the
+        // full-slot bootstrapper sees dense data.  Only add a copy when the
+        // whole block stays inside [0, slot_count): rotations are cyclic, so a
+        // block that runs past slot_count wraps around onto the original data
+        // and doubles those slots.  That happens whenever slot does not divide
+        // slot_count (e.g. 4704 or 1600 out of 32768).
         cyclic_input = op1;
         Ciphertext rotated_input = op1;
-        for (uint64_t offset = effective_slot; offset < _params.slot_count; offset += effective_slot) {
+        const uint64_t slot_count = _params.slot_count;
+        for (uint64_t offset = effective_slot; offset + effective_slot <= slot_count; offset += effective_slot) {
             Rotate(rotated_input, rotated_input, effective_slot);
             Add(cyclic_input, rotated_input, cyclic_input);
         }

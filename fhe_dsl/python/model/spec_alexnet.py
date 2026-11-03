@@ -9,8 +9,14 @@ AlexNet ModelSpec instances for FHE compilation.
 AlexNet is a mid-depth CNN (5 conv + 5 relu + 3 avg-pool → flatten → 3 linear)
 and follows the VGG16 route: weights_required=True makes
 ModelSpec::get_vr_profile() auto-discover profiles/{name}.json for the ReLU
-polynomial approximation, and model_post_init loads the fixed weights
-produced by train_alexnet.py.
+polynomial approximation, and model_post_init loads the fixed weights in
+weights/alexnet_cifar10.pt.
+
+Those weights are the real trained CIFAR-10 AlexNet, imported from the
+reference ``alexnet_cifar10.onnx`` (ace-compiler-iiecas) by
+``model/alexnet/import_reference_weights.py`` — NOT the synthetic rehearsal
+weights ``train_alexnet.py`` produces. Plaintext top-1 is 86.94% on the full
+CIFAR-10 test set, matching the ASPLOS/IIE accuracy table (85–86%).
 
 Backend scope is **ant (CPU) only**: the 2×2 AveragePool2d layers that
 AlexNet uses for downsampling are supported by the antlib CPU runtime but
@@ -36,19 +42,24 @@ from .alexnet import AlexNet
 _WEIGHTS_DIR = os.path.join(os.path.dirname(__file__), "alexnet", "weights")
 _ALEXNET_WEIGHTS = os.path.join(_WEIGHTS_DIR, "alexnet_cifar10.pt")
 
-_ALEXNET_DATA_SEED = 2026
+# Deterministic CIFAR-10 test image used as the compile/probe example.
+# offset=1 is class 8 with a ~12-logit plaintext margin, so CKKS noise / ReLU
+# approximation cannot flip the argmax (offset=0 has a marginal ~1.2 margin).
+_ALEXNET_EXAMPLE_OFFSET = 1
 
 
 def _alexnet_example_input() -> torch.Tensor:
-    """Deterministic class-0 template input, matching train_alexnet.py.
+    """A real, normalized CIFAR-10 image as the compile/probe example input.
 
-    A fixed template from the training distribution (same generator seed)
-    keeps the logit margins wide, so CKKS noise / ReLU approximation never
-    flips the argmax. Random torch.randn inputs land where margins are small.
+    The shipped weights are trained on real CIFAR-10 (imported from the
+    reference ``alexnet_cifar10.onnx``), so the example input must come from
+    the same distribution as ``load_cifar10_images`` — the earlier synthetic
+    ``randn/7`` template is meaningless to these weights.
     """
-    g = torch.Generator().manual_seed(_ALEXNET_DATA_SEED)
-    templates = torch.randn(10, 3, 32, 32, generator=g) / 7.0
-    return templates[0:1].float()          # [1, 3, 32, 32]
+    from ace.model.dataset import load_cifar10_images
+
+    images, _ = load_cifar10_images(1, offset=_ALEXNET_EXAMPLE_OFFSET)
+    return images[0:1]
 
 
 def _load_alexnet_weights(model: torch.nn.Module) -> None:
@@ -68,10 +79,9 @@ def _load_alexnet_weights(model: torch.nn.Module) -> None:
 # ReLU value ranges
 # =============================================================================
 
-# Per-node ReLU VR values, profiled over the trained weights
-# (weights/alexnet_cifar10.pt) on the training distribution, matching
-# profiles/alexnet_cifar10.json (features_*_Relu / classifier_*_Relu keys →
-# our ONNX node names here).
+# Per-node ReLU VR values, profiled over the shipped weights
+# (weights/alexnet_cifar10.pt) on the full CIFAR-10 test set (10k images,
+# CIFAR mean/std normalization) as PRE-ReLU input abs_max; VR = ceil(1) + 1.
 #
 # KEY NAMING: the torch-via-onnx frontend exports via the legacy
 # torch.onnx.export (dynamo=False), which does NOT preserve torch module
@@ -81,17 +91,19 @@ def _load_alexnet_weights(model: torch.nn.Module) -> None:
 # tensor2sihe_impl.h ctx.Has_relu_vr(node->Attr("name"))). Earlier keys
 # like "/features/features.1/Relu" NEVER matched (verified: generated .c
 # contained only 1/relu_vr_def scale constants) — every node silently fell
-# back to relu_vr_def, which is why the smoke test failed with a shuffled
-# argmax each time the def changed (fhe=8 at def=2, fhe=7 at def=3).
-# Graph order ↔ profile site mapping (verified against the exported .onnx):
+# back to relu_vr_def.
+#
+# These values MUST match profiles/alexnet_cifar10.json (regenerate both at
+# once: `python3 -m model.alexnet.train_alexnet --profile-only`).
+# node           profile site  pre-ReLU abs_max  (10k test set)
 _ORIGIN_RELU_VR = {
-    "/Relu": 1.0,    # conv0  absmax 0.65
-    "/Relu_1": 1.0,  # conv1  absmax 0.72
-    "/Relu_2": 1.0,  # conv2  absmax 0.36
-    "/Relu_3": 4.0,  # conv3  absmax 3.03
-    "/Relu_4": 6.0,  # conv4  absmax 5.48
-    "/Relu_5": 16.0,  # fc1    absmax 15.46
-    "/Relu_6": 42.0,  # fc2    absmax 41.51
+    "/Relu": 8.0,     # conv0  features.1     7.72
+    "/Relu_1": 6.0,   # conv1  features.4     5.77
+    "/Relu_2": 4.0,   # conv2  features.7     3.54
+    "/Relu_3": 4.0,   # conv3  features.9     3.83
+    "/Relu_4": 4.0,   # conv4  features.11    3.96
+    "/Relu_5": 2.0,   # fc1    classifier.1   1.91
+    "/Relu_6": 16.0,  # fc2    classifier.3  15.21
 }
 _ORIGIN_RELU_VR_DEF = 3.0
 

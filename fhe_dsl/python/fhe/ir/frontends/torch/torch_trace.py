@@ -624,8 +624,8 @@ class TorchTracedModel(CompilationUnit):
                             batch_size, channels = output_shape[0], output_shape[1]
                             h, w = output_shape[2], output_shape[3]
 
-                            out_h = (h + 2 * pads[0] - kernel_shape[0] - 1) // strides[0] + 1
-                            out_w = (w + 2 * pads[1] - kernel_shape[1] - 1) // strides[1] + 1
+                            out_h = (h + 2 * pads[0] - kernel_shape[0]) // strides[0] + 1
+                            out_w = (w + 2 * pads[1] - kernel_shape[1]) // strides[1] + 1
 
                             output_shape = [batch_size, channels, out_h, out_w]
                     elif op_name in ("gemm", "tensor.gemm"):

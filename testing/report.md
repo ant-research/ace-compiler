@@ -150,7 +150,7 @@ pytest tests/regression/vgg16_x2/test_vgg16_x2_smoke.py -k ant -v -s
 | 编号 | 模型 | 数据集 | 端到端耗时(s) | 最大绝对误差 | 执行结果 |
 |---|---|---:|---:|---|---|
 | 1 | LR | smoke | 0.80 | — | PASS（标准 smoke） |
-| 2 | LeNet x² | smoke | 1.5 | 1.53e-07 | PASS (abs err<=0.001) |
+| 2 | LeNet x² | smoke | 13.81 | 1.53e-07 | PASS (abs err<=0.001) |
 | 3 | AlexNet | smoke | 1087.98 (18:07) | 2.33e-08 | PASS (abs err<=0.001) |
 | 4 | ResNet-20 | smoke | 439.36 (07:19) | 5.44e-07 | PASS (abs err<=0.001) |
 | 5 | VGG16 | smoke | 1120.37 s (18:40) | 5.67e-05 | PASS (abs err<=0.001) |
@@ -233,9 +233,9 @@ python3 -m pytest benchmark/vgg16/test_accuracy.py -k "ant-cpu-100 and not 1000"
 
 | 编号 | 模型 | 数据集 | 加密准确率 | 非加密准确率 | 差异 | 基线文件 |
 |---|---|---|---|---|---|---|
-| 1 | AlexNet | CIFAR-10 | 85.00% | 86.00% | 1.00% | `alexnet_cifar10_ant_cpu_100img.yml` |
+| 1 | AlexNet | CIFAR-10 | 88.00% | 88.00% | 0.00% | `alexnet_cifar10_ant_cpu_100img.yml` |
 | 2 | ResNet-20 | CIFAR-10 | 89.00% | 89.00% | 0.00% | `resnet20_cifar10_ant_cpu_100img.yml` |
-| 3 | VGG16 | CIFAR-10 | 96.00% | 96.00% | 0.00% | `vgg16_cifar10_ant_cpu_100img.yml` |
+| 3 | VGG16 | CIFAR-10 | 95.00% | 95.00% | 0.00% | `vgg16_cifar10_ant_cpu_100img.yml` |
 
 > 注：
 > - 加密准确率 = FHE 推理 Top-1 命中数 / 100，取自 `benchmark/` 下 `data_regression` YAML 基线的 `fhe_correct` / `num_images`。
@@ -258,7 +258,7 @@ python3 -m pytest benchmark/vgg16/test_accuracy.py -k "ant-cpu-100 and not 1000"
 
 ### 7.3.3 GPU 测试数据
 
-测试模型：LR、ResNet-20、ResNet-32、ResNet-44、ResNet-56、ResNet-110；每模型推理 100 张图片。
+测试模型：LR、LeNet、ResNet-20；每模型推理 100 张图片。
 
 测试脚本已固化到仓库：
 
@@ -266,12 +266,11 @@ python3 -m pytest benchmark/vgg16/test_accuracy.py -k "ant-cpu-100 and not 1000"
 # LR（phantom-cuda，100 张图片；用 [param-id] 精确匹配）
 CUDA_VISIBLE_DEVICES=0 python3 -m pytest benchmark/lr/test_accuracy.py -k "[phantom-cuda-100]" -v -s
 
-# ResNet-20 / 32 / 44 / 56 / 110（phantom-cuda，100 张图片；用 [param-id])
+# LeNet（phantom-cuda，100 张图片）
+CUDA_VISIBLE_DEVICES=0 python3 -m pytest benchmark/lenet/test_accuracy.py -k "[phantom-cuda-100]" -v -s
+
+# ResNet-20（phantom-cuda，100 张图片；用 [param-id])
 CUDA_VISIBLE_DEVICES=0 python3 -m pytest benchmark/resnet/test_accuracy.py -k "resnet20 and [phantom-cuda-100]" -v -s
-CUDA_VISIBLE_DEVICES=0 python3 -m pytest benchmark/resnet/test_accuracy.py -k "resnet32 and [phantom-cuda-100]" -v -s
-CUDA_VISIBLE_DEVICES=0 python3 -m pytest benchmark/resnet/test_accuracy.py -k "resnet44 and [phantom-cuda-100]" -v -s
-CUDA_VISIBLE_DEVICES=0 python3 -m pytest benchmark/resnet/test_accuracy.py -k "resnet56 and [phantom-cuda-100]" -v -s
-CUDA_VISIBLE_DEVICES=0 python3 -m pytest benchmark/resnet/test_accuracy.py -k "resnet110 and [phantom-cuda-100]" -v -s
 ```
 
 #### 表 7.3-3 模型加密/明文准确率对比（GPU）
@@ -281,16 +280,12 @@ CUDA_VISIBLE_DEVICES=0 python3 -m pytest benchmark/resnet/test_accuracy.py -k "r
 | 编号 | 模型 | 数据集 | 加密准确率 | 明文准确率 | 差异 | 基线文件 |
 |---|---|---|---|---|---|---|
 | 1 | LR | toy | 100.00% | 100.00% | 0.00% | `lr_1d_phantom_cuda_100img.yml` |
-| 2 | ResNet-20 | CIFAR-10 | 95.00% | 95.00% | 0.00% | `resnet20_cifar10_phantom_cuda_100img.yml` |
-| 3 | ResNet-32 | CIFAR-10 | 94.00% | 95.00% | 1.00% | `resnet32_cifar10_phantom_cuda_100img.yml` |
-| 4 | ResNet-44 | CIFAR-10 | 93.00% | 95.00% | 2.00% | `resnet44_cifar10_phantom_cuda_100img.yml` |
-| 5 | ResNet-56 | CIFAR-10 | 95.00% | 95.00% | 0.00% | `resnet56_cifar10_phantom_cuda_100img.yml` |
-| 6 | ResNet-110 | CIFAR-10 | 96.00% | 96.00% | 0.00% | `resnet110_cifar10_phantom_cuda_100img.yml` |
+| 2 | LeNet | CIFAR-10 | 70.00% | 70.00% | 0.00% | `lenet_cifar10_phantom_cuda_100img.yml` |
+| 3 | ResNet-20 | CIFAR-10 | 95.00% | 95.00% | 0.00% | `resnet20_cifar10_phantom_cuda_100img.yml` |
 
 > 注：
 > - 差异 = |明文准确率 − 加密准确率|，衡量 FHE 近似计算引入的精度损失。
-> - ResNet-32 / 44 的 FHE 推理有个别样本与明文推理预测不一致（FHE `fhe_mismatch` 非空），差异 ≤ 2%，在合理范围内。
-> - 基线文件路径前缀为 `benchmark/resnet/test_accuracy/` 或 `benchmark/lr/test_accuracy/`。
+> - 基线文件路径前缀为 `benchmark/resnet/test_accuracy/`、`benchmark/lr/test_accuracy/` 或 `benchmark/lenet/test_accuracy/`。
 > - 测试命令中使用 `[param-id]` 语法（如 `[phantom-cuda-100]`）精确匹配 pytest 参数化 ID，避免 `-k "100"` 子字符串误匹配 `1000` 图 slow 测试（参考 `docs/benchmarks/resnet-scripts.md:102`）。
 
 原始数据与日志：
@@ -298,11 +293,8 @@ CUDA_VISIBLE_DEVICES=0 python3 -m pytest benchmark/resnet/test_accuracy.py -k "r
 | 数据来源 | 路径 |
 |---|---|
 | LR phantom-cuda-100 | [`benchmark/lr/test_accuracy/lr_1d_phantom_cuda_100img.yml`](../benchmark/lr/test_accuracy/lr_1d_phantom_cuda_100img.yml) |
+| LeNet phantom-cuda-100 | [`benchmark/lenet/test_accuracy/lenet_cifar10_phantom_cuda_100img.yml`](../benchmark/lenet/test_accuracy/lenet_cifar10_phantom_cuda_100img.yml) |
 | ResNet-20 phantom-cuda-100 | [`benchmark/resnet/test_accuracy/resnet20_cifar10_phantom_cuda_100img.yml`](../benchmark/resnet/test_accuracy/resnet20_cifar10_phantom_cuda_100img.yml) |
-| ResNet-32 phantom-cuda-100 | [`benchmark/resnet/test_accuracy/resnet32_cifar10_phantom_cuda_100img.yml`](../benchmark/resnet/test_accuracy/resnet32_cifar10_phantom_cuda_100img.yml) |
-| ResNet-44 phantom-cuda-100 | [`benchmark/resnet/test_accuracy/resnet44_cifar10_phantom_cuda_100img.yml`](../benchmark/resnet/test_accuracy/resnet44_cifar10_phantom_cuda_100img.yml) |
-| ResNet-56 phantom-cuda-100 | [`benchmark/resnet/test_accuracy/resnet56_cifar10_phantom_cuda_100img.yml`](../benchmark/resnet/test_accuracy/resnet56_cifar10_phantom_cuda_100img.yml) |
-| ResNet-110 phantom-cuda-100 | [`benchmark/resnet/test_accuracy/resnet110_cifar10_phantom_cuda_100img.yml`](../benchmark/resnet/test_accuracy/resnet110_cifar10_phantom_cuda_100img.yml) |
 | LR 运行日志 | [`testing/7.3_gpu_lr_accuracy.log`](7.3_gpu_lr_accuracy.log) |
 | ResNet-20 运行日志 | [`testing/7.3_gpu_resnet20_accuracy.log`](7.3_gpu_resnet20_accuracy.log) |
 

@@ -6,10 +6,13 @@
 """
 LeNet ModelSpec instances for FHE compilation.
 
-LeNet is a small CNN with ReLUs, so it follows the ResNet route rather than
-LR: weights_required=True makes ModelSpec::get_vr_profile() auto-discover
-profiles/{name}.json for the ReLU polynomial approximation, and model_post_init
-loads the fixed weights produced by train_lenet.py.
+The model is the original demo LeNet (cti/verify/onnx2c/cnn/lenet.py) with
+MaxPool2d replaced by AvgPool2d -- see model/lenet/lenet.py.
+
+LeNet has ReLUs, so it follows the ResNet route rather than LR:
+weights_required=True makes ModelSpec::get_vr_profile() auto-discover
+profiles/{name}.json for the ReLU polynomial approximation, and
+model_post_init loads the fixed weights produced by train_lenet.py.
 """
 
 import os
@@ -68,14 +71,14 @@ LENET_CIFAR10 = ModelSpec(
     compile_options={
         "phantom": {
             "vec": {"conv_parl": True, "ssf": True},
-            "ckks": {"q0": 60, "sf": 56, "N": 65536, "icl": 17},
+            "ckks": {"q0": 60, "sf": 56, "N": 65536, "icl": 17, "sbm": True},
         },
         "ant": {
             "ckks": {"hw": 192, "q0": 60, "sf": 56, "sbm": True, "ts": True, "rtt": True},
             "p2c": {"fp": True, "lib": "ant", "ts": True},
         },
     },
-    expected_ops=["Conv", "Relu", "Gemm"],
+    expected_ops=["Conv", "Relu", "AveragePool", "Gemm"],
     weights_required=True,
     dataset="cifar10",
 )

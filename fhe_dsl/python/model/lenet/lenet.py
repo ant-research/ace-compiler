@@ -4,18 +4,31 @@
 #
 
 """
-Compact LeNet-style CNN for FHE classification.
+Reference LeNet (CIFAR-10), ported from the original demo
+``cti/verify/onnx2c/cnn/lenet.py``.
 
-A small CNN tuned for the FHE backends. It avoids avgpool/maxpool (the
-phantom executor is known-broken on pool ops, see test_sample_smoke and the
-ResNet route which uses AdaptiveAvgPool2d) and instead downsamples with
-stride-2 convolutions, keeping channels and the final linear layer small so
-the CKKS scale never goes out of bounds.
+Two deliberate changes vs. the reference:
 
-Structure: conv(3→8, s2) → relu → conv(8→16, s2) → relu → flatten → fc(1024→32)
-→ relu → fc(32→10). Input is CIFAR-style [3, 32, 32].
+1. **MaxPool2d -> AvgPool2d.** The phantom / ace GPU executors do not
+   support MaxPool, while ``nn.AvgPool2d`` lowers to ``OPC_AVERAGE_POOL``
+   and is supported end-to-end.
+2. **``F.relu(x)`` -> ``self.reluN(x)`` modules.** The ReLU VR profiler
+   (ace.fhe.config.ReLUProfiler) discovers ``nn.ReLU`` modules and
+   ``torch.relu``, but not ``F.relu``; functional ReLUs would silently
+   fall back to ``relu_vr_def`` for every node. Using modules keeps the
+   per-node value ranges accurate. This is numerically identical to the
+   reference (ReLU has no parameters).
 
-Preprocessing (e.g. CIFAR normalization) is the caller's responsibility.
+Structure (input [1, 3, 32, 32]):
+    conv1(3->6,  k5) -> relu1 -> pool1(2,2)   # [1, 6, 14, 14]
+    conv2(6->16, k5) -> relu2 -> pool2(2,2)   # [1, 16, 5, 5]
+    flatten                                   # [1, 400]
+    fc1(400->120) -> relu3
+    fc2(120->84)  -> relu4
+    fc3(84->10)
+
+The reference demo has no trained weights; the weights here come from
+``train_lenet.py`` (trained on the repo's CIFAR-10 split).
 """
 
 import torch
@@ -23,22 +36,26 @@ import torch.nn as nn
 
 
 class LeNet(nn.Module):
-    """Compact LeNet: stride-2 conv blocks (no pooling) → flatten → 2 linear."""
+    """Original demo LeNet with AvgPool2d in place of MaxPool2d."""
 
     def __init__(self, num_classes: int = 10, in_channels: int = 3):
         super().__init__()
-        self.conv1 = nn.Conv2d(in_channels, 8, kernel_size=3, stride=2, padding=1)
-        self.relu1 = nn.ReLU(inplace=True)
-        self.conv2 = nn.Conv2d(8, 16, kernel_size=3, stride=2, padding=1)
-        self.relu2 = nn.ReLU(inplace=True)
-        self.flatten = nn.Flatten()
-        self.fc1 = nn.Linear(16 * 8 * 8, 32)
-        self.relu3 = nn.ReLU(inplace=True)
-        self.fc2 = nn.Linear(32, num_classes)
+        self.conv1 = nn.Conv2d(in_channels, 6, 5)
+        self.relu1 = nn.ReLU()
+        self.pool1 = nn.AvgPool2d(2, 2)
+        self.conv2 = nn.Conv2d(6, 16, 5)
+        self.relu2 = nn.ReLU()
+        self.pool2 = nn.AvgPool2d(2, 2)
+        self.fc1 = nn.Linear(16 * 5 * 5, 120)
+        self.relu3 = nn.ReLU()
+        self.fc2 = nn.Linear(120, 84)
+        self.relu4 = nn.ReLU()
+        self.fc3 = nn.Linear(84, num_classes)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = self.relu1(self.conv1(x))    # [B, 8, 16, 16]
-        x = self.relu2(self.conv2(x))    # [B, 16, 8, 8]
-        x = self.flatten(x)              # [B, 1024]
-        x = self.relu3(self.fc1(x))      # [B, 32]
-        return self.fc2(x)               # [B, num_classes]
+        x = self.pool1(self.relu1(self.conv1(x)))   # [B, 6, 14, 14]
+        x = self.pool2(self.relu2(self.conv2(x)))   # [B, 16, 5, 5]
+        x = torch.flatten(x, 1)                     # [B, 400]
+        x = self.relu3(self.fc1(x))                 # [B, 120]
+        x = self.relu4(self.fc2(x))                 # [B, 84]
+        return self.fc3(x)                          # [B, num_classes]

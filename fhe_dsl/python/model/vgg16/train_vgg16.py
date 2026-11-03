@@ -109,6 +109,26 @@ def _profile_vr(model, inputs, name):
     return profiler.profile(inputs=inputs, margin=1, save=True)
 
 
+def _profile_real(name):
+    """Regenerate the VR profile from the shipped weights on real CIFAR-10."""
+    from ace.model.dataset import load_cifar10_images
+
+    path = os.path.join(_WEIGHTS_DIR, _WEIGHTS_FILE)
+    if not os.path.exists(path):
+        raise FileNotFoundError(
+            f"{path} not found. Import it first: "
+            "python3 -m model.vgg16.import_reference_weights <vgg16_cifar10.onnx>"
+        )
+    model = VGG16(num_classes=10, in_channels=3)
+    model.load_state_dict(torch.load(path, map_location="cpu", weights_only=True))
+    model.eval()
+
+    images, _ = load_cifar10_images(10000)
+    vr_path = _profile_vr(model, images, name)
+    print(f"VR profile -> {vr_path}")
+    return vr_path
+
+
 def main():
     parser = argparse.ArgumentParser(description="Train VGG16 FHE smoke weights")
     parser.add_argument(
@@ -116,7 +136,32 @@ def main():
         default="vgg16_cifar10",
         help="ModelSpec name (also used as VR profile filename)",
     )
+    parser.add_argument(
+        "--profile-only",
+        action="store_true",
+        help="Only regenerate the ReLU VR profile from the shipped weights (real CIFAR-10)",
+    )
+    parser.add_argument(
+        "--force-synthetic",
+        action="store_true",
+        help="Allow overwriting the real weights with the synthetic rehearsal model",
+    )
     args = parser.parse_args()
+
+    if args.profile_only:
+        _profile_real(args.name)
+        return
+
+    # The committed weights are the real reference-trained VGG16 (~94%
+    # CIFAR-10). Training the synthetic model below and saving it would
+    # silently replace them with a ~9%-accuracy network, so require an
+    # explicit override.
+    if not args.force_synthetic:
+        parser.error(
+            "Refusing to overwrite the shipped real-CIFAR weights with the synthetic "
+            "rehearsal model. Use --profile-only to regenerate the VR profile, or "
+            "--force-synthetic to intentionally overwrite the weights."
+        )
 
     torch.manual_seed(SEED)
     xs, ys = _synthetic_cifar_like()

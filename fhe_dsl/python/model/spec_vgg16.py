@@ -38,19 +38,22 @@ from .vgg16 import VGG16
 _WEIGHTS_DIR = os.path.join(os.path.dirname(__file__), "vgg16", "weights")
 _VGG16_WEIGHTS = os.path.join(_WEIGHTS_DIR, "vgg16_cifar10.pt")
 
-_VGG16_DATA_SEED = 2026
+# Deterministic CIFAR-10 test image used as the compile/probe example.
+_VGG16_EXAMPLE_OFFSET = 0
 
 
 def _vgg16_example_input() -> torch.Tensor:
-    """Deterministic class-0 template input, matching train_vgg16.py.
+    """A real, normalized CIFAR-10 image as the compile/probe example input.
 
-    A fixed template from the training distribution (same generator seed)
-    keeps the logit margins wide, so CKKS noise / ReLU approximation never
-    flips the argmax. Random torch.randn inputs land where margins are small.
+    The shipped weights are trained on real CIFAR-10 (imported from the
+    reference ``vgg16_cifar10.onnx``), so the example input must come from the
+    same distribution as ``load_cifar10_images`` — the earlier synthetic
+    ``randn/7`` template is meaningless to these weights.
     """
-    g = torch.Generator().manual_seed(_VGG16_DATA_SEED)
-    templates = torch.randn(10, 3, 32, 32, generator=g) / 7.0
-    return templates[0:1].float()          # [1, 3, 32, 32]
+    from ace.model.dataset import load_cifar10_images
+
+    images, _ = load_cifar10_images(1, offset=_VGG16_EXAMPLE_OFFSET)
+    return images[0:1]
 
 
 def _load_vgg16_weights(model: torch.nn.Module) -> None:
@@ -70,9 +73,9 @@ def _load_vgg16_weights(model: torch.nn.Module) -> None:
 # ReLU value ranges
 # =============================================================================
 
-# Per-node ReLU VR values, profiled over the trained weights
-# (weights/vgg16_cifar10.pt) on the training distribution, matching
-# profiles/vgg16_cifar10.json (features_*_Relu keys → our ONNX node names).
+# Per-node ReLU VR values, profiled over the shipped weights
+# (weights/vgg16_cifar10.pt) on the full CIFAR-10 test set (10k images,
+# CIFAR mean/std normalization) as PRE-ReLU input abs_max; VR = ceil(abs) + 1.
 #
 # KEY NAMING: the torch-via-onnx frontend exports via the legacy
 # torch.onnx.export (dynamo=False), which does NOT preserve torch module
@@ -81,31 +84,32 @@ def _load_vgg16_weights(model: torch.nn.Module) -> None:
 # (compiler/fhe-cmplr/include/fhe/sihe/config.h Parse_relu_vr →
 # tensor2sihe_impl.h ctx.Has_relu_vr(node->Attr("name"))). The earlier
 # "/features/features.N/Relu" keys NEVER matched (verified in the generated
-# .c) — every node silently fell back to relu_vr_def=7, which happens to be
-# close enough to the true ranges that the smoke test passed despite the
-# constant being effectively flat. The keys below are the real exported node
-# names in graph order, aligned with the profile sites above.
+# .c) — every node silently fell back to relu_vr_def.
 #
-# Do NOT reuse the reference build's ranges (5/5/4×11, def=4): our trained
-# activations run up to |x|=8.5, and undersized vr pushes x/vr outside the
-# [-1,1] domain of the sign-composite polynomial (Chebyshev diverges there),
-# which silently corrupts the ReLU outputs.
+# Do NOT reuse the reference build's ranges (5/5/4×11, def=4): they were
+# calibrated on the BN-equipped reference net; undersized vr pushes x/vr
+# outside the [-1,1] domain of the sign-composite polynomial (Chebyshev
+# diverges there), silently corrupting the ReLU outputs.
+#
+# These values MUST match profiles/vgg16_cifar10.json (regenerate both at
+# once: `python3 -m model.vgg16.train_vgg16 --profile-only`).
+# node        site              pre-ReLU abs_max (10k)
 _ORIGIN_RELU_VR = {
-    "/Relu": 6.0,      # block1 conv0 absmax 5.90
-    "/Relu_1": 6.0,    # block1 conv1 absmax 5.72
-    "/Relu_2": 8.0,    # block1 conv2 absmax 7.68
-    "/Relu_3": 9.0,    # block2 conv0 absmax 8.49
-    "/Relu_4": 8.0,    # block2 conv1 absmax 7.58
-    "/Relu_5": 8.0,    # block2 conv2 absmax 7.67
-    "/Relu_6": 8.0,    # block2 conv3 absmax 7.55
-    "/Relu_7": 7.0,    # block3 conv0 absmax 6.53
-    "/Relu_8": 6.0,    # block3 conv1 absmax 5.46
-    "/Relu_9": 6.0,    # block3 conv2 absmax 5.60
-    "/Relu_10": 7.0,   # block3 conv3 absmax 4.84
-    "/Relu_11": 5.0,   # block4 conv0 absmax 4.88
-    "/Relu_12": 5.0,   # block4 conv1 absmax 4.02
+    "/Relu": 5.0,      # features.2  4.56
+    "/Relu_1": 6.0,    # features.5  5.19
+    "/Relu_2": 4.0,    # features.9  3.44
+    "/Relu_3": 4.0,    # features.12 3.77
+    "/Relu_4": 3.0,    # features.16 2.12
+    "/Relu_5": 3.0,    # features.19 2.28
+    "/Relu_6": 4.0,    # features.22 3.85
+    "/Relu_7": 2.0,    # features.26 1.80
+    "/Relu_8": 2.0,    # features.29 1.48
+    "/Relu_9": 1.0,    # features.32 0.73
+    "/Relu_10": 1.0,   # features.36 0.45
+    "/Relu_11": 1.0,   # features.39 0.47
+    "/Relu_12": 3.0,   # features.42 2.63
 }
-_ORIGIN_RELU_VR_DEF = 7.0
+_ORIGIN_RELU_VR_DEF = 3.0
 
 
 # =============================================================================

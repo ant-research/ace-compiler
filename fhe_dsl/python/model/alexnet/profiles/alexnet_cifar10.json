@@ -1,34 +1,34 @@
 {
   "relu_vr_def": 3,
-  "relu_vr": "features_1_Relu=1;features_4_Relu=1;features_7_Relu=1;features_9_Relu=4;features_11_Relu=6;classifier_1_Relu=16;classifier_3_Relu=42",
+  "relu_vr": "features_1_Relu=8;features_4_Relu=6;features_7_Relu=4;features_9_Relu=4;features_11_Relu=4;classifier_1_Relu=2;classifier_3_Relu=16",
   "per_node": {
     "features_1_Relu": {
-      "abs_max": 0.6523995399475098,
-      "vr": 1
+      "abs_max": 7.7190775871276855,
+      "vr": 8
     },
     "features_4_Relu": {
-      "abs_max": 0.7214711904525757,
-      "vr": 1
+      "abs_max": 5.765495300292969,
+      "vr": 6
     },
     "features_7_Relu": {
-      "abs_max": 0.3563593029975891,
-      "vr": 1
+      "abs_max": 3.5420949459075928,
+      "vr": 4
     },
     "features_9_Relu": {
-      "abs_max": 3.0267412662506104,
+      "abs_max": 3.8322291374206543,
       "vr": 4
     },
     "features_11_Relu": {
-      "abs_max": 5.482353210449219,
-      "vr": 6
+      "abs_max": 3.962369441986084,
+      "vr": 4
     },
     "classifier_1_Relu": {
-      "abs_max": 15.455048561096191,
-      "vr": 16
+      "abs_max": 1.9064205884933472,
+      "vr": 2
     },
     "classifier_3_Relu": {
-      "abs_max": 41.51192092895508,
-      "vr": 42
+      "abs_max": 15.214731216430664,
+      "vr": 16
     }
   }
 }

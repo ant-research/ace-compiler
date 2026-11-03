@@ -1,58 +1,58 @@
 {
   "relu_vr_def": 3,
-  "relu_vr": "features_2_Relu=6;features_5_Relu=6;features_9_Relu=8;features_12_Relu=9;features_16_Relu=8;features_19_Relu=8;features_22_Relu=8;features_26_Relu=7;features_29_Relu=6;features_32_Relu=6;features_36_Relu=7;features_39_Relu=5;features_42_Relu=5",
+  "relu_vr": "features_2_Relu=5;features_5_Relu=6;features_9_Relu=4;features_12_Relu=4;features_16_Relu=3;features_19_Relu=3;features_22_Relu=4;features_26_Relu=2;features_29_Relu=2;features_32_Relu=1;features_36_Relu=1;features_39_Relu=1;features_42_Relu=3",
   "per_node": {
     "features_2_Relu": {
-      "abs_max": 5.89877986907959,
-      "vr": 6
+      "abs_max": 4.5615620613098145,
+      "vr": 5
     },
     "features_5_Relu": {
-      "abs_max": 5.747956275939941,
+      "abs_max": 5.190394401550293,
       "vr": 6
     },
     "features_9_Relu": {
-      "abs_max": 7.678126335144043,
-      "vr": 8
+      "abs_max": 3.4387199878692627,
+      "vr": 4
     },
     "features_12_Relu": {
-      "abs_max": 8.490144729614258,
-      "vr": 9
+      "abs_max": 3.771303415298462,
+      "vr": 4
     },
     "features_16_Relu": {
-      "abs_max": 7.574599742889404,
-      "vr": 8
+      "abs_max": 2.122859477996826,
+      "vr": 3
     },
     "features_19_Relu": {
-      "abs_max": 7.67335844039917,
-      "vr": 8
+      "abs_max": 2.281214952468872,
+      "vr": 3
     },
     "features_22_Relu": {
-      "abs_max": 7.551382541656494,
-      "vr": 8
+      "abs_max": 3.8514814376831055,
+      "vr": 4
     },
     "features_26_Relu": {
-      "abs_max": 6.529383659362793,
-      "vr": 7
+      "abs_max": 1.8025667667388916,
+      "vr": 2
     },
     "features_29_Relu": {
-      "abs_max": 5.457656383514404,
-      "vr": 6
+      "abs_max": 1.4774363040924072,
+      "vr": 2
     },
     "features_32_Relu": {
-      "abs_max": 5.599785804748535,
-      "vr": 6
+      "abs_max": 0.7342986464500427,
+      "vr": 1
     },
     "features_36_Relu": {
-      "abs_max": 6.493427276611328,
-      "vr": 7
+      "abs_max": 0.4451903700828552,
+      "vr": 1
     },
     "features_39_Relu": {
-      "abs_max": 4.882531642913818,
-      "vr": 5
+      "abs_max": 0.47144603729248047,
+      "vr": 1
     },
     "features_42_Relu": {
-      "abs_max": 4.269001007080078,
-      "vr": 5
+      "abs_max": 2.6322617530822754,
+      "vr": 3
     }
   }
 }

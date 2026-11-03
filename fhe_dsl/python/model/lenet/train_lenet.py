@@ -3,10 +3,17 @@
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #
 """
-Train and save weights + VR profile for the LeNet FHE smoke model.
+Train and save weights + VR profile for the LeNet FHE model.
 
-This script trains LeNet on the real CIFAR-10 dataset (not synthetic templates)
-so that the resulting weights give meaningful accuracy on CIFAR-10 benchmarks.
+The model is the original demo LeNet (cti/verify/onnx2c/cnn/lenet.py) with
+MaxPool2d replaced by AvgPool2d, see model/lenet/lenet.py.
+
+Training uses the exact same CIFAR-10 normalization as
+ace.model.dataset.load_cifar10_images (mean 0.4914/0.4822/0.4465,
+std 0.229/0.224/0.225) so that plaintext and ciphertext evaluation share
+one preprocessing path -- a mismatched normalization silently costs
+accuracy at inference time.
+
 The saved weights and ReLU VR profile are consumed by LENET_CIFAR10 in
 spec_lenet.py.
 
@@ -26,7 +33,7 @@ import torchvision.transforms as transforms
 from .lenet import LeNet
 
 _WEIGHTS_DIR = os.path.join(os.path.dirname(__file__), "weights")
-_PROFILES_DIR = os.path.join(os.path.dirname(__file__), "..", "profiles")
+_PROFILES_DIR = os.path.join(os.path.dirname(__file__), "profiles")
 _WEIGHTS_FILE = "lenet_cifar10.pt"
 
 SEED = 2026
@@ -35,21 +42,22 @@ BATCH = 128
 LR = 0.001
 DATASET_ROOT = "/opt/dataset"
 
+# Must match ace/model/dataset.py (used by the FHE eval path).
+NORM_MEAN = (0.4914, 0.4822, 0.4465)
+NORM_STD = (0.229, 0.224, 0.225)
+
 
 def _load_cifar10():
     """Load normalized CIFAR-10 train/test sets matching ace.model.dataset."""
-    mean = (0.4914, 0.4822, 0.4465)
-    std = (0.2470, 0.2435, 0.2616)
-
     transform_train = transforms.Compose([
         transforms.RandomCrop(32, padding=4),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
-        transforms.Normalize(mean, std),
+        transforms.Normalize(NORM_MEAN, NORM_STD),
     ])
     transform_test = transforms.Compose([
         transforms.ToTensor(),
-        transforms.Normalize(mean, std),
+        transforms.Normalize(NORM_MEAN, NORM_STD),
     ])
 
     trainset = torchvision.datasets.CIFAR10(
@@ -100,7 +108,7 @@ def _train(model, trainloader, testloader, epochs=EPOCHS, lr=LR):
                 correct += predicted.eq(labels).sum().item()
         acc = 100.0 * correct / total
         best_acc = max(best_acc, acc)
-        print(f"Epoch {epoch + 1}/{epochs}: test accuracy = {acc:.2f}%")
+        print(f"Epoch {epoch + 1}/{epochs}: test accuracy = {acc:.2f}%", flush=True)
 
     # Move model back to CPU before saving
     model.to("cpu")
@@ -109,7 +117,7 @@ def _train(model, trainloader, testloader, epochs=EPOCHS, lr=LR):
 
 def _profile_vr(model, inputs, name):
     """Generate and save the ReLU VR profile via the project ReLUProfiler."""
-    from ace.fhe.config import ReLUProfiler, ModelSpec
+    from ace.fhe.config import ModelSpec, ReLUProfiler
 
     # Use a real CIFAR-10 image as the spec example input
     from ace.model.dataset import load_cifar10_images
@@ -127,20 +135,27 @@ def _profile_vr(model, inputs, name):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Train LeNet FHE smoke weights")
+    parser = argparse.ArgumentParser(description="Train LeNet FHE weights")
     parser.add_argument(
         "--name",
         default="lenet_cifar10",
         help="ModelSpec name (also used as VR profile filename)",
     )
+    parser.add_argument("--epochs", type=int, default=EPOCHS, help="Training epochs")
+    parser.add_argument(
+        "--device", default=None, help="Torch device, e.g. cuda:1 (default: auto)"
+    )
     args = parser.parse_args()
+
+    if args.device is not None:
+        os.environ["CUDA_VISIBLE_DEVICES"] = args.device.split(":")[-1]
 
     torch.manual_seed(SEED)
     trainloader, testloader = _load_cifar10()
-    print("Training LeNet on real CIFAR-10...")
+    print("Training LeNet (AvgPool) on real CIFAR-10...", flush=True)
 
     model = LeNet(num_classes=10, in_channels=3)
-    best_acc = _train(model, trainloader, testloader)
+    best_acc = _train(model, trainloader, testloader, epochs=args.epochs)
     print(f"Best test accuracy: {best_acc:.2f}%")
 
     os.makedirs(_WEIGHTS_DIR, exist_ok=True)
