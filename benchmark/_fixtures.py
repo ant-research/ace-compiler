@@ -83,6 +83,14 @@ VGG16_TARGET_PARAMS = _make_skip_gpu_params(
     phantom_gpu_reason="AveragePool2d segfaults on phantom/ace GPU; VGG16 is ant-cpu only",
 )
 
+SQUEEZENET_TARGET_PARAMS = _make_skip_gpu_params(
+    phantom_gpu_reason="AveragePool2d/Concat unsupported on phantom/ace GPU; SqueezeNet is ant-cpu only",
+)
+
+MOBILENET_TARGET_PARAMS = _make_skip_gpu_params(
+    phantom_gpu_reason="AveragePool2d unsupported on phantom/ace GPU; MobileNet is ant-cpu only",
+)
+
 
 # ============================================================================
 # GPU tag for baseline file naming

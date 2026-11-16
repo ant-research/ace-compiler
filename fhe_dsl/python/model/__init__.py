@@ -139,4 +139,33 @@ def __getattr__(name):
         from ace.model import spec_alexnet_x2
 
         return getattr(spec_alexnet_x2, name)
+    # SqueezeNet model creator
+    if name in ("SqueezeNet", "FireBlock", "FireBlockPool"):
+        from ace.model import squeezenet
+
+        return getattr(squeezenet, name)
+    # SqueezeNet specs
+    if name in (
+        "SQUEEZENET_CIFAR10",
+        "SQUEEZENET_SPECS",
+        "ALL_SQUEEZENET_SPECS",
+    ):
+        from ace.model import spec_squeezenet
+
+        return getattr(spec_squeezenet, name)
+    # MobileNet model creator ("Block" stays module-local: the name is too
+    # generic for the top-level namespace).
+    if name == "MobileNet":
+        from ace.model import mobilenet
+
+        return getattr(mobilenet, name)
+    # MobileNet specs
+    if name in (
+        "MOBILENET_CIFAR10",
+        "MOBILENET_SPECS",
+        "ALL_MOBILENET_SPECS",
+    ):
+        from ace.model import spec_mobilenet
+
+        return getattr(spec_mobilenet, name)
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

@@ -310,6 +310,13 @@ python3 scripts/build_cnn.py
 
 # 性能评测（-e = Expert/FHE-MP-CNN 基线）
 python3 scripts/perf.py -e
+
+# ANT-ACE ResNet 系列单图延迟（benchmark/resnet/test_latency/）
+LATENCY_NUM=1 pytest benchmark/resnet/test_latency.py -k "ant-cpu and resnet20" -v --regen-all
+LATENCY_NUM=1 pytest benchmark/resnet/test_latency.py -k "ant-cpu and resnet32 and cifar10" -v --regen-all
+LATENCY_NUM=1 pytest benchmark/resnet/test_latency.py -k "ant-cpu and resnet44" -v --regen-all
+LATENCY_NUM=1 pytest benchmark/resnet/test_latency.py -k "ant-cpu and resnet56" -v --regen-all
+LATENCY_NUM=1 pytest benchmark/resnet/test_latency.py -k "ant-cpu and resnet110" -v --regen-all
 ```
 
 ### 推理耗时对比
@@ -318,13 +325,13 @@ python3 scripts/perf.py -e
 
 | 编号 | 模型 | FHE-MP-CNN | ANT-ACE | 加速比 |
 |---|---|---|---|---|
-| 1 | ResNet-20 | 2997.94 s | 1476.2 s | 2.03× |
-| 2 | ResNet-32 | 4851.45 s | 2213.3 s | 2.19× |
-| 3 | ResNet-44 | 6657.36 s | 3022.2 s | 2.20× |
-| 4 | ResNet-56 | 8494.23 s | 3813.2 s | 2.23× |
-| 5 | ResNet-110 | 17056.50 s | 7317.0 s | 2.33× |
+| 1 | ResNet-20 | 2997.94 s | 976.8 s | 3.07× |
+| 2 | ResNet-32 | 4851.45 s | 1480.6 s | 3.28× |
+| 3 | ResNet-44 | 6657.36 s | 1990.4 s | 3.35× |
+| 4 | ResNet-56 | 8494.23 s | 2542.2 s | 3.34× |
+| 5 | ResNet-110 | 17056.50 s | 5097.0 s | 3.35× |
 
-> 数据来源：`testing/data 7.1.csv`；加速比 = FHE-MP-CNN ÷ ANT-ACE。随模型规模增大，ANT-ACE 预编译与去除 Python 开销优势更显著，加速比从 2.03× 升至 2.33×。
+> 数据来源：FHE-MP-CNN 来自 `testing/data 7.1.csv`；ANT-ACE 来自 `benchmark/resnet/test_latency/resnet*_ant_cpu_cpu_latency.csv`。加速比 = FHE-MP-CNN ÷ ANT-ACE。随模型规模增大，ANT-ACE 预编译与去除 Python 开销优势更显著，加速比从 3.07× 升至 3.35×。
 
 ![7.4 ResNet 系列推理耗时](./figures_7.4_time.png)
 
@@ -332,10 +339,15 @@ python3 scripts/perf.py -e
 
 ### 原始日志
 
-| 日志文件 | 说明 |
-|---|---|
-| [`testing/7.4_2026_10_03_17_42.log`](7.4_2026_10_03_17_42.log) | `perf.py -a` 全量输出 |
-| [`testing/7.4_resnet_cpu.log`](7.4_resnet_cpu.log) | `test_latency.py -k ant-cpu` ACE 单模型延迟 |
+| 数据 | 文件 | 说明 |
+|---|---|---|
+| FHE-MP-CNN 基线 | [`testing/7.4_2026_10_03_17_42.log`](7.4_2026_10_03_17_42.log) | `perf.py -e` 全量输出 |
+| ANT-ACE ResNet-20 | [`benchmark/resnet/test_latency/resnet20_cifar10_ant_cpu_cpu_latency.csv`](../benchmark/resnet/test_latency/resnet20_cifar10_ant_cpu_cpu_latency.csv) | `LATENCY_NUM=1` 单图延迟 |
+| ANT-ACE ResNet-32 | [`benchmark/resnet/test_latency/resnet32_cifar10_ant_cpu_cpu_latency.csv`](../benchmark/resnet/test_latency/resnet32_cifar10_ant_cpu_cpu_latency.csv) | `LATENCY_NUM=1` 单图延迟 |
+| ANT-ACE ResNet-44 | [`benchmark/resnet/test_latency/resnet44_cifar10_ant_cpu_cpu_latency.csv`](../benchmark/resnet/test_latency/resnet44_cifar10_ant_cpu_cpu_latency.csv) | `LATENCY_NUM=1` 单图延迟 |
+| ANT-ACE ResNet-56 | [`benchmark/resnet/test_latency/resnet56_cifar10_ant_cpu_cpu_latency.csv`](../benchmark/resnet/test_latency/resnet56_cifar10_ant_cpu_cpu_latency.csv) | `LATENCY_NUM=1` 单图延迟 |
+| ANT-ACE ResNet-110 | [`benchmark/resnet/test_latency/resnet110_cifar10_ant_cpu_cpu_latency.csv`](../benchmark/resnet/test_latency/resnet110_cifar10_ant_cpu_cpu_latency.csv) | `LATENCY_NUM=1` 单图延迟 |
+
 
 ## 7.5 面向硬件加速器的全同态编译系统性能测试
 

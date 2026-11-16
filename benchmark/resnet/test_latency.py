@@ -19,6 +19,10 @@
 #   pytest benchmark/resnet/test_latency.py -k ace -v
 #   pytest benchmark/resnet/test_latency.py --regen-all   # update baselines
 
+# CPU single-image mode (avoids averaging the OpenMP-parallel 10-image batch):
+#   LATENCY_NUM=1 pytest benchmark/resnet/test_latency.py -k ant-cpu -v
+
+import os
 import pytest
 from _fixtures import TARGET_PARAMS, gpu_tag
 
@@ -27,7 +31,10 @@ from _fixtures import TARGET_PARAMS, gpu_tag
 # Constants
 # ============================================================================
 
-NUM_IMAGES = 10
+# Default number of images for latency measurement.  Can be overridden via the
+# LATENCY_NUM environment variable so that slower CPU backends can measure a
+# single image instead of averaging over the default 10-image batch.
+NUM_IMAGES = int(os.environ.get("LATENCY_NUM", "10"))
 
 # Tolerance design (per-metric).
 #
